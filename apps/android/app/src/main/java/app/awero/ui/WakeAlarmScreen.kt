@@ -1,13 +1,15 @@
 package app.awero.ui
 
-import androidx.activity.ComponentActivity
 import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import app.awero.core.wake.WakeFlowController
+import kotlinx.coroutines.launch
 
 object WakeAlarmScreen {
     fun create(activity: ComponentActivity, flow: WakeFlowController): LinearLayout {
@@ -38,53 +40,65 @@ object WakeAlarmScreen {
                 activity,
                 flow.currentAlarm!!,
                 onSuccess = {
-                    flow.completeMission()
-                    root.removeAllViews()
-                    root.addView(text("YOU'RE UP", 42f))
-                    root.addView(text("Wake session completed", 18f))
+                    activity.lifecycleScope.launch {
+                        flow.completeMission()
+                        root.removeAllViews()
+                        root.addView(text("YOU'RE UP", 42f))
+                        root.addView(text("Wake session completed", 18f))
+                    }
                 },
                 onFailure = {
-                    flow.fallbackToMath()
-                    root.removeAllViews()
-                    root.addView(text("FALLBACK", 30f))
-                    root.addView(MissionRuntimeScreen.create(
-                        activity,
-                        flow.currentAlarm!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
-                        onSuccess = {
-                            flow.completeMission()
-                            root.removeAllViews()
-                            root.addView(text("YOU'RE UP", 42f))
-                        },
-                        onFailure = {}
-                    ))
+                    activity.lifecycleScope.launch {
+                        flow.fallbackToMath()
+                        root.removeAllViews()
+                        root.addView(text("FALLBACK", 30f))
+                        root.addView(MissionRuntimeScreen.create(
+                            activity,
+                            flow.currentAlarm!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
+                            onSuccess = {
+                                activity.lifecycleScope.launch {
+                                    flow.completeMission()
+                                    root.removeAllViews()
+                                    root.addView(text("YOU'RE UP", 42f))
+                                }
+                            },
+                            onFailure = {}
+                        ))
+                    }
                 }
             )
             root.addView(missionView)
         }
 
         primary.setOnClickListener {
-            if (flow.state == WakeFlowController.State.RINGING) {
-                flow.beginMission()
-                showMission()
+            activity.lifecycleScope.launch {
+                if (flow.state == WakeFlowController.State.RINGING) {
+                    flow.beginMission()
+                    showMission()
+                }
             }
         }
 
         snooze.setOnClickListener {
-            if (flow.snooze()) {
-                title.text = "SNOOZED"
-                status.text = "Alarm scheduled again"
-                primary.isEnabled = false
-                snooze.isEnabled = false
+            activity.lifecycleScope.launch {
+                if (flow.snooze()) {
+                    title.text = "SNOOZED"
+                    status.text = "Alarm scheduled again"
+                    primary.isEnabled = false
+                    snooze.isEnabled = false
+                }
             }
         }
 
         emergency.setOnClickListener {
-            flow.emergencyStop()
-            title.text = "STOPPED"
-            status.text = "Session recorded"
-            primary.isEnabled = false
-            snooze.isEnabled = false
-            emergency.isEnabled = false
+            activity.lifecycleScope.launch {
+                flow.emergencyStop()
+                title.text = "STOPPED"
+                status.text = "Session recorded"
+                primary.isEnabled = false
+                snooze.isEnabled = false
+                emergency.isEnabled = false
+            }
         }
 
         root.addView(status)
