@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-struct WakeStatistics: Codable {
+struct WakeStatistics: Codable, Sendable {
     var planned = 0
     var completed = 0
     var snoozes = 0
@@ -16,26 +16,39 @@ struct WakeStatistics: Codable {
 @MainActor
 final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
-    private let key = "awero.statistics.v1"
+    private let database = CoreDataStore.shared
 
     init() {
-        if let data = UserDefaults.standard.data(forKey: key),
-           let value = try? JSONDecoder().decode(WakeStatistics.self, from: data) {
-            statistics = value
-        } else { statistics = WakeStatistics() }
+        statistics = WakeStatistics()
+        Task { await load() }
     }
 
-    func recordPlanned() { statistics.planned += 1; persist() }
-    func record(_ session: WakeSession) {
+    func load() async {
+        if let stored = await database.fetchStatistics() {
+            statistics = stored
+            return
+        }
+
+        let key = "awero.statistics.v1"
+        if let data = UserDefaults.standard.data(forKey: key),
+           let legacy = try? JSONDecoder().decode(WakeStatistics.self, from: data) {
+            statistics = legacy
+            await database.saveStatistics(legacy)
+            UserDefaults.standard.set(true, forKey: "awero.coredata.statistics.migrated.v1")
+        }
+    }
+
+    func recordPlanned() async {
+        statistics.planned += 1
+        await database.saveStatistics(statistics)
+    }
+
+    func record(_ session: WakeSession) async {
         statistics.completed += session.result == "COMPLETED" ? 1 : 0
         statistics.snoozes += session.snoozeCount
         statistics.fallback += session.fallbackUsed ? 1 : 0
         statistics.emergencyStops += session.emergencyStop ? 1 : 0
         statistics.totalCompletionSeconds += session.completionTimeSeconds ?? 0
-        persist()
-    }
-
-    private func persist() {
-        if let data = try? JSONEncoder().encode(statistics) { UserDefaults.standard.set(data, forKey: key) }
+        await database.saveStatistics(statistics)
     }
 }
