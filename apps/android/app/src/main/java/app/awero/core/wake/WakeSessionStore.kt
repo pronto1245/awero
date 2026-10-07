@@ -31,6 +31,10 @@ class WakeSessionStore(context: Context) {
         }
     }
 
+    fun markFallback() {
+        active?.let { it.fallbackUsed = true; save(it) }
+    }
+
     fun complete() {
         active?.let {
             it.completedAt = System.currentTimeMillis()
