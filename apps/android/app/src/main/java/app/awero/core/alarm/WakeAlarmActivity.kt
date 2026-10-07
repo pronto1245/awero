@@ -14,12 +14,14 @@ class WakeAlarmActivity : Activity() {
     private var alarmVersion: Int = -1
     private var scheduledAt: Long = System.currentTimeMillis()
     private var permissionPending = false
+    private var testAlarm = false
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return finish()
         alarmVersion = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
         scheduledAt = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
+        testAlarm = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
         alarm = AlarmStore(this).get(id)
         val current = alarm ?: return finish()
         if (current.version != alarmVersion || !current.enabled) return finish()
@@ -41,7 +43,7 @@ class WakeAlarmActivity : Activity() {
 
     private fun startFlow(current: Alarm) {
         permissionPending = false
-        flow = WakeFlowController(WakeSessionStore(this), this)
+        flow = WakeFlowController(WakeSessionStore(this), this, testAlarm = testAlarm)
         flow.start(current, scheduledAt)
         setContentView(WakeAlarmScreen.create(this, flow))
     }
