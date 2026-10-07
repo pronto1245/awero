@@ -1,37 +1,30 @@
 import Foundation
 import CoreMotion
 
-final class StepsMission: Mission {
-    let type: MissionType = .steps
-    let difficulty: Difficulty
-    let targetSteps: Int
+@MainActor
+final class StepsMissionRuntime: ObservableObject {
+    @Published private(set) var steps = 0
+    @Published private(set) var unavailable = false
     private let pedometer = CMPedometer()
-    private var startSteps: Int?
+    private var target = 30
 
-    init(difficulty: Difficulty) {
-        self.difficulty = difficulty
-        switch difficulty {
-        case .easy: targetSteps = 15
-        case .medium: targetSteps = 30
-        case .hard: targetSteps = 60
+    func start(target: Int) {
+        self.target = max(1, target)
+        steps = 0
+        guard CMPedometer.isStepCountingAvailable() else {
+            unavailable = true
+            return
         }
-    }
-
-    func start() {
-        startSteps = nil
-        guard CMPedometer.isStepCountingAvailable() else { return }
+        unavailable = false
         pedometer.startUpdates(from: .now) { [weak self] data, _ in
-            guard let self, let steps = data?.numberOfSteps.intValue else { return }
-            if self.startSteps == nil { self.startSteps = 0 }
-            self.startSteps = steps
+            guard let self, let count = data?.numberOfSteps.intValue else { return }
+            Task { @MainActor in self.steps = count }
         }
     }
 
-    func validate() -> Bool {
-        guard CMPedometer.isStepCountingAvailable() else { return false }
-        return (startSteps ?? 0) >= targetSteps
+    func stop() {
+        pedometer.stopUpdates()
     }
 
-    func retry() {}
-    func stop() { pedometer.stopUpdates() }
+    var completed: Bool { steps >= target }
 }
