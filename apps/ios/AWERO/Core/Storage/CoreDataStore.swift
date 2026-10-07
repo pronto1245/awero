@@ -1,7 +1,7 @@
 import CoreData
 import Foundation
 
-final class CoreDataStore {
+final class CoreDataStore: @unchecked Sendable {
     static let shared = CoreDataStore()
 
     private let container: NSPersistentContainer
@@ -41,7 +41,7 @@ final class CoreDataStore {
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", alarm.id.uuidString)
             let object = (try? context.fetch(request).first) ?? NSManagedObject(
-                entity: self.entity(named: "AlarmRecord"),
+                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AlarmRecord"]!,
                 insertInto: context
             )
             object.setValue(alarm.id.uuidString, forKey: "id")
@@ -89,10 +89,6 @@ final class CoreDataStore {
             if context.hasChanges { try? context.save() }
             return result
         }
-    }
-
-    private func entity(named name: String) -> NSEntityDescription {
-        container.managedObjectModel.entitiesByName[name]!
     }
 
     private static func alarm(from object: NSManagedObject) -> Alarm? {
