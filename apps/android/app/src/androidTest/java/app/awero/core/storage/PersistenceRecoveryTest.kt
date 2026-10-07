@@ -112,6 +112,22 @@ class PersistenceRecoveryTest {
 
         assertEquals(WakeFlowController.State.MISSION, restored.state.value)
         assertEquals(MissionType.MATH, restored.mission.value)
+
+        restored.beginMission()
+        restored.completeMission()
+        restored.completeMission()
+
+        val db = AweroDatabase.get(context)
+        val storedSession = db.wakeSessions().recent().first()
+        val events = db.wakeEvents().forSession(storedSession.id)
+        assertEquals(3, events.size)
+        assertEquals(1, db.statistics().get()?.completed)
+
+        AweroDatabase.closeForTesting()
+
+        val finalRestore = WakeFlowController(WakeSessionStore(context), context)
+        finalRestore.restore()
+        assertEquals(WakeFlowController.State.IDLE, finalRestore.state.value)
     }
 
     @Test
