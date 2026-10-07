@@ -17,7 +17,7 @@ struct WakeScreen: View {
                     Button("Emergency stop") { flow.emergencyStop() }.font(.caption).foregroundStyle(.red.opacity(0.9))
                 case .mission:
                     if let alarm = flow.currentAlarm {
-                        MissionView(alarm: alarm.copy(missionType: flow.currentMission), onSuccess: { flow.completeMission() }, onFailure: { flow.fallbackToMath() })
+                        MissionView(alarm: missionAlarm(from: alarm), onSuccess: { flow.completeMission() }, onFailure: { flow.fallbackToMath() })
                     }
                 case .completed:
                     Text("YOU'RE UP").font(.title.bold()).foregroundStyle(.white)
@@ -31,6 +31,12 @@ struct WakeScreen: View {
                 }
             }.padding(28)
         }
+    }
+
+    private func missionAlarm(from alarm: Alarm) -> Alarm {
+        var value = alarm
+        value.missionType = flow.currentMission
+        return value
     }
 }
 
