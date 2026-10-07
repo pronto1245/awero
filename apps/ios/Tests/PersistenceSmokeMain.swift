@@ -72,6 +72,41 @@ struct PersistenceSmokeMain {
         let active = await restartedAgain.fetchActiveWakeSession()
         precondition(active?.id == session.id)
 
+        let manager = await MainActor.run { WakeSessionManager(database: restartedAgain) }
+        let alarm = Alarm(
+            id: alarmId,
+            version: 1,
+            hour: 7,
+            minute: 30,
+            enabled: true,
+            weekdays: Set(1...7),
+            timezoneMode: .deviceLocal,
+            fixedTimezone: nil,
+            missionType: .math,
+            difficulty: .medium
+        )
+        let firstTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
+        let secondTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
+        precondition(firstTrigger)
+        precondition(!secondTrigger)
+        await manager.startMission()
+        await manager.startMission()
+        guard let completedSession = await manager.complete() else {
+            fatalError("Expected wake session completion")
+        }
+        let duplicateCompletion = await manager.complete()
+        precondition(duplicateCompletion == nil)
+
+        let statistics = await MainActor.run { StatisticsStore(database: restartedAgain) }
+        await statistics.recordPlanned()
+        await statistics.record(completedSession)
+
+        let finalStore = CoreDataStore(storeURL: storeURL)
+        let finalStatistics = await finalStore.fetchStatistics()
+        precondition(finalStatistics?.planned == 1)
+        precondition(finalStatistics?.completed == 1)
+        precondition(await finalStore.fetchActiveWakeSession() == nil)
+
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
     }
