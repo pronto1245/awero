@@ -18,12 +18,12 @@ class WakeSessionStore(context: Context) {
     private val migrationMutex = Mutex()
     private var active: WakeSession? = null
 
-    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): WakeSession {
+    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): Boolean {
         migrateLegacyIfNeeded()
         val existing = database.wakeSessions().active()
         if (existing != null && existing.alarmId == alarm.id && existing.alarmVersion == alarm.version) {
             active = WakeSessionMapper.fromEntity(existing)
-            return active!!
+            return false
         }
 
         val session = WakeSession(
@@ -34,7 +34,7 @@ class WakeSessionStore(context: Context) {
         )
         active = session
         save(session)
-        return session
+        return true
     }
 
     suspend fun startMission() {
