@@ -18,64 +18,82 @@ class QRMissionRuntime(private val context: Context) {
         private set
 
     private val executor = Executors.newSingleThreadExecutor()
+    private var provider: ProcessCameraProvider? = null
+    private var scanner: com.google.mlkit.vision.barcode.BarcodeScanner? = null
+    private var closed = false
 
     fun start(owner: LifecycleOwner, preview: PreviewView, onCode: (String) -> Unit) {
+        closed = false
         val providerFuture = ProcessCameraProvider.getInstance(context)
         providerFuture.addListener({
-            val provider = providerFuture.get()
-            val previewUseCase = Preview.Builder().build().also {
-                it.surfaceProvider = preview.surfaceProvider
-            }
-            val options = BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                .build()
-            val scanner = BarcodeScanning.getClient(options)
-            val analysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .build()
-            analysis.setAnalyzer(executor) { imageProxy ->
-                val mediaImage = imageProxy.image
-                if (mediaImage == null) {
-                    imageProxy.close()
-                    return@setAnalyzer
-                }
-                val image = InputImage.fromMediaImage(
-                    mediaImage,
-                    imageProxy.imageInfo.rotationDegrees
-                )
-                scanner.process(image)
-                    .addOnSuccessListener { barcodes ->
-                        val value = barcodes.firstOrNull()?.rawValue
-                        if (!value.isNullOrBlank() && scannedCode == null) {
-                            scannedCode = value
-                            onCode(value)
-                            provider.unbind(analysis)
-                        }
-                    }
-                    .addOnCompleteListener { imageProxy.close() }
-            }
-            provider.unbindAll()
+            if (closed) return@addListener
             try {
-                provider.bindToLifecycle(
+                val cameraProvider = providerFuture.get()
+                provider = cameraProvider
+                val previewUseCase = Preview.Builder().build().also {
+                    it.surfaceProvider = preview.surfaceProvider
+                }
+                val options = BarcodeScannerOptions.Builder()
+                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                    .build()
+                val barcodeScanner = BarcodeScanning.getClient(options)
+                scanner = barcodeScanner
+                val analysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .build()
+                analysis.setAnalyzer(executor) { imageProxy ->
+                    if (closed) {
+                        imageProxy.close()
+                        return@setAnalyzer
+                    }
+                    val mediaImage = imageProxy.image
+                    if (mediaImage == null) {
+                        imageProxy.close()
+                        return@setAnalyzer
+                    }
+                    val image = InputImage.fromMediaImage(
+                        mediaImage,
+                        imageProxy.imageInfo.rotationDegrees
+                    )
+                    barcodeScanner.process(image)
+                        .addOnSuccessListener { barcodes ->
+                            if (closed) return@addOnSuccessListener
+                            val value = barcodes.firstOrNull()?.rawValue
+                            if (!value.isNullOrBlank() && scannedCode == null) {
+                                scannedCode = value
+                                onCode(value)
+                                cameraProvider.unbind(analysis)
+                            }
+                        }
+                        .addOnCompleteListener { imageProxy.close() }
+                }
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
                     owner,
                     CameraSelector.DEFAULT_BACK_CAMERA,
                     previewUseCase,
                     analysis
                 )
             } catch (_: Exception) {
-                provider.unbindAll()
+                close()
                 onCode("")
             }
         }, androidx.core.content.ContextCompat.getMainExecutor(context))
     }
 
     fun accept(code: String) {
-        scannedCode = code
+        if (!closed) scannedCode = code
     }
 
     fun matches(expected: String) = scannedCode == expected
 
     fun close() {
+        if (closed) return
+        closed = true
+        provider?.unbindAll()
+        provider = null
+        scanner?.close()
+        scanner = null
         executor.shutdown()
     }
 }
