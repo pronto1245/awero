@@ -1,5 +1,7 @@
 package app.awero.core.missions
 
+import app.awero.core.alarm.Difficulty
+
 class QRMission(
     private val difficulty: Difficulty,
     private val expectedPayload: String
