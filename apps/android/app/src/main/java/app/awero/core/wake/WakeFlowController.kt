@@ -21,8 +21,8 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
         currentAlarm = alarm
         mission = alarm.missionType
         snoozeCount = 0
-        sessions.start(alarm, scheduledAt)
-        if (!testAlarm) statistics.recordPlanned()
+        val created = sessions.start(alarm, scheduledAt)
+        if (created && !testAlarm) statistics.recordPlanned()
         state = State.RINGING
     }
 
