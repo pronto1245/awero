@@ -37,14 +37,26 @@ final class AlarmStore: ObservableObject {
     private func migrateLegacyIfNeeded() async {
         let key = "awero.coredata.migrated.v1"
         guard !UserDefaults.standard.bool(forKey: key) else { return }
+
         let legacyKey = "awero.alarms.v1"
-        if let data = UserDefaults.standard.data(forKey: legacyKey),
-           let legacy = try? JSONDecoder().decode([Alarm].self, from: data) {
-            for alarm in legacy {
-                await database.saveAlarm(alarm)
-            }
-            alarms = await database.fetchAlarms()
+        guard
+            let data = UserDefaults.standard.data(forKey: legacyKey),
+            let legacy = try? JSONDecoder().decode([Alarm].self, from: data)
+        else {
+            UserDefaults.standard.set(true, forKey: key)
+            return
         }
+
+        for alarm in legacy {
+            await database.saveAlarm(alarm)
+        }
+
+        let persistedIds = Set((await database.fetchAlarms()).map(\.id))
+        guard legacy.allSatisfy({ persistedIds.contains($0.id) }) else {
+            return
+        }
+
+        alarms = await database.fetchAlarms()
         UserDefaults.standard.set(true, forKey: key)
     }
 }
