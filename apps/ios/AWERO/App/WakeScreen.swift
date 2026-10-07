@@ -12,12 +12,12 @@ struct WakeScreen: View {
                 switch flow.state {
                 case .ringing:
                     Text("GET UP").font(.system(size: 54, weight: .black, design: .rounded)).foregroundStyle(.white)
-                    Button("Start mission") { flow.beginMission() }.buttonStyle(PrimaryWakeButton())
-                    Button("Snooze") { flow.snooze() }.foregroundStyle(.white.opacity(0.7))
-                    Button("Emergency stop") { flow.emergencyStop() }.font(.caption).foregroundStyle(.red.opacity(0.9))
+                    Button("Start mission") { Task { await flow.beginMission() } }.buttonStyle(PrimaryWakeButton())
+                    Button("Snooze") { Task { await flow.snooze() } }.foregroundStyle(.white.opacity(0.7))
+                    Button("Emergency stop") { Task { await flow.emergencyStop() } }.font(.caption).foregroundStyle(.red.opacity(0.9))
                 case .mission:
                     if let alarm = flow.currentAlarm {
-                        MissionView(alarm: missionAlarm(from: alarm), onSuccess: { flow.completeMission() }, onFailure: { flow.fallbackToMath() })
+                        MissionView(alarm: missionAlarm(from: alarm), onSuccess: { Task { await flow.completeMission() } }, onFailure: { Task { await flow.fallbackToMath() } })
                     }
                 case .completed:
                     Text("YOU'RE UP").font(.title.bold()).foregroundStyle(.white)
