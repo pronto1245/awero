@@ -1,12 +1,16 @@
 package app.awero.core.alarm
 
 import android.Manifest
-import androidx.activity.ComponentActivity
 import android.content.pm.PackageManager
 import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
 import app.awero.core.wake.WakeFlowController
 import app.awero.core.wake.WakeSessionStore
 import app.awero.ui.WakeAlarmScreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class WakeAlarmActivity : ComponentActivity() {
     private lateinit var flow: WakeFlowController
@@ -19,26 +23,31 @@ class WakeAlarmActivity : ComponentActivity() {
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         AlarmNotificationManager.clear(this)
+
         val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return finish()
         alarmVersion = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
         scheduledAt = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
         testAlarm = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
-        alarm = AlarmStore(this).get(id)
-        val current = alarm ?: return finish()
-        if (current.version != alarmVersion || !current.enabled) return finish()
 
-        when {
-            current.missionType == MissionType.QR &&
-                checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED -> {
-                permissionPending = true
-                requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA)
+        lifecycleScope.launch {
+            val current = withContext(Dispatchers.IO) { AlarmStore(this@WakeAlarmActivity).get(id) }
+                ?: return@launch finish()
+            alarm = current
+            if (current.version != alarmVersion || !current.enabled) return@launch finish()
+
+            when {
+                current.missionType == MissionType.QR &&
+                    checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED -> {
+                    permissionPending = true
+                    requestPermissions(arrayOf(Manifest.permission.CAMERA), REQUEST_CAMERA)
+                }
+                current.missionType == MissionType.STEPS &&
+                    checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED -> {
+                    permissionPending = true
+                    requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), REQUEST_ACTIVITY)
+                }
+                else -> startFlow(current)
             }
-            current.missionType == MissionType.STEPS &&
-                checkSelfPermission(Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED -> {
-                permissionPending = true
-                requestPermissions(arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), REQUEST_ACTIVITY)
-            }
-            else -> startFlow(current)
         }
     }
 
@@ -49,12 +58,14 @@ class WakeAlarmActivity : ComponentActivity() {
         setContentView(WakeAlarmScreen.create(this, flow))
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val current = alarm ?: return finish()
-        if (permissionPending) {
-            startFlow(current)
-        }
+        if (permissionPending) startFlow(current)
     }
 
     companion object {
