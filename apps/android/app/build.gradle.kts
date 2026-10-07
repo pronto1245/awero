@@ -3,8 +3,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
+    id("androidx.room")
 }
-android {
+room { schemaDirectory("$projectDir/schemas") }\n\nandroid {
     namespace="app.awero"
     compileSdk=35
     defaultConfig {
