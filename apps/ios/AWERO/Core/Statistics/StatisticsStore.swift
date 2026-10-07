@@ -16,7 +16,7 @@ struct WakeStatistics: Codable, Sendable {
 @MainActor
 final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
-    private let database = CoreDataStore.shared
+    private let database: CoreDataStore
 
     init() {
         statistics = WakeStatistics()
