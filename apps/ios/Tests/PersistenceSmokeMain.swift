@@ -109,7 +109,7 @@ struct PersistenceSmokeMain {
         let finalStatistics = await finalStore.fetchStatistics()
         precondition(finalStatistics?.planned == 1)
         precondition(finalStatistics?.completed == 1)
-        precondition(await finalStore.fetchActiveWakeSession() == nil)
+        let finalActive = await finalStore.fetchActiveWakeSession()\n        precondition(finalActive == nil)
 
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
