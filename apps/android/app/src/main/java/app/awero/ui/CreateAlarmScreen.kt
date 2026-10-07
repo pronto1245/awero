@@ -48,7 +48,8 @@ fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> 
         }
         Spacer(Modifier.weight(1f))
         Button(onClick = {
-            if (alarm == null) coordinator.create(hour, minute, mission, difficulty)\n            else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
+            if (alarm == null) coordinator.create(hour, minute, mission, difficulty)
+            else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
             onSaved()
         }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Text(if (alarm == null) "Create alarm" else "Save changes")
