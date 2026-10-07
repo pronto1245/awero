@@ -1,6 +1,5 @@
 import XCTest
 import CoreData
-@testable import Foundation
 
 final class CoreDataMigrationTests: XCTestCase {
     func testLightweightMigrationAddsNewEntitiesAndKeepsAlarm() async throws {
