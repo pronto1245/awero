@@ -13,18 +13,7 @@ protocol Mission {
 @MainActor
 final class MissionEngine {
     private(set) var state: MissionState = .ready
-
-    func start(_ mission: Mission) {
-        state = .started
-        mission.start()
-        state = .inProgress
-    }
-
-    func validate(_ mission: Mission) -> Bool {
-        let success = mission.validate()
-        state = success ? .success : .retry
-        return success
-    }
-
+    func start(_ mission: Mission) { state = .started; mission.start(); state = .inProgress }
+    func validate(_ mission: Mission) -> Bool { let success = mission.validate(); state = success ? .success : .retry; return success }
     func fallback() { state = .fallback }
 }
