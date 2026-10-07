@@ -39,11 +39,11 @@ class AlarmStore(context: Context) {
             if (preferences.getBoolean("room_migrated", false)) return
             val ids = preferences.getStringSet("ids", emptySet()).orEmpty()
             for (id in ids) {
-                preferences.getString("alarm:$id", null)?.let {
-                    runCatching {
-                        database.alarms().upsert(AlarmMapper.toEntity(fromJson(JSONObject(it))))
-                    }
+                val raw = preferences.getString("alarm:$id", null) ?: continue
+                val migrated = runCatching {
+                    database.alarms().upsert(AlarmMapper.toEntity(fromJson(JSONObject(raw))))
                 }
+                if (migrated.isFailure) return
             }
             preferences.edit().putBoolean("room_migrated", true).apply()
         }
