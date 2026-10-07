@@ -1,14 +1,14 @@
 package app.awero.core.alarm
 
 import android.Manifest
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import android.content.pm.PackageManager
 import android.os.Bundle
 import app.awero.core.wake.WakeFlowController
 import app.awero.core.wake.WakeSessionStore
 import app.awero.ui.WakeAlarmScreen
 
-class WakeAlarmActivity : Activity() {
+class WakeAlarmActivity : ComponentActivity() {
     private lateinit var flow: WakeFlowController
     private var alarm: Alarm? = null
     private var alarmVersion: Int = -1
