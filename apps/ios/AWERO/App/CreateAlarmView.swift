@@ -1,9 +1,18 @@
 import SwiftUI
 
-struct CreateAlarmView: View {\n    let alarm: Alarm?
+struct CreateAlarmView: View {
+    let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
-    init(alarm: Alarm? = nil) {\n        self.alarm = alarm\n        _hour = State(initialValue: alarm?.hour ?? 7)\n        _minute = State(initialValue: alarm?.minute ?? 30)\n        _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))\n        _mission = State(initialValue: alarm?.missionType ?? .math)\n    }\n\n    @State private var hour = 7
+    init(alarm: Alarm? = nil) {
+        self.alarm = alarm
+        _hour = State(initialValue: alarm?.hour ?? 7)
+        _minute = State(initialValue: alarm?.minute ?? 30)
+        _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
+        _mission = State(initialValue: alarm?.missionType ?? .math)
+    }
+
+    @State private var hour = 7
     @State private var minute = 30
     @State private var selectedDays = Set(1...7)
     @State private var mission: MissionType = .math
