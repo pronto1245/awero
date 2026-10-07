@@ -16,11 +16,11 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
     var currentAlarm: Alarm? = null
         private set
 
-    fun start(alarm: Alarm) {
+    fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()) {
         currentAlarm = alarm
         mission = alarm.missionType
         snoozeCount = 0
-        sessions.start(alarm)
+        sessions.start(alarm, scheduledAt)
         state = State.RINGING
     }
 
