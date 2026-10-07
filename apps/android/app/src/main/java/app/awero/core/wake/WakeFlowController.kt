@@ -3,19 +3,19 @@ package app.awero.core.wake
 import app.awero.core.alarm.Alarm
 import app.awero.core.missions.MissionType
 
-class WakeFlowController(
-    private val sessions: WakeSessionStore
-) {
+class WakeFlowController(private val sessions: WakeSessionStore) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
-
     var state: State = State.IDLE
         private set
     var mission: MissionType = MissionType.MATH
         private set
     var snoozeCount: Int = 0
         private set
+    var currentAlarm: Alarm? = null
+        private set
 
     fun start(alarm: Alarm) {
+        currentAlarm = alarm
         mission = alarm.missionType
         snoozeCount = 0
         sessions.start(alarm)
@@ -23,7 +23,10 @@ class WakeFlowController(
     }
 
     fun beginMission() {
-        if (state == State.RINGING) state = State.MISSION
+        if (state == State.RINGING) {
+            sessions.startMission()
+            state = State.MISSION
+        }
     }
 
     fun completeMission() {
@@ -33,8 +36,9 @@ class WakeFlowController(
         }
     }
 
-    fun snooze(maxSnoozes: Int): Boolean {
-        if (state != State.RINGING || snoozeCount >= maxSnoozes) return false
+    fun snooze(): Boolean {
+        val alarm = currentAlarm ?: return false
+        if (state != State.RINGING || snoozeCount >= alarm.maxSnoozes) return false
         snoozeCount++
         sessions.setSnoozeCount(snoozeCount)
         state = State.IDLE
