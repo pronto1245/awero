@@ -10,6 +10,7 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import app.awero.ui.AweroApp
+import app.awero.core.alarm.AlarmCoordinator
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        AlarmCoordinator(this).repair()
         setContent { AweroApp() }
     }
 
