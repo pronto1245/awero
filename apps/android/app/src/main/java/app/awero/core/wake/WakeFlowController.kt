@@ -5,12 +5,8 @@ import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmScheduler
 import app.awero.core.alarm.MissionType
 
-class WakeFlowController(
-    private val sessions: WakeSessionStore,
-    private val context: Context
-) {
+class WakeFlowController(private val sessions: WakeSessionStore, private val context: Context) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
-
     var state: State = State.IDLE
         private set
     var mission: MissionType = MissionType.MATH
@@ -32,6 +28,13 @@ class WakeFlowController(
         if (state == State.RINGING) {
             sessions.startMission()
             state = State.MISSION
+        }
+    }
+
+    fun fallbackToMath() {
+        if (state == State.MISSION) {
+            sessions.markFallback()
+            mission = MissionType.MATH
         }
     }
 
