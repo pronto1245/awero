@@ -270,7 +270,7 @@ final class CoreDataStore: @unchecked Sendable {
             let idString = object.value(forKey: "id") as? String,
             let id = UUID(uuidString: idString),
             let timezoneRaw = object.value(forKey: "timezoneMode") as? String,
-            let timezone = TimezoneMode(rawValue: timezoneRaw),
+            let timezone = AlarmTimezoneMode(rawValue: timezoneRaw),
             let missionRaw = object.value(forKey: "missionType") as? String,
             let mission = MissionType(rawValue: missionRaw),
             let difficultyRaw = object.value(forKey: "difficulty") as? String,
