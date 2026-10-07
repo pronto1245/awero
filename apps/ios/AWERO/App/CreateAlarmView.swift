@@ -1,9 +1,9 @@
 import SwiftUI
 
-struct CreateAlarmView: View {
+struct CreateAlarmView: View {\n    let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
-    @State private var hour = 7
+    init(alarm: Alarm? = nil) {\n        self.alarm = alarm\n        _hour = State(initialValue: alarm?.hour ?? 7)\n        _minute = State(initialValue: alarm?.minute ?? 30)\n        _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))\n        _mission = State(initialValue: alarm?.missionType ?? .math)\n    }\n\n    @State private var hour = 7
     @State private var minute = 30
     @State private var selectedDays = Set(1...7)
     @State private var mission: MissionType = .math
@@ -38,14 +38,19 @@ struct CreateAlarmView: View {
                 }
 
                 Button("Save alarm") {
-                    let alarm = Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
+                    var next = alarm ?? Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
+                    next.hour = hour
+                    next.minute = minute
+                    next.weekdays = selectedDays
+                    next.missionType = mission
                     Task {
-                        await AlarmCoordinator(store: store).create(alarm)
+                        if alarm == nil { await AlarmCoordinator(store: store).create(next) }
+                        else { await AlarmCoordinator(store: store).update(next) }
                         dismiss()
                     }
                 }
             }
-            .navigationTitle("Create Alarm")
+            .navigationTitle(alarm == nil ? "Create Alarm" : "Edit Alarm")
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
         }
     }
