@@ -9,12 +9,13 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import app.awero.core.missions.MissionType
 import app.awero.core.wake.WakeFlowController
 
 @Composable
 fun WakeScreen(flow: WakeFlowController) {
-    val scope = rememberCoroutineScope()\n\n    Column(
+    val scope = rememberCoroutineScope()
+
+    Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
