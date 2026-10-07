@@ -67,12 +67,15 @@ class AlarmScheduler(private val context: Context) {
         if (pending != null) manager.cancel(pending)
     }
 
-    fun isScheduled(a: Alarm): Boolean = a.weekdays.all { day ->
-        val intent = Intent(context, AlarmReceiver::class.java).apply { action = ACTION_ALARM }
-        PendingIntent.getBroadcast(
-            context, code(a, day), intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        ) != null
+    fun isScheduled(a: Alarm): Boolean {
+        if (!a.enabled || a.weekdays.isEmpty()) return false
+        return a.weekdays.all { day ->
+            val intent = Intent(context, AlarmReceiver::class.java).apply { action = ACTION_ALARM }
+            PendingIntent.getBroadcast(
+                context, code(a, day), intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            ) != null
+        }
     }
 
     private fun set(at: Long, pending: PendingIntent) {
