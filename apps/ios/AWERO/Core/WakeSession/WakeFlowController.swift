@@ -3,32 +3,28 @@ import Combine
 
 @MainActor
 final class WakeFlowController: ObservableObject {
-    enum State: Equatable {
-        case idle
-        case ringing
-        case mission
-        case completed
-        case emergencyStopped
-    }
+    enum State: Equatable { case idle, ringing, mission, completed, emergencyStopped }
 
     @Published private(set) var state: State = .idle
     @Published private(set) var currentMission: MissionType = .math
     @Published private(set) var snoozeCount = 0
 
     private let sessionManager: WakeSessionManager
-    private let maxSnoozes: Int
-    private let snoozeMinutes: Int
+    private var activeAlarm: Alarm?
+    private var maxSnoozes = 3
+    private var snoozeMinutes = 10
 
-    init(sessionManager: WakeSessionManager = WakeSessionManager(), maxSnoozes: Int = 3, snoozeMinutes: Int = 10) {
+    init(sessionManager: WakeSessionManager = WakeSessionManager()) {
         self.sessionManager = sessionManager
-        self.maxSnoozes = maxSnoozes
-        self.snoozeMinutes = snoozeMinutes
     }
 
-    func start(alarm: Alarm) {
+    func start(alarm: Alarm, scheduledAt: Date = .now) {
+        activeAlarm = alarm
         currentMission = alarm.missionType
+        maxSnoozes = alarm.maxSnoozes
+        snoozeMinutes = alarm.snoozeMinutes
         snoozeCount = 0
-        sessionManager.start(alarm: alarm)
+        sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
         state = .ringing
     }
 
@@ -40,7 +36,7 @@ final class WakeFlowController: ObservableObject {
 
     func completeMission() {
         guard state == .mission else { return }
-        sessionManager.completeMission()
+        sessionManager.complete()
         state = .completed
     }
 
@@ -48,8 +44,9 @@ final class WakeFlowController: ObservableObject {
         guard state == .ringing, snoozeCount < maxSnoozes else { return }
         snoozeCount += 1
         sessionManager.setSnoozeCount(snoozeCount)
-        sessionManager.snooze(minutes: snoozeMinutes)
         state = .idle
+        // The scheduler owns the actual OS reschedule. This controller only records policy/state.
+        _ = snoozeMinutes
     }
 
     func emergencyStop() {
