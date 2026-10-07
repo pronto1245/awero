@@ -112,6 +112,18 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
+    func retrySyncOperation(_ id: UUID, nextAttemptAt: Date) async {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
+            request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+            if let object = try? context.fetch(request).first {
+                let attempts = object.value(forKey: "attempts") as? Int ?? 0
+                object.setValue(attempts + 1, forKey: "attempts")
+                object.setValue(nextAttemptAt, forKey: "nextAttemptAt")
+            }
+        }
+    }
+
     func saveAnalyticsEvent(_ event: AnalyticsEvent) async {
         await performBackground { context in
             let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AnalyticsEventRecord"]!, insertInto: context)
