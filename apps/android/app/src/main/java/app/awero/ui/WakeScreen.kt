@@ -15,14 +15,14 @@ import app.awero.core.wake.WakeFlowController
 fun WakeScreen(flow: WakeFlowController) {
     val scope = rememberCoroutineScope()
 
-    Column(
+    val state by flow.state.collectAsState()\n    val mission by flow.mission.collectAsState()\n\n    Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text("AWERO", color = Color.White.copy(alpha = .45f))
         Text("GET UP", style = MaterialTheme.typography.displayLarge, color = Color.White)
 
-        when (flow.state) {
+        when (state) {
             WakeFlowController.State.RINGING -> {
                 Text("The alarm is active.", color = Color.White.copy(alpha = .6f))
                 Button(onClick = { scope.launch { flow.beginMission() } }, modifier = Modifier.fillMaxWidth()) {
@@ -32,7 +32,7 @@ fun WakeScreen(flow: WakeFlowController) {
                 TextButton(onClick = { scope.launch { flow.emergencyStop() } }) { Text("Emergency stop") }
             }
             WakeFlowController.State.MISSION -> {
-                Text(flow.mission.name, color = Color.White.copy(alpha = .7f))
+                Text(mission.name, color = Color.White.copy(alpha = .7f))
                 Button(onClick = { scope.launch { flow.completeMission() } }, modifier = Modifier.fillMaxWidth()) {
                     Text("Complete mission")
                 }
