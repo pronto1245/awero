@@ -55,12 +55,17 @@ class QRMissionRuntime(private val context: Context) {
                     .addOnCompleteListener { imageProxy.close() }
             }
             provider.unbindAll()
-            provider.bindToLifecycle(
-                owner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                previewUseCase,
-                analysis
-            )
+            try {
+                provider.bindToLifecycle(
+                    owner,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
+                    previewUseCase,
+                    analysis
+                )
+            } catch (_: Exception) {
+                provider.unbindAll()
+                onCode("")
+            }
         }, androidx.core.content.ContextCompat.getMainExecutor(context))
     }
 
