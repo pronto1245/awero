@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import app.awero.ui.AweroApp
 import app.awero.core.alarm.AlarmCoordinator
 
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        AlarmCoordinator(this).repair()
+        lifecycleScope.launch { AlarmCoordinator(this@MainActivity).repair() }
         setContent { AweroApp() }
     }
 
