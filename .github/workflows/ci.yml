@@ -42,3 +42,20 @@ jobs:
         run: |
           SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
           find apps/ios -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
+
+  ios-persistence-smoke:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run persistence smoke test
+        shell: bash
+        run: |
+          swiftc \
+            apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
+            apps/ios/AWERO/Core/Sync/SyncOperation.swift \
+            apps/ios/AWERO/Core/WakeSession/WakeSession.swift \
+            apps/ios/AWERO/Core/Statistics/StatisticsStore.swift \
+            apps/ios/AWERO/Core/Storage/CoreDataStore.swift \
+            apps/ios/Tests/PersistenceSmokeMain.swift \
+            -o /tmp/awero-persistence-smoke
+          /tmp/awero-persistence-smoke
