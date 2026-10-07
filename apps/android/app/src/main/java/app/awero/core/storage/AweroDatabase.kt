@@ -10,7 +10,8 @@ import androidx.room.RoomDatabase
         AlarmEntity::class,
         WakeSessionEntity::class,
         StatisticsEntity::class,
-        SyncOperationEntity::class
+        SyncOperationEntity::class,
+        AnalyticsEventEntity::class
     ],
     version = 1,
     exportSchema = true
@@ -20,6 +21,7 @@ abstract class AweroDatabase : RoomDatabase() {
     abstract fun wakeSessions(): WakeSessionDao
     abstract fun statistics(): StatisticsDao
     abstract fun syncOperations(): SyncOperationDao
+    abstract fun analyticsEvents(): AnalyticsEventDao
 
     companion object {
         @Volatile private var instance: AweroDatabase? = null
