@@ -4,7 +4,14 @@ import SwiftUI
 struct AWEROApp: App {
     @UIApplicationDelegateAdaptor(AWEROAppDelegate.self) private var delegate
     @StateObject private var alarmStore = AlarmStore()
+
     var body: some Scene {
-        WindowGroup { ContentView().environmentObject(alarmStore) }
+        WindowGroup {
+            ContentView()
+                .environmentObject(alarmStore)
+                .task {
+                    try? await AlarmScheduler().requestAuthorization()
+                }
+        }
     }
 }
