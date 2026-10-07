@@ -4,63 +4,108 @@ struct CreateAlarmView: View {
     let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
+
+    @State private var wakeDate: Date
+    @State private var selectedDays: Set<Int>
+    @State private var mission: MissionType
+
     init(alarm: Alarm? = nil) {
         self.alarm = alarm
-        _hour = State(initialValue: alarm?.hour ?? 7)
-        _minute = State(initialValue: alarm?.minute ?? 30)
+        let calendar = Calendar.current
+        let base = calendar.date(from: DateComponents(
+            hour: alarm?.hour ?? 7,
+            minute: alarm?.minute ?? 30
+        )) ?? Date()
+        _wakeDate = State(initialValue: base)
         _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
         _mission = State(initialValue: alarm?.missionType ?? .math)
     }
 
-    @State private var hour = 7
-    @State private var minute = 30
-    @State private var selectedDays = Set(1...7)
-    @State private var mission: MissionType = .math
-
     var body: some View {
         NavigationStack {
             Form {
-                DatePicker("Wake time", selection: Binding(
-                    get: { Calendar.current.date(from: DateComponents(hour: hour, minute: minute)) ?? Date() },
-                    set: {
-                        let c = Calendar.current.dateComponents([.hour, .minute], from: $0)
-                        hour = c.hour ?? 7
-                        minute = c.minute ?? 30
-                    }
-                ), displayedComponents: .hourAndMinute)
-
-                Section("Days") {
-                    ForEach(1...7, id: \.self) { day in
-                        Toggle("Day \(day)", isOn: Binding(
-                            get: { selectedDays.contains(day) },
-                            set: { $0 ? selectedDays.insert(day) : selectedDays.remove(day) }
-                        ))
-                    }
-                }
-
-                Section("Wake mission") {
-                    Picker("Mission", selection: $mission) {
-                        Text("Math").tag(MissionType.math)
-                        Text("Steps").tag(MissionType.steps)
-                        Text("QR").tag(MissionType.qr)
-                    }
-                }
-
-                Button("Save alarm") {
-                    var next = alarm ?? Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
-                    next.hour = hour
-                    next.minute = minute
-                    next.weekdays = selectedDays
-                    next.missionType = mission
-                    Task {
-                        if alarm == nil { await AlarmCoordinator(store: store).create(next) }
-                        else { await AlarmCoordinator(store: store).update(next) }
-                        dismiss()
-                    }
-                }
+                wakeTimeSection
+                daysSection
+                missionSection
+                saveSection
             }
             .navigationTitle(alarm == nil ? "Create Alarm" : "Edit Alarm")
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var wakeTimeSection: some View {
+        DatePicker(
+            "Wake time",
+            selection: $wakeDate,
+            displayedComponents: .hourAndMinute
+        )
+    }
+
+    private var daysSection: some View {
+        Section("Days") {
+            ForEach(1...7, id: \.self) { day in
+                Toggle(
+                    "Day \(day)",
+                    isOn: Binding(
+                        get: { selectedDays.contains(day) },
+                        set: { enabled in
+                            if enabled {
+                                selectedDays.insert(day)
+                            } else {
+                                selectedDays.remove(day)
+                            }
+                        }
+                    )
+                )
+            }
+        }
+    }
+
+    private var missionSection: some View {
+        Section("Wake mission") {
+            Picker("Mission", selection: $mission) {
+                Text("Math").tag(MissionType.math)
+                Text("Steps").tag(MissionType.steps)
+                Text("QR").tag(MissionType.qr)
+            }
+        }
+    }
+
+    private var saveSection: some View {
+        Button(alarm == nil ? "Save alarm" : "Save changes") {
+            saveAlarm()
+        }
+    }
+
+    private func saveAlarm() {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: wakeDate)
+        let hour = components.hour ?? 7
+        let minute = components.minute ?? 30
+
+        var next = alarm ?? Alarm(
+            hour: hour,
+            minute: minute,
+            weekdays: selectedDays,
+            missionType: mission
+        )
+        next.hour = hour
+        next.minute = minute
+        next.weekdays = selectedDays
+        next.missionType = mission
+
+        Task {
+            let coordinator = AlarmCoordinator(store: store)
+            if alarm == nil {
+                await coordinator.create(next)
+            } else {
+                await coordinator.update(next)
+            }
+            dismiss()
         }
     }
 }
