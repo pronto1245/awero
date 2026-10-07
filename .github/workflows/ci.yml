@@ -31,7 +31,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - run: gradle -p apps/android :app:assembleDebug\n      - run: gradle -p apps/android pixel2Api35DebugAndroidTest
+      - run: gradle -p apps/android :app:assembleDebug
+      - run: gradle -p apps/android pixel2Api35DebugAndroidTest
 
   ios-syntax:
     runs-on: macos-15
