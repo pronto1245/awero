@@ -28,7 +28,7 @@ class StatisticsStore(context: Context) {
         val s = statistics()
         val completed = if (session.result == "SUCCESS") 1 else 0
         val seconds = if (session.completedAt != null) {
-            ((session.completedAt!! - session.scheduledAt) / 1000).coerceAtLeast(0)
+            ((session.completedAt!! - (session.triggeredAt ?: session.scheduledAt)) / 1000).coerceAtLeast(0)
         } else 0
         save(s.copy(
             completed = s.completed + completed,
