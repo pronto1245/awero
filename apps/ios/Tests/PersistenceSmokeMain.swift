@@ -71,10 +71,14 @@ struct PersistenceSmokeMain {
         let restartedAgain = CoreDataStore(storeURL: storeURL)
         let active = await restartedAgain.fetchActiveWakeSession()
         precondition(active?.id == session.id)
+        var closedSession = session
+        closedSession.completedAt = .now
+        closedSession.result = "COMPLETED"
+        await restartedAgain.saveWakeSession(closedSession)
 
         let manager = await MainActor.run { WakeSessionManager(database: restartedAgain) }
         let alarm = Alarm(
-            id: alarmId,
+            id: UUID(),
             version: 1,
             hour: 7,
             minute: 30,
