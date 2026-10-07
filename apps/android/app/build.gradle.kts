@@ -22,7 +22,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose=true }
+    buildFeatures { compose=true }\n    testOptions {\n        managedDevices {\n            devices {\n                pixel2Api35(com.android.build.api.dsl.ManagedVirtualDevice::class) {\n                    device = "Pixel 2"\n                    apiLevel = 35\n                    systemImageSource = "aosp-atd"\n                }\n            }\n        }\n    }
 }
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
