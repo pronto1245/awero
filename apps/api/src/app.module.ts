@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AnonymousModule } from './anonymous/anonymous.module';
+import { AuthModule } from './auth/auth.module';
+import { AlarmsModule } from './alarms/alarms.module';
 
 @Module({
   imports: [
@@ -10,6 +12,8 @@ import { AnonymousModule } from './anonymous/anonymous.module';
     DatabaseModule,
     HealthModule,
     AnonymousModule,
+    AuthModule,
+    AlarmsModule,
   ],
 })
 export class AppModule {}
