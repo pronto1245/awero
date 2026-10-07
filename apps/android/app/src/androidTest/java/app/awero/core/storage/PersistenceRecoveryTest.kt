@@ -3,6 +3,13 @@ package app.awero.core.storage
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.awero.core.alarm.Alarm
+import app.awero.core.alarm.AlarmStore
+import app.awero.core.alarm.Difficulty
+import app.awero.core.alarm.MissionType
+import app.awero.core.alarm.TimezoneMode
+import app.awero.core.wake.WakeFlowController
+import app.awero.core.wake.WakeSessionStore
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -76,6 +83,35 @@ class PersistenceRecoveryTest {
         val due = db.syncOperations().due(0)
         assertEquals(1, due.count { it.id == id })
         assertEquals(0, due.first { it.id == id }.attempts)
+    }
+
+    @Test
+    fun wakeFlowRestoresMissionStateAfterProcessRestart() = runBlocking {
+        val alarm = Alarm(
+            id = UUID.randomUUID().toString(),
+            version = 2,
+            hour = 7,
+            minute = 30,
+            enabled = true,
+            weekdays = setOf(1, 2, 3, 4, 5),
+            timezoneMode = TimezoneMode.DEVICE_LOCAL,
+            fixedTimezone = null,
+            missionType = MissionType.MATH,
+            difficulty = Difficulty.MEDIUM
+        )
+        AlarmStore(context).save(alarm)
+
+        val first = WakeFlowController(WakeSessionStore(context), context)
+        first.start(alarm, 1000)
+        first.beginMission()
+
+        AweroDatabase.closeForTesting()
+
+        val restored = WakeFlowController(WakeSessionStore(context), context)
+        restored.restore()
+
+        assertEquals(WakeFlowController.State.MISSION, restored.state.value)
+        assertEquals(MissionType.MATH, restored.mission.value)
     }
 
     @Test
