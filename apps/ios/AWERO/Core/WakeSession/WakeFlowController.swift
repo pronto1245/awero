@@ -28,8 +28,8 @@ final class WakeFlowController: ObservableObject {
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
         snoozeCount = 0
-        await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
-        await statistics.recordPlanned()
+        let created = await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
+        if created { await statistics.recordPlanned() }
         state = .ringing
     }
 
