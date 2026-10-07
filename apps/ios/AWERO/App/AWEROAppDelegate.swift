@@ -48,7 +48,7 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
         }
 
         Task { @MainActor in
-            wakeFlow.start(alarm: alarm, scheduledAt: Date())
+            await wakeFlow.start(alarm: alarm, scheduledAt: Date())
         }
     }
 }
