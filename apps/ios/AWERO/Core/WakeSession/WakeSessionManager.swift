@@ -5,7 +5,7 @@ final class WakeSessionManager {
     private(set) var current: WakeSession?
     private let database = CoreDataStore.shared
 
-    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
+    func restore() async -> WakeSession? {\n        await ensureCurrent()\n        return current\n    }\n\n    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
         if let existing = await database.fetchActiveWakeSession(),
            existing.alarmId == alarm.id,
            existing.alarmVersion == alarm.version {
