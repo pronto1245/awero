@@ -116,7 +116,7 @@ struct PersistenceSmokeMain {
     }
 
     private static func load(_ container: NSPersistentContainer) async throws {
-        try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             container.loadPersistentStores { _, error in
                 if let error {
                     continuation.resume(throwing: error)
