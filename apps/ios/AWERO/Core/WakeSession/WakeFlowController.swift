@@ -10,7 +10,7 @@ final class WakeFlowController: ObservableObject {
 
     private let sessionManager: WakeSessionManager
     private let scheduler: AlarmScheduler
-    private var currentAlarm: Alarm?
+    private(set) var currentAlarm: Alarm?
     private var maxSnoozes = 3
 
     init(
