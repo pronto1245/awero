@@ -1,35 +1,29 @@
 import Foundation
 
-struct FallbackStep {
-    let mission: MissionType
-    let reason: String
-}
-
+@MainActor
 final class FallbackEngine {
-    private let chain: [MissionType]
+    private(set) var attempts: [MissionType] = []
 
-    init(primary: MissionType) {
-        switch primary {
-        case .photo:
-            chain = [.photo, .qr, .math]
-        case .steps:
-            chain = [.steps, .qr, .math]
-        case .qr:
-            chain = [.qr, .math]
-        case .mixed:
-            chain = [.mixed, .qr, .math]
-        case .math:
-            chain = [.math]
-        }
+    func reset() {
+        attempts.removeAll()
     }
 
     func next(after mission: MissionType) -> MissionType? {
-        guard let index = chain.firstIndex(of: mission) else { return chain.first }
-        let nextIndex = index + 1
-        return nextIndex < chain.count ? chain[nextIndex] : nil
-    }
+        if attempts.isEmpty || attempts.last != mission {
+            attempts.append(mission)
+        }
 
-    func canFallback(after mission: MissionType) -> Bool {
-        next(after: mission) != nil
+        switch mission {
+        case .photo:
+            return .qr
+        case .qr:
+            return .math
+        case .steps:
+            return .math
+        case .mixed:
+            return .math
+        case .math:
+            return nil
+        }
     }
 }
