@@ -65,22 +65,22 @@
 - [ ] Persistent statistics/streak UI
 
 ## 7. Onboarding / localization
-- [ ] Anonymous first-run mode
-- [ ] Permission education
-- [ ] First alarm flow
-- [ ] Test alarm flow
-- [ ] en
-- [ ] ru
-- [ ] pt-BR
-- [ ] fr
-- [ ] de
-- [ ] es
+- [x] Anonymous first-run mode foundation
+- [x] Permission education/runtime requests
+- [x] First alarm flow foundation
+- [x] Test alarm flow
+- [x] en
+- [x] ru
+- [x] pt-BR
+- [x] fr
+- [x] de
+- [x] es
 
 ## 8. Backend / sync
-- [ ] Auth
-- [ ] Anonymous account
-- [ ] Device registration
-- [ ] Alarm CRUD API
+- [x] Auth session foundation
+- [x] Anonymous account
+- [x] Device registration
+- [x] Alarm CRUD API
 - [ ] Wake session API
 - [ ] Statistics API
 - [ ] Analytics ingestion
