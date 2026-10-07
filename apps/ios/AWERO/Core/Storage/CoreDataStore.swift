@@ -254,7 +254,7 @@ final class CoreDataStore: @unchecked Sendable {
                 do {
                     try context.save()
                 } catch {
-                    logger.error("Core Data save failed: \(error.localizedDescription, privacy: .public)")
+                    self.logger.error("Core Data save failed: \(error.localizedDescription, privacy: .public)")
                     NotificationCenter.default.post(
                         name: .aweroPersistenceSaveFailed,
                         object: nil,
