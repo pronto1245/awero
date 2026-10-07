@@ -3,6 +3,7 @@ import Combine
 
 @MainActor
 final class WakeFlowController: ObservableObject {
+    static let shared = WakeFlowController()
     enum State: Equatable { case idle, ringing, mission, completed, emergencyStopped }
     @Published private(set) var state: State = .idle
     @Published private(set) var currentMission: MissionType = .math
