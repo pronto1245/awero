@@ -17,7 +17,8 @@ import java.util.Calendar
 @Composable
 fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> Unit) {
     val context = LocalContext.current
-    val coordinator = remember { AlarmCoordinator(context) }\n    val scope = rememberCoroutineScope()
+    val coordinator = remember { AlarmCoordinator(context) }
+    val scope = rememberCoroutineScope()
     val now = Calendar.getInstance()
     var hour by remember { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
@@ -48,7 +49,11 @@ fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> 
         }
         Spacer(Modifier.weight(1f))
         Button(onClick = {
-            scope.launch {\n                if (alarm == null) coordinator.create(hour, minute, mission, difficulty)\n                else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))\n                onSaved()\n            }
+            scope.launch {
+                if (alarm == null) coordinator.create(hour, minute, mission, difficulty)
+                else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
+                onSaved()
+            }
         }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Text(if (alarm == null) "Create alarm" else "Save changes")
         }
