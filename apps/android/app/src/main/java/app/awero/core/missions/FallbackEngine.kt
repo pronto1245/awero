@@ -1,16 +1,18 @@
 package app.awero.core.missions
 
-class FallbackEngine(primary: MissionType) {
-    private val chain = when (primary) {
-        MissionType.PHOTO -> listOf(MissionType.PHOTO, MissionType.QR, MissionType.MATH)
-        MissionType.STEPS -> listOf(MissionType.STEPS, MissionType.QR, MissionType.MATH)
-        MissionType.QR -> listOf(MissionType.QR, MissionType.MATH)
-        MissionType.MIXED -> listOf(MissionType.MIXED, MissionType.QR, MissionType.MATH)
-        MissionType.MATH -> listOf(MissionType.MATH)
-    }
+class FallbackEngine {
+    private val attempts = mutableListOf<MissionType>()
 
-    fun next(after: MissionType): MissionType? {
-        val index = chain.indexOf(after)
-        return if (index >= 0 && index + 1 < chain.size) chain[index + 1] else null
+    fun reset() = attempts.clear()
+
+    fun nextAfter(mission: MissionType): MissionType? {
+        if (attempts.lastOrNull() != mission) attempts += mission
+        return when (mission) {
+            MissionType.PHOTO -> MissionType.QR
+            MissionType.QR -> MissionType.MATH
+            MissionType.STEPS -> MissionType.MATH
+            MissionType.MIXED -> MissionType.MATH
+            MissionType.MATH -> null
+        }
     }
 }
