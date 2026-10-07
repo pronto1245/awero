@@ -4,6 +4,7 @@ import UserNotifications
 @MainActor
 final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     private let wakeFlow = WakeFlowController.shared
+    private let database = CoreDataStore.shared
 
     func application(
         _ application: UIApplication,
@@ -18,7 +19,7 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        startWakeIfValid(response.notification.request.identifier)
+        handleNotification(response.notification.request.identifier)
         completionHandler()
     }
 
@@ -27,28 +28,38 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
-        startWakeIfValid(notification.request.identifier)
+        handleNotification(notification.request.identifier)
         completionHandler([.banner, .sound, .badge])
     }
 
-    private func startWakeIfValid(_ identifier: String) {
+    private func handleNotification(_ identifier: String) {
         let parts = identifier.split(separator: ":")
+        guard parts.count >= 3,
+              parts[0] == "awero" else {
+            return
+        }
+
+        if parts[1] == "test" {
+            guard let id = UUID(uuidString: String(parts[2])) else { return }
+            Task { @MainActor in
+                guard let alarm = await database.fetchAlarm(id: id), alarm.enabled else { return }
+                await wakeFlow.start(alarm: alarm, scheduledAt: .now)
+            }
+            return
+        }
+
         guard parts.count >= 5,
-              parts[0] == "awero",
               parts[1] == "alarm",
               let id = UUID(uuidString: String(parts[2])),
               let version = Int(parts[3].replacingOccurrences(of: "v", with: "")) else {
             return
         }
 
-        guard let data = UserDefaults.standard.data(forKey: "awero.alarms.v1"),
-              let alarms = try? JSONDecoder().decode([Alarm].self, from: data),
-              let alarm = alarms.first(where: { $0.id == id && $0.version == version && $0.enabled }) else {
-            return
-        }
-
         Task { @MainActor in
-            await wakeFlow.start(alarm: alarm, scheduledAt: Date())
+            guard let alarm = await database.fetchAlarm(id: id),
+                  alarm.version == version,
+                  alarm.enabled else { return }
+            await wakeFlow.start(alarm: alarm, scheduledAt: .now)
         }
     }
 }
