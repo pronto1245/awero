@@ -1,6 +1,8 @@
 import Foundation
 import UserNotifications
 
+enum AlarmSchedulingError: Error { case invalidTimezone }
+
 final class AlarmScheduler {
     private let center = UNUserNotificationCenter.current()
 
@@ -19,7 +21,8 @@ final class AlarmScheduler {
             components.hour = alarm.hour
             components.minute = alarm.minute
             if alarm.timezoneMode == .fixed {
-                components.timeZone = TimeZone(identifier: alarm.fixedTimezone ?? "")
+                guard let timezone = TimeZone(identifier: alarm.fixedTimezone ?? "") else { throw AlarmSchedulingError.invalidTimezone }
+                components.timeZone = timezone
             }
 
             let content = UNMutableNotificationContent()
@@ -79,7 +82,7 @@ final class AlarmScheduler {
         guard alarm.enabled && !alarm.weekdays.isEmpty else { return false }
         let ids = Set((await center.pendingNotificationRequests()).map(\.identifier))
         return alarm.weekdays.allSatisfy {
-            ids.contains("awero:alarm:\\(alarm.id.uuidString):v(alarm.version):w($0)")
+            ids.contains("awero:alarm:\\(alarm.id.uuidString):v\\(alarm.version):w\\($0)")
         }
     }
 
