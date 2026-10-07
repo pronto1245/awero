@@ -1,6 +1,6 @@
 package app.awero.ui
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import android.graphics.Color
 import android.view.Gravity
 import android.view.View
@@ -10,7 +10,7 @@ import android.widget.TextView
 import app.awero.core.wake.WakeFlowController
 
 object WakeAlarmScreen {
-    fun create(activity: Activity, flow: WakeFlowController): LinearLayout {
+    fun create(activity: ComponentActivity, flow: WakeFlowController): LinearLayout {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
