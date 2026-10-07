@@ -9,6 +9,8 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.camera.view.PreviewView
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.MissionType
 import app.awero.core.missions.MathMission
@@ -85,10 +87,18 @@ object MissionRuntimeScreen {
                     val preview = PreviewView(activity)
                     root.addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
                     val runtime = QRMissionRuntime(activity)
-                    runtime.start(activity, preview) { code ->
+                    val lifecycleObserver = object : DefaultLifecycleObserver {
+                        override fun onDestroy(owner: LifecycleOwner) {
+                            runtime.close()
+                            owner.lifecycle.removeObserver(this)
+                        }
+                    }
+                    activity.lifecycle.addObserver(lifecycleObserver)
+                    runtime.start(activity, preview) {
                         activity.runOnUiThread {
                             if (runtime.matches(expected)) onSuccess() else onFailure()
                             runtime.close()
+                            activity.lifecycle.removeObserver(lifecycleObserver)
                         }
                     }
                 }
