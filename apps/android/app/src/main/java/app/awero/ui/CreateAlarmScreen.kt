@@ -15,20 +15,20 @@ import app.awero.core.alarm.MissionType
 import java.util.Calendar
 
 @Composable
-fun CreateAlarmScreen(onSaved: () -> Unit) {
+fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> Unit) {
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
     val now = Calendar.getInstance()
-    var hour by remember { mutableIntStateOf(now.get(Calendar.HOUR_OF_DAY)) }
-    var minute by remember { mutableIntStateOf(now.get(Calendar.MINUTE)) }
-    var mission by remember { mutableStateOf(MissionType.MATH) }
-    var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
+    var hour by remember { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
+    var minute by remember { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
+    var mission by remember { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
+    var difficulty by remember { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Text("New alarm", color = Color.White, style = MaterialTheme.typography.headlineMedium)
+        Text(if (alarm == null) "New alarm" else "Edit alarm", color = Color.White, style = MaterialTheme.typography.headlineMedium)
         OutlinedButton(onClick = {
             TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, true).show()
         }, modifier = Modifier.fillMaxWidth()) {
@@ -48,10 +48,10 @@ fun CreateAlarmScreen(onSaved: () -> Unit) {
         }
         Spacer(Modifier.weight(1f))
         Button(onClick = {
-            coordinator.create(hour, minute, mission, difficulty)
+            if (alarm == null) coordinator.create(hour, minute, mission, difficulty)\n            else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
             onSaved()
         }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Create alarm")
+            Text(if (alarm == null) "Create alarm" else "Save changes")
         }
     }
 }
