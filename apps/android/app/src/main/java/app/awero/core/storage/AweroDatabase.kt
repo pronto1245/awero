@@ -30,12 +30,24 @@ abstract class AweroDatabase : RoomDatabase() {
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS wake_events (id TEXT NOT NULL, wakeSessionId TEXT NOT NULL, eventType TEXT NOT NULL, occurredAt INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(id))")
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_wake_events_wakeSessionId ON wake_events(wakeSessionId)")
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS wake_events (id TEXT NOT NULL, wakeSessionId TEXT NOT NULL, eventType TEXT NOT NULL, occurredAt INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(id))"
+                )
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_wake_events_wakeSessionId ON wake_events(wakeSessionId)"
+                )
             }
         }
 
-        @Volatile private var instance: AweroDatabase? = null\n\n        internal fun closeForTesting() {\n            synchronized(this) {\n                instance?.close()\n                instance = null\n            }\n        }
+        @Volatile
+        private var instance: AweroDatabase? = null
+
+        internal fun closeForTesting() {
+            synchronized(this) {
+                instance?.close()
+                instance = null
+            }
+        }
 
         fun get(context: Context): AweroDatabase =
             instance ?: synchronized(this) {
