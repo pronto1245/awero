@@ -1,28 +1,17 @@
 # AWERO Alarm Engine v2
 
-## Versioning
-Every alarm schedule is identified by:
-alarm_id + version + weekday.
+Versioning: each occurrence is identified by alarm id, version, and weekday. Editing increments version. The iOS notification identifier contains the version; Android carries version in the PendingIntent payload.
 
-Any edit increments version. The previous schedule is cancelled before the new version is installed.
+Recurrence: iOS uses repeating calendar notifications. Android uses exact one-shot RTC alarms for selected weekdays and schedules the next occurrence after every fire.
 
-## Recurrence
-An alarm stores weekdays 1...7 using Gregorian/Calendar weekday semantics. Each selected day receives its own schedule.
+Timezone: DEVICE_LOCAL follows the device timezone. FIXED uses an IANA timezone identifier. Alarms are stored as local wall-clock components, not permanent UTC timestamps.
 
-## Timezone
-DEVICE_LOCAL follows the current device timezone. FIXED follows the configured IANA timezone identifier.
+DST: calendar APIs calculate local wall-clock occurrences. Android reconciles after boot, clock changes, and timezone changes. iOS notification schedules survive reboot and reconcile when the app becomes active.
 
-## DST
-The OS calendar/alarm APIs calculate local wall-clock occurrences. AWERO never converts a recurring wall-clock alarm into a fixed UTC timestamp. Recovery runs after timezone/time changes. DST transitions therefore follow local calendar semantics.
+Recovery: local only. Missing schedules are detected and repaired without backend access.
 
-## Recovery
-On app activation and Android boot/time/timezone broadcasts, AWERO reconciles local alarms with pending OS schedules. Missing schedules are repaired without network access.
+Stale versions: every fired event carries alarm id and version. The runtime rejects stale versions before Wake Session creation.
 
-## Verification
-Verification checks OS pending/pending-intent state. If an enabled alarm is missing, repair recreates it.
+Test Alarm: isolated one-shot request. It never mutates the production alarm version or recurrence.
 
-## Test Alarm
-Test alarms are one-shot and never mutate the production alarm version or recurrence.
-
-## Wake Flow
-A fired alarm carries alarm_id and alarm_version. The runtime must reject stale versions before starting a Wake Session.
+Wake flow: valid fire -> Alarm -> WakeFlowController.begin -> Wake Session -> Mission Engine.
