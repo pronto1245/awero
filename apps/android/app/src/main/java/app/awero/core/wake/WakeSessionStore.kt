@@ -35,27 +35,31 @@ class WakeSessionStore(context: Context) {
         active?.let { it.fallbackUsed = true; save(it) }
     }
 
-    fun complete() {
+    fun complete(): WakeSession? {
         active?.let {
             it.completedAt = System.currentTimeMillis()
             it.result = "SUCCESS"
             save(it)
             active = null
+            return it
         }
+        return null
     }
 
     fun setSnoozeCount(count: Int) {
         active?.let { it.snoozeCount = count; save(it) }
     }
 
-    fun emergencyStop() {
+    fun emergencyStop(): WakeSession? {
         active?.let {
             it.emergencyStop = true
             it.result = "EMERGENCY_STOP"
             it.completedAt = System.currentTimeMillis()
             save(it)
             active = null
+            return it
         }
+        return null
     }
 
     fun save(session: WakeSession) {
