@@ -30,10 +30,10 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun scheduleTest(a: Alarm, seconds: Long = 30) =
-        scheduleOneShot(a, ACTION_TEST, a.id.hashCode() xor 0x55AA, seconds * 1000L)
+        scheduleOneShot(a, ACTION_TEST, testCode(a), seconds * 1000L)
 
     fun scheduleSnooze(a: Alarm, minutes: Int) =
-        scheduleOneShot(a, ACTION_SNOOZE, a.id.hashCode() xor 0xAA55, minutes.coerceAtLeast(1) * 60_000L)
+        scheduleOneShot(a, ACTION_SNOOZE, snoozeCode(a), minutes.coerceAtLeast(1) * 60_000L)
 
     private fun scheduleOneShot(a: Alarm, action: String, requestCode: Int, delay: Long) {
         val at = System.currentTimeMillis() + delay
@@ -52,13 +52,19 @@ class AlarmScheduler(private val context: Context) {
 
     fun cancel(a: Alarm) {
         (1..7).forEach { day ->
-            val intent = Intent(context, AlarmReceiver::class.java).apply { action = ACTION_ALARM }
-            val pending = PendingIntent.getBroadcast(
-                context, code(a, day), intent,
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-            )
-            if (pending != null) manager.cancel(pending)
+            cancelPending(code(a, day), ACTION_ALARM)
         }
+        cancelPending(testCode(a), ACTION_TEST)
+        cancelPending(snoozeCode(a), ACTION_SNOOZE)
+    }
+
+    private fun cancelPending(requestCode: Int, action: String) {
+        val intent = Intent(context, AlarmReceiver::class.java).apply { this.action = action }
+        val pending = PendingIntent.getBroadcast(
+            context, requestCode, intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (pending != null) manager.cancel(pending)
     }
 
     fun isScheduled(a: Alarm): Boolean = a.weekdays.all { day ->
@@ -93,6 +99,8 @@ class AlarmScheduler(private val context: Context) {
     }
 
     private fun code(a: Alarm, day: Int) = a.id.hashCode() * 31 + day
+    private fun testCode(a: Alarm) = a.id.hashCode() xor 0x55AA
+    private fun snoozeCode(a: Alarm) = a.id.hashCode() xor 0xAA55
 
     companion object {
         const val ACTION_ALARM = "app.awero.ALARM"
