@@ -1,6 +1,7 @@
 import UIKit
 import UserNotifications
 
+@MainActor
 final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     private let wakeFlow = WakeFlowController.shared
 
