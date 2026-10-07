@@ -3,9 +3,16 @@ import Foundation
 @MainActor
 final class WakeSessionManager {
     private(set) var current: WakeSession?
-    private let database = CoreDataStore.shared
+    private let database: CoreDataStore
 
-    func restore() async -> WakeSession? {\n        await ensureCurrent()\n        return current\n    }\n\n    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
+    init(database: CoreDataStore = .shared) {
+        self.database = database
+    }
+
+    func restore() async -> WakeSession? {
+        await ensureCurrent()
+        return current
+    }\n\n    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
         if let existing = await database.fetchActiveWakeSession(),
            existing.alarmId == alarm.id,
            existing.alarmVersion == alarm.version {
