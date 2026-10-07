@@ -39,8 +39,10 @@ struct CreateAlarmView: View {
 
                 Button("Save alarm") {
                     let alarm = Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
-                    store.save(alarm)
-                    dismiss()
+                    Task {
+                        await AlarmCoordinator(store: store).create(alarm)
+                        dismiss()
+                    }
                 }
             }
             .navigationTitle("Create Alarm")
