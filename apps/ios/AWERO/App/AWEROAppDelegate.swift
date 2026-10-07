@@ -39,7 +39,7 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
             return
         }
 
-        if parts[1] == "test" {
+        if parts[1] == "test" || parts[1] == "snooze" {
             guard let id = UUID(uuidString: String(parts[2])) else { return }
             Task { @MainActor in
                 guard let alarm = await database.fetchAlarm(id: id), alarm.enabled else { return }
