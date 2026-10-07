@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var alarms: AlarmStore
     @State private var showingCreate = false
+    @State private var editingAlarm: Alarm?
 
     var body: some View {
         NavigationStack {
@@ -18,17 +19,18 @@ struct HomeView: View {
                             .foregroundStyle(.white.opacity(0.6))
 
                         if alarms.alarms.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("No alarms")
-                                    .font(.title2.bold())
-                                    .foregroundStyle(.white)
-                                Text("Create your first wake-up.")
-                                    .foregroundStyle(.white.opacity(0.55))
-                            }
-                            .padding(.top, 80)
+                            Text("No alarms")
+                                .font(.title2.bold())
+                                .foregroundStyle(.white)
+                                .padding(.top, 80)
                         } else {
                             ForEach(alarms.alarms) { alarm in
-                                AlarmCard(alarm: alarm)
+                                AlarmCard(
+                                    alarm: alarm,
+                                    onEdit: { editingAlarm = alarm },
+                                    onTest: { Task { await AlarmCoordinator(store: alarms).test(alarm) } },
+                                    onDelete: { Task { await AlarmCoordinator(store: alarms).delete(alarm) } }
+                                )
                             }
                         }
 
@@ -50,14 +52,21 @@ struct HomeView: View {
             .sheet(isPresented: $showingCreate) {
                 CreateAlarmView()
             }
+            .sheet(item: $editingAlarm) { alarm in
+                CreateAlarmView(alarm: alarm)
+            }
         }
     }
 }
 
 private struct AlarmCard: View {
     let alarm: Alarm
+    let onEdit: () -> Void
+    let onTest: () -> Void
+    let onDelete: () -> Void
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             Text(String(format: "%02d:%02d", alarm.hour, alarm.minute))
                 .font(.system(size: 42, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
@@ -66,6 +75,11 @@ private struct AlarmCard: View {
             Text(alarm.missionType.rawValue)
                 .font(.caption.bold())
                 .foregroundStyle(.white.opacity(0.7))
+            HStack {
+                Button("Test", action: onTest)
+                Button("Edit", action: onEdit)
+                Button("Delete", action: onDelete).foregroundStyle(.red)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
