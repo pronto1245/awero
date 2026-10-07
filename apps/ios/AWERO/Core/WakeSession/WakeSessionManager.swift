@@ -5,12 +5,12 @@ final class WakeSessionManager {
     private(set) var current: WakeSession?
     private let database = CoreDataStore.shared
 
-    func trigger(alarm: Alarm, scheduledAt: Date) async {
+    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
         if let existing = await database.fetchActiveWakeSession(),
            existing.alarmId == alarm.id,
            existing.alarmVersion == alarm.version {
             current = existing
-            return
+            return false
         }
 
         let session = WakeSession(
@@ -30,6 +30,7 @@ final class WakeSessionManager {
         )
         current = session
         await database.saveWakeSession(session)
+        return true
     }
 
     func startMission() async {
