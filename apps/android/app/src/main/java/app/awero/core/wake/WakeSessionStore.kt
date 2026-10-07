@@ -91,6 +91,11 @@ class WakeSessionStore(context: Context) {
         database.wakeSessions().upsert(WakeSessionMapper.toEntity(session))
     }
 
+    suspend fun loadActive(): WakeSession? {
+        migrateLegacyIfNeeded()
+        return database.wakeSessions().active()?.let(WakeSessionMapper::fromEntity)
+    }
+
     suspend fun load(): List<WakeSession> {
         migrateLegacyIfNeeded()
         return database.wakeSessions().recent().map(WakeSessionMapper::fromEntity)
