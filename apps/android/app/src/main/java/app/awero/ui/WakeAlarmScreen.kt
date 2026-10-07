@@ -38,7 +38,7 @@ object WakeAlarmScreen {
             root.removeAllViews()
             val missionView = MissionRuntimeScreen.create(
                 activity,
-                flow.currentAlarm!!,
+                flow.currentAlarm.value!!,
                 onSuccess = {
                     activity.lifecycleScope.launch {
                         flow.completeMission()
@@ -72,7 +72,7 @@ object WakeAlarmScreen {
 
         primary.setOnClickListener {
             activity.lifecycleScope.launch {
-                if (flow.state == WakeFlowController.State.RINGING) {
+                if (flow.state.value == WakeFlowController.State.RINGING) {
                     flow.beginMission()
                     showMission()
                 }
