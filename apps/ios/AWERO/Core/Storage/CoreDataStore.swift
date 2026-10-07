@@ -16,11 +16,11 @@ final class CoreDataStore: @unchecked Sendable {
         let model = Self.makeModel()
         container = NSPersistentContainer(name: "AWERO", managedObjectModel: model)
 
-        let storeURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let resolvedStoreURL = storeURL ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AWERO.sqlite")
         do {
             try FileManager.default.createDirectory(
-                at: storeURL.deletingLastPathComponent(),
+                at: resolvedStoreURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true
             )
         } catch {
