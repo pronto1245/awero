@@ -1,7 +1,7 @@
 import UIKit
 import UserNotifications
 final class AWEROAppDelegate:NSObject,UIApplicationDelegate,UNUserNotificationCenterDelegate{
- private let wakeFlow=WakeFlowController()
+ private let wakeFlow=WakeFlowController.shared
  func application(_ application:UIApplication,didFinishLaunchingWithOptions options:[UIApplication.LaunchOptionsKey:Any]?=nil)->Bool{UNUserNotificationCenter.current().delegate=self;return true}
  func userNotificationCenter(_ center:UNUserNotificationCenter,didReceive response:UNNotificationResponse,withCompletionHandler completionHandler:@escaping()->Void){
   let p=response.notification.request.identifier.split(separator:":")
