@@ -1,10 +1,16 @@
 package app.awero.core.wake
 
+import android.content.Context
 import app.awero.core.alarm.Alarm
-import app.awero.core.missions.MissionType
+import app.awero.core.alarm.AlarmScheduler
+import app.awero.core.alarm.MissionType
 
-class WakeFlowController(private val sessions: WakeSessionStore) {
+class WakeFlowController(
+    private val sessions: WakeSessionStore,
+    private val context: Context
+) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
+
     var state: State = State.IDLE
         private set
     var mission: MissionType = MissionType.MATH
@@ -41,6 +47,7 @@ class WakeFlowController(private val sessions: WakeSessionStore) {
         if (state != State.RINGING || snoozeCount >= alarm.maxSnoozes) return false
         snoozeCount++
         sessions.setSnoozeCount(snoozeCount)
+        AlarmScheduler(context).scheduleSnooze(alarm, alarm.snoozeMinutes)
         state = State.IDLE
         return true
     }
