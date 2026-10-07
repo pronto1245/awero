@@ -48,7 +48,7 @@ final class WakeFlowController: ObservableObject {
     func completeMission() async {
         guard state == .mission else { return }
         await sessionManager.complete()
-        if let session = sessionManager.current { await await statistics.record(session) }
+        if let session = sessionManager.current { await statistics.record(session) }
         state = .completed
     }
 
@@ -64,7 +64,7 @@ final class WakeFlowController: ObservableObject {
 
     func emergencyStop() async {
         await sessionManager.emergencyStop()
-        if let session = sessionManager.current { statistics.record(session) }
+        if let session = sessionManager.current { await statistics.record(session) }
         state = .emergencyStopped
     }
 }
