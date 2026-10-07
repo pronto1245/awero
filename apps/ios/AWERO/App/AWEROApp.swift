@@ -11,6 +11,7 @@ struct AWEROApp: App {
                 .environmentObject(alarmStore)
                 .task {
                     try? await AlarmScheduler().requestAuthorization()
+                    await AlarmCoordinator(store: alarmStore).repairAll()
                 }
         }
     }
