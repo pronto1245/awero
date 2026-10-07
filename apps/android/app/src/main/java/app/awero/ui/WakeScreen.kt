@@ -25,7 +25,7 @@ fun WakeScreen(flow: WakeFlowController) {
                 Button(onClick = flow::beginMission, modifier = Modifier.fillMaxWidth()) {
                     Text("Start mission")
                 }
-                TextButton(onClick = { flow.snooze(3) }) { Text("Snooze") }
+                TextButton(onClick = { flow.snooze() }) { Text("Snooze") }
                 TextButton(onClick = flow::emergencyStop) { Text("Emergency stop") }
             }
             WakeFlowController.State.MISSION -> {
