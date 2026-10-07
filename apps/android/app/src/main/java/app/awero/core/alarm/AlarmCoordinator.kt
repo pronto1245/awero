@@ -7,9 +7,9 @@ class AlarmCoordinator(context: Context) {
     private val store = AlarmStore(context)
     private val scheduler = AlarmScheduler(context)
 
-    fun all(): List<Alarm> = store.all().sortedWith(compareBy<Alarm> { it.hour }.thenBy { it.minute })
+    suspend fun all(): List<Alarm> = store.all().sortedWith(compareBy<Alarm> { it.hour }.thenBy { it.minute })
 
-    fun create(
+    suspend fun create(
         hour: Int,
         minute: Int,
         missionType: MissionType = MissionType.MATH,
@@ -29,14 +29,14 @@ class AlarmCoordinator(context: Context) {
         return alarm
     }
 
-    fun update(alarm: Alarm): Alarm {
+    suspend fun update(alarm: Alarm): Alarm {
         val next = alarm.copy(version = alarm.version + 1)
         store.save(next)
         scheduler.schedule(next)
         return next
     }
 
-    fun delete(alarm: Alarm) {
+    suspend fun delete(alarm: Alarm) {
         scheduler.cancel(alarm)
         store.delete(alarm.id)
     }
@@ -45,7 +45,7 @@ class AlarmCoordinator(context: Context) {
         scheduler.scheduleTest(alarm)
     }
 
-    fun repair() {
+    suspend fun repair() {
         store.all().forEach { alarm ->
             if (alarm.enabled && !scheduler.isScheduled(alarm)) scheduler.schedule(alarm)
         }
