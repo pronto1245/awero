@@ -3,9 +3,17 @@ import Foundation
 @MainActor
 final class WakeSessionManager {
     private(set) var current: WakeSession?
+    private let database = CoreDataStore.shared
 
-    func trigger(alarm: Alarm, scheduledAt: Date) {
-        current = WakeSession(
+    func trigger(alarm: Alarm, scheduledAt: Date) async {
+        if let existing = await database.fetchActiveWakeSession(),
+           existing.alarmId == alarm.id,
+           existing.alarmVersion == alarm.version {
+            current = existing
+            return
+        }
+
+        let session = WakeSession(
             id: UUID(),
             alarmId: alarm.id,
             alarmVersion: alarm.version,
@@ -20,13 +28,16 @@ final class WakeSessionManager {
             fallbackUsed: false,
             emergencyStop: false
         )
+        current = session
+        await database.saveWakeSession(session)
     }
 
-    func startMission() {
+    func startMission() async {
         current?.missionStartedAt = .now
+        if let current { await database.saveWakeSession(current) }
     }
 
-    func complete() {
+    func complete() async {
         guard var session = current else { return }
         session.completedAt = .now
         session.result = "COMPLETED"
@@ -34,19 +45,25 @@ final class WakeSessionManager {
             session.completionTimeSeconds = max(0, Int(Date.now.timeIntervalSince(start)))
         }
         current = session
+        await database.saveWakeSession(session)
     }
 
-    func setSnoozeCount(_ count: Int) {
+    func setSnoozeCount(_ count: Int) async {
         current?.snoozeCount = count
+        if let current { await database.saveWakeSession(current) }
     }
 
-    func markFallback() {
+    func markFallback() async {
         current?.fallbackUsed = true
+        if let current { await database.saveWakeSession(current) }
     }
 
-    func emergencyStop() {
-        current?.emergencyStop = true
-        current?.result = "EMERGENCY_STOP"
-        current?.completedAt = .now
+    func emergencyStop() async {
+        guard var session = current else { return }
+        session.emergencyStop = true
+        session.result = "EMERGENCY_STOP"
+        session.completedAt = .now
+        current = session
+        await database.saveWakeSession(session)
     }
 }
