@@ -27,7 +27,7 @@ final class CoreDataStore: @unchecked Sendable {
             fatalError("AWERO Core Data directory failed: \(error.localizedDescription)")
         }
 
-        let description = NSPersistentStoreDescription(url: storeURL)
+        let description = NSPersistentStoreDescription(url: resolvedStoreURL)
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
         container.persistentStoreDescriptions = [description]
@@ -337,7 +337,7 @@ final class CoreDataStore: @unchecked Sendable {
         )
     }
 
-    private static func makeModel() -> NSManagedObjectModel {
+    static func makeModelForTesting() -> NSManagedObjectModel {\n        makeModel()\n    }\n\n    private static func makeModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
         model.entities = [
             entity(name: "AlarmRecord", attributes: [
