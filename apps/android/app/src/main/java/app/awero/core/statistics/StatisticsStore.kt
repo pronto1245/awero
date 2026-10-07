@@ -1,14 +1,69 @@
 package app.awero.core.statistics
 
 import android.content.Context
+import app.awero.core.storage.AweroDatabase
+import app.awero.core.storage.StatisticsEntity
 import app.awero.core.wake.WakeSession
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
 class StatisticsStore(context: Context) {
-    private val prefs = context.getSharedPreferences("awero_statistics", Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val database = AweroDatabase.get(appContext)
+    private val preferences = appContext.getSharedPreferences("awero_statistics", Context.MODE_PRIVATE)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val mutex = Mutex()
 
-    fun statistics(): WakeStatistics {
-        val o = JSONObject(prefs.getString("statistics", "{}") ?: "{}")
+    @Volatile
+    private var cached = legacyStatistics()
+
+    fun statistics(): WakeStatistics = cached
+
+    fun recordPlanned() {
+        scope.launch {
+            mutex.withLock {
+                migrateLegacyIfNeeded()
+                val next = database.statistics().get()?.toModel() ?: cached
+                cached = next.copy(planned = next.planned + 1)
+                database.statistics().upsert(cached.toEntity())
+            }
+        }
+    }
+
+    fun record(session: WakeSession) {
+        scope.launch {
+            mutex.withLock {
+                migrateLegacyIfNeeded()
+                val current = database.statistics().get()?.toModel() ?: cached
+                val completed = if (session.result == "SUCCESS") 1 else 0
+                val seconds = if (session.completedAt != null) {
+                    ((session.completedAt!! - (session.triggeredAt ?: session.scheduledAt)) / 1000).coerceAtLeast(0)
+                } else 0
+                cached = current.copy(
+                    completed = current.completed + completed,
+                    snoozes = current.snoozes + session.snoozeCount,
+                    fallback = current.fallback + if (session.fallbackUsed) 1 else 0,
+                    emergencyStops = current.emergencyStops + if (session.emergencyStop) 1 else 0,
+                    totalCompletionSeconds = current.totalCompletionSeconds + seconds
+                )
+                database.statistics().upsert(cached.toEntity())
+            }
+        }
+    }
+
+    private fun migrateLegacyIfNeeded() {
+        if (preferences.getBoolean("room_migrated", false)) return
+        database.statistics().upsert(cached.toEntity())
+        preferences.edit().putBoolean("room_migrated", true).apply()
+    }
+
+    private fun legacyStatistics(): WakeStatistics {
+        val o = JSONObject(preferences.getString("statistics", "{}") ?: "{}")
         return WakeStatistics(
             planned = o.optInt("planned", 0),
             completed = o.optInt("completed", 0),
@@ -19,34 +74,21 @@ class StatisticsStore(context: Context) {
         )
     }
 
-    fun recordPlanned() {
-        val s = statistics()
-        save(s.copy(planned = s.planned + 1))
-    }
+    private fun WakeStatistics.toEntity() = StatisticsEntity(
+        planned = planned,
+        completed = completed,
+        snoozes = snoozes,
+        fallback = fallback,
+        emergencyStops = emergencyStops,
+        totalCompletionSeconds = totalCompletionSeconds
+    )
 
-    fun record(session: WakeSession) {
-        val s = statistics()
-        val completed = if (session.result == "SUCCESS") 1 else 0
-        val seconds = if (session.completedAt != null) {
-            ((session.completedAt!! - (session.triggeredAt ?: session.scheduledAt)) / 1000).coerceAtLeast(0)
-        } else 0
-        save(s.copy(
-            completed = s.completed + completed,
-            snoozes = s.snoozes + session.snoozeCount,
-            fallback = s.fallback + if (session.fallbackUsed) 1 else 0,
-            emergencyStops = s.emergencyStops + if (session.emergencyStop) 1 else 0,
-            totalCompletionSeconds = s.totalCompletionSeconds + seconds
-        ))
-    }
-
-    private fun save(s: WakeStatistics) {
-        prefs.edit().putString("statistics", JSONObject().apply {
-            put("planned", s.planned)
-            put("completed", s.completed)
-            put("snoozes", s.snoozes)
-            put("fallback", s.fallback)
-            put("emergencyStops", s.emergencyStops)
-            put("totalCompletionSeconds", s.totalCompletionSeconds)
-        }.toString()).apply()
-    }
+    private fun StatisticsEntity.toModel() = WakeStatistics(
+        planned = planned,
+        completed = completed,
+        snoozes = snoozes,
+        fallback = fallback,
+        emergencyStops = emergencyStops,
+        totalCompletionSeconds = totalCompletionSeconds
+    )
 }
