@@ -4,11 +4,21 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 
 @Dao
 interface WakeSessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(entity: WakeSessionEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertEvent(event: WakeEventEntity)
+
+    @Transaction
+    suspend fun upsertWithEvent(entity: WakeSessionEntity, event: WakeEventEntity) {
+        upsert(entity)
+        insertEvent(event)
+    }
 
     @Query("SELECT * FROM wake_sessions ORDER BY scheduledAt DESC LIMIT 200")
     suspend fun recent(): List<WakeSessionEntity>
