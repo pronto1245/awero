@@ -33,7 +33,7 @@ class WakeFlowController(
         val session = sessions.loadActive() ?: return
         val alarm = alarmStore.get(session.alarmId) ?: return
         _currentAlarm.value = alarm
-        _mission.value = if (session.fallbackUsed) MissionType.MATH else session.missionType
+        _mission.value = if (session.fallbackUsed) MissionType.MATH else alarm.missionType
         _snoozeCount.value = session.snoozeCount
         _state.value = if (session.missionStartedAt != null) State.MISSION else State.RINGING
     }
