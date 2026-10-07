@@ -27,7 +27,7 @@ final class AlarmScheduler {
             content.body = "Wake up. Stay up."
             content.sound = .default
 
-            let id = "awero:alarm:(alarm.id.uuidString):v(alarm.version):w(day)"
+            let id = "awero:alarm:\\(alarm.id.uuidString):v\\(alarm.version):w\\(day)"
             try await center.add(
                 UNNotificationRequest(
                     identifier: id,
@@ -45,7 +45,7 @@ final class AlarmScheduler {
         content.sound = .default
         try await center.add(
             UNNotificationRequest(
-                identifier: "awero:test:(alarm.id.uuidString):(UUID().uuidString)",
+                identifier: "awero:test:\\(alarm.id.uuidString):\\(UUID().uuidString)",
                 content: content,
                 trigger: UNTimeIntervalNotificationTrigger(timeInterval: max(5, seconds), repeats: false)
             )
@@ -59,7 +59,7 @@ final class AlarmScheduler {
         content.sound = .default
         try await center.add(
             UNNotificationRequest(
-                identifier: "awero:snooze:(alarm.id.uuidString):v(alarm.version):(UUID().uuidString)",
+                identifier: "awero:snooze:\\(alarm.id.uuidString):v\\(alarm.version):\\(UUID().uuidString)",
                 content: content,
                 trigger: UNTimeIntervalNotificationTrigger(
                     timeInterval: TimeInterval(max(1, alarm.snoozeMinutes) * 60),
@@ -70,7 +70,7 @@ final class AlarmScheduler {
     }
 
     func cancel(_ alarm: Alarm) async {
-        let prefix = "awero:alarm:(alarm.id.uuidString):"
+        let prefix = "awero:alarm:\\(alarm.id.uuidString):"
         let ids = (await center.pendingNotificationRequests()).map(\.identifier).filter { $0.hasPrefix(prefix) }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
@@ -79,7 +79,7 @@ final class AlarmScheduler {
         guard alarm.enabled && !alarm.weekdays.isEmpty else { return false }
         let ids = Set((await center.pendingNotificationRequests()).map(\.identifier))
         return alarm.weekdays.allSatisfy {
-            ids.contains("awero:alarm:(alarm.id.uuidString):v(alarm.version):w($0)")
+            ids.contains("awero:alarm:\\(alarm.id.uuidString):v(alarm.version):w($0)")
         }
     }
 
