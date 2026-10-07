@@ -1,48 +1,52 @@
 package app.awero.core.alarm
 
 import android.content.Context
-import org.json.JSONArray
+import app.awero.core.storage.AlarmMapper
+import app.awero.core.storage.AweroDatabase
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
 class AlarmStore(context: Context) {
-    private val preferences = context.getSharedPreferences("awero_alarms", Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
+    private val database = AweroDatabase.get(appContext)
+    private val preferences = appContext.getSharedPreferences("awero_alarms", Context.MODE_PRIVATE)
+    private val migrationMutex = Mutex()
 
-    fun save(alarm: Alarm) {
-        preferences.edit()
-            .putString("alarm:" + alarm.id, toJson(alarm).toString())
-            .putStringSet("ids", (ids() + alarm.id).toSet())
-            .apply()
+    suspend fun save(alarm: Alarm) {
+        migrateLegacyIfNeeded()
+        database.alarms().upsert(AlarmMapper.toEntity(alarm))
     }
 
-    fun get(id: String) = preferences.getString("alarm:" + id, null)?.let {
-        fromJson(JSONObject(it))
+    suspend fun get(id: String): Alarm? {
+        migrateLegacyIfNeeded()
+        return database.alarms().get(id)?.let(AlarmMapper::fromEntity)
     }
 
-    fun all() = ids().mapNotNull(::get)
-
-    fun delete(id: String) {
-        preferences.edit()
-            .remove("alarm:" + id)
-            .putStringSet("ids", ids().filterNot { it == id }.toSet())
-            .apply()
+    suspend fun all(): List<Alarm> {
+        migrateLegacyIfNeeded()
+        return database.alarms().all().map(AlarmMapper::fromEntity)
     }
 
-    private fun ids() = preferences.getStringSet("ids", emptySet()) ?: emptySet()
+    suspend fun delete(id: String) {
+        migrateLegacyIfNeeded()
+        database.alarms().get(id)?.let { database.alarms().delete(it) }
+    }
 
-    private fun toJson(a: Alarm) = JSONObject().apply {
-        put("id", a.id)
-        put("version", a.version)
-        put("hour", a.hour)
-        put("minute", a.minute)
-        put("enabled", a.enabled)
-        put("weekdays", JSONArray(a.weekdays.toList()))
-        put("timezoneMode", a.timezoneMode.name)
-        put("fixedTimezone", a.fixedTimezone ?: JSONObject.NULL)
-        put("missionType", a.missionType.name)
-        put("difficulty", a.difficulty.name)
-        put("maxSnoozes", a.maxSnoozes)
-        put("snoozeMinutes", a.snoozeMinutes)
-        put("qrExpectedCode", a.qrExpectedCode ?: JSONObject.NULL)
+    private suspend fun migrateLegacyIfNeeded() {
+        if (preferences.getBoolean("room_migrated", false)) return
+        migrationMutex.withLock {
+            if (preferences.getBoolean("room_migrated", false)) return
+            val ids = preferences.getStringSet("ids", emptySet()).orEmpty()
+            for (id in ids) {
+                preferences.getString("alarm:$id", null)?.let {
+                    runCatching {
+                        database.alarms().upsert(AlarmMapper.toEntity(fromJson(JSONObject(it))))
+                    }
+                }
+            }
+            preferences.edit().putBoolean("room_migrated", true).apply()
+        }
     }
 
     private fun fromJson(o: JSONObject): Alarm {
