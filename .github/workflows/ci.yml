@@ -19,6 +19,26 @@ jobs:
           cache: pnpm
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm typecheck
-        continue-on-error: true
       - run: pnpm build
-        continue-on-error: true
+
+  android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - run: gradle -p apps/android :app:assembleDebug
+
+  ios-syntax:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse Swift sources
+        shell: bash
+        run: |
+          find apps/ios -name '*.swift' -print0 | xargs -0 -n1 swiftc -parse
