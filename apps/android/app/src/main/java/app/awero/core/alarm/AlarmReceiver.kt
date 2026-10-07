@@ -12,7 +12,9 @@ class AlarmReceiver : BroadcastReceiver() {
         val alarm = AlarmStore(context).get(id) ?: return
         if (alarm.version != version || !alarm.enabled) return
 
-        AlarmScheduler(context).schedule(alarm)
+        if (intent.action == AlarmScheduler.ACTION_ALARM) {
+            AlarmScheduler(context).schedule(alarm)
+        }
 
         val wake = Intent(context, WakeAlarmActivity::class.java).apply {
             putExtra(AlarmScheduler.EXTRA_ID, id)
