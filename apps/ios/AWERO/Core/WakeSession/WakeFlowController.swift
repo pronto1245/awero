@@ -7,31 +7,59 @@ final class WakeFlowController: ObservableObject {
     @Published private(set) var state: State = .idle
     @Published private(set) var currentMission: MissionType = .math
     @Published private(set) var snoozeCount = 0
-    private let sessionManager: WakeSessionManager
-    private var maxSnoozes = 3
-    private var snoozeMinutes = 10
 
-    init(sessionManager: WakeSessionManager = WakeSessionManager()) { self.sessionManager = sessionManager }
+    private let sessionManager: WakeSessionManager
+    private let scheduler: AlarmScheduler
+    private var currentAlarm: Alarm?
+    private var maxSnoozes = 3
+
+    init(
+        sessionManager: WakeSessionManager = WakeSessionManager(),
+        scheduler: AlarmScheduler = AlarmScheduler()
+    ) {
+        self.sessionManager = sessionManager
+        self.scheduler = scheduler
+    }
 
     func start(alarm: Alarm, scheduledAt: Date = .now) {
+        currentAlarm = alarm
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
-        snoozeMinutes = alarm.snoozeMinutes
         snoozeCount = 0
         sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
         state = .ringing
     }
 
-    func beginMission() { guard state == .ringing else { return }; state = .mission; sessionManager.startMission() }
-    func completeMission() { guard state == .mission else { return }; sessionManager.complete(); state = .completed }
-
-    func snooze() {
-        guard state == .ringing, snoozeCount < maxSnoozes else { return }
-        snoozeCount += 1
-        sessionManager.setSnoozeCount(snoozeCount)
-        state = .idle
-        _ = snoozeMinutes
+    func beginMission() {
+        guard state == .ringing else { return }
+        state = .mission
+        sessionManager.startMission()
     }
 
-    func emergencyStop() { sessionManager.emergencyStop(); state = .emergencyStopped }
+    func fallbackToMath() {
+        guard state == .mission else { return }
+        currentMission = .math
+        sessionManager.markFallback()
+    }
+
+    func completeMission() {
+        guard state == .mission else { return }
+        sessionManager.complete()
+        state = .completed
+    }
+
+    func snooze() {
+        guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return }
+        snoozeCount += 1
+        sessionManager.setSnoozeCount(snoozeCount)
+        Task {
+            try? await scheduler.scheduleSnooze(for: alarm)
+        }
+        state = .idle
+    }
+
+    func emergencyStop() {
+        sessionManager.emergencyStop()
+        state = .emergencyStopped
+    }
 }
