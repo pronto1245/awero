@@ -4,10 +4,6 @@ import android.content.Context
 import app.awero.core.storage.AweroDatabase
 import app.awero.core.storage.StatisticsEntity
 import app.awero.core.wake.WakeSession
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
@@ -16,7 +12,6 @@ class StatisticsStore(context: Context) {
     private val appContext = context.applicationContext
     private val database = AweroDatabase.get(appContext)
     private val preferences = appContext.getSharedPreferences("awero_statistics", Context.MODE_PRIVATE)
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
 
     @Volatile
@@ -24,35 +19,31 @@ class StatisticsStore(context: Context) {
 
     fun statistics(): WakeStatistics = cached
 
-    fun recordPlanned() {
-        scope.launch {
-            mutex.withLock {
-                migrateLegacyIfNeeded()
-                val next = database.statistics().get()?.toModel() ?: cached
-                cached = next.copy(planned = next.planned + 1)
-                database.statistics().upsert(cached.toEntity())
-            }
+    suspend fun recordPlanned() {
+        mutex.withLock {
+            migrateLegacyIfNeeded()
+            val next = database.statistics().get()?.toModel() ?: cached
+            cached = next.copy(planned = next.planned + 1)
+            database.statistics().upsert(cached.toEntity())
         }
     }
 
-    fun record(session: WakeSession) {
-        scope.launch {
-            mutex.withLock {
-                migrateLegacyIfNeeded()
-                val current = database.statistics().get()?.toModel() ?: cached
-                val completed = if (session.result == "SUCCESS") 1 else 0
-                val seconds = if (session.completedAt != null) {
-                    ((session.completedAt!! - (session.triggeredAt ?: session.scheduledAt)) / 1000).coerceAtLeast(0)
-                } else 0
-                cached = current.copy(
-                    completed = current.completed + completed,
-                    snoozes = current.snoozes + session.snoozeCount,
-                    fallback = current.fallback + if (session.fallbackUsed) 1 else 0,
-                    emergencyStops = current.emergencyStops + if (session.emergencyStop) 1 else 0,
-                    totalCompletionSeconds = current.totalCompletionSeconds + seconds
-                )
-                database.statistics().upsert(cached.toEntity())
-            }
+    suspend fun record(session: WakeSession) {
+        mutex.withLock {
+            migrateLegacyIfNeeded()
+            val current = database.statistics().get()?.toModel() ?: cached
+            val completed = if (session.result == "SUCCESS") 1 else 0
+            val seconds = if (session.completedAt != null) {
+                ((session.completedAt!! - (session.triggeredAt ?: session.scheduledAt)) / 1000).coerceAtLeast(0)
+            } else 0
+            cached = current.copy(
+                completed = current.completed + completed,
+                snoozes = current.snoozes + session.snoozeCount,
+                fallback = current.fallback + if (session.fallbackUsed) 1 else 0,
+                emergencyStops = current.emergencyStops + if (session.emergencyStop) 1 else 0,
+                totalCompletionSeconds = current.totalCompletionSeconds + seconds
+            )
+            database.statistics().upsert(cached.toEntity())
         }
     }
 
