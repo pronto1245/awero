@@ -101,5 +101,6 @@ class AlarmScheduler(private val context: Context) {
         const val EXTRA_ID = "alarm_id"
         const val EXTRA_VERSION = "alarm_version"
         const val EXTRA_AT = "scheduled_at"
+        const val EXTRA_TEST = "test_alarm"
     }
 }
