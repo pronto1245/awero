@@ -16,7 +16,7 @@ class WakeAlarmActivity : Activity() {
         val alarm = AlarmStore(this).get(id) ?: return finish()
         if (alarm.version != version || !alarm.enabled) return finish()
 
-        flow = WakeFlowController(WakeSessionStore(this))
+        flow = WakeFlowController(WakeSessionStore(this), this)
         flow.start(alarm)
         setContentView(WakeAlarmScreen.create(this, flow))
     }
