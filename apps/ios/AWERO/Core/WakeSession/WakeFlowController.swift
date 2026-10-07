@@ -29,7 +29,7 @@ final class WakeFlowController: ObservableObject {
         maxSnoozes = alarm.maxSnoozes
         snoozeCount = 0
         sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
-        statistics.recordPlanned()
+        await statistics.recordPlanned()
         state = .ringing
     }
 
@@ -48,7 +48,7 @@ final class WakeFlowController: ObservableObject {
     func completeMission() {
         guard state == .mission else { return }
         sessionManager.complete()
-        if let session = sessionManager.current { statistics.record(session) }
+        if let session = sessionManager.current { await statistics.record(session) }
         state = .completed
     }
 
