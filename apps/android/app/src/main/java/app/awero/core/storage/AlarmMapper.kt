@@ -22,5 +22,19 @@ object AlarmMapper {
         qrExpectedCode = a.qrExpectedCode
     )
 
-    fun fromEntity(e: Alarm) = e
+    fun fromEntity(e: AlarmEntity) = Alarm(
+        id = e.id,
+        version = e.version,
+        hour = e.hour,
+        minute = e.minute,
+        enabled = e.enabled,
+        weekdays = e.weekdays.split(",").filter { it.isNotBlank() }.map { it.toInt() }.toSet(),
+        timezoneMode = TimezoneMode.valueOf(e.timezoneMode),
+        fixedTimezone = e.fixedTimezone,
+        missionType = MissionType.valueOf(e.missionType),
+        difficulty = Difficulty.valueOf(e.difficulty),
+        maxSnoozes = e.maxSnoozes,
+        snoozeMinutes = e.snoozeMinutes,
+        qrExpectedCode = e.qrExpectedCode
+    )
 }
