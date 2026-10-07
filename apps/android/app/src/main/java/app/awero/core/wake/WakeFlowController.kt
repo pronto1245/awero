@@ -4,8 +4,9 @@ import android.content.Context
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmScheduler
 import app.awero.core.alarm.MissionType
+import app.awero.core.statistics.StatisticsStore
 
-class WakeFlowController(private val sessions: WakeSessionStore, private val context: Context) {
+class WakeFlowController(private val sessions: WakeSessionStore, private val context: Context, private val statistics: StatisticsStore = StatisticsStore(context)) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
     var state: State = State.IDLE
         private set
@@ -21,6 +22,7 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
         mission = alarm.missionType
         snoozeCount = 0
         sessions.start(alarm, scheduledAt)
+        statistics.recordPlanned()
         state = State.RINGING
     }
 
@@ -40,7 +42,7 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
 
     fun completeMission() {
         if (state == State.MISSION) {
-            sessions.complete()
+            sessions.complete()?.let(statistics::record)
             state = State.COMPLETED
         }
     }
@@ -56,7 +58,7 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
     }
 
     fun emergencyStop() {
-        sessions.emergencyStop()
+        sessions.emergencyStop()?.let(statistics::record)
         state = State.EMERGENCY_STOPPED
     }
 }
