@@ -20,6 +20,7 @@ class AlarmReceiver : BroadcastReceiver() {
             putExtra(AlarmScheduler.EXTRA_ID, id)
             putExtra(AlarmScheduler.EXTRA_VERSION, version)
             putExtra(AlarmScheduler.EXTRA_AT, at)
+            putExtra(AlarmScheduler.EXTRA_TEST, intent.action == AlarmScheduler.ACTION_TEST)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
         }
         context.startActivity(wake)
