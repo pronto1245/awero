@@ -28,7 +28,7 @@ abstract class AweroDatabase : RoomDatabase() {
     abstract fun analyticsEvents(): AnalyticsEventDao
 
     companion object {
-        private val MIGRATION_1_2 = object : Migration(1, 2) {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS wake_events (id TEXT NOT NULL, wakeSessionId TEXT NOT NULL, eventType TEXT NOT NULL, occurredAt INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(id))")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_wake_events_wakeSessionId ON wake_events(wakeSessionId)")
