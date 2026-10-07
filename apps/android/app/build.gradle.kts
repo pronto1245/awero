@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 android {
     namespace="app.awero"
@@ -13,7 +14,6 @@ android {
         versionName="0.1.0"
     }
     buildFeatures { compose=true }
-    composeOptions { kotlinCompilerExtensionVersion="1.5.15" }
 }
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
@@ -26,4 +26,5 @@ dependencies {
     implementation("androidx.camera:camera-camera2:1.4.1")
     implementation("androidx.camera:camera-lifecycle:1.4.1")
     implementation("androidx.camera:camera-view:1.4.1")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 }
