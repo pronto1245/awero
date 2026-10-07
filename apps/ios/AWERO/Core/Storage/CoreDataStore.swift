@@ -71,6 +71,40 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
+    func saveStatistics(_ statistics: WakeStatistics) async {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
+            request.predicate = NSPredicate(format: "id == %@", "singleton")
+            let object = (try? context.fetch(request).first) ?? NSManagedObject(
+                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["StatisticsRecord"]!,
+                insertInto: context
+            )
+            object.setValue("singleton", forKey: "id")
+            object.setValue(statistics.planned, forKey: "planned")
+            object.setValue(statistics.completed, forKey: "completed")
+            object.setValue(statistics.snoozes, forKey: "snoozes")
+            object.setValue(statistics.fallback, forKey: "fallback")
+            object.setValue(statistics.emergencyStops, forKey: "emergencyStops")
+            object.setValue(statistics.totalCompletionSeconds, forKey: "totalCompletionSeconds")
+        }
+    }
+
+    func fetchStatistics() async -> WakeStatistics? {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
+            request.predicate = NSPredicate(format: "id == %@", "singleton")
+            guard let object = try? context.fetch(request).first else { return nil }
+            return WakeStatistics(
+                planned: object.value(forKey: "planned") as? Int ?? 0,
+                completed: object.value(forKey: "completed") as? Int ?? 0,
+                snoozes: object.value(forKey: "snoozes") as? Int ?? 0,
+                fallback: object.value(forKey: "fallback") as? Int ?? 0,
+                emergencyStops: object.value(forKey: "emergencyStops") as? Int ?? 0,
+                totalCompletionSeconds: object.value(forKey: "totalCompletionSeconds") as? Int ?? 0
+            )
+        }
+    }
+
     func saveWakeSession(_ session: WakeSession) async {
         await performBackground { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
@@ -198,6 +232,15 @@ final class CoreDataStore: @unchecked Sendable {
                 ("maxSnoozes", .integer64AttributeType, false),
                 ("snoozeMinutes", .integer64AttributeType, false),
                 ("qrExpectedCode", .stringAttributeType, true)
+            ]),
+            entity(name: "StatisticsRecord", attributes: [
+                ("id", .stringAttributeType, false),
+                ("planned", .integer64AttributeType, false),
+                ("completed", .integer64AttributeType, false),
+                ("snoozes", .integer64AttributeType, false),
+                ("fallback", .integer64AttributeType, false),
+                ("emergencyStops", .integer64AttributeType, false),
+                ("totalCompletionSeconds", .integer64AttributeType, false)
             ]),
             entity(name: "WakeSessionRecord", attributes: [
                 ("id", .stringAttributeType, false),
