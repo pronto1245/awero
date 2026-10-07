@@ -5,7 +5,9 @@ plugins {
     id("com.google.devtools.ksp")
     id("androidx.room")
 }
-room { schemaDirectory("$projectDir/schemas") }\n\nandroid {
+room { schemaDirectory("$projectDir/schemas") }
+
+android {
     namespace="app.awero"
     compileSdk=35
     defaultConfig {
