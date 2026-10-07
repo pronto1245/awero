@@ -1,5 +1,7 @@
 package app.awero.core.missions
 
+import app.awero.core.alarm.Difficulty
+
 data class MathProblem(val left:Int,val right:Int,val operation:Char) {
     val answer:Int get() = if (operation == '+') left + right else left - right
 }
