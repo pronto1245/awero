@@ -51,7 +51,7 @@ class WakeAlarmActivity : ComponentActivity() {
         }
     }
 
-    private fun startFlow(current: Alarm) {
+    private suspend fun startFlow(current: Alarm) {
         permissionPending = false
         flow = WakeFlowController(WakeSessionStore(this), this, testAlarm = testAlarm)
         flow.start(current, scheduledAt)
@@ -65,7 +65,7 @@ class WakeAlarmActivity : ComponentActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val current = alarm ?: return finish()
-        if (permissionPending) startFlow(current)
+        if (permissionPending) lifecycleScope.launch { startFlow(current) }
     }
 
     companion object {
