@@ -36,6 +36,14 @@ final class WakeSessionManager {
         current = session
     }
 
+    func setSnoozeCount(_ count: Int) {
+        current?.snoozeCount = count
+    }
+
+    func markFallback() {
+        current?.fallbackUsed = true
+    }
+
     func emergencyStop() {
         current?.emergencyStop = true
         current?.result = "EMERGENCY_STOP"
