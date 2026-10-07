@@ -123,3 +123,8 @@
 AWERO must **not** be described as production-ready until the physical iOS and Android release candidates pass the critical E2E matrix and the release checklist.
 
 Current status: **MVP implementation in progress; repository contains foundation and runtime scaffolding, not a verified production build.**
+
+
+## Reliability Foundation
+
+Status: CODE + CI VERIFIED
