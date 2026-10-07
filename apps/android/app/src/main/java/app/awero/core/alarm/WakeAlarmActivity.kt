@@ -42,7 +42,7 @@ class WakeAlarmActivity : Activity() {
     private fun startFlow(current: Alarm) {
         permissionPending = false
         flow = WakeFlowController(WakeSessionStore(this), this)
-        flow.start(current)
+        flow.start(current, scheduledAt)
         setContentView(WakeAlarmScreen.create(this, flow))
     }
 
