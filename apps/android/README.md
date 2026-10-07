@@ -1,8 +1,12 @@
 # AWERO Android
 
-Kotlin + Jetpack Compose application.
+Native Kotlin/Compose application.
 
-Critical alarm path:
-AlarmManager → Wake Session → Mission Engine → Validation → Fallback.
+Gradle project:
+- applicationId: app.awero
+- minSdk 26
+- targetSdk 35
+- Kotlin 2.0.21
+- Android Gradle Plugin 8.7.3
 
-Critical behavior must not require network or backend availability.
+Critical alarm logic stays local and does not require network access.
