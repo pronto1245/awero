@@ -18,6 +18,7 @@ class WakeAlarmActivity : Activity() {
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
+        AlarmNotificationManager.clear(this)
         val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return finish()
         alarmVersion = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
         scheduledAt = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
