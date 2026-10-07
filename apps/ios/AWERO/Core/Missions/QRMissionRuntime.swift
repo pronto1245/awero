@@ -42,10 +42,13 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
         if session.isRunning { session.stopRunning() }
     }
 
-    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput objects: [AVMetadataObject], from connection: AVCaptureConnection) {
+    nonisolated func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput objects: [AVMetadataObject], from connection: AVCaptureConnection) {
         guard let code = objects.compactMap({ $0 as? AVMetadataMachineReadableCodeObject }).first?.stringValue else { return }
-        scannedCode = code
-        stop()
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            scannedCode = code
+            stop()
+        }
     }
 
     func matches(expected: String) -> Bool {
