@@ -4,23 +4,22 @@ import UserNotifications
 final class AlarmScheduler {
     private let center = UNUserNotificationCenter.current()
 
+    func requestAuthorization() async throws {
+        try await center.requestAuthorization(options: [.alert, .sound, .badge])
+    }
+
     func schedule(_ alarm: Alarm, fireDate: DateComponents) async throws {
         let content = UNMutableNotificationContent()
         content.title = "AWERO"
         content.body = "Wake up. Stay up."
         content.sound = .default
 
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: fireDate,
-            repeats: false
-        )
-
+        let trigger = UNCalendarNotificationTrigger(dateMatching: fireDate, repeats: true)
         let request = UNNotificationRequest(
             identifier: alarm.id.uuidString + ":" + String(alarm.version),
             content: content,
             trigger: trigger
         )
-
         try await center.add(request)
     }
 
