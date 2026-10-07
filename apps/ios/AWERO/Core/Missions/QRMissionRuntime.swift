@@ -7,8 +7,14 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
     @Published private(set) var cameraUnavailable = false
     let session = AVCaptureSession()
     private var output: AVCaptureMetadataOutput?
+    private var configured = false
+
+    deinit {
+        session.stopRunning()
+    }
 
     func configure() {
+        guard !configured else { return }
         guard AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
             cameraUnavailable = true
             return
@@ -31,6 +37,7 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
         metadata.setMetadataObjectsDelegate(self, queue: .main)
         metadata.metadataObjectTypes = [.qr]
         output = metadata
+        configured = true
         session.commitConfiguration()
     }
 
