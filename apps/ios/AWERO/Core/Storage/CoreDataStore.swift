@@ -198,7 +198,7 @@ final class CoreDataStore: @unchecked Sendable {
                 completed: object.value(forKey: "completed") as? Int ?? 0,
                 snoozes: object.value(forKey: "snoozes") as? Int ?? 0,
                 fallback: object.value(forKey: "fallback") as? Int ?? 0,
-                emergencyStops: object.value(forKey: "emergencyStops") as? Bool ?? false ? 0 : object.value(forKey: "emergencyStops") as? Int ?? 0,
+                emergencyStops: object.value(forKey: "emergencyStops") as? Int ?? 0,
                 totalCompletionSeconds: object.value(forKey: "totalCompletionSeconds") as? Int ?? 0
             )
         }
@@ -298,7 +298,7 @@ final class CoreDataStore: @unchecked Sendable {
             completedAt: object.value(forKey: "completedAt") as? Date,
             result: object.value(forKey: "result") as? String, missionType: mission,
             completionTimeSeconds: object.value(forKey: "completionTimeSeconds") as? Int,
-            snoozeCount: object.value(forKey: "snoozeCount") as? Int,
+            snoozeCount: object.value(forKey: "snoozeCount") as? Int ?? 0,
             fallbackUsed: object.value(forKey: "fallbackUsed") as? Bool ?? false,
             emergencyStop: object.value(forKey: "emergencyStop") as? Bool ?? false
         )
