@@ -2,11 +2,23 @@
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+ <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+ <uses-permission android:name="android.permission.CAMERA"/>
  <application android:theme="@style/Theme.AWERO" android:label="AWERO" android:allowBackup="true">
+  <activity android:name=".MainActivity" android:exported="true">
+   <intent-filter>
+    <action android:name="android.intent.action.MAIN"/>
+    <category android:name="android.intent.category.LAUNCHER"/>
+   </intent-filter>
+  </activity>
   <activity android:name=".core.alarm.WakeAlarmActivity" android:exported="false"/>
   <receiver android:name=".core.alarm.AlarmReceiver" android:exported="false"/>
   <receiver android:name=".core.alarm.AlarmRecoveryReceiver" android:exported="false">
-   <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.TIME_CHANGED"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter>
+   <intent-filter>
+    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+    <action android:name="android.intent.action.TIME_CHANGED"/>
+    <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+   </intent-filter>
   </receiver>
  </application>
 </manifest>
