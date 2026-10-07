@@ -16,6 +16,8 @@ class AlarmReceiver : BroadcastReceiver() {
             AlarmScheduler(context).schedule(alarm)
         }
 
+        AlarmNotificationManager.show(context, id, version, at, intent.action == AlarmScheduler.ACTION_TEST)
+
         val wake = Intent(context, WakeAlarmActivity::class.java).apply {
             putExtra(AlarmScheduler.EXTRA_ID, id)
             putExtra(AlarmScheduler.EXTRA_VERSION, version)
