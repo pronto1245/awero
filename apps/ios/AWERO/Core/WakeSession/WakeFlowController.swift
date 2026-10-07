@@ -16,11 +16,11 @@ final class WakeFlowController: ObservableObject {
     private var maxSnoozes = 3
 
     init(
-        sessionManager: WakeSessionManager = WakeSessionManager(),
-        scheduler: AlarmScheduler = AlarmScheduler()
+        sessionManager: WakeSessionManager? = nil,
+        scheduler: AlarmScheduler? = nil
     ) {
-        self.sessionManager = sessionManager
-        self.scheduler = scheduler
+        self.sessionManager = sessionManager ?? WakeSessionManager()
+        self.scheduler = scheduler ?? AlarmScheduler()
     }
 
     func start(alarm: Alarm, scheduledAt: Date = .now) {
