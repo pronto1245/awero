@@ -73,8 +73,15 @@ final class AlarmScheduler {
     }
 
     func cancel(_ alarm: Alarm) async {
-        let prefix = "awero:alarm:\(alarm.id.uuidString):"
-        let ids = (await center.pendingNotificationRequests()).map(\.identifier).filter { $0.hasPrefix(prefix) }
+        let requests = await center.pendingNotificationRequests()
+        let prefixes = [
+            "awero:alarm:\(alarm.id.uuidString):",
+            "awero:test:\(alarm.id.uuidString):",
+            "awero:snooze:\(alarm.id.uuidString):"
+        ]
+        let ids = requests.map(\.identifier).filter { id in
+            prefixes.contains { id.hasPrefix($0) }
+        }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
