@@ -35,7 +35,7 @@ abstract class AweroDatabase : RoomDatabase() {
             }
         }
 
-        @Volatile private var instance: AweroDatabase? = null
+        @Volatile private var instance: AweroDatabase? = null\n\n        internal fun closeForTesting() {\n            synchronized(this) {\n                instance?.close()\n                instance = null\n            }\n        }
 
         fun get(context: Context): AweroDatabase =
             instance ?: synchronized(this) {
