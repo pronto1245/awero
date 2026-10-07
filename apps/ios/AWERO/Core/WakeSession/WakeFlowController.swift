@@ -23,47 +23,47 @@ final class WakeFlowController: ObservableObject {
         self.scheduler = scheduler ?? AlarmScheduler()
     }
 
-    func start(alarm: Alarm, scheduledAt: Date = .now) {
+    func start(alarm: Alarm, scheduledAt: Date = .now) async {
         currentAlarm = alarm
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
         snoozeCount = 0
-        sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
+        await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
         await statistics.recordPlanned()
         state = .ringing
     }
 
-    func beginMission() {
+    func beginMission() async {
         guard state == .ringing else { return }
         state = .mission
-        sessionManager.startMission()
+        await sessionManager.startMission()
     }
 
-    func fallbackToMath() {
+    func fallbackToMath() async {
         guard state == .mission else { return }
         currentMission = .math
-        sessionManager.markFallback()
+        await sessionManager.markFallback()
     }
 
-    func completeMission() {
+    func completeMission() async {
         guard state == .mission else { return }
-        sessionManager.complete()
-        if let session = sessionManager.current { await statistics.record(session) }
+        await sessionManager.complete()
+        if let session = sessionManager.current { await await statistics.record(session) }
         state = .completed
     }
 
-    func snooze() {
+    func snooze() async {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return }
         snoozeCount += 1
-        sessionManager.setSnoozeCount(snoozeCount)
+        await sessionManager.setSnoozeCount(snoozeCount)
         Task {
             try? await scheduler.scheduleSnooze(for: alarm)
         }
         state = .idle
     }
 
-    func emergencyStop() {
-        sessionManager.emergencyStop()
+    func emergencyStop() async {
+        await sessionManager.emergencyStop()
         if let session = sessionManager.current { statistics.record(session) }
         state = .emergencyStopped
     }
