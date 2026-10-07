@@ -7,7 +7,7 @@ import UserNotifications
   let id=response.notification.request.identifier
   let parts=id.split(separator:":")
   if parts.count >= 5 && parts[0]=="awero" && parts[1]=="alarm",let uuid=UUID(uuidString:String(parts[2])),let alarm=store.alarms.first(where:{$0.id==uuid}){
-   if parts[3]=="v\(alarm.version)" {wakeFlow.begin(alarm:alarm,scheduledAt:Date())}
+   if parts[3]=="v\(alarm.version)" {wakeFlow.start(alarm: alarm, scheduledAt: Date())}
   }
   completionHandler()
  }
