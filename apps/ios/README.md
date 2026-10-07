@@ -1,12 +1,13 @@
 # AWERO iOS
 
-SwiftUI application.
+Native Swift/SwiftUI app foundation.
 
-Critical dependencies:
-- UserNotifications
-- AVFoundation
-- CoreMotion
-- Keychain
-- StoreKit 2
+Create an Xcode iOS App target with:
+- Bundle identifier: app.awero
+- SwiftUI lifecycle
+- iOS 17+
+- files under AWERO/
+- UserNotifications capability
+- notification permissions requested at first usable setup
 
-The alarm path must remain local-first.
+The source is intentionally native SwiftUI and does not depend on a cross-platform UI framework.
