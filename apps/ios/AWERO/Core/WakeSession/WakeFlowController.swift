@@ -23,7 +23,17 @@ final class WakeFlowController: ObservableObject {
         self.scheduler = scheduler ?? AlarmScheduler()
     }
 
-    func restore() async {\n        guard let session = await sessionManager.restore(),\n              let alarm = await CoreDataStore.shared.fetchAlarm(id: session.alarmId) else { return }\n        currentAlarm = alarm\n        currentMission = session.fallbackUsed ? .math : session.missionType\n        maxSnoozes = alarm.maxSnoozes\n        snoozeCount = session.snoozeCount\n        state = session.missionStartedAt == nil ? .ringing : .mission\n    }\n\n    func start(alarm: Alarm, scheduledAt: Date = .now) async {
+    func restore() async {
+        guard let session = await sessionManager.restore(),
+              let alarm = await CoreDataStore.shared.fetchAlarm(id: session.alarmId) else { return }
+        currentAlarm = alarm
+        currentMission = session.fallbackUsed ? .math : session.missionType
+        maxSnoozes = alarm.maxSnoozes
+        snoozeCount = session.snoozeCount
+        state = session.missionStartedAt == nil ? .ringing : .mission
+    }
+
+    func start(alarm: Alarm, scheduledAt: Date = .now) async {
         currentAlarm = alarm
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
