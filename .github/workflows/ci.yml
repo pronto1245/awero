@@ -37,7 +37,8 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Parse Swift sources
+      - name: Typecheck Swift sources
         shell: bash
         run: |
-          find apps/ios -name '*.swift' -print0 | xargs -0 -n1 swiftc -parse
+          SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          find apps/ios -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
