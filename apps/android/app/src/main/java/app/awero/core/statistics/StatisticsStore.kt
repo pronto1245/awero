@@ -56,7 +56,7 @@ class StatisticsStore(context: Context) {
         }
     }
 
-    private fun migrateLegacyIfNeeded() {
+    private suspend fun migrateLegacyIfNeeded() {
         if (preferences.getBoolean("room_migrated", false)) return
         database.statistics().upsert(cached.toEntity())
         preferences.edit().putBoolean("room_migrated", true).apply()
