@@ -12,7 +12,9 @@ final class WakeSessionManager {
     func restore() async -> WakeSession? {
         await ensureCurrent()
         return current
-    }\n\n    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
+    }
+
+    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
         if let existing = await database.fetchActiveWakeSession(),
            existing.alarmId == alarm.id,
            existing.alarmVersion == alarm.version {
