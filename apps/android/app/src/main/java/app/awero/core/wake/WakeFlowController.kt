@@ -17,7 +17,7 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
     var currentAlarm: Alarm? = null
         private set
 
-    fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()) {
+    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()) {
         currentAlarm = alarm
         mission = alarm.missionType
         snoozeCount = 0
@@ -26,28 +26,28 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
         state = State.RINGING
     }
 
-    fun beginMission() {
+    suspend fun beginMission() {
         if (state == State.RINGING) {
             sessions.startMission()
             state = State.MISSION
         }
     }
 
-    fun fallbackToMath() {
+    suspend fun fallbackToMath() {
         if (state == State.MISSION) {
             sessions.markFallback()
             mission = MissionType.MATH
         }
     }
 
-    fun completeMission() {
+    suspend fun completeMission() {
         if (state == State.MISSION) {
             sessions.complete()?.let { if (!testAlarm) statistics.record(it) }
             state = State.COMPLETED
         }
     }
 
-    fun snooze(): Boolean {
+    suspend fun snooze(): Boolean {
         val alarm = currentAlarm ?: return false
         if (state != State.RINGING || snoozeCount >= alarm.maxSnoozes) return false
         snoozeCount++
@@ -57,7 +57,7 @@ class WakeFlowController(private val sessions: WakeSessionStore, private val con
         return true
     }
 
-    fun emergencyStop() {
+    suspend fun emergencyStop() {
         sessions.emergencyStop()?.let { if (!testAlarm) statistics.record(it) }
         state = State.EMERGENCY_STOPPED
     }
