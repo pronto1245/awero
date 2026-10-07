@@ -1,4 +1,16 @@
 import SwiftUI
+
 struct ContentView: View {
-    var body: some View { HomeView() }
+    @EnvironmentObject private var wakeFlow: WakeFlowController
+
+    var body: some View {
+        Group {
+            switch wakeFlow.state {
+            case .ringing, .mission, .completed, .emergencyStopped:
+                WakeScreen(flow: wakeFlow)
+            case .idle:
+                HomeView()
+            }
+        }
+    }
 }
