@@ -34,12 +34,16 @@ final class WakeSessionManager {
     }
 
     func startMission() async {
-        current?.missionStartedAt = .now
-        if let current { await database.saveWakeSession(current) }
+        await ensureCurrent()
+        guard var session = current, session.result == nil else { return }
+        session.missionStartedAt = .now
+        current = session
+        await database.saveWakeSession(session)
     }
 
-    func complete() async {
-        guard var session = current else { return }
+    func complete() async -> WakeSession? {
+        await ensureCurrent()
+        guard var session = current, session.result == nil else { return nil }
         session.completedAt = .now
         session.result = "COMPLETED"
         if let start = session.triggeredAt {
@@ -47,24 +51,39 @@ final class WakeSessionManager {
         }
         current = session
         await database.saveWakeSession(session)
+        return session
     }
 
     func setSnoozeCount(_ count: Int) async {
-        current?.snoozeCount = count
-        if let current { await database.saveWakeSession(current) }
+        await ensureCurrent()
+        guard var session = current, session.result == nil else { return }
+        session.snoozeCount = count
+        current = session
+        await database.saveWakeSession(session)
     }
 
     func markFallback() async {
-        current?.fallbackUsed = true
-        if let current { await database.saveWakeSession(current) }
+        await ensureCurrent()
+        guard var session = current, session.result == nil else { return }
+        session.fallbackUsed = true
+        current = session
+        await database.saveWakeSession(session)
     }
 
-    func emergencyStop() async {
-        guard var session = current else { return }
+    func emergencyStop() async -> WakeSession? {
+        await ensureCurrent()
+        guard var session = current, session.result == nil else { return nil }
         session.emergencyStop = true
         session.result = "EMERGENCY_STOP"
         session.completedAt = .now
         current = session
         await database.saveWakeSession(session)
+        return session
+    }
+
+    private func ensureCurrent() async {
+        if current == nil {
+            current = await database.fetchActiveWakeSession()
+        }
     }
 }
