@@ -54,7 +54,7 @@ object WakeAlarmScreen {
                         root.addView(text("FALLBACK", 30f))
                         root.addView(MissionRuntimeScreen.create(
                             activity,
-                            flow.currentAlarm!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
+                            flow.currentAlarm.value!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
                             onSuccess = {
                                 activity.lifecycleScope.launch {
                                     flow.completeMission()
