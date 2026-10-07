@@ -60,6 +60,14 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
+    func fetchAlarm(id: UUID) async -> Alarm? {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
+            request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+            return try? context.fetch(request).first.flatMap(Self.alarm(from:))
+        }
+    }
+
     func fetchAlarms() async -> [Alarm] {
         await performBackground { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
