@@ -12,7 +12,7 @@ final class CoreDataStore: @unchecked Sendable {
     private let container: NSPersistentContainer
     private let logger = Logger(subsystem: "app.awero", category: "persistence")
 
-    private init() {
+    init(storeURL: URL? = nil) {
         let model = Self.makeModel()
         container = NSPersistentContainer(name: "AWERO", managedObjectModel: model)
 
