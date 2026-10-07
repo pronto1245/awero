@@ -1,10 +1,16 @@
 import CoreData
 import Foundation
+import os
+
+enum PersistenceError: Error {
+    case saveFailed(underlying: Error)
+}
 
 final class CoreDataStore: @unchecked Sendable {
     static let shared = CoreDataStore()
 
     private let container: NSPersistentContainer
+    private let logger = Logger(subsystem: "app.awero", category: "persistence")
 
     private init() {
         let model = Self.makeModel()
@@ -12,10 +18,14 @@ final class CoreDataStore: @unchecked Sendable {
 
         let storeURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AWERO.sqlite")
-        try? FileManager.default.createDirectory(
-            at: storeURL.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
+        do {
+            try FileManager.default.createDirectory(
+                at: storeURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+        } catch {
+            fatalError("AWERO Core Data directory failed: \(error.localizedDescription)")
+        }
 
         let description = NSPersistentStoreDescription(url: storeURL)
         description.shouldMigrateStoreAutomatically = true
@@ -81,6 +91,10 @@ final class CoreDataStore: @unchecked Sendable {
 
     func saveSyncOperation(_ operation: SyncOperation) async {
         await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
+            request.predicate = NSPredicate(format: "id == %@", operation.id.uuidString)
+            guard (try? context.fetch(request).first) == nil else { return }
+
             let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["SyncOperationRecord"]!, insertInto: context)
             object.setValue(operation.id.uuidString, forKey: "id")
             object.setValue(operation.operationType, forKey: "operationType")
@@ -126,6 +140,10 @@ final class CoreDataStore: @unchecked Sendable {
 
     func saveAnalyticsEvent(_ event: AnalyticsEvent) async {
         await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
+            request.predicate = NSPredicate(format: "id == %@", event.id.uuidString)
+            guard (try? context.fetch(request).first) == nil else { return }
+
             let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AnalyticsEventRecord"]!, insertInto: context)
             object.setValue(event.id.uuidString, forKey: "id")
             object.setValue(event.name, forKey: "name")
@@ -180,7 +198,7 @@ final class CoreDataStore: @unchecked Sendable {
                 completed: object.value(forKey: "completed") as? Int ?? 0,
                 snoozes: object.value(forKey: "snoozes") as? Int ?? 0,
                 fallback: object.value(forKey: "fallback") as? Int ?? 0,
-                emergencyStops: object.value(forKey: "emergencyStops") as? Int ?? 0,
+                emergencyStops: object.value(forKey: "emergencyStops") as? Bool ?? false ? 0 : object.value(forKey: "emergencyStops") as? Int ?? 0,
                 totalCompletionSeconds: object.value(forKey: "totalCompletionSeconds") as? Int ?? 0
             )
         }
@@ -223,9 +241,7 @@ final class CoreDataStore: @unchecked Sendable {
         await performBackground { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", alarm.id.uuidString)
-            if let object = try? context.fetch(request).first {
-                context.delete(object)
-            }
+            if let object = try? context.fetch(request).first { context.delete(object) }
         }
     }
 
@@ -234,7 +250,18 @@ final class CoreDataStore: @unchecked Sendable {
     ) async -> T {
         await container.performBackgroundTask { context in
             let result = work(context)
-            if context.hasChanges { try? context.save() }
+            if context.hasChanges {
+                do {
+                    try context.save()
+                } catch {
+                    logger.error("Core Data save failed: \(error.localizedDescription, privacy: .public)")
+                    NotificationCenter.default.post(
+                        name: .aweroPersistenceSaveFailed,
+                        object: nil,
+                        userInfo: ["error": error]
+                    )
+                }
+            }
             return result
         }
     }
@@ -271,7 +298,7 @@ final class CoreDataStore: @unchecked Sendable {
             completedAt: object.value(forKey: "completedAt") as? Date,
             result: object.value(forKey: "result") as? String, missionType: mission,
             completionTimeSeconds: object.value(forKey: "completionTimeSeconds") as? Int,
-            snoozeCount: object.value(forKey: "snoozeCount") as? Int ?? 0,
+            snoozeCount: object.value(forKey: "snoozeCount") as? Int,
             fallbackUsed: object.value(forKey: "fallbackUsed") as? Bool ?? false,
             emergencyStop: object.value(forKey: "emergencyStop") as? Bool ?? false
         )
@@ -378,4 +405,8 @@ final class CoreDataStore: @unchecked Sendable {
         }
         return entity
     }
+}
+
+extension Notification.Name {
+    static let aweroPersistenceSaveFailed = Notification.Name("awero.persistence.save.failed")
 }
