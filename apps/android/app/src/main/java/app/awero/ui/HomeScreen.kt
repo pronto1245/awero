@@ -20,7 +20,12 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
-    var alarms by remember { mutableStateOf(emptyList<Alarm>()) }\n    val scope = rememberCoroutineScope()\n\n    LaunchedEffect(Unit) {\n        alarms = coordinator.all()\n    }
+    var alarms by remember { mutableStateOf(emptyList<Alarm>()) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        alarms = coordinator.all()
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(24.dp)
@@ -42,7 +47,10 @@ fun HomeScreen(
                                 TextButton(onClick = { coordinator.test(alarm) }) { Text("Test") }
                                 TextButton(onClick = { onEditAlarm(alarm) }) { Text("Edit") }
                                 TextButton(onClick = {
-                                    scope.launch {\n                                        coordinator.delete(alarm)\n                                        alarms = coordinator.all()\n                                    }
+                                    scope.launch {
+                                        coordinator.delete(alarm)
+                                        alarms = coordinator.all()
+                                    }
                                 }) { Text("Delete") }
                             }
                         }
