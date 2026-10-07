@@ -71,6 +71,67 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
+    func saveSyncOperation(_ operation: SyncOperation) async {
+        await performBackground { context in
+            let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["SyncOperationRecord"]!, insertInto: context)
+            object.setValue(operation.id.uuidString, forKey: "id")
+            object.setValue(operation.operationType, forKey: "operationType")
+            object.setValue(operation.entityType, forKey: "entityType")
+            object.setValue(operation.entityId, forKey: "entityId")
+            object.setValue(operation.clientVersion, forKey: "clientVersion")
+            object.setValue((try? JSONEncoder().encode(operation.payload)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}", forKey: "payload")
+            object.setValue(operation.occurredAt, forKey: "occurredAt")
+            object.setValue(0, forKey: "attempts")
+            object.setValue(Date.distantPast, forKey: "nextAttemptAt")
+        }
+    }
+
+    func fetchDueSyncOperations() async -> [SyncOperation] {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
+            request.predicate = NSPredicate(format: "nextAttemptAt <= %@", Date.now as NSDate)
+            request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
+            request.fetchLimit = 100
+            return (try? context.fetch(request).compactMap(Self.syncOperation(from:))) ?? []
+        }
+    }
+
+    func deleteSyncOperation(_ id: UUID) async {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
+            request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+            if let object = try? context.fetch(request).first { context.delete(object) }
+        }
+    }
+
+    func saveAnalyticsEvent(_ event: AnalyticsEvent) async {
+        await performBackground { context in
+            let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AnalyticsEventRecord"]!, insertInto: context)
+            object.setValue(event.id.uuidString, forKey: "id")
+            object.setValue(event.name, forKey: "name")
+            object.setValue(event.version, forKey: "version")
+            object.setValue((try? JSONEncoder().encode(event.payload)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}", forKey: "payload")
+            object.setValue(event.occurredAt, forKey: "occurredAt")
+        }
+    }
+
+    func fetchPendingAnalyticsEvents() async -> [AnalyticsEvent] {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
+            request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
+            request.fetchLimit = 100
+            return (try? context.fetch(request).compactMap(Self.analyticsEvent(from:))) ?? []
+        }
+    }
+
+    func deleteAnalyticsEvent(_ id: UUID) async {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
+            request.predicate = NSPredicate(format: "id == %@", id.uuidString)
+            if let object = try? context.fetch(request).first { context.delete(object) }
+        }
+    }
+
     func saveStatistics(_ statistics: WakeStatistics) async {
         await performBackground { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
@@ -158,6 +219,20 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
+    private static func syncOperation(from object: NSManagedObject) -> SyncOperation? {
+        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? "") else { return nil }
+        let payloadData = Data((object.value(forKey: "payload") as? String ?? "{}").utf8)
+        let payload = (try? JSONDecoder().decode([String: String].self, from: payloadData)) ?? [:]
+        return SyncOperation(id: id, operationType: object.value(forKey: "operationType") as? String ?? "", entityType: object.value(forKey: "entityType") as? String ?? "", entityId: object.value(forKey: "entityId") as? String ?? "", clientVersion: object.value(forKey: "clientVersion") as? Int, payload: payload, occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now)
+    }
+
+    private static func analyticsEvent(from object: NSManagedObject) -> AnalyticsEvent? {
+        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? "") else { return nil }
+        let payloadData = Data((object.value(forKey: "payload") as? String ?? "{}").utf8)
+        let payload = (try? JSONDecoder().decode([String: String].self, from: payloadData)) ?? [:]
+        return AnalyticsEvent(id: id, name: object.value(forKey: "name") as? String ?? "", version: object.value(forKey: "version") as? Int ?? 1, payload: payload, occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now)
+    }
+
     private static func wakeSession(from object: NSManagedObject) -> WakeSession? {
         guard
             let idString = object.value(forKey: "id") as? String,
@@ -232,6 +307,12 @@ final class CoreDataStore: @unchecked Sendable {
                 ("maxSnoozes", .integer64AttributeType, false),
                 ("snoozeMinutes", .integer64AttributeType, false),
                 ("qrExpectedCode", .stringAttributeType, true)
+            ]),
+            entity(name: "SyncOperationRecord", attributes: [
+                ("id", .stringAttributeType, false), ("operationType", .stringAttributeType, false), ("entityType", .stringAttributeType, false), ("entityId", .stringAttributeType, false), ("clientVersion", .integer64AttributeType, true), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false), ("attempts", .integer64AttributeType, false), ("nextAttemptAt", .dateAttributeType, false)
+            ]),
+            entity(name: "AnalyticsEventRecord", attributes: [
+                ("id", .stringAttributeType, false), ("name", .stringAttributeType, false), ("version", .integer64AttributeType, false), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false)
             ]),
             entity(name: "StatisticsRecord", attributes: [
                 ("id", .stringAttributeType, false),
