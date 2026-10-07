@@ -18,7 +18,8 @@ final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
     private let database: CoreDataStore
 
-    init() {
+    init(database: CoreDataStore = .shared) {
+        self.database = database
         statistics = WakeStatistics()
         Task { await load() }
     }
