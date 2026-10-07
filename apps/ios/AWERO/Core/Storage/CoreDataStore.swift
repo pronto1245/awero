@@ -337,7 +337,11 @@ final class CoreDataStore: @unchecked Sendable {
         )
     }
 
-    static func makeModelForTesting() -> NSManagedObjectModel {\n        makeModel()\n    }\n\n    private static func makeModel() -> NSManagedObjectModel {
+    static func makeModelForTesting() -> NSManagedObjectModel {
+        makeModel()
+    }
+
+    private static func makeModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
         model.entities = [
             entity(name: "AlarmRecord", attributes: [
