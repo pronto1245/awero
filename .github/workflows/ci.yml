@@ -55,6 +55,7 @@ jobs:
             apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
             apps/ios/AWERO/Core/Sync/SyncOperation.swift \
             apps/ios/AWERO/Core/WakeSession/WakeSession.swift \
+            apps/ios/AWERO/Core/WakeSession/WakeSessionManager.swift \
             apps/ios/AWERO/Core/Statistics/StatisticsStore.swift \
             apps/ios/AWERO/Core/Analytics/AnalyticsQueueStore.swift \
             apps/ios/AWERO/Core/Storage/CoreDataStore.swift \
