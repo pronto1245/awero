@@ -70,7 +70,7 @@ class WakeSessionStore(context: Context) {
         ensureActive()
         active?.let {
             it.snoozeCount = count
-            saveWithEvent(it, "SNOOZE", "{"count":$count}")
+            saveWithEvent(it, "SNOOZE", """{"count":$count}""")
         }
     }
 
@@ -122,12 +122,15 @@ class WakeSessionStore(context: Context) {
             if (preferences.getBoolean("room_migrated", false)) return
             val raw = preferences.getString("sessions", null)
             if (!raw.isNullOrBlank()) {
-                runCatching {
+                val migrated = runCatching {
                     val array = JSONArray(raw)
                     for (i in 0 until array.length()) {
-                        database.wakeSessions().upsert(WakeSessionMapper.toEntity(fromJson(array.getJSONObject(i))))
+                        database.wakeSessions().upsert(
+                            WakeSessionMapper.toEntity(fromJson(array.getJSONObject(i)))
+                        )
                     }
                 }
+                if (migrated.isFailure) return
             }
             preferences.edit().putBoolean("room_migrated", true).apply()
         }
