@@ -11,12 +11,12 @@ class WakeSessionStore(context: Context) {
 
     private var active: WakeSession? = null
 
-    fun start(alarm: Alarm): WakeSession {
+    fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): WakeSession {
         val session = WakeSession(
             id = UUID.randomUUID().toString(),
             alarmId = alarm.id,
             alarmVersion = alarm.version,
-            scheduledAt = System.currentTimeMillis()
+            scheduledAt = scheduledAt
         )
         active = session
         save(session)
