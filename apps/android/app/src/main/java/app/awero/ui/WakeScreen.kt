@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -12,7 +14,7 @@ import app.awero.core.wake.WakeFlowController
 
 @Composable
 fun WakeScreen(flow: WakeFlowController) {
-    Column(
+    val scope = rememberCoroutineScope()\n\n    Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -22,15 +24,15 @@ fun WakeScreen(flow: WakeFlowController) {
         when (flow.state) {
             WakeFlowController.State.RINGING -> {
                 Text("The alarm is active.", color = Color.White.copy(alpha = .6f))
-                Button(onClick = flow::beginMission, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { scope.launch { flow.beginMission() } }, modifier = Modifier.fillMaxWidth()) {
                     Text("Start mission")
                 }
-                TextButton(onClick = { flow.snooze() }) { Text("Snooze") }
-                TextButton(onClick = flow::emergencyStop) { Text("Emergency stop") }
+                TextButton(onClick = { scope.launch { flow.snooze() } }) { Text("Snooze") }
+                TextButton(onClick = { scope.launch { flow.emergencyStop() } }) { Text("Emergency stop") }
             }
             WakeFlowController.State.MISSION -> {
                 Text(flow.mission.name, color = Color.White.copy(alpha = .7f))
-                Button(onClick = flow::completeMission, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { scope.launch { flow.completeMission() } }, modifier = Modifier.fillMaxWidth()) {
                     Text("Complete mission")
                 }
             }
