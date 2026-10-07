@@ -1,6 +1,6 @@
 package app.awero.ui
 
-import android.app.Activity
+import androidx.activity.ComponentActivity
 import android.graphics.Color
 import android.view.Gravity
 import android.view.View
@@ -16,7 +16,7 @@ import app.awero.core.missions.QRMissionRuntime
 import app.awero.core.missions.StepsMission
 
 object MissionRuntimeScreen {
-    fun create(activity: Activity, alarm: Alarm, onSuccess: () -> Unit, onFailure: () -> Unit): View {
+    fun create(activity: ComponentActivity, alarm: Alarm, onSuccess: () -> Unit, onFailure: () -> Unit): View {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
