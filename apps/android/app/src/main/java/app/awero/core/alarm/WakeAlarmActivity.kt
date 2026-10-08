@@ -22,8 +22,6 @@ class WakeAlarmActivity : ComponentActivity() {
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
-        AlarmNotificationManager.clear(this)
-
         val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return finish()
         alarmVersion = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
         scheduledAt = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
@@ -33,7 +31,10 @@ class WakeAlarmActivity : ComponentActivity() {
             val current = withContext(Dispatchers.IO) { AlarmStore(this@WakeAlarmActivity).get(id) }
                 ?: return@launch finish()
             alarm = current
-            if (current.version != alarmVersion || !current.enabled) return@launch finish()
+            if (current.version != alarmVersion || !current.enabled) {
+                AlarmRingingService.stop(this@WakeAlarmActivity)
+                return@launch finish()
+            }
 
             when {
                 current.missionType == MissionType.QR &&

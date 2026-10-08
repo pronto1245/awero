@@ -3,6 +3,7 @@ package app.awero.core.wake
 import android.content.Context
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmScheduler
+import app.awero.core.alarm.AlarmRingingService
 import app.awero.core.alarm.AlarmStore
 import app.awero.core.alarm.MissionType
 import app.awero.core.statistics.StatisticsStore
@@ -64,6 +65,7 @@ class WakeFlowController(
     suspend fun completeMission() {
         if (_state.value == State.MISSION) {
             sessions.complete()?.let { if (!testAlarm) statistics.record(it) }
+            AlarmRingingService.stop(context)
             _state.value = State.COMPLETED
         }
     }
@@ -75,12 +77,14 @@ class WakeFlowController(
         _snoozeCount.value = nextCount
         sessions.setSnoozeCount(nextCount)
         AlarmScheduler(context).scheduleSnooze(alarm, alarm.snoozeMinutes)
+        AlarmRingingService.stop(context)
         _state.value = State.IDLE
         return true
     }
 
     suspend fun emergencyStop() {
         sessions.emergencyStop()?.let { if (!testAlarm) statistics.record(it) }
+        AlarmRingingService.stop(context)
         _state.value = State.EMERGENCY_STOPPED
     }
 }

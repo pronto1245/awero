@@ -25,6 +25,7 @@ fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> 
     var minute by remember { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
     var mission by remember { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
     var difficulty by remember { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
+    var saveError by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier.fillMaxSize().background(Color.Black).padding(24.dp),
@@ -51,12 +52,26 @@ fun CreateAlarmScreen(alarm: app.awero.core.alarm.Alarm? = null, onSaved: () -> 
         Spacer(Modifier.weight(1f))
         Button(onClick = {
             scope.launch {
-                if (alarm == null) coordinator.create(hour, minute, mission, difficulty)
-                else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
-                onSaved()
+                try {
+                    if (alarm == null) coordinator.create(hour, minute, mission, difficulty)
+                    else coordinator.update(alarm.copy(hour = hour, minute = minute, missionType = mission, difficulty = difficulty))
+                    onSaved()
+                } catch (error: Exception) {
+                    saveError = error.message ?: "Could not schedule this alarm."
+                }
             }
         }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
             Text(if (alarm == null) "Create alarm" else "Save changes")
         }
+    }
+    if (saveError != null) {
+        AlertDialog(
+            onDismissRequest = { saveError = null },
+            title = { Text("Alarm was not scheduled") },
+            text = { Text(saveError.orEmpty()) },
+            confirmButton = {
+                TextButton(onClick = { saveError = null }) { Text("OK") }
+            }
+        )
     }
 }

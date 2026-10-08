@@ -2,6 +2,8 @@ package app.awero.core.alarm
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.os.Build
+import android.os.Build.VERSION_CODES
 import android.content.Context
 import android.content.Intent
 import java.util.Calendar
@@ -11,8 +13,12 @@ class AlarmScheduler(private val context: Context) {
     private val manager = context.getSystemService(AlarmManager::class.java)
 
     fun schedule(a: Alarm) {
+        if (!a.enabled) {
+            cancel(a)
+            return
+        }
+        requireExactAlarmAccess()
         cancel(a)
-        if (!a.enabled) return
         a.weekdays.forEach { day ->
             val at = next(a, day)
             val intent = Intent(context, AlarmReceiver::class.java).apply {
@@ -36,6 +42,7 @@ class AlarmScheduler(private val context: Context) {
         scheduleOneShot(a, ACTION_SNOOZE, snoozeCode(a), minutes.coerceAtLeast(1) * 60_000L)
 
     private fun scheduleOneShot(a: Alarm, action: String, requestCode: Int, delay: Long) {
+        requireExactAlarmAccess()
         val at = System.currentTimeMillis() + delay
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             this.action = action
@@ -82,10 +89,14 @@ class AlarmScheduler(private val context: Context) {
     }
 
     private fun set(at: Long, pending: PendingIntent) {
-        if (manager.canScheduleExactAlarms()) {
-            manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
-        } else {
-            manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
+        manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
+    }
+
+    private fun requireExactAlarmAccess() {
+        if (Build.VERSION.SDK_INT >= VERSION_CODES.S && !manager.canScheduleExactAlarms()) {
+            throw IllegalStateException(
+                "Allow AWERO to set alarms and reminders in Android Settings to use reliable alarms."
+            )
         }
     }
 

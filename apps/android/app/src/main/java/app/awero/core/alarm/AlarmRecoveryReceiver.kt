@@ -1,8 +1,11 @@
 package app.awero.core.alarm
 
+import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.Build.VERSION_CODES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -10,11 +13,16 @@ import kotlinx.coroutines.launch
 
 class AlarmRecoveryReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val exactAccessChanged = intent.action == AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED
         if (intent.action !in setOf(
                 Intent.ACTION_BOOT_COMPLETED,
                 Intent.ACTION_TIME_CHANGED,
-                Intent.ACTION_TIMEZONE_CHANGED
+                Intent.ACTION_TIMEZONE_CHANGED,
+                AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED
             )
+        ) return
+        if (exactAccessChanged && Build.VERSION.SDK_INT >= VERSION_CODES.S &&
+            !context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
         ) return
 
         val pending = goAsync()

@@ -1,5 +1,6 @@
 package app.awero.core.alarm
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,10 +11,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
 object AlarmNotificationManager {
-    private const val CHANNEL_ID = "awero_alarm"
-    private const val NOTIFICATION_ID = 7001
+    internal const val CHANNEL_ID = "awero_alarm_v2"
+    internal const val NOTIFICATION_ID = 7001
 
-    fun show(context: Context, alarmId: String, version: Int, scheduledAt: Long, test: Boolean) {
+    fun build(context: Context, alarmId: String, version: Int, scheduledAt: Long, test: Boolean): Notification {
         ensureChannel(context)
         val intent = Intent(context, WakeAlarmActivity::class.java).apply {
             putExtra(AlarmScheduler.EXTRA_ID, alarmId)
@@ -28,23 +29,30 @@ object AlarmNotificationManager {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(if (test) "AWERO — Test Alarm" else "AWERO")
             .setContentText("Wake up. Stay up.")
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(!test)
-            .setAutoCancel(test)
+            .setAutoCancel(false)
             .setFullScreenIntent(pending, true)
             .setContentIntent(pending)
-            .setSound(android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI)
             .build()
-        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
     }
 
-    fun clear(context: Context) {
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+    fun requireAlarmAccess(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !NotificationManagerCompat.from(context).areNotificationsEnabled()
+        ) {
+            throw IllegalStateException("Allow AWERO notifications so alarms can ring.")
+        }
+        if (Build.VERSION.SDK_INT >= 34 &&
+            !context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
+        ) {
+            throw IllegalStateException("Allow AWERO full-screen alarms in Android Settings.")
+        }
     }
 
     private fun ensureChannel(context: Context) {
@@ -55,8 +63,8 @@ object AlarmNotificationManager {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Wake-up alarms"
-                setSound(android.provider.Settings.System.DEFAULT_ALARM_ALERT_URI, null)
-                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                setSound(null, null)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
             context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }

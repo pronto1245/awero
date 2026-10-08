@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -24,16 +23,13 @@ class AlarmReceiver : BroadcastReceiver() {
                     AlarmScheduler(context).schedule(alarm)
                 }
 
-                withContext(Dispatchers.Main) {
-                    AlarmNotificationManager.show(context, id, version, at, intent.action == AlarmScheduler.ACTION_TEST)
-                    context.startActivity(Intent(context, WakeAlarmActivity::class.java).apply {
-                        putExtra(AlarmScheduler.EXTRA_ID, id)
-                        putExtra(AlarmScheduler.EXTRA_VERSION, version)
-                        putExtra(AlarmScheduler.EXTRA_AT, at)
-                        putExtra(AlarmScheduler.EXTRA_TEST, intent.action == AlarmScheduler.ACTION_TEST)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    })
-                }
+                AlarmRingingService.start(
+                    context = context,
+                    alarmId = id,
+                    version = version,
+                    scheduledAt = at,
+                    test = intent.action == AlarmScheduler.ACTION_TEST
+                )
             } finally {
                 pending.finish()
             }

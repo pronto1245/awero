@@ -26,16 +26,30 @@ class AlarmCoordinator(
             missionType = missionType,
             difficulty = difficulty
         )
-        store.save(alarm)
-        scheduler.schedule(alarm)
-        return alarm
+        AlarmNotificationManager.requireAlarmAccess(context)
+        try {
+            store.save(alarm)
+            scheduler.schedule(alarm)
+            return alarm
+        } catch (error: Exception) {
+            scheduler.cancel(alarm)
+            store.delete(alarm.id)
+            throw error
+        }
     }
 
     suspend fun update(alarm: Alarm): Alarm {
         val next = alarm.copy(version = alarm.version + 1)
+        AlarmNotificationManager.requireAlarmAccess(context)
         store.save(next)
-        scheduler.schedule(next)
-        return next
+        try {
+            scheduler.schedule(next)
+            return next
+        } catch (error: Exception) {
+            store.save(alarm)
+            runCatching { scheduler.schedule(alarm) }
+            throw error
+        }
     }
 
     suspend fun delete(alarm: Alarm) {
@@ -44,6 +58,7 @@ class AlarmCoordinator(
     }
 
     fun test(alarm: Alarm) {
+        AlarmNotificationManager.requireAlarmAccess(context)
         scheduler.scheduleTest(alarm)
     }
 
