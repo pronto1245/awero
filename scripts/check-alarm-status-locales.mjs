@@ -52,10 +52,10 @@ function assertKeys(platform, locale, path, expected, pattern) {
 }
 
 for (const [locale, path] of Object.entries(androidLocales)) {
-  assertKeys("Android", locale, path, expectedAndroid, /<string\\s+name="([^"]+)"/g);
+  assertKeys("Android", locale, path, expectedAndroid, /<string\s+name="([^"]+)"/g);
 }
 for (const [locale, path] of Object.entries(iosLocales)) {
-  assertKeys("iOS", locale, path, expectedIOS, /^\\s*"([^"]+)"\\s*=/gm);
+  assertKeys("iOS", locale, path, expectedIOS, /^\s*"([^"]+)"\s*=/gm);
 }
 
 console.log("Alarm status locale parity: PASS (en, ru, pt-BR, fr, de, es)");
