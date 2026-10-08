@@ -10,7 +10,7 @@ final class WakeFlowController: ObservableObject {
     @Published private(set) var snoozeCount = 0
 
     private let sessionManager: WakeSessionManager
-    private let scheduler: AlarmScheduler
+    private var scheduler: AlarmScheduler?
     private let database: CoreDataStore
     private let statistics: StatisticsStore
     private(set) var currentAlarm: Alarm?
@@ -22,7 +22,7 @@ final class WakeFlowController: ObservableObject {
         database: CoreDataStore = .shared
     ) {
         self.sessionManager = sessionManager ?? WakeSessionManager(database: database)
-        self.scheduler = scheduler ?? AlarmScheduler()
+        self.scheduler = scheduler
         self.database = database
         self.statistics = StatisticsStore(database: database)
     }
@@ -71,6 +71,8 @@ final class WakeFlowController: ObservableObject {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return }
         snoozeCount += 1
         await sessionManager.setSnoozeCount(snoozeCount)
+        let scheduler = scheduler ?? AlarmScheduler()
+        self.scheduler = scheduler
         Task {
             try? await scheduler.scheduleSnooze(for: alarm)
         }
