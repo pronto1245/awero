@@ -312,9 +312,19 @@ struct PersistenceSmokeMain {
         let readOnly = AlarmStore(database: CoreDataStore(storeURL: url, readOnly: true))
         await readOnly.load()
         let coordinator = AlarmCoordinator(store: readOnly, scheduler: scheduler)
-        await coordinator.update(enabled)
+        do {
+            try await coordinator.update(enabled)
+            preconditionFailure("Expected read-only alarm update to fail")
+        } catch AlarmCoordinatorError.persistenceFailed {
+            // The database rejects the write before scheduling can change.
+        }
         await coordinator.delete(enabled)
-        await coordinator.create(Alarm(hour: 11, minute: 0))
+        do {
+            try await coordinator.create(Alarm(hour: 11, minute: 0))
+            preconditionFailure("Expected read-only alarm creation to fail")
+        } catch AlarmCoordinatorError.persistenceFailed {
+            // The database rejects the write before scheduling can change.
+        }
         let unchanged = await center.pendingNotificationRequests()
         precondition(Set(unchanged.map(\.identifier)) == Set(requests.map(\.identifier)))
         precondition(center.additions == additions)

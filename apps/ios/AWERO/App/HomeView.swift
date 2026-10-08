@@ -4,6 +4,7 @@ struct HomeView: View {
     @EnvironmentObject private var alarms: AlarmStore
     @State private var showingCreate = false
     @State private var editingAlarm: Alarm?
+    @State private var testAlarmError: String?
 
     var body: some View {
         NavigationStack {
@@ -28,7 +29,15 @@ struct HomeView: View {
                                 AlarmCard(
                                     alarm: alarm,
                                     onEdit: { editingAlarm = alarm },
-                                    onTest: { Task { await AlarmCoordinator(store: alarms).test(alarm) } },
+                                    onTest: {
+                                        Task {
+                                            do {
+                                                try await AlarmCoordinator(store: alarms).test(alarm)
+                                            } catch {
+                                                testAlarmError = error.localizedDescription
+                                            }
+                                        }
+                                    },
                                     onDelete: { Task { await AlarmCoordinator(store: alarms).delete(alarm) } }
                                 )
                             }
@@ -54,6 +63,14 @@ struct HomeView: View {
             }
             .sheet(item: $editingAlarm) { alarm in
                 CreateAlarmView(alarm: alarm)
+            }
+            .alert("Could not schedule test alarm", isPresented: Binding(
+                get: { testAlarmError != nil },
+                set: { if !$0 { testAlarmError = nil } }
+            )) {
+                Button("OK", role: .cancel) { testAlarmError = nil }
+            } message: {
+                Text(testAlarmError ?? "Please check alarm permissions and try again.")
             }
         }
     }
