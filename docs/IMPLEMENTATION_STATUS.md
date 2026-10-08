@@ -171,3 +171,7 @@ The first package addresses P0 Mission runtime / recovery requirements: two-minu
 The next scoped package adds camera-based QR/barcode capture during alarm creation/editing on both platforms, an optional exact-content field, blank-code save prevention, persisted expected code and iOS Math difficulty selection. Android scans ML Kit-supported formats; iOS uses the supported subset of QR, EAN/UPC-E, Code 39/93/128, PDF417, Aztec and Data Matrix. Permission denial/camera failure during setup preserves the draft and offers manual entry. The iOS persistence/edited-code validation test passed locally; Android's existing restart test now includes the expected code.
 
 Phase 3 remains active: test-alarm history exclusion and the remaining offline/permission/retry mission E2E cases still require implementation/verification. Camera decoding on physical devices remains a Phase 10 check. Full localization stays in Phase 6.
+
+### User-reported iPhone walkthrough
+
+On 2026-10-08, the user confirmed that the guided iPhone walkthrough worked. The walkthrough covered creating a QR alarm, scanning the saved code at wake-up, invalid-code fallback to Math, Steps, and snooze. This is a manual report without recorded device/OS details; it does not replace the broader Phase 10 release matrix.
