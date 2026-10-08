@@ -46,8 +46,8 @@ enum SystemAlarmKitScheduler {
         try? AlarmManager.shared.cancel(id: alarmID)
 
         let weekdays = alarm.weekdays.sorted().compactMap(localeWeekday)
-        let time = Alarm.Schedule.Relative.Time(hour: alarm.hour, minute: alarm.minute)
-        let schedule = Alarm.Schedule.relative(
+        let time = AlarmKit.Alarm.Schedule.Relative.Time(hour: alarm.hour, minute: alarm.minute)
+        let schedule = AlarmKit.Alarm.Schedule.relative(
             .init(time: time, repeats: .weekly(weekdays))
         )
         let configuration = configuration(
@@ -68,7 +68,7 @@ enum SystemAlarmKitScheduler {
         try await ensureAuthorization()
         let id = identifier(for: "test:\(alarm.id.uuidString)")
         try? AlarmManager.shared.cancel(id: id)
-        let schedule = Alarm.Schedule.fixed(Date(timeIntervalSinceNow: max(5, seconds)))
+        let schedule = AlarmKit.Alarm.Schedule.fixed(Date(timeIntervalSinceNow: max(5, seconds)))
         try await AlarmManager.shared.schedule(
             id: id,
             configuration: configuration(schedule: schedule, alarmID: alarm.id)
@@ -79,7 +79,7 @@ enum SystemAlarmKitScheduler {
         try await ensureAuthorization()
         let id = identifier(for: "snooze:\(alarm.id.uuidString)")
         try? AlarmManager.shared.cancel(id: id)
-        let schedule = Alarm.Schedule.fixed(
+        let schedule = AlarmKit.Alarm.Schedule.fixed(
             Date(timeIntervalSinceNow: TimeInterval(max(1, alarm.snoozeMinutes) * 60))
         )
         try await AlarmManager.shared.schedule(
@@ -108,7 +108,7 @@ enum SystemAlarmKitScheduler {
     }
 
     private static func configuration(
-        schedule: Alarm.Schedule,
+        schedule: AlarmKit.Alarm.Schedule,
         alarmID: UUID
     ) -> AlarmManager.AlarmConfiguration<AweroAlarmMetadata> {
         let stopButton = AlarmButton(
