@@ -86,9 +86,11 @@ final class WakeFlowController: ObservableObject {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
         snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
+        print("SNOOZE overrides schedule=\(scheduleSnoozeOperation != nil) cancel=\(cancelSnoozeOperation != nil)")
         do {
             if let scheduleSnoozeOperation {
                 try await scheduleSnoozeOperation(alarm)
+                print("SNOOZE injected schedule completed")
             } else {
                 let alarmScheduler: AlarmScheduler
                 if let configuredScheduler = self.scheduler {
@@ -99,13 +101,16 @@ final class WakeFlowController: ObservableObject {
                     alarmScheduler = createdScheduler
                 }
                 try await alarmScheduler.scheduleSnooze(for: alarm)
+                print("SNOOZE default schedule completed")
             }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
+                print("SNOOZE session write failed")
                 await cancelScheduledSnooze(for: alarm)
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
+            print("SNOOZE operation failed: \(error)")
             await cancelScheduledSnooze(for: alarm)
             snoozeError = error.localizedDescription
             return false
