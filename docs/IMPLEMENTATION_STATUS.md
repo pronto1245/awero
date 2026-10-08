@@ -149,7 +149,8 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 ## Governing plan position
 - [x] Phase 0 — reconcile scope, competitor inputs, phase order, and acceptance gates across product docs
 - [ ] Phase 1 — physical iOS and Android alarm reliability; a push-only iPhone test is not an audible-alarm pass
-- [ ] Phase 2 — wake-session runtime and P0 mission flows
-- [ ] Phase 3 — local persistence device checks (the ten-point automated CI gate is already complete)
-- [ ] Phase 4 — backend and sync isolated from the alarm-critical path
-- [ ] Phase 5 — user-facing UX and six-language completion
+- [ ] Phase 2 — wake-session runtime
+- [ ] Phase 3 — P0 Math, Steps, and QR/barcode mission flows
+- [ ] Phase 4 — local persistence device checks (the ten-point automated CI gate is already complete)
+- [ ] Phase 5 — backend and sync isolated from the alarm-critical path
+- [ ] Phase 6 — user-facing UX and six-language completion
