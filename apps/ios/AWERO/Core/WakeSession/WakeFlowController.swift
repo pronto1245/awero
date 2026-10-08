@@ -11,21 +11,25 @@ final class WakeFlowController: ObservableObject {
 
     private let sessionManager: WakeSessionManager
     private let scheduler: AlarmScheduler
-    private let statistics = StatisticsStore()
+    private let database: CoreDataStore
+    private let statistics: StatisticsStore
     private(set) var currentAlarm: Alarm?
     private var maxSnoozes = 3
 
     init(
         sessionManager: WakeSessionManager? = nil,
-        scheduler: AlarmScheduler? = nil
+        scheduler: AlarmScheduler? = nil,
+        database: CoreDataStore = .shared
     ) {
-        self.sessionManager = sessionManager ?? WakeSessionManager()
+        self.sessionManager = sessionManager ?? WakeSessionManager(database: database)
         self.scheduler = scheduler ?? AlarmScheduler()
+        self.database = database
+        self.statistics = StatisticsStore(database: database)
     }
 
     func restore() async {
         guard let session = await sessionManager.restore(),
-              let alarm = await CoreDataStore.shared.fetchAlarm(id: session.alarmId) else { return }
+              let alarm = await database.fetchAlarm(id: session.alarmId) else { return }
         currentAlarm = alarm
         currentMission = session.fallbackUsed ? .math : session.missionType
         maxSnoozes = alarm.maxSnoozes
