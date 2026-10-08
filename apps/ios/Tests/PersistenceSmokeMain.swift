@@ -365,9 +365,11 @@ struct PersistenceSmokeMain {
         await recovery.reconcile()
         let repaired = await scheduler.isScheduled(enabled)
         precondition(repaired)
-        precondition(await scheduler.readiness(for: enabled) == .notificationFallback)
+        let fallbackReadiness = await scheduler.readiness(for: enabled)
+        precondition(fallbackReadiness == .notificationFallback)
         center.canDeliverAudibleNotificationsValue = false
-        precondition(await scheduler.readiness(for: enabled) == .actionRequired)
+        let deniedReadiness = await scheduler.readiness(for: enabled)
+        precondition(deniedReadiness == .actionRequired)
         center.canDeliverAudibleNotificationsValue = true
         let repairedRequests = await center.pendingNotificationRequests()
         precondition(repairedRequests.count == 2)
