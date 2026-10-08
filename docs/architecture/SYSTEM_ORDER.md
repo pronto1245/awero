@@ -44,6 +44,7 @@
 - Statistics.
 - Streak.
 - Failure/support flow.
+- Visual direction and screen acceptance criteria: [Product UX Design](../design/PRODUCT_UX_DESIGN.md) (planned; not implemented).
 
 ## 6. Monetization
 - Free entitlement always retains basic alarm.
