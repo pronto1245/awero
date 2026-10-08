@@ -35,9 +35,9 @@ adb shell run-as app.awero kill -9 "$APP_PID"
 wait "$WRITER_PID" || true
 trap - EXIT
 adb shell dumpsys alarm > "$REPORT_DIR/alarms-after-sigkill.txt"
-rg -F 'app.awero.ALARM' "$REPORT_DIR/alarms-after-sigkill.txt"
+grep -F 'app.awero.ALARM' "$REPORT_DIR/alarms-after-sigkill.txt"
 timeout 120s adb shell am instrument -w -e class "$TEST_CLASS" -e aweroCrashPhase read "$RUNNER" | tee "$REPORT_DIR/read.txt"
-rg 'OK \(1 test\)' "$REPORT_DIR/read.txt"
-if rg 'FAILURES|INSTRUMENTATION_FAILED|shortMsg=' "$REPORT_DIR/read.txt"; then exit 1; fi
+grep -F 'OK (1 test)' "$REPORT_DIR/read.txt"
+if grep -E 'FAILURES|INSTRUMENTATION_FAILED|shortMsg=' "$REPORT_DIR/read.txt"; then exit 1; fi
 adb logcat -d > "$REPORT_DIR/logcat.txt"
 echo "AWERO Android SIGKILL persistence + alarm recovery + E2E: PASS"
