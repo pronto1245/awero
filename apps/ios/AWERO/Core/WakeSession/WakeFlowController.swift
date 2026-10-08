@@ -8,6 +8,7 @@ final class WakeFlowController: ObservableObject {
     @Published private(set) var state: State = .idle
     @Published private(set) var currentMission: MissionType = .math
     @Published private(set) var snoozeCount = 0
+    @Published private(set) var snoozeError: String?
 
     private let sessionManager: WakeSessionManager
     private var scheduler: AlarmScheduler?
@@ -74,17 +75,34 @@ final class WakeFlowController: ObservableObject {
         state = .completed
     }
 
-    func snooze() async {
-        guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return }
+    @discardableResult
+    func snooze() async -> Bool {
+        guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
+        snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
-        guard await sessionManager.setSnoozeCount(nextSnoozeCount) else { return }
-        snoozeCount = nextSnoozeCount
         let scheduler = scheduler ?? AlarmScheduler()
         self.scheduler = scheduler
-        Task {
-            try? await scheduler.scheduleSnooze(for: alarm)
+
+        do {
+            try await scheduler.scheduleSnooze(for: alarm)
+            guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
+                await scheduler.cancelSnooze(for: alarm)
+                snoozeError = "Could not save the snooze. The alarm is still ringing."
+                return false
+            }
+        } catch {
+            await scheduler.cancelSnooze(for: alarm)
+            snoozeError = error.localizedDescription
+            return false
         }
+
+        snoozeCount = nextSnoozeCount
         state = .idle
+        return true
+    }
+
+    func clearSnoozeError() {
+        snoozeError = nil
     }
 
     func emergencyStop() async {
