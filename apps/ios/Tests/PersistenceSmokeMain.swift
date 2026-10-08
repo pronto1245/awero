@@ -60,6 +60,13 @@ struct PersistenceSmokeMain {
             )
         )
         precondition(!saveFailure)
+        let unchangedAlarm = await restarted.fetchAlarm(id: alarmId)
+        precondition(unchangedAlarm?.version == 1 && unchangedAlarm?.hour == 7)
+        let failedManager = await MainActor.run { WakeSessionManager(database: readOnlyStore) }
+        let failedTrigger = await failedManager.trigger(alarm: restoredAlarm!, scheduledAt: .now)
+        precondition(!failedTrigger)
+        let failedCurrent = await MainActor.run { failedManager.current }
+        precondition(failedCurrent == nil)
 
         let operation = SyncOperation(
             operationType: "UPDATE_ALARM",
@@ -94,7 +101,22 @@ struct PersistenceSmokeMain {
             fallbackUsed: false,
             emergencyStop: false
         )
-        await restarted.saveWakeSession(session)
+        let sessionSaved = await restarted.saveWakeSession(session)
+        precondition(sessionSaved)
+        _ = await failedManager.restore()
+        await failedManager.startMission()
+        await failedManager.setSnoozeCount(2)
+        await failedManager.markFallback()
+        let failedCompletion = await failedManager.complete()
+        let failedEmergency = await failedManager.emergencyStop()
+        precondition(failedCompletion == nil && failedEmergency == nil)
+        let unchangedSession = await MainActor.run { failedManager.current }
+        precondition(unchangedSession?.id == session.id)
+        precondition(unchangedSession?.missionStartedAt == nil)
+        precondition(unchangedSession?.snoozeCount == 0)
+        precondition(unchangedSession?.fallbackUsed == false)
+        precondition(unchangedSession?.result == nil && unchangedSession?.completedAt == nil)
+        precondition(unchangedSession?.emergencyStop == false)
         let restartedAgain = CoreDataStore(storeURL: storeURL)
         let active = await restartedAgain.fetchActiveWakeSession()
         precondition(active?.id == session.id)
@@ -117,10 +139,10 @@ struct PersistenceSmokeMain {
             difficulty: .medium
         )
         await restartedAgain.saveAlarm(alarm)
-        let firstTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
-        let secondTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
-        precondition(firstTrigger)
-        precondition(!secondTrigger)
+        async let firstTrigger = manager.trigger(alarm: alarm, scheduledAt: .now)
+        async let secondTrigger = manager.trigger(alarm: alarm, scheduledAt: .now)
+        let triggerResults = await [firstTrigger, secondTrigger]
+        precondition(triggerResults.filter { $0 }.count == 1)
         await manager.startMission()
         await manager.startMission()
 
@@ -132,11 +154,11 @@ struct PersistenceSmokeMain {
         let restoredState = await MainActor.run { restoredFlow.state }
         precondition(restoredState == .mission)
 
-        guard let completedSession = await manager.complete() else {
-            fatalError("Expected wake session completion")
-        }
-        let duplicateCompletion = await manager.complete()
-        precondition(duplicateCompletion == nil)
+        async let firstCompletion = manager.complete()
+        async let secondCompletion = manager.complete()
+        let completions = await [firstCompletion, secondCompletion].compactMap { $0 }
+        precondition(completions.count == 1)
+        let completedSession = completions[0]
 
         let statistics = await MainActor.run { StatisticsStore(database: restartedAgain) }
         await statistics.recordPlanned()
