@@ -5,7 +5,7 @@ import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.test.core.app.ActivityScenario
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.awero.core.wake.WakeSessionStore
@@ -20,14 +20,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WakeAlarmActivityEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val alarmStore = AlarmStore(context)
     private val sessions = WakeSessionStore(context)
-    private var scenario: ActivityScenario<WakeAlarmActivity>? = null
+    private var activity: WakeAlarmActivity? = null
     private var alarm: Alarm? = null
 
     @After
     fun cleanup() {
-        scenario?.close()
+        activity?.let { current ->
+            instrumentation.runOnMainSync { current.finish() }
+        }
         alarm?.let { saved ->
             runBlocking {
                 if (sessions.loadActive()?.alarmId == saved.id) {
@@ -53,20 +56,22 @@ class WakeAlarmActivityEndToEndTest {
         alarmStore.save(currentAlarm)
 
         val intent = Intent(context, WakeAlarmActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra(AlarmScheduler.EXTRA_ID, currentAlarm.id)
             putExtra(AlarmScheduler.EXTRA_VERSION, currentAlarm.version)
             putExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
             putExtra(AlarmScheduler.EXTRA_TEST, true)
         }
-        scenario = ActivityScenario.launch(intent)
+        activity = instrumentation.startActivitySync(intent) as WakeAlarmActivity
 
         awaitCondition("wake session was not persisted after the alarm intent") {
             runBlocking { sessions.loadActive()?.alarmId == currentAlarm.id }
         }
 
-        scenario!!.onActivity { activity ->
-            assertNotNull(findText(activity.window.decorView, "Start mission"))
-            val emergencyStop = findText(activity.window.decorView, "Emergency stop")
+        instrumentation.runOnMainSync {
+            val root = activity!!.window.decorView
+            assertNotNull(findText(root, "Start mission"))
+            val emergencyStop = findText(root, "Emergency stop")
             assertNotNull(emergencyStop)
             emergencyStop!!.performClick()
         }
@@ -75,8 +80,8 @@ class WakeAlarmActivityEndToEndTest {
             runBlocking { sessions.loadActive() == null }
         }
 
-        scenario!!.onActivity { activity ->
-            assertNotNull(findText(activity.window.decorView, "STOPPED"))
+        instrumentation.runOnMainSync {
+            assertNotNull(findText(activity!!.window.decorView, "STOPPED"))
         }
     }
 
