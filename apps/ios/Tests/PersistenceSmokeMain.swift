@@ -126,6 +126,44 @@ struct PersistenceSmokeMain {
         let finalActive = await finalStore.fetchActiveWakeSession()
         precondition(finalActive == nil)
 
+        let e2eAlarm = Alarm(
+            id: UUID(),
+            version: 1,
+            hour: 6,
+            minute: 30,
+            enabled: true,
+            weekdays: Set(1...7),
+            timezoneMode: .deviceLocal,
+            fixedTimezone: nil,
+            missionType: .math,
+            difficulty: .easy
+        )
+        await finalStore.saveAlarm(e2eAlarm)
+        let e2eController = await MainActor.run {
+            WakeFlowController(
+                sessionManager: WakeSessionManager(database: finalStore),
+                database: finalStore
+            )
+        }
+        await e2eController.start(alarm: e2eAlarm, scheduledAt: .now)
+        await e2eController.beginMission()
+        precondition(await MainActor.run { e2eController.state == .mission })
+
+        let e2eRestoredController = await MainActor.run {
+            WakeFlowController(
+                sessionManager: WakeSessionManager(database: finalStore),
+                database: finalStore
+            )
+        }
+        await e2eRestoredController.restore()
+        precondition(await MainActor.run { e2eRestoredController.state == .mission })
+        await e2eRestoredController.completeMission()
+        precondition(await MainActor.run { e2eRestoredController.state == .completed })
+
+        let e2eStats = await finalStore.fetchStatistics()
+        precondition(e2eStats?.planned == 2)
+        precondition(e2eStats?.completed == 2)
+
         let emergencyAlarm = Alarm(
             id: UUID(),
             version: 1,
