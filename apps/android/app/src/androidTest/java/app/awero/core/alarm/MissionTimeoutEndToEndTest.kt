@@ -36,6 +36,7 @@ class MissionTimeoutEndToEndTest {
             if (sessions.loadActive()?.alarmId == current.id) sessions.complete()
             alarms.delete(current.id)
         }
+        Unit
     }
 
     @Test
