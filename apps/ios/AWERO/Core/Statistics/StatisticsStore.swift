@@ -17,6 +17,7 @@ struct WakeStatistics: Codable, Sendable {
 final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
     private let database: CoreDataStore
+    private var loaded = false
 
     init(database: CoreDataStore = .shared) {
         self.database = database
@@ -27,6 +28,7 @@ final class StatisticsStore: ObservableObject {
     func load() async {
         if let stored = await database.fetchStatistics() {
             statistics = stored
+            loaded = true
             return
         }
 
@@ -37,19 +39,26 @@ final class StatisticsStore: ObservableObject {
             await database.saveStatistics(legacy)
             UserDefaults.standard.set(true, forKey: "awero.coredata.statistics.migrated.v1")
         }
+        loaded = true
     }
 
     func recordPlanned() async {
+        await ensureLoaded()
         statistics.planned += 1
         await database.saveStatistics(statistics)
     }
 
     func record(_ session: WakeSession) async {
+        await ensureLoaded()
         statistics.completed += session.result == "COMPLETED" ? 1 : 0
         statistics.snoozes += session.snoozeCount
         statistics.fallback += session.fallbackUsed ? 1 : 0
         statistics.emergencyStops += session.emergencyStop ? 1 : 0
         statistics.totalCompletionSeconds += session.completionTimeSeconds ?? 0
         await database.saveStatistics(statistics)
+    }
+
+    private func ensureLoaded() async {
+        if !loaded { await load() }
     }
 }
