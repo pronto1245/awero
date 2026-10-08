@@ -31,7 +31,7 @@ final class CoreDataStore: @unchecked Sendable {
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
         if readOnly {
-            description.setOption(true as NSNumber, forKey: NSSQLiteReadOnlyOption)
+            description.setOption(["query_only": "1"] as NSDictionary, forKey: NSSQLitePragmasOption)
         }
         container.persistentStoreDescriptions = [description]
 
