@@ -137,7 +137,7 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun isScheduled(a: Alarm): Boolean {
-        if (!a.enabled || a.weekdays.isEmpty() || !AlarmNotificationManager.hasAlarmAccess(context)) return false
+        if (!a.enabled || a.weekdays.isEmpty()) return false
         val exactAlarmAccessGranted =
             Build.VERSION.SDK_INT < VERSION_CODES.S || manager.canScheduleExactAlarms()
         val pendingWeekdays = a.weekdays.filter { day ->
