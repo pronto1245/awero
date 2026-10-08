@@ -86,28 +86,27 @@ final class WakeFlowController: ObservableObject {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
         snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
-        let alarmScheduler: AlarmScheduler
-        if let configuredScheduler = self.scheduler {
-            alarmScheduler = configuredScheduler
-        } else {
-            let createdScheduler = AlarmScheduler()
-            self.scheduler = createdScheduler
-            alarmScheduler = createdScheduler
-        }
-
         do {
             if let scheduleSnoozeOperation {
                 try await scheduleSnoozeOperation(alarm)
             } else {
+                let alarmScheduler: AlarmScheduler
+                if let configuredScheduler = self.scheduler {
+                    alarmScheduler = configuredScheduler
+                } else {
+                    let createdScheduler = AlarmScheduler()
+                    self.scheduler = createdScheduler
+                    alarmScheduler = createdScheduler
+                }
                 try await alarmScheduler.scheduleSnooze(for: alarm)
             }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
-                await cancelScheduledSnooze(for: alarm, fallbackScheduler: alarmScheduler)
+                await cancelScheduledSnooze(for: alarm)
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
-            await cancelScheduledSnooze(for: alarm, fallbackScheduler: alarmScheduler)
+            await cancelScheduledSnooze(for: alarm)
             snoozeError = error.localizedDescription
             return false
         }
@@ -121,12 +120,20 @@ final class WakeFlowController: ObservableObject {
         snoozeError = nil
     }
 
-    private func cancelScheduledSnooze(for alarm: Alarm, fallbackScheduler: AlarmScheduler) async {
+    private func cancelScheduledSnooze(for alarm: Alarm) async {
         if let cancelSnoozeOperation {
             await cancelSnoozeOperation(alarm)
-        } else {
-            await fallbackScheduler.cancelSnooze(for: alarm)
+            return
         }
+        let alarmScheduler: AlarmScheduler
+        if let configuredScheduler = self.scheduler {
+            alarmScheduler = configuredScheduler
+        } else {
+            let createdScheduler = AlarmScheduler()
+            self.scheduler = createdScheduler
+            alarmScheduler = createdScheduler
+        }
+        await alarmScheduler.cancelSnooze(for: alarm)
     }
 
     func emergencyStop() async {
