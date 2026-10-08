@@ -32,14 +32,7 @@ jobs:
         with:
           gradle-version: '8.9'
       - run: gradle -p apps/android :app:assembleDebug
-      - name: Run Android persistence tests
-        shell: bash
-        run: |
-          set +e
-          gradle -p apps/android :app:testDebugUnitTest --tests app.awero.PersistenceRecoveryTest --stacktrace
-          status=$?
-          cat apps/android/app/build/test-results/testDebugUnitTest/*.xml || true
-          exit $status
+      - run: gradle -p apps/android :app:testDebugUnitTest
 
   ios-syntax:
     runs-on: macos-15
