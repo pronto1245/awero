@@ -51,6 +51,16 @@ class ProcessCrashRecoveryTest {
                     enabled = true, missionType = MissionType.STEPS, difficulty = Difficulty.MEDIUM
                 )
                 alarms.save(alarm)
+                val instrumentation = InstrumentationRegistry.getInstrumentation()
+                ParcelFileDescriptor.AutoCloseInputStream(
+                    instrumentation.uiAutomation.executeShellCommand(
+                        "appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow"
+                    )
+                ).bufferedReader().use { it.readText() }
+                assertTrue(
+                    "Exact alarm app-op must be granted in the test fixture",
+                    context.getSystemService(android.app.AlarmManager::class.java).canScheduleExactAlarms()
+                )
                 scheduler.schedule(alarm)
                 assertTrue(scheduler.isScheduled(alarm))
                 controller.start(alarm, 1000L)
