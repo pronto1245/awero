@@ -84,8 +84,8 @@
 - [x] Wake session API (transactional events, idempotency, owner checks)
 - [x] Statistics API (owner-scoped totals and streaks)
 - [x] Analytics ingestion (owner-scoped batches and idempotent retries)
-- [ ] Offline sync queue (API intake exists; entity reconciliation remains)
-- [ ] Conflict resolution
+- [x] Offline sync queue (transactional ALARM create/update/delete reconciliation)
+- [x] Conflict resolution (optimistic versions, stable retry results, server snapshot returned)
 - [x] Support diagnostics tickets (bounded, owner-scoped, idempotent)
 
 ## 9. Monetization

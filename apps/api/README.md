@@ -52,11 +52,13 @@ The client supplies UUIDs for the session and each event. Repeating the same cre
 
 - `GET /api/v1/statistics/summary` — return the caller's lifetime wake totals, completion rate, average completion time, and current/best consecutive-day streak. Successful wake days use each alarm's fixed timezone or the caller's latest registered device timezone.
 
-## Offline operation intake
+## Offline alarm sync and conflicts
 
-- `POST /api/v1/sync` — atomically accept up to 100 queued operations and return their acknowledged UUIDs
+- `POST /api/v1/sync` — atomically reconcile up to 100 queued `ALARM` operations
 
-Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. IDs are idempotency keys: a retry with the same content is acknowledged again, while reusing an ID with different content returns a conflict. `occurredAt` accepts ISO dates, Unix milliseconds, Unix seconds, and Swift `Date` seconds since 2001. This endpoint stores the owner-scoped operation log; entity conflict resolution and applying operations to server entities remain separate work.
+Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. Supported alarm operation types are `CREATE_ALARM`, `UPDATE_ALARM`, `DELETE_ALARM`, and `UPSERT`. `clientVersion` is the expected server version for updates/deletes; a missing alarm can be created at client version 0 or 1. Successful operations are applied in the same transaction as their idempotency record and alarm version snapshot.
+
+The response keeps `acceptedIds` and `accepted` for applied or previously acknowledged operations and adds `conflicts`. A version mismatch returns the stored server alarm and version without changing the alarm. Replaying the same operation ID and content repeats its original applied/conflict result; reusing an ID with changed content returns HTTP 409. Unsupported entity types or operation types return HTTP 422. `occurredAt` accepts ISO dates, Unix milliseconds, Unix seconds, and Swift `Date` seconds since 2001. Existing intake records from before reconciliation remain acknowledged and are never replayed against alarm data.
 
 ## Analytics ingestion
 

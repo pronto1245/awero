@@ -53,6 +53,7 @@ async function main() {
   });
   assert(created.status === 201, 'alarm create failed');
   assert(created.data.item.version === 1, 'new alarm version was not initialized');
+  assert(created.data.item.enabled === true && created.data.item.weekdays.length === 7, 'alarm defaults were incomplete');
   const alarmId = created.data.item.id;
 
   const invalidTimezone = await request(`/alarms/${alarmId}`, {
@@ -161,20 +162,67 @@ async function main() {
     entityType: 'ALARM',
     entityId: alarmId,
     clientVersion: 2,
-    payload: { minute: 45 },
+    payload: { minute: 50, weekdays: [1, 2, 3] },
     occurredAt: Date.now(),
   };
   const sync = await request('/sync', { method: 'POST', token, body: { operations: [syncOperation] } });
   assert(
     sync.status === 201 && sync.data.accepted === 1 && sync.data.acceptedIds[0] === syncOperation.id,
-    'offline sync operation was not accepted',
+    'offline sync operation was not applied',
   );
+  const syncedAlarm = await request('/alarms', { token });
+  const syncedItem = syncedAlarm.data.items.find((item) => item.id === alarmId);
+  assert(syncedItem.version === 3 && syncedItem.minute === 50 && syncedItem.weekdays.join(',') === '1,2,3', 'sync did not reconcile the alarm');
   const syncRetry = await request('/sync', { method: 'POST', token, body: { operations: [syncOperation] } });
   assert(syncRetry.status === 201 && syncRetry.data.accepted === 1, 'sync retry was not idempotently acknowledged');
+  const afterRetry = await request('/alarms', { token });
+  assert(afterRetry.data.items.find((item) => item.id === alarmId).version === 3, 'sync retry applied the alarm twice');
+  const staleSyncOperation = {
+    id: randomUUID(), operationType: 'UPDATE_ALARM', entityType: 'ALARM', entityId: alarmId,
+    clientVersion: 2, payload: { minute: 5 }, occurredAt: Date.now(),
+  };
+  const staleSync = await request('/sync', { method: 'POST', token, body: { operations: [staleSyncOperation] } });
+  assert(
+    staleSync.status === 201 && staleSync.data.accepted === 0 && staleSync.data.conflicts[0].code === 'VERSION_MISMATCH' &&
+      staleSync.data.conflicts[0].serverVersion === 3 && staleSync.data.conflicts[0].serverEntity.minute === 50,
+    'stale sync did not return the current server alarm as a conflict',
+  );
+  const staleRetry = await request('/sync', { method: 'POST', token, body: { operations: [staleSyncOperation] } });
+  assert(staleRetry.data.conflicts[0].code === 'VERSION_MISMATCH', 'conflict retry did not return its stable result');
   const conflictingSync = await request('/sync', {
     method: 'POST', token, body: { operations: [{ ...syncOperation, payload: { minute: 5 } }] },
   });
   assert(conflictingSync.status === 409, 'reused sync operation ID accepted different content');
+
+  const syncedAlarmId = randomUUID();
+  const syncCreate = {
+    id: randomUUID(), operationType: 'CREATE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
+    clientVersion: 1, payload: { label: 'Offline alarm', hour: 6, minute: 15, enabled: true, weekdays: [1, 3, 5] },
+    occurredAt: Date.now(),
+  };
+  const syncCreated = await request('/sync', { method: 'POST', token, body: { operations: [syncCreate] } });
+  assert(syncCreated.status === 201 && syncCreated.data.accepted === 1, 'offline alarm create was not applied');
+  const createdFromSync = await request('/alarms', { token });
+  assert(createdFromSync.data.items.some((item) => item.id === syncedAlarmId && item.hour === 6), 'synced alarm was not readable');
+  const syncUpdate = {
+    id: randomUUID(), operationType: 'UPDATE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
+    clientVersion: 1, payload: { minute: 20 }, occurredAt: Date.now(),
+  };
+  const syncUpdated = await request('/sync', { method: 'POST', token, body: { operations: [syncUpdate] } });
+  assert(syncUpdated.data.accepted === 1, 'offline alarm update was not applied');
+  const syncDelete = {
+    id: randomUUID(), operationType: 'DELETE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
+    clientVersion: 2, payload: {}, occurredAt: Date.now(),
+  };
+  const syncDeleted = await request('/sync', { method: 'POST', token, body: { operations: [syncDelete] } });
+  assert(syncDeleted.data.accepted === 1, 'offline alarm delete was not applied');
+  const afterSyncDelete = await request('/alarms', { token });
+  assert(!afterSyncDelete.data.items.some((item) => item.id === syncedAlarmId), 'synced delete did not create a tombstone');
+  const unsupportedSync = await request('/sync', {
+    method: 'POST', token,
+    body: { operations: [{ id: randomUUID(), operationType: 'UPDATE', entityType: 'PROFILE', entityId: randomUUID(), payload: {} }] },
+  });
+  assert(unsupportedSync.status === 422, 'unsupported sync entity was silently accepted');
 
   const analyticsEvent = {
     id: randomUUID(),
@@ -207,7 +255,7 @@ async function main() {
       platform: 'IOS',
       timezone: 'Europe/Moscow',
       alarmId,
-      alarmVersion: 2,
+      alarmVersion: 3,
       errorCode: 'SCHEDULE_MISSING',
       pendingSyncCount: 2,
     },
@@ -261,7 +309,7 @@ async function main() {
   assert(crossOwnerSupport.status === 409, 'support ticket ID was reused across anonymous owners');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
-  assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');
+  assert(removed.status === 200 && removed.data.version === 4, 'alarm delete/tombstone failed');
   const list = await request('/alarms', { token });
   assert(list.status === 200 && list.data.items.length === 0, 'deleted alarm remained in the list');
 
