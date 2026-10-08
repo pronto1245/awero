@@ -109,9 +109,11 @@ jobs:
           if-no-files-found: warn
 
   ios-syntax:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
+      - name: Show selected Xcode version
+        run: xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate iOS app project
