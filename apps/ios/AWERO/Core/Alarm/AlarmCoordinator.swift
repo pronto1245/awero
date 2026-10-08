@@ -32,6 +32,7 @@ final class AlarmCoordinator {
     }
 
     func repairAll() async {
+        await store.load()
         await AlarmRecovery(scheduler: scheduler, store: store).reconcile()
     }
 }
