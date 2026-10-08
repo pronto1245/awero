@@ -10,6 +10,8 @@ import app.awero.core.alarm.MissionType
 import app.awero.core.storage.AweroDatabase
 import app.awero.core.statistics.StatisticsStore
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -130,6 +132,38 @@ class WakeFlowControllerTest {
         assertEquals(WakeFlowController.State.IDLE, flow.state.value)
         assertEquals(1, flow.snoozeCount.value)
         assertEquals(1, sessions.loadActive()?.snoozeCount)
+    }
+
+    @Test
+    fun repeatedSnoozeDuringPersistenceDoesNotCancelScheduledAlarm() = runBlocking {
+        val store = AlarmStore(context, database)
+        val sessions = WakeSessionStore(context, database)
+        val stats = StatisticsStore(context, database)
+        val alarm = alarm("overlapping-snooze", maxSnoozes = 2)
+        store.save(alarm)
+        var schedules = 0
+        var cancellations = 0
+        val flow = WakeFlowController(
+            sessions, context, stats, alarmStore = store,
+            scheduleAlarmSnooze = { _, _ -> schedules += 1 },
+            cancelAlarmSnooze = { cancellations += 1 }
+        )
+        flow.start(alarm, 1_000L)
+
+        // Run until the Room write suspends, then deliver the second tap.
+        val first = async(start = CoroutineStart.UNDISPATCHED) { flow.snooze() }
+        val repeated = flow.snooze()
+        assertFalse(repeated)
+        assertTrue(first.await())
+        assertEquals(1, schedules)
+        assertEquals(0, cancellations)
+        assertEquals(1, sessions.loadActive()?.snoozeCount)
+
+        flow.start(alarm, 2_000L)
+        assertTrue(flow.snooze())
+        assertEquals(2, schedules)
+        assertEquals(0, cancellations)
+        assertEquals(2, sessions.loadActive()?.snoozeCount)
     }
 
     private fun alarm(id: String, maxSnoozes: Int = 3) = Alarm(

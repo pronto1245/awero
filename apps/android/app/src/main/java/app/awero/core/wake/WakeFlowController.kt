@@ -32,6 +32,7 @@ class WakeFlowController(
     private val _snoozeError = MutableStateFlow<String?>(null)
     private val _actionError = MutableStateFlow<String?>(null)
     private val _currentAlarm = MutableStateFlow<Alarm?>(null)
+    private var snoozeInProgress = false
 
     val state: StateFlow<State> = _state.asStateFlow()
     val mission: StateFlow<MissionType> = _mission.asStateFlow()
@@ -103,25 +104,31 @@ class WakeFlowController(
     suspend fun snooze(): Boolean {
         val alarm = _currentAlarm.value ?: return false
         if (_state.value != State.RINGING || _snoozeCount.value >= alarm.maxSnoozes) return false
-        val previousCount = _snoozeCount.value
-        val nextCount = previousCount + 1
-        _snoozeError.value = null
+        if (snoozeInProgress) return false
+        snoozeInProgress = true
         try {
-            scheduleAlarmSnooze(alarm, alarm.snoozeMinutes)
-            if (!sessions.setSnoozeCount(nextCount)) {
+            val previousCount = _snoozeCount.value
+            val nextCount = previousCount + 1
+            _snoozeError.value = null
+            try {
+                scheduleAlarmSnooze(alarm, alarm.snoozeMinutes)
+                if (!sessions.setSnoozeCount(nextCount)) {
+                    runCatching { cancelAlarmSnooze(alarm) }
+                    _snoozeError.value = "Could not save snooze. The alarm is still ringing."
+                    return false
+                }
+            } catch (error: Exception) {
                 runCatching { cancelAlarmSnooze(alarm) }
-                _snoozeError.value = "Could not save snooze. The alarm is still ringing."
+                _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
                 return false
             }
-        } catch (error: Exception) {
-            runCatching { cancelAlarmSnooze(alarm) }
-            _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
-            return false
+            _snoozeCount.value = nextCount
+            AlarmRingingService.stop(context)
+            _state.value = State.IDLE
+            return true
+        } finally {
+            snoozeInProgress = false
         }
-        _snoozeCount.value = nextCount
-        AlarmRingingService.stop(context)
-        _state.value = State.IDLE
-        return true
     }
 
     suspend fun emergencyStop(): Boolean {
