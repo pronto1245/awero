@@ -11,9 +11,11 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
-class WakeSessionStore(context: Context) {
+class WakeSessionStore(
+    context: Context,
+    private val database: AweroDatabase = AweroDatabase.get(context.applicationContext)
+) {
     private val appContext = context.applicationContext
-    private val database = AweroDatabase.get(appContext)
     private val preferences = appContext.getSharedPreferences("awero_wake_sessions", Context.MODE_PRIVATE)
     private val migrationMutex = Mutex()
     private var active: WakeSession? = null
