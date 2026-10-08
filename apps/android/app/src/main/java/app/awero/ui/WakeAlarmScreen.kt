@@ -84,6 +84,7 @@ object WakeAlarmScreen {
                             },
                             onFailure = {}
                         ))
+                        root.addView(emergency)
                     }
                 }
             )
@@ -94,8 +95,8 @@ object WakeAlarmScreen {
         primary.setOnClickListener {
             activity.lifecycleScope.launch {
                 if (flow.state.value == WakeFlowController.State.RINGING) {
-                    flow.beginMission()
-                    showMission()
+                    if (flow.beginMission()) showMission()
+                    else showError(flow.actionError.value ?: "Could not save mission progress. The alarm is still active.")
                 }
             }
         }

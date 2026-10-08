@@ -137,7 +137,3 @@ class WakeFlowController(
         return true
     }
 }
-        AlarmRingingService.stop(context)
-        _state.value = State.EMERGENCY_STOPPED
-    }
-}
