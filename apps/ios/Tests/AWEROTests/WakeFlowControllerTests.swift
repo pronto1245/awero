@@ -3,6 +3,36 @@ import XCTest
 
 @MainActor
 final class WakeFlowControllerTests: XCTestCase {
+    #if canImport(AlarmKit) && canImport(AppIntents)
+    @available(iOS 26.0, *)
+    func testAlarmKitIntentDispatchStartsAndStopsPersistedWakeSession() async throws {
+        let (database, alarm) = try await makeDatabase()
+        let saved = await database.saveAlarm(alarm)
+        XCTAssertTrue(saved)
+
+        let flow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+
+        await StartAweroMissionIntent.trigger(alarmID: alarm.id.uuidString, using: flow)
+
+        XCTAssertEqual(flow.state, .ringing)
+        let activeSession = await database.fetchActiveWakeSession()
+        XCTAssertEqual(activeSession?.alarmId, alarm.id)
+
+        let missionStarted = await flow.beginMission()
+        XCTAssertTrue(missionStarted)
+        XCTAssertEqual(flow.state, .mission)
+
+        let stopped = await flow.emergencyStop()
+        XCTAssertTrue(stopped)
+        XCTAssertEqual(flow.state, .emergencyStopped)
+        let sessionAfterStop = await database.fetchActiveWakeSession()
+        XCTAssertNil(sessionAfterStop)
+    }
+    #endif
+
     func testRestoreFallbackAndCompletionPersistAcrossControllerRestart() async throws {
         let (database, alarm) = try await makeDatabase()
         let saved = await database.saveAlarm(alarm)

@@ -23,11 +23,14 @@ struct StartAweroMissionIntent: LiveActivityIntent {
         self.alarmID = alarmID
     }
 
+    @MainActor
+    static func trigger(alarmID: String, using controller: WakeFlowController) async {
+        guard let id = UUID(uuidString: alarmID) else { return }
+        await controller.start(alarmID: id)
+    }
+
     func perform() async throws -> some IntentResult {
-        guard let id = UUID(uuidString: alarmID) else {
-            return .result()
-        }
-        await WakeFlowController.shared.start(alarmID: id)
+        await Self.trigger(alarmID: alarmID, using: .shared)
         return .result()
     }
 }
