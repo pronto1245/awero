@@ -133,7 +133,7 @@ jobs:
         shell: bash
         run: |
           SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
-          find apps/ios -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
+          find apps/ios/AWERO -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
       - name: Run iOS alarm scheduler smoke test
         run: |
           swiftc -framework UserNotifications \
