@@ -1,6 +1,7 @@
 package app.awero.core.alarm
 
 import android.content.Context
+import android.util.Log
 import java.util.UUID
 
 class AlarmCoordinator(
@@ -63,12 +64,29 @@ class AlarmCoordinator(
     }
 
     suspend fun repair(forceReschedule: Boolean = false) {
-        store.all().forEach { alarm ->
-            if (!alarm.enabled) {
-                scheduler.cancel(alarm)
-            } else if (forceReschedule || !scheduler.isScheduled(alarm)) {
-                scheduler.schedule(alarm)
-            }
+        val alarms = try {
+            store.all()
+        } catch (error: Exception) {
+            Log.e(TAG, "Could not load alarms for recovery", error)
+            return
         }
+
+        runIndependently(
+            items = alarms,
+            action = { alarm ->
+                if (!alarm.enabled) {
+                    scheduler.cancel(alarm)
+                } else if (forceReschedule || !scheduler.isScheduled(alarm)) {
+                    scheduler.schedule(alarm)
+                }
+            },
+            onFailure = { alarm, error ->
+                Log.e(TAG, "Could not repair alarm schedule: ${alarm.id}", error)
+            }
+        )
+    }
+
+    private companion object {
+        const val TAG = "AWERO.AlarmCoordinator"
     }
 }
