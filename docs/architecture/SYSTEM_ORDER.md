@@ -44,7 +44,9 @@
 - Statistics.
 - Streak.
 - Failure/support flow.
+- Use the complete cross-platform feature scope and acceptance rules in [Product Requirements](../PRODUCT_REQUIREMENTS.md).
 - Use competitor and review findings as acceptance inputs: [Competitor and Review Gap Analysis](../research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md).
+- Keep all planned competitor capabilities tracked, including optional weather/morning briefing and exercise missions; sequence them after the reliability and core mission gates.
 - Visual direction and screen acceptance criteria: [Product UX Design](../design/PRODUCT_UX_DESIGN.md) (planned; not implemented).
 - Keep sort order and alarm edits predictable; explain repeat/timezone/next fire.
 - Never place ads, review prompts, login, paywall, or network-dependent flow in the ringing/mission path.
