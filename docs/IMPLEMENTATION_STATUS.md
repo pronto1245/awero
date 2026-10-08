@@ -124,9 +124,9 @@ AWERO must **not** be described as production-ready until the physical iOS and A
 Current status: **MVP implementation in progress; repository contains foundation and runtime scaffolding, not a verified production build.**
 
 ## Competitor research
-- [x] Public App Store / Google Play descriptions, screenshots and review excerpts reviewed for Erly, Alarmy, and I Can't Wake Up!
-- [x] Findings and derived AWERO acceptance criteria recorded in [Competitor and Review Gap Analysis](research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md)
-- [ ] Verify candidate requirements with additional review samples and installed-runtime tests before feature implementation. Desk research is qualitative and does not mark product code complete.
+- [x] Public App Store / Google Play descriptions, screenshots and visible review excerpts reviewed for Erly, Alarmy, I Can't Wake Up!, WAKR and Wakey.
+- [x] Competitor features and complaint-derived AWERO acceptance criteria recorded in [Competitor and Review Gap Analysis](research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md) and [Product Requirements](PRODUCT_REQUIREMENTS.md).
+- [ ] Expand review sampling systematically and test competitors in installed runtimes before treating the research as comprehensive. Current desk research is qualitative, based on public storefront material, and does not mark AWERO product code complete.
 
 ## Reliability Foundation
 
