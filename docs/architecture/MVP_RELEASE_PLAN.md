@@ -34,6 +34,14 @@ The MVP is complete only when a new user can:
 
 Competitor and review findings refine acceptance criteria without changing this implementation order: [Competitor and Review Gap Analysis](../research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md). AWERO is not considered complete from a feature checklist alone: both platforms must pass the alarm and wake-flow failure matrix below.
 
+## Full product scope after the MVP gate
+
+The complete competitor-informed scope is recorded in [Product Requirements](../PRODUCT_REQUIREMENTS.md). Post-MVP capabilities remain part of the product roadmap and are not dropped:
+- P1: camera/object and exercise missions (push-ups, squats, yoga), mission sequences, wake-up check, and dated progress/streak history.
+- P2: optional localized weather and morning briefing, sleep support, social accountability, and adaptive/AI recommendations.
+
+Weather is informational only. Location permission is optional, weather/network unavailability never affects alarm creation or delivery, and wake missions use retry/fallback rules. These features begin after cross-platform P0 alarm reliability and the approved Math/Steps/QR mission gate.
+
 ## Non-negotiable invariants
 
 - Backend outage never prevents a scheduled local alarm.
