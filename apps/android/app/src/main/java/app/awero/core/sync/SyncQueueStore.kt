@@ -15,9 +15,9 @@ class SyncQueueStore(context: Context) {
         entityId: String,
         payload: JSONObject,
         clientVersion: Int? = null,
-        occurredAt: Long = System.currentTimeMillis()
+        occurredAt: Long = System.currentTimeMillis(),
+        id: String = UUID.randomUUID().toString()
     ): String {
-        val id = UUID.randomUUID().toString()
         database.syncOperations().insert(
             SyncOperationEntity(
                 id = id,
