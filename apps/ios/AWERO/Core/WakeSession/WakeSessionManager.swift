@@ -15,9 +15,7 @@ final class WakeSessionManager {
     }
 
     func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
-        if let existing = await database.fetchActiveWakeSession(),
-           existing.alarmId == alarm.id,
-           existing.alarmVersion == alarm.version {
+        if let existing = await database.fetchActiveWakeSession() {
             current = existing
             return false
         }
@@ -44,7 +42,7 @@ final class WakeSessionManager {
 
     func startMission() async {
         await ensureCurrent()
-        guard var session = current, session.result == nil else { return }
+        guard var session = current, session.result == nil, session.missionStartedAt == nil else { return }
         session.missionStartedAt = .now
         current = session
         await database.saveWakeSession(session)
@@ -65,7 +63,7 @@ final class WakeSessionManager {
 
     func setSnoozeCount(_ count: Int) async {
         await ensureCurrent()
-        guard var session = current, session.result == nil else { return }
+        guard var session = current, session.result == nil, session.snoozeCount != count else { return }
         session.snoozeCount = count
         current = session
         await database.saveWakeSession(session)
@@ -73,7 +71,7 @@ final class WakeSessionManager {
 
     func markFallback() async {
         await ensureCurrent()
-        guard var session = current, session.result == nil else { return }
+        guard var session = current, session.result == nil, !session.fallbackUsed else { return }
         session.fallbackUsed = true
         current = session
         await database.saveWakeSession(session)
