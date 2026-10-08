@@ -63,3 +63,9 @@ Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`,
 - `POST /api/v1/analytics/events` — atomically accept up to 100 client events
 
 Each event uses `id`, `eventName`, `eventVersion`, optional `properties`, and optional `occurredAt`. Event properties are limited to 16 KiB per event. IDs are idempotency keys, and reusing an ID with changed content returns a conflict. Analytics rows are scoped to the authenticated anonymous account and latest registered device.
+
+## Support diagnostics
+
+- `POST /api/v1/support/diagnostics` — create a support ticket with a limited diagnostics object
+
+The caller supplies an idempotency UUID, category (`ALARM`, `MISSION`, `SYNC`, or `OTHER`), and optional app/platform/OS/timezone/alarm/error-code/pending-sync fields. Unknown fields and invalid timezones are rejected. The API stores at most 16 KiB and acknowledges retries with the same ticket contents.

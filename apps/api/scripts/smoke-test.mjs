@@ -199,6 +199,32 @@ async function main() {
   });
   assert(conflictingAnalytics.status === 409, 'analytics event ID accepted changed properties');
 
+  const supportTicket = {
+    id: randomUUID(),
+    category: 'ALARM',
+    diagnostics: {
+      appVersion: '0.1.0',
+      platform: 'IOS',
+      timezone: 'Europe/Moscow',
+      alarmId,
+      alarmVersion: 2,
+      errorCode: 'SCHEDULE_MISSING',
+      pendingSyncCount: 2,
+    },
+  };
+  const support = await request('/support/diagnostics', { method: 'POST', token, body: supportTicket });
+  assert(support.status === 201 && support.data.item.status === 'OPEN', 'support diagnostics ticket was not created');
+  const supportRetry = await request('/support/diagnostics', { method: 'POST', token, body: supportTicket });
+  assert(supportRetry.status === 201 && supportRetry.data.duplicate, 'support ticket retry was not idempotent');
+  const conflictingSupport = await request('/support/diagnostics', {
+    method: 'POST', token, body: { ...supportTicket, diagnostics: { ...supportTicket.diagnostics, errorCode: 'OTHER' } },
+  });
+  assert(conflictingSupport.status === 409, 'support ticket ID accepted changed diagnostics');
+  const invalidSupportTimezone = await request('/support/diagnostics', {
+    method: 'POST', token, body: { ...supportTicket, id: randomUUID(), diagnostics: { timezone: 'not-a-timezone' } },
+  });
+  assert(invalidSupportTimezone.status === 400, 'invalid support diagnostics timezone was accepted');
+
   const secondRegistration = await request('/auth/anonymous', {
     method: 'POST',
     body: {
@@ -229,6 +255,10 @@ async function main() {
     method: 'POST', token: secondRegistration.data.accessToken, body: { events: [analyticsEvent] },
   });
   assert(crossOwnerAnalytics.status === 409, 'analytics event ID was reused across anonymous owners');
+  const crossOwnerSupport = await request('/support/diagnostics', {
+    method: 'POST', token: secondRegistration.data.accessToken, body: supportTicket,
+  });
+  assert(crossOwnerSupport.status === 409, 'support ticket ID was reused across anonymous owners');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');
