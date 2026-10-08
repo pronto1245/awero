@@ -7,9 +7,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
-class AlarmStore(context: Context) {
+class AlarmStore(
+    context: Context,
+    private val database: AweroDatabase = AweroDatabase.get(context.applicationContext)
+) {
     private val appContext = context.applicationContext
-    private val database = AweroDatabase.get(appContext)
     private val preferences = appContext.getSharedPreferences("awero_alarms", Context.MODE_PRIVATE)
     private val migrationMutex = Mutex()
 
