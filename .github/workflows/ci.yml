@@ -71,27 +71,28 @@ jobs:
             apps/ios/Tests/PersistenceSmokeMain.swift \
             -o /tmp/awero-persistence-smoke
           /tmp/awero-persistence-smoke
-      - name: Crash and restart persistence test
-        shell: bash
-        run: |
-          ROOT=$(mktemp -d)
-          STORE="$ROOT/AWERO.sqlite"
-          AWERO_CRASH_PATH="$STORE" AWERO_CRASH_PHASE=write /tmp/awero-persistence-smoke &
-          PID=$!
-          sleep 3
-          kill -9 "$PID"
-          wait "$PID" 2>/dev/null || true
-          AWERO_CRASH_PATH="$STORE" AWERO_CRASH_PHASE=read /tmp/awero-persistence-smoke
-
       - name: Verify persistence across forced process termination
         shell: bash
         run: |
+          set -euo pipefail
           CRASH_DIR=$(mktemp -d)
           CRASH_PATH="$CRASH_DIR/AWERO.sqlite"
+          PID=""
+          trap 'if [ -n "$PID" ]; then kill -9 "$PID" 2>/dev/null || true; fi; rm -rf "$CRASH_DIR"' EXIT
           AWERO_CRASH_PHASE=write AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke &
           PID=$!
-          sleep 2
+          for ATTEMPT in $(seq 1 300); do
+            if [ -f "$CRASH_PATH.ready" ]; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Crash fixture exited before committing data"
+              exit 1
+            fi
+            sleep 0.1
+          done
+          test -f "$CRASH_PATH.ready"
           kill -9 "$PID"
-          wait "$PID" || test "$?" -eq 137
+          EXIT_CODE=0
+          wait "$PID" || EXIT_CODE=$?
+          PID=""
+          test "$EXIT_CODE" -eq 137
           AWERO_CRASH_PHASE=read AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke
-          rm -rf "$CRASH_DIR"

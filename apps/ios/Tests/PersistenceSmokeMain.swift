@@ -260,7 +260,8 @@ struct PersistenceSmokeMain {
                 missionType: .math,
                 difficulty: .medium
             )
-            await store.saveAlarm(alarm)
+            let alarmSaved = await store.saveAlarm(alarm)
+            precondition(alarmSaved)
             let session = WakeSession(
                 id: UUID(),
                 alarmId: alarm.id,
@@ -276,7 +277,23 @@ struct PersistenceSmokeMain {
                 fallbackUsed: true,
                 emergencyStop: false
             )
-            await store.saveWakeSession(session)
+            let sessionSaved = await store.saveWakeSession(session)
+            precondition(sessionSaved)
+            let operation = SyncOperation(
+                id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
+                operationType: "UPDATE_ALARM",
+                entityType: "ALARM",
+                entityId: alarm.id.uuidString,
+                clientVersion: 1,
+                payload: ["hour": "7"]
+            )
+            let operationSaved = await store.saveSyncOperation(operation)
+            let duplicateSaved = await store.saveSyncOperation(operation)
+            let retrySaved = await store.retrySyncOperation(
+                operation.id, nextAttemptAt: Date(timeIntervalSinceNow: 3600)
+            )
+            precondition(operationSaved && duplicateSaved && retrySaved)
+            try Data("READY".utf8).write(to: storeURL.appendingPathExtension("ready"), options: .atomic)
             print("AWERO crash phase write: READY")
             while true {
                 try await Task.sleep(nanoseconds: 60_000_000_000)
@@ -293,6 +310,23 @@ struct PersistenceSmokeMain {
             precondition(session?.missionStartedAt != nil)
             precondition(session?.snoozeCount == 1)
             precondition(session?.fallbackUsed == true)
+            let blockedRetry = await store.fetchDueSyncOperations()
+            precondition(blockedRetry.isEmpty)
+            let operationId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+            let retrySaved = await store.retrySyncOperation(operationId, nextAttemptAt: .distantPast)
+            precondition(retrySaved)
+            let recoveredQueue = await store.fetchDueSyncOperations()
+            precondition(recoveredQueue.count == 1 && recoveredQueue[0].id == operationId)
+            let duplicateSaved = await store.saveSyncOperation(recoveredQueue[0])
+            precondition(duplicateSaved)
+            let stillUnique = await store.fetchDueSyncOperations()
+            precondition(stillUnique.count == 1)
+            let controller = await MainActor.run {
+                WakeFlowController(sessionManager: WakeSessionManager(database: store), database: store)
+            }
+            await controller.restore()
+            let restoredState = await MainActor.run { controller.state }
+            precondition(restoredState == .mission)
             print("AWERO crash phase read: PASS")
             return
         }
