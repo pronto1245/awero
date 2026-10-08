@@ -83,10 +83,10 @@
 - [x] Alarm CRUD API
 - [x] Wake session API (transactional events, idempotency, owner checks)
 - [x] Statistics API (owner-scoped totals and streaks)
-- [ ] Analytics ingestion
-- [ ] Offline sync queue
+- [x] Analytics ingestion (owner-scoped batches and idempotent retries)
+- [ ] Offline sync queue (API intake exists; entity reconciliation remains)
 - [ ] Conflict resolution
-- [ ] Support tickets
+- [x] Support diagnostics tickets (bounded, owner-scoped, idempotent)
 
 ## 9. Monetization
 - [ ] iOS StoreKit 2
