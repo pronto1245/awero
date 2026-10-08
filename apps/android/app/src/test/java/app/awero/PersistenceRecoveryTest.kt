@@ -24,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
+@Config(manifest = Config.NONE, sdk = [35])
 class PersistenceRecoveryTest {
     private val context: Context
         get() = ApplicationProvider.getApplicationContext()
