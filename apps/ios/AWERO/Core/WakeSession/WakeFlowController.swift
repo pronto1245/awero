@@ -12,6 +12,8 @@ final class WakeFlowController: ObservableObject {
 
     private let sessionManager: WakeSessionManager
     private var scheduler: AlarmScheduler?
+    private let scheduleSnoozeOperation: ((Alarm) async throws -> Void)?
+    private let cancelSnoozeOperation: ((Alarm) async -> Void)?
     private let database: CoreDataStore
     private let statistics: StatisticsStore
     private(set) var currentAlarm: Alarm?
@@ -20,10 +22,14 @@ final class WakeFlowController: ObservableObject {
     init(
         sessionManager: WakeSessionManager? = nil,
         scheduler: AlarmScheduler? = nil,
-        database: CoreDataStore = .shared
+        database: CoreDataStore = .shared,
+        scheduleSnooze: ((Alarm) async throws -> Void)? = nil,
+        cancelSnooze: ((Alarm) async -> Void)? = nil
     ) {
         self.sessionManager = sessionManager ?? WakeSessionManager(database: database)
         self.scheduler = scheduler
+        self.scheduleSnoozeOperation = scheduleSnooze
+        self.cancelSnoozeOperation = cancelSnooze
         self.database = database
         self.statistics = StatisticsStore(database: database)
     }
@@ -90,14 +96,18 @@ final class WakeFlowController: ObservableObject {
         }
 
         do {
-            try await alarmScheduler.scheduleSnooze(for: alarm)
+            if let scheduleSnoozeOperation {
+                try await scheduleSnoozeOperation(alarm)
+            } else {
+                try await alarmScheduler.scheduleSnooze(for: alarm)
+            }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
-                await alarmScheduler.cancelSnooze(for: alarm)
+                await cancelScheduledSnooze(for: alarm, fallbackScheduler: alarmScheduler)
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
-            await alarmScheduler.cancelSnooze(for: alarm)
+            await cancelScheduledSnooze(for: alarm, fallbackScheduler: alarmScheduler)
             snoozeError = error.localizedDescription
             return false
         }
@@ -109,6 +119,14 @@ final class WakeFlowController: ObservableObject {
 
     func clearSnoozeError() {
         snoozeError = nil
+    }
+
+    private func cancelScheduledSnooze(for alarm: Alarm, fallbackScheduler: AlarmScheduler) async {
+        if let cancelSnoozeOperation {
+            await cancelSnoozeOperation(alarm)
+        } else {
+            await fallbackScheduler.cancelSnooze(for: alarm)
+        }
     }
 
     func emergencyStop() async {
