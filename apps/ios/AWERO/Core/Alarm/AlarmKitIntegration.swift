@@ -88,6 +88,10 @@ enum SystemAlarmKitScheduler {
         )
     }
 
+    static func cancelSnooze(for alarm: Alarm) {
+        try? AlarmManager.shared.cancel(id: identifier(for: "snooze:\(alarm.id.uuidString)"))
+    }
+
     static func cancel(_ alarm: Alarm) {
         let lastVersion = max(1, alarm.version)
         for version in 1...lastVersion {
