@@ -99,7 +99,7 @@ struct PersistenceSmokeMain {
 
         let restoredManager = await MainActor.run { WakeSessionManager(database: restartedAgain) }
         let restoredFlow = await MainActor.run {
-            WakeFlowController(sessionManager: restoredManager)
+            WakeFlowController(sessionManager: restoredManager, database: restartedAgain)
         }
         await restoredFlow.restore()
         let restoredState = await MainActor.run { restoredFlow.state }
