@@ -280,12 +280,19 @@ struct PersistenceSmokeMain {
 
         let center = SmokeNotificationCenter()
         let scheduler = AlarmScheduler(center: center)
+        let scheduleSnooze: (Alarm) async throws -> Void = { value in
+            try await scheduler.scheduleSnooze(for: value)
+        }
+        let cancelSnooze: (Alarm) async -> Void = { value in
+            await scheduler.cancelSnooze(for: value)
+        }
+        precondition(scheduleSnooze != nil && cancelSnooze != nil)
         let flow = WakeFlowController(
             sessionManager: WakeSessionManager(database: database),
             scheduler: scheduler,
             database: database,
-            scheduleSnooze: { alarm in try await scheduler.scheduleSnooze(for: alarm) },
-            cancelSnooze: { alarm in await scheduler.cancelSnooze(for: alarm) }
+            scheduleSnooze: scheduleSnooze,
+            cancelSnooze: cancelSnooze
         )
         await flow.start(alarm: alarm, scheduledAt: .now)
 
