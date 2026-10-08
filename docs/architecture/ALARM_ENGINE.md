@@ -6,7 +6,7 @@ Recurrence: iOS uses repeating calendar notifications. Android uses exact one-sh
 
 Timezone: DEVICE_LOCAL follows the device timezone. FIXED uses an IANA timezone identifier. Alarms are stored as local wall-clock components, not permanent UTC timestamps.
 
-DST: calendar APIs calculate local wall-clock occurrences. Android reconciles after boot, clock changes, and timezone changes. iOS notification schedules survive reboot and reconcile when the app becomes active.
+DST: alarms follow local wall-clock time. Android resolves a nonexistent spring-forward time by shifting it forward by the DST gap (for example, 02:30 → 03:30) and uses the earlier occurrence in a repeated fall-back hour. iOS delegates wall-clock recurrence to AlarmKit or UserNotifications and reconciles when the app becomes active. Android reconciles after boot, clock changes, and timezone changes.
 
 Recovery: local only. Missing schedules are detected and repaired without backend access.
 

@@ -8,7 +8,10 @@ import android.content.Context
 import android.content.Intent
 import java.util.Calendar
 import java.time.DateTimeException
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.TimeZone
 
 enum class AlarmReadiness {
@@ -66,6 +69,31 @@ internal fun isAlarmScheduleRegistered(
     alarm.weekdays.isNotEmpty() &&
     exactAlarmAccessGranted &&
     alarm.weekdays.all(pendingWeekdays::contains)
+
+internal fun nextAlarmOccurrence(alarm: Alarm, day: Int, now: Instant): ZonedDateTime {
+    require(alarm.enabled) { "Disabled alarms cannot be scheduled." }
+    validateAlarmSchedule(alarm)
+    require(day in alarm.weekdays) { "The requested weekday is not enabled for this alarm." }
+
+    val isoDay = when (day) {
+        Calendar.SUNDAY -> 7
+        else -> day - 1
+    }
+    val zone = resolveAlarmTimeZone(alarm).toZoneId()
+    val nowInZone = now.atZone(zone)
+    val daysAhead = (isoDay - nowInZone.dayOfWeek.value + 7) % 7
+    var occurrenceDate = nowInZone.toLocalDate().plusDays(daysAhead.toLong())
+
+    fun occurrence(date: java.time.LocalDate): ZonedDateTime =
+        LocalDateTime.of(date, java.time.LocalTime.of(alarm.hour, alarm.minute)).atZone(zone)
+
+    var candidate = occurrence(occurrenceDate)
+    if (!candidate.toInstant().isAfter(now)) {
+        occurrenceDate = occurrenceDate.plusWeeks(1)
+        candidate = occurrence(occurrenceDate)
+    }
+    return candidate
+}
 
 class AlarmScheduler(private val context: Context) {
     private val manager = context.getSystemService(AlarmManager::class.java)
@@ -171,17 +199,10 @@ class AlarmScheduler(private val context: Context) {
     }
 
     private fun next(a: Alarm, day: Int): Calendar {
-        val tz = resolveAlarmTimeZone(a)
-        val now = Calendar.getInstance(tz)
-        val target = Calendar.getInstance(tz).apply {
-            set(Calendar.HOUR_OF_DAY, a.hour)
-            set(Calendar.MINUTE, a.minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            set(Calendar.DAY_OF_WEEK, day)
+        val instant = nextAlarmOccurrence(a, day, Instant.now()).toInstant()
+        return Calendar.getInstance(resolveAlarmTimeZone(a)).apply {
+            timeInMillis = instant.toEpochMilli()
         }
-        if (target.timeInMillis <= now.timeInMillis) target.add(Calendar.WEEK_OF_YEAR, 1)
-        return target
     }
 
     private fun code(a: Alarm, day: Int) = a.id.hashCode() * 31 + day
