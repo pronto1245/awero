@@ -26,7 +26,7 @@ internal fun validateAlarmSchedule(alarm: Alarm) {
     resolveAlarmTimeZone(alarm)
 }
 
-private fun resolveAlarmTimeZone(alarm: Alarm): TimeZone {
+internal fun resolveAlarmTimeZone(alarm: Alarm): TimeZone {
     if (alarm.timezoneMode == TimezoneMode.DEVICE_LOCAL) return TimeZone.getDefault()
     val identifier = alarm.fixedTimezone
         ?: throw IllegalArgumentException("A valid fixed timezone is required for this alarm.")
