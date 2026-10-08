@@ -98,7 +98,8 @@ Do not start a later phase until its dependencies are green. Each phase gets a n
 
 ### Current phase position
 
-- Phase 0 is being consolidated in this commit.
+- Phase 0 — product scope, competitor inputs, phase order, and acceptance gates are reconciled across the governing specification and linked plans. **Complete.**
+- Next: Phase 1 — verify and complete audible alarm reliability on physical iPhone and Android devices.
 - Automated Local Persistence Hardening: recorded complete and green in CI.
 - Alarm delivery on a physical iPhone: **not passed**. The reported push notification without audible ringing is not an alarm-delivery pass.
 - Android physical alarm delivery: **not recorded as passed**.
