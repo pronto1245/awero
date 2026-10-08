@@ -64,7 +64,10 @@ class AlarmScheduler(private val context: Context) {
             context, requestCode, intent,
             PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
         )
-        if (pending != null) manager.cancel(pending)
+        if (pending != null) {
+            manager.cancel(pending)
+            pending.cancel()
+        }
     }
 
     fun isScheduled(a: Alarm): Boolean {

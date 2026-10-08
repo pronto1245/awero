@@ -3,9 +3,11 @@ package app.awero.core.alarm
 import android.content.Context
 import java.util.UUID
 
-class AlarmCoordinator(context: Context) {
-    private val store = AlarmStore(context)
-    private val scheduler = AlarmScheduler(context)
+class AlarmCoordinator(
+    context: Context,
+    private val store: AlarmStore = AlarmStore(context),
+    private val scheduler: AlarmScheduler = AlarmScheduler(context)
+) {
 
     suspend fun all(): List<Alarm> = store.all().sortedWith(compareBy<Alarm> { it.hour }.thenBy { it.minute })
 
@@ -45,9 +47,13 @@ class AlarmCoordinator(context: Context) {
         scheduler.scheduleTest(alarm)
     }
 
-    suspend fun repair() {
+    suspend fun repair(forceReschedule: Boolean = false) {
         store.all().forEach { alarm ->
-            if (alarm.enabled && !scheduler.isScheduled(alarm)) scheduler.schedule(alarm)
+            if (!alarm.enabled) {
+                scheduler.cancel(alarm)
+            } else if (forceReschedule || !scheduler.isScheduled(alarm)) {
+                scheduler.schedule(alarm)
+            }
         }
     }
 }

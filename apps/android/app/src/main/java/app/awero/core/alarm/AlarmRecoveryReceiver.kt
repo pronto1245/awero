@@ -20,11 +20,7 @@ class AlarmRecoveryReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
-                val store = AlarmStore(context)
-                val scheduler = AlarmScheduler(context)
-                store.all().forEach { alarm ->
-                    if (alarm.enabled) scheduler.schedule(alarm) else scheduler.cancel(alarm)
-                }
+                AlarmCoordinator(context).repair(forceReschedule = true)
             } finally {
                 pending.finish()
             }
