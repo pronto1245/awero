@@ -64,3 +64,16 @@ jobs:
             apps/ios/Tests/PersistenceSmokeMain.swift \
             -o /tmp/awero-persistence-smoke
           /tmp/awero-persistence-smoke
+
+      - name: Verify persistence across forced process termination
+        shell: bash
+        run: |
+          CRASH_DIR=$(mktemp -d)
+          CRASH_PATH="$CRASH_DIR/AWERO.sqlite"
+          AWERO_CRASH_PHASE=write AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke &
+          PID=$!
+          sleep 2
+          kill -9 "$PID"
+          wait "$PID" || test "$?" -eq 137
+          AWERO_CRASH_PHASE=read AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke
+          rm -rf "$CRASH_DIR"
