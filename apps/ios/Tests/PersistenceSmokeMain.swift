@@ -56,9 +56,11 @@ struct PersistenceSmokeMain {
         let pending = await restarted.fetchDueSyncOperations()
         precondition(pending.count == 1)
         await restarted.retrySyncOperation(operation.id, nextAttemptAt: Date(timeIntervalSinceNow: 3600))
-        precondition((await restarted.fetchDueSyncOperations()).isEmpty)
+        let retryBlocked = await restarted.fetchDueSyncOperations()
+        precondition(retryBlocked.isEmpty)
         await restarted.retrySyncOperation(operation.id, nextAttemptAt: .distantPast)
-        precondition((await restarted.fetchDueSyncOperations()).count == 1)
+        let retryDue = await restarted.fetchDueSyncOperations()
+        precondition(retryDue.count == 1)
 
         let session = WakeSession(
             id: UUID(),
