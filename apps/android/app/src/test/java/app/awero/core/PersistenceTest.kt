@@ -7,6 +7,8 @@ import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.Difficulty
 import app.awero.core.alarm.MissionType
 import app.awero.core.storage.AweroDatabase
+import app.awero.core.statistics.StatisticsStore
+import app.awero.core.wake.WakeFlowController
 import app.awero.core.sync.SyncQueueStore
 import app.awero.core.wake.WakeSessionStore
 import org.junit.Assert.assertEquals
@@ -53,6 +55,54 @@ class PersistenceTest {
 
         scheduler.cancel(restored)
         secondDb.close()
+        context.deleteDatabase(name)
+    }
+
+
+    @Test
+    fun fullWakeFlowRestoresUiAndPersistsStatistics() {
+        val name = "e2e-test.db"
+        val db = AweroDatabase.createForTesting(context, name)
+        val alarm = Alarm(
+            id = "e2e-alarm",
+            version = 1,
+            hour = 6,
+            minute = 30,
+            enabled = true,
+            missionType = MissionType.MATH,
+            difficulty = Difficulty.EASY
+        )
+        val alarmStore = app.awero.core.alarm.AlarmStore(context, db)
+        kotlinx.coroutines.runBlocking { alarmStore.save(alarm) }
+        val sessions1 = WakeSessionStore(context, db)
+        val stats = StatisticsStore(context, db)
+        val controller1 = WakeFlowController(sessions1, context, stats, alarmStore = alarmStore)
+
+        kotlinx.coroutines.runBlocking {
+            controller1.start(alarm, 1000L)
+            controller1.beginMission()
+        }
+        assertEquals(WakeFlowController.State.MISSION, controller1.state.value)
+
+        val controller2 = WakeFlowController(
+            WakeSessionStore(context, db),
+            context,
+            StatisticsStore(context, db),
+            alarmStore = alarmStore
+        )
+        kotlinx.coroutines.runBlocking { controller2.restore() }
+        assertEquals(WakeFlowController.State.MISSION, controller2.state.value)
+        assertEquals(MissionType.MATH, controller2.mission.value)
+
+        kotlinx.coroutines.runBlocking { controller2.completeMission() }
+        assertEquals(WakeFlowController.State.COMPLETED, controller2.state.value)
+
+        val restoredStats = db.statistics().get()
+        assertNotNull(restoredStats)
+        assertEquals(1, restoredStats?.planned)
+        assertEquals(1, restoredStats?.completed)
+
+        db.close()
         context.deleteDatabase(name)
     }
 
