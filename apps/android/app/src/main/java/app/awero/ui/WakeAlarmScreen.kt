@@ -86,6 +86,8 @@ object WakeAlarmScreen {
                     status.text = "Alarm scheduled again"
                     primary.isEnabled = false
                     snooze.isEnabled = false
+                } else {
+                    status.text = flow.snoozeError.value ?: "Snooze failed. The alarm is still ringing."
                 }
             }
         }
