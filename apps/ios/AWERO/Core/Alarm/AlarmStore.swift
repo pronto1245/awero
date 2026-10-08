@@ -14,13 +14,15 @@ final class AlarmStore: ObservableObject {
         await migrateLegacyIfNeeded()
     }
 
-    func save(_ alarm: Alarm) async {
-        await database.saveAlarm(alarm)
+    @discardableResult
+    func save(_ alarm: Alarm) async -> Bool {
+        guard await database.saveAlarm(alarm) else { return false }
         if let index = alarms.firstIndex(where: { $0.id == alarm.id }) {
             alarms[index] = alarm
         } else {
             alarms.append(alarm)
         }
+        return true
     }
 
     func update(_ alarm: Alarm) async {
@@ -29,9 +31,11 @@ final class AlarmStore: ObservableObject {
         await save(next)
     }
 
-    func delete(_ alarm: Alarm) async {
-        await database.deleteAlarm(alarm)
+    @discardableResult
+    func delete(_ alarm: Alarm) async -> Bool {
+        guard await database.deleteAlarm(alarm) else { return false }
         alarms.removeAll { $0.id == alarm.id }
+        return true
     }
 
     private func migrateLegacyIfNeeded() async {
