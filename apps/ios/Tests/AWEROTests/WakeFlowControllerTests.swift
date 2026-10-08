@@ -4,7 +4,7 @@ import XCTest
 @MainActor
 final class WakeFlowControllerTests: XCTestCase {
     func testRestoreFallbackAndCompletionPersistAcrossControllerRestart() async throws {
-        let (database, alarm) = try makeDatabase()
+        let (database, alarm) = try await makeDatabase()
         let saved = await database.saveAlarm(alarm)
         XCTAssertTrue(saved)
 
@@ -100,11 +100,14 @@ final class WakeFlowControllerTests: XCTestCase {
         XCTAssertNil(activeSession)
     }
 
-    private func makeDatabase(maxSnoozes: Int = 3) throws -> (CoreDataStore, Alarm) {
+    private func makeDatabase(maxSnoozes: Int = 3) async throws -> (CoreDataStore, Alarm) {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent("awero-wake-flow-tests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let database = CoreDataStore(storeURL: directory.appendingPathComponent("AWERO.sqlite"))
+        let storeURL = directory.appendingPathComponent("AWERO.sqlite")
+        let database = await Task.detached {
+            CoreDataStore(storeURL: storeURL)
+        }.value
         let alarm = Alarm(
             hour: 7,
             minute: 30,
