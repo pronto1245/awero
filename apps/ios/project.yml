@@ -11,6 +11,9 @@ targets:
       - path: AWERO
         excludes:
           - App/README.md
+    scheme:
+      testTargets:
+        - AWEROTests
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.awero
@@ -26,3 +29,18 @@ targets:
         INFOPLIST_KEY_NSAlarmKitUsageDescription: AWERO schedules wake-up alarms that can alert while your iPhone is locked or in Focus.
         CODE_SIGN_STYLE: Automatic
         ENABLE_PREVIEWS: "YES"
+  AWEROTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/AWEROTests
+    dependencies:
+      - target: AWERO
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awero.tests
+        PRODUCT_NAME: AWEROTests
+        SWIFT_VERSION: "5.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "YES"
