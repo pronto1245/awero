@@ -4,7 +4,7 @@ import android.content.Context
 import java.util.UUID
 
 class AlarmCoordinator(
-    context: Context,
+    private val context: Context,
     private val store: AlarmStore = AlarmStore(context),
     private val scheduler: AlarmScheduler = AlarmScheduler(context)
 ) {
