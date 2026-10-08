@@ -3,6 +3,7 @@ package app.awero.core.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -19,20 +20,35 @@ class AlarmReceiver : BroadcastReceiver() {
                 val alarm = AlarmStore(context).get(id) ?: return@launch
                 if (alarm.version != version || !alarm.enabled) return@launch
 
-                if (intent.action == AlarmScheduler.ACTION_ALARM) {
-                    AlarmScheduler(context).schedule(alarm)
+                val startRinging = {
+                    AlarmRingingService.start(
+                        context = context,
+                        alarmId = id,
+                        version = version,
+                        scheduledAt = at,
+                        test = intent.action == AlarmScheduler.ACTION_TEST
+                    )
                 }
-
-                AlarmRingingService.start(
-                    context = context,
-                    alarmId = id,
-                    version = version,
-                    scheduledAt = at,
-                    test = intent.action == AlarmScheduler.ACTION_TEST
-                )
+                if (intent.action == AlarmScheduler.ACTION_ALARM) {
+                    deliverAlarm(
+                        startRinging = startRinging,
+                        reschedule = { AlarmScheduler(context).schedule(alarm) },
+                        onFailure = { error ->
+                            Log.e(TAG, "Alarm fired, but its next occurrence could not be scheduled: $id", error)
+                        }
+                    )
+                } else {
+                    try { startRinging() } catch (error: Exception) {
+                        Log.e(TAG, "Could not start alarm ringing: $id", error)
+                    }
+                }
             } finally {
                 pending.finish()
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "AWERO.AlarmReceiver"
     }
 }

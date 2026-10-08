@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Build.VERSION_CODES
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,9 +30,15 @@ class AlarmRecoveryReceiver : BroadcastReceiver() {
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
                 AlarmCoordinator(context).repair(forceReschedule = true)
+            } catch (error: Exception) {
+                Log.e(TAG, "Could not repair alarm schedules after a system change", error)
             } finally {
                 pending.finish()
             }
         }
+    }
+
+    private companion object {
+        const val TAG = "AWERO.AlarmRecoveryReceiver"
     }
 }
