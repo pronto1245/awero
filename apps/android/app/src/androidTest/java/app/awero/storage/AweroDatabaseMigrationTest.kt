@@ -11,7 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import kotlin.test.assertEquals
+import org.junit.Assert.assertEquals
 
 @RunWith(AndroidJUnit4::class)
 class AweroDatabaseMigrationTest {
