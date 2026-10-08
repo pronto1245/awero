@@ -17,6 +17,7 @@ import app.awero.core.storage.StatisticsEntity
 import app.awero.core.storage.SyncOperationEntity
 import app.awero.core.storage.WakeSessionEntity
 import app.awero.core.wake.WakeSessionStore
+import app.awero.core.wake.WakeFlowController
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -73,6 +74,10 @@ class PersistenceRecoveryTest {
 
         val events = database.wakeEvents().forSession(sessionId)
         assertEquals(listOf("TRIGGERED", "MISSION_STARTED", "FALLBACK", "SNOOZE"), events.map { it.eventType })
+
+        val restoredFlow = WakeFlowController(restoredStore, context)
+        restoredFlow.restore()
+        assertEquals(WakeFlowController.State.MISSION, restoredFlow.state.value)
 
         val completed = restoredStore.complete()
         assertNotNull(completed)
