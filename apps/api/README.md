@@ -51,3 +51,9 @@ The client supplies UUIDs for the session and each event. Repeating the same cre
 ## Statistics
 
 - `GET /api/v1/statistics/summary` — return the caller's lifetime wake totals, completion rate, average completion time, and current/best consecutive-day streak. Successful wake days use each alarm's fixed timezone or the caller's latest registered device timezone.
+
+## Offline operation intake
+
+- `POST /api/v1/sync` — atomically accept up to 100 queued operations and return their acknowledged UUIDs
+
+Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. IDs are idempotency keys: a retry with the same content is acknowledged again, while reusing an ID with different content returns a conflict. `occurredAt` accepts ISO dates, Unix milliseconds, Unix seconds, and Swift `Date` seconds since 2001. This endpoint stores the owner-scoped operation log; entity conflict resolution and applying operations to server entities remain separate work.

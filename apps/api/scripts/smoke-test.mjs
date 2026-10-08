@@ -155,6 +155,27 @@ async function main() {
     'statistics summary did not reflect the completed wake session',
   );
 
+  const syncOperation = {
+    id: randomUUID(),
+    operationType: 'UPSERT',
+    entityType: 'ALARM',
+    entityId: alarmId,
+    clientVersion: 2,
+    payload: { minute: 45 },
+    occurredAt: Date.now(),
+  };
+  const sync = await request('/sync', { method: 'POST', token, body: { operations: [syncOperation] } });
+  assert(
+    sync.status === 201 && sync.data.accepted === 1 && sync.data.acceptedIds[0] === syncOperation.id,
+    'offline sync operation was not accepted',
+  );
+  const syncRetry = await request('/sync', { method: 'POST', token, body: { operations: [syncOperation] } });
+  assert(syncRetry.status === 201 && syncRetry.data.accepted === 1, 'sync retry was not idempotently acknowledged');
+  const conflictingSync = await request('/sync', {
+    method: 'POST', token, body: { operations: [{ ...syncOperation, payload: { minute: 5 } }] },
+  });
+  assert(conflictingSync.status === 409, 'reused sync operation ID accepted different content');
+
   const secondRegistration = await request('/auth/anonymous', {
     method: 'POST',
     body: {
@@ -177,6 +198,10 @@ async function main() {
     otherOwnerStatistics.status === 200 && otherOwnerStatistics.data.summary.totalWakes === 0,
     'statistics leaked wake data across anonymous accounts',
   );
+  const crossOwnerSync = await request('/sync', {
+    method: 'POST', token: secondRegistration.data.accessToken, body: { operations: [syncOperation] },
+  });
+  assert(crossOwnerSync.status === 409, 'sync operation ID was reused across anonymous owners');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');

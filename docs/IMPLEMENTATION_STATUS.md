@@ -82,7 +82,7 @@
 - [x] Device registration
 - [x] Alarm CRUD API
 - [x] Wake session API (transactional events, idempotency, owner checks)
-- [ ] Statistics API
+- [x] Statistics API (owner-scoped totals and streaks)
 - [ ] Analytics ingestion
 - [ ] Offline sync queue
 - [ ] Conflict resolution
