@@ -289,14 +289,12 @@ struct PersistenceSmokeMain {
         let flow = WakeFlowController(
             sessionManager: WakeSessionManager(database: database),
             scheduler: scheduler,
-            database: database,
-            scheduleSnooze: scheduleSnooze,
-            cancelSnooze: cancelSnooze
+            database: database
         )
         await flow.start(alarm: alarm, scheduledAt: .now)
 
         center.failNextAdd = true
-        let failed = await flow.snooze()
+        let failed = await flow.snooze(schedule: scheduleSnooze, cancel: cancelSnooze)
         precondition(!failed)
         precondition(flow.state == .ringing)
         precondition(flow.snoozeCount == 0)
@@ -305,7 +303,7 @@ struct PersistenceSmokeMain {
         let requestsAfterFailure = await center.pendingNotificationRequests()
         precondition(requestsAfterFailure.isEmpty)
 
-        let succeeded = await flow.snooze()
+        let succeeded = await flow.snooze(schedule: scheduleSnooze, cancel: cancelSnooze)
         precondition(succeeded)
         precondition(flow.state == .idle)
         precondition(flow.snoozeCount == 1)
