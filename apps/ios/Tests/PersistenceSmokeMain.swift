@@ -147,7 +147,8 @@ struct PersistenceSmokeMain {
         }
         await e2eController.start(alarm: e2eAlarm, scheduledAt: .now)
         await e2eController.beginMission()
-        precondition(await MainActor.run { e2eController.state == .mission })
+        let e2eState = await MainActor.run { e2eController.state }
+        precondition(e2eState == .mission)
 
         let e2eRestoredController = await MainActor.run {
             WakeFlowController(
@@ -156,9 +157,11 @@ struct PersistenceSmokeMain {
             )
         }
         await e2eRestoredController.restore()
-        precondition(await MainActor.run { e2eRestoredController.state == .mission })
+        let e2eRestoredState = await MainActor.run { e2eRestoredController.state }
+        precondition(e2eRestoredState == .mission)
         await e2eRestoredController.completeMission()
-        precondition(await MainActor.run { e2eRestoredController.state == .completed })
+        let e2eCompletedState = await MainActor.run { e2eRestoredController.state }
+        precondition(e2eCompletedState == .completed)
 
         let e2eStats = await finalStore.fetchStatistics()
         precondition(e2eStats?.planned == 2)
