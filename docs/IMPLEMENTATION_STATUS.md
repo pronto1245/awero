@@ -69,12 +69,11 @@
 - [x] Permission education/runtime requests
 - [x] First alarm flow foundation
 - [x] Test alarm flow
-- [x] en
-- [x] ru
-- [x] pt-BR
-- [x] fr
-- [x] de
-- [x] es
+- [x] Translation resource foundation exists for en, ru, pt-BR, fr, de, es
+- [ ] Wire all user-facing iOS strings to localized resources for all six locales
+- [ ] Wire all user-facing Android strings to localized resources for all six locales
+- [ ] Complete and validate matching keys and fallback behavior across locales
+- [ ] Verify system-language selection and localization tests on both platforms
 
 ## 8. Backend / sync
 - [x] Auth session foundation
