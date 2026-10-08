@@ -29,6 +29,28 @@ class AlarmScheduleValidationTest {
     }
 
     @Test
+    fun scheduledStateRequiresExactAlarmPermissionEvenWhenPendingIntentsRemain() {
+        val alarm = alarm(weekdays = setOf(1, 2, 3))
+        assertEquals(
+            false,
+            isAlarmScheduleRegistered(alarm, exactAlarmAccessGranted = false, pendingWeekdays = setOf(1, 2, 3))
+        )
+    }
+
+    @Test
+    fun scheduledStateRequiresEveryWeekdayToBeRegistered() {
+        val alarm = alarm(weekdays = setOf(1, 2, 3))
+        assertEquals(
+            false,
+            isAlarmScheduleRegistered(alarm, exactAlarmAccessGranted = true, pendingWeekdays = setOf(1, 2))
+        )
+        assertEquals(
+            true,
+            isAlarmScheduleRegistered(alarm, exactAlarmAccessGranted = true, pendingWeekdays = setOf(1, 2, 3))
+        )
+    }
+
+    @Test
     fun fixedTimezoneMustBeValidInsteadOfSilentlyFallingBackToGmt() {
         assertEquals("Europe/Berlin", resolveAlarmTimeZone(alarm(timezoneMode = TimezoneMode.FIXED, fixedTimezone = "Europe/Berlin")).id)
         assertThrows(IllegalArgumentException::class.java) {

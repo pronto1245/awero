@@ -37,6 +37,15 @@ internal fun resolveAlarmTimeZone(alarm: Alarm): TimeZone {
     return TimeZone.getTimeZone(zoneId)
 }
 
+internal fun isAlarmScheduleRegistered(
+    alarm: Alarm,
+    exactAlarmAccessGranted: Boolean,
+    pendingWeekdays: Set<Int>
+): Boolean = alarm.enabled &&
+    alarm.weekdays.isNotEmpty() &&
+    exactAlarmAccessGranted &&
+    alarm.weekdays.all(pendingWeekdays::contains)
+
 class AlarmScheduler(private val context: Context) {
     private val manager = context.getSystemService(AlarmManager::class.java)
 
@@ -108,13 +117,16 @@ class AlarmScheduler(private val context: Context) {
 
     fun isScheduled(a: Alarm): Boolean {
         if (!a.enabled || a.weekdays.isEmpty()) return false
-        return a.weekdays.all { day ->
+        val exactAlarmAccessGranted =
+            Build.VERSION.SDK_INT < VERSION_CODES.S || manager.canScheduleExactAlarms()
+        val pendingWeekdays = a.weekdays.filter { day ->
             val intent = Intent(context, AlarmReceiver::class.java).apply { action = ACTION_ALARM }
             PendingIntent.getBroadcast(
                 context, code(a, day), intent,
                 PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
             ) != null
-        }
+        }.toSet()
+        return isAlarmScheduleRegistered(a, exactAlarmAccessGranted, pendingWeekdays)
     }
 
     private fun set(at: Long, pending: PendingIntent) {
