@@ -1,7 +1,8 @@
 package app.awero.core
 
 import android.content.Context
-import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.Difficulty
 import app.awero.core.alarm.MissionType
@@ -181,48 +182,48 @@ class PersistenceTest {
     @Test
     fun migratesRealVersionOneDatabaseToVersionTwo() = runBlocking {
         val name = "migration-test.db"
-        createVersionOneDatabase(name)
+        val helper = createVersionOneDatabase(name)
+        val database = helper.writableDatabase
 
-        val migrated = AweroDatabase.createForTesting(context, name)
-        val tables = migrated.openHelper.writableDatabase.query(
+        AweroDatabase.MIGRATION_1_2.migrate(database)
+
+        val tables = database.query(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'"
         )
         assertEquals(true, tables.moveToFirst())
         tables.close()
 
-        val columns = migrated.openHelper.writableDatabase.query("PRAGMA table_info(wake_events)")
+        val columns = database.query("PRAGMA table_info(wake_events)")
         val names = buildList {
             while (columns.moveToNext()) add(columns.getString(1))
         }
         columns.close()
         assertEquals(listOf("id", "wakeSessionId", "eventType", "occurredAt", "payload"), names)
 
-        migrated.close()
+        helper.close()
         context.deleteDatabase(name)
         Unit
     }
 
-    private fun createVersionOneDatabase(name: String) {
-        val database = Room.databaseBuilder(
-            context,
-            AweroDatabaseV1::class.java,
-            name
-        ).build()
-        database.openHelper.writableDatabase.close()
+    private fun createVersionOneDatabase(name: String): SupportSQLiteOpenHelper {
+        val callback = object : SupportSQLiteOpenHelper.Callback(1) {
+            override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS alarms (id TEXT NOT NULL, version INTEGER NOT NULL, hour INTEGER NOT NULL, minute INTEGER NOT NULL, enabled INTEGER NOT NULL, weekdays TEXT NOT NULL, timezoneMode TEXT NOT NULL, fixedTimezone TEXT, missionType TEXT NOT NULL, difficulty TEXT NOT NULL, maxSnoozes INTEGER NOT NULL, snoozeMinutes INTEGER NOT NULL, qrExpectedCode TEXT, PRIMARY KEY(id))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS wake_sessions (id TEXT NOT NULL, alarmId TEXT NOT NULL, alarmVersion INTEGER NOT NULL, scheduledAt INTEGER NOT NULL, triggeredAt INTEGER, missionStartedAt INTEGER, completedAt INTEGER, result TEXT, snoozeCount INTEGER NOT NULL, fallbackUsed INTEGER NOT NULL, emergencyStop INTEGER NOT NULL, PRIMARY KEY(id))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS statistics (id INTEGER NOT NULL, planned INTEGER NOT NULL, completed INTEGER NOT NULL, snoozes INTEGER NOT NULL, fallback INTEGER NOT NULL, emergencyStops INTEGER NOT NULL, totalCompletionSeconds INTEGER NOT NULL, PRIMARY KEY(id))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS sync_operations (id TEXT NOT NULL, operationType TEXT NOT NULL, entityType TEXT NOT NULL, entityId TEXT NOT NULL, clientVersion INTEGER, payload TEXT NOT NULL, occurredAt INTEGER NOT NULL, attempts INTEGER NOT NULL, nextAttemptAt INTEGER NOT NULL, PRIMARY KEY(id))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS analytics_events (id TEXT NOT NULL, eventName TEXT NOT NULL, eventVersion INTEGER NOT NULL, payload TEXT NOT NULL, occurredAt INTEGER NOT NULL, PRIMARY KEY(id))")
+            }
+
+            override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+        }
+        return FrameworkSQLiteOpenHelperFactory().create(
+            SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(name)
+                .callback(callback)
+                .build()
+        )
     }
 
+
 }
-
-@androidx.room.Database(
-    entities = [
-        app.awero.core.storage.AlarmEntity::class,
-        app.awero.core.storage.WakeSessionEntity::class,
-        app.awero.core.storage.StatisticsEntity::class,
-        app.awero.core.storage.SyncOperationEntity::class,
-        app.awero.core.storage.AnalyticsEventEntity::class
-    ],
-    version = 1,
-    exportSchema = false
-)
-abstract class AweroDatabaseV1 : androidx.room.RoomDatabase()
-
