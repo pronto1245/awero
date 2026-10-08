@@ -27,6 +27,7 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: AWERO uses the camera to scan QR codes for wake missions.
         INFOPLIST_KEY_NSMotionUsageDescription: AWERO uses motion activity to count steps during wake missions.
         INFOPLIST_KEY_NSAlarmKitUsageDescription: AWERO schedules wake-up alarms that can alert while your iPhone is locked or in Focus.
+        INFOPLIST_KEY_NSSupportsLiveActivities: "YES"
         CODE_SIGN_STYLE: Automatic
         ENABLE_PREVIEWS: "YES"
   AWEROTests:

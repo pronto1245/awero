@@ -128,8 +128,17 @@ jobs:
           -scheme AWERO
           -sdk iphonesimulator
           -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/AWERO-Build"
           CODE_SIGNING_ALLOWED=NO
           build
+      - name: Verify AlarmKit and Live Activities app configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          INFO_PLIST="$RUNNER_TEMP/AWERO-Build/Build/Products/Debug-iphonesimulator/AWERO.app/Info.plist"
+          test -f "$INFO_PLIST"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSSupportsLiveActivities' "$INFO_PLIST")" = "true"
+          test -n "$(/usr/libexec/PlistBuddy -c 'Print :NSAlarmKitUsageDescription' "$INFO_PLIST")"
       - name: Typecheck Swift sources
         shell: bash
         run: |
