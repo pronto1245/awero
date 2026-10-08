@@ -7,6 +7,9 @@ import AlarmKit
 enum AlarmSchedulingError: LocalizedError {
     case invalidTimezone
     case alarmAuthorizationDenied
+    case noWeekdaysSelected
+    case invalidAlarmTime
+    case invalidWeekday
 
     var errorDescription: String? {
         switch self {
@@ -14,6 +17,12 @@ enum AlarmSchedulingError: LocalizedError {
             return "The selected alarm timezone is invalid."
         case .alarmAuthorizationDenied:
             return "Allow AWERO to schedule alarms in iPhone Settings, then try again."
+        case .noWeekdaysSelected:
+            return "Select at least one day for this repeating alarm."
+        case .invalidAlarmTime:
+            return "Enter a valid alarm time."
+        case .invalidWeekday:
+            return "Select valid days for this repeating alarm."
         }
     }
 }
@@ -54,15 +63,32 @@ final class AlarmScheduler {
         self.usesSystemAlarmKit = usesSystemAlarmKit ?? (center == nil)
     }
 
+    static func validate(_ alarm: Alarm) throws {
+        guard (0...23).contains(alarm.hour), (0...59).contains(alarm.minute) else {
+            throw AlarmSchedulingError.invalidAlarmTime
+        }
+        guard !alarm.weekdays.isEmpty else {
+            throw AlarmSchedulingError.noWeekdaysSelected
+        }
+        guard alarm.weekdays.allSatisfy({ (1...7).contains($0) }) else {
+            throw AlarmSchedulingError.invalidWeekday
+        }
+        if alarm.timezoneMode == .fixed,
+           TimeZone(identifier: alarm.fixedTimezone ?? "") == nil {
+            throw AlarmSchedulingError.invalidTimezone
+        }
+    }
+
     func requestAuthorization() async throws {
         try await center.requestAuthorization(options: [.alert, .sound, .badge])
     }
 
     func schedule(_ alarm: Alarm) async throws {
-        guard alarm.enabled && !alarm.weekdays.isEmpty else {
+        guard alarm.enabled else {
             await cancel(alarm)
             return
         }
+        try Self.validate(alarm)
 
 #if canImport(AlarmKit) && canImport(AppIntents)
         if #available(iOS 26.0, *),

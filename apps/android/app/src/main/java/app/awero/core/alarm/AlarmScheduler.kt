@@ -7,7 +7,36 @@ import android.os.Build.VERSION_CODES
 import android.content.Context
 import android.content.Intent
 import java.util.Calendar
+import java.time.DateTimeException
+import java.time.ZoneId
+import java.util.Calendar
 import java.util.TimeZone
+
+internal fun validateAlarmSchedule(alarm: Alarm) {
+    if (!alarm.enabled) return
+    require(alarm.hour in 0..23 && alarm.minute in 0..59) {
+        "Enter a valid alarm time."
+    }
+    require(alarm.weekdays.isNotEmpty()) {
+        "Select at least one day for this repeating alarm."
+    }
+    require(alarm.weekdays.all { it in Calendar.SUNDAY..Calendar.SATURDAY }) {
+        "Select valid days for this repeating alarm."
+    }
+    resolveAlarmTimeZone(alarm)
+}
+
+private fun resolveAlarmTimeZone(alarm: Alarm): TimeZone {
+    if (alarm.timezoneMode == TimezoneMode.DEVICE_LOCAL) return TimeZone.getDefault()
+    val identifier = alarm.fixedTimezone
+        ?: throw IllegalArgumentException("A valid fixed timezone is required for this alarm.")
+    val zoneId = try {
+        ZoneId.of(identifier)
+    } catch (_: DateTimeException) {
+        throw IllegalArgumentException("The selected alarm timezone is invalid.")
+    }
+    return TimeZone.getTimeZone(zoneId)
+}
 
 class AlarmScheduler(private val context: Context) {
     private val manager = context.getSystemService(AlarmManager::class.java)
@@ -17,6 +46,7 @@ class AlarmScheduler(private val context: Context) {
             cancel(a)
             return
         }
+        validateAlarmSchedule(a)
         requireExactAlarmAccess()
         cancel(a)
         a.weekdays.forEach { day ->
@@ -101,8 +131,7 @@ class AlarmScheduler(private val context: Context) {
     }
 
     private fun next(a: Alarm, day: Int): Calendar {
-        val tz = if (a.timezoneMode == TimezoneMode.FIXED && a.fixedTimezone != null)
-            TimeZone.getTimeZone(a.fixedTimezone) else TimeZone.getDefault()
+        val tz = resolveAlarmTimeZone(a)
         val now = Calendar.getInstance(tz)
         val target = Calendar.getInstance(tz).apply {
             set(Calendar.HOUR_OF_DAY, a.hour)

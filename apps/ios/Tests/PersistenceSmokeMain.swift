@@ -9,6 +9,7 @@ struct PersistenceSmokeMain {
             try await runCrashPhase(phase)
             return
         }
+        try runAlarmScheduleValidationChecks()
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("awero-smoke-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let storeURL = root.appendingPathComponent("AWERO.sqlite")
@@ -267,6 +268,34 @@ struct PersistenceSmokeMain {
         try await runAlarmRecoveryChecks(root: root)
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
+    }
+
+    private static func runAlarmScheduleValidationChecks() throws {
+        try AlarmScheduler.validate(Alarm(hour: 7, minute: 30, weekdays: [1, 7]))
+
+        do {
+            try AlarmScheduler.validate(Alarm(hour: 7, minute: 30, weekdays: []))
+            preconditionFailure("Expected an enabled repeating alarm without days to be rejected")
+        } catch AlarmSchedulingError.noWeekdaysSelected {}
+
+        do {
+            try AlarmScheduler.validate(Alarm(hour: 24, minute: 30, weekdays: [1]))
+            preconditionFailure("Expected an invalid alarm time to be rejected")
+        } catch AlarmSchedulingError.invalidAlarmTime {}
+
+        do {
+            try AlarmScheduler.validate(Alarm(hour: 7, minute: 30, weekdays: [0]))
+            preconditionFailure("Expected an invalid weekday to be rejected")
+        } catch AlarmSchedulingError.invalidWeekday {}
+
+        do {
+            try AlarmScheduler.validate(
+                Alarm(hour: 7, minute: 30, weekdays: [1], timezoneMode: .fixed, fixedTimezone: "Invalid/Zone")
+            )
+            preconditionFailure("Expected an invalid fixed timezone to be rejected")
+        } catch AlarmSchedulingError.invalidTimezone {}
+
+        print("AWERO alarm schedule validation: PASS")
     }
 
     @MainActor
