@@ -127,7 +127,11 @@ struct PersistenceSmokeMain {
         precondition(unchangedSession?.emergencyStop == false)
         await failedFlow.restore()
         await failedFlow.beginMission()
-        await failedFlow.snooze()
+        let failedFlowSnoozed = await failedFlow.snooze(
+            schedule: { _ in },
+            cancel: { _ in }
+        )
+        precondition(!failedFlowSnoozed)
         await failedFlow.emergencyStop()
         let failedFlowState = await MainActor.run { failedFlow.state }
         let failedSnoozes = await MainActor.run { failedFlow.snoozeCount }
