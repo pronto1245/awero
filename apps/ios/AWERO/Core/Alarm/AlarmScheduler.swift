@@ -181,6 +181,17 @@ final class AlarmScheduler {
         )
     }
 
+    func cancelSnooze(for alarm: Alarm) async {
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            SystemAlarmKitScheduler.cancelSnooze(for: alarm)
+        }
+#endif
+        await removeNotifications(for: alarm, kind: "snooze")
+    }
+
     func cancel(_ alarm: Alarm) async {
 #if canImport(AlarmKit) && canImport(AppIntents)
         if #available(iOS 26.0, *), usesSystemAlarmKit {
