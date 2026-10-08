@@ -39,7 +39,7 @@ final class WakeFlowControllerTests: XCTestCase {
     }
 
     func testFailedSnoozeKeepsAlarmRingingAndCanRetry() async throws {
-        let (database, alarm) = try makeDatabase(maxSnoozes: 2)
+        let (database, alarm) = try await makeDatabase(maxSnoozes: 2)
         let saved = await database.saveAlarm(alarm)
         XCTAssertTrue(saved)
 
@@ -78,7 +78,7 @@ final class WakeFlowControllerTests: XCTestCase {
     }
 
     func testEmergencyStopPersistsAndMissingSessionIsNoOp() async throws {
-        let (database, alarm) = try makeDatabase()
+        let (database, alarm) = try await makeDatabase()
         let idleFlow = WakeFlowController(
             sessionManager: WakeSessionManager(database: database),
             database: database
