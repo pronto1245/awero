@@ -34,7 +34,7 @@ class QRMissionRuntime(private val context: Context) {
                     it.surfaceProvider = preview.surfaceProvider
                 }
                 val options = BarcodeScannerOptions.Builder()
-                    .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                    .setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS)
                     .build()
                 val barcodeScanner = BarcodeScanning.getClient(options)
                 scanner = barcodeScanner

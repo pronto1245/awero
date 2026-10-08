@@ -108,7 +108,7 @@ object MissionRuntimeScreen {
                         setOnClickListener { finish(false) }
                     })
                 } else {
-                    root.addView(label("Scan your wake-up QR code", 24f))
+                    root.addView(label("Scan your saved QR or barcode", 24f))
                     val preview = PreviewView(activity)
                     root.addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
                     val runtime = QRMissionRuntime(activity)

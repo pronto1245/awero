@@ -115,7 +115,7 @@ private struct QRMissionView: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            Text("SCAN YOUR QR")
+            Text("SCAN YOUR CODE")
                 .font(.system(size: 32, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
 
@@ -136,7 +136,7 @@ private struct QRMissionView: View {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                Text(runtime.scannedCode == nil ? "Point the camera at your wake-up QR." : "Code detected.")
+                Text(runtime.scannedCode == nil ? "Point the camera at your saved QR or barcode." : "Code detected.")
                     .foregroundStyle(.white.opacity(0.7))
                 Text("After 2 minutes, this task switches to Math.")
                     .font(.caption).foregroundStyle(.white.opacity(0.6))
@@ -188,7 +188,7 @@ private struct FallbackMissionView: View {
     }
 }
 
-private struct QRPreview: UIViewRepresentable {
+struct QRPreview: UIViewRepresentable {
     let session: AVCaptureSession
     func makeUIView(context: Context) -> UIView {
         let view = UIView()

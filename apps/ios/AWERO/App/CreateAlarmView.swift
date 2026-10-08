@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 
 struct CreateAlarmView: View {
     let alarm: Alarm?
@@ -8,6 +9,9 @@ struct CreateAlarmView: View {
     @State private var wakeDate: Date
     @State private var selectedDays: Set<Int>
     @State private var mission: MissionType
+    @State private var difficulty: Difficulty
+    @State private var qrExpectedCode: String
+    @State private var showCodeScanner = false
     @State private var saveError: String?
 
     init(alarm: Alarm? = nil) {
@@ -20,6 +24,8 @@ struct CreateAlarmView: View {
         _wakeDate = State(initialValue: base)
         _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
         _mission = State(initialValue: alarm?.missionType ?? .math)
+        _difficulty = State(initialValue: alarm?.difficulty ?? .medium)
+        _qrExpectedCode = State(initialValue: alarm?.qrExpectedCode ?? "")
     }
 
     var body: some View {
@@ -43,6 +49,12 @@ struct CreateAlarmView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+            }
+        }
+        .sheet(isPresented: $showCodeScanner) {
+            AlarmCodeScanner { code in
+                qrExpectedCode = code
+                showCodeScanner = false
             }
         }
     }
@@ -80,7 +92,22 @@ struct CreateAlarmView: View {
             Picker("Mission", selection: $mission) {
                 Text("Math").tag(MissionType.math)
                 Text("Steps").tag(MissionType.steps)
-                Text("QR").tag(MissionType.qr)
+                Text("QR/barcode").tag(MissionType.qr)
+            }
+            if mission == .math {
+                Picker("Difficulty", selection: $difficulty) {
+                    Text("Easy").tag(Difficulty.easy)
+                    Text("Medium").tag(Difficulty.medium)
+                    Text("Hard").tag(Difficulty.hard)
+                }
+            }
+            if mission == .qr {
+                Button("Scan QR/barcode") { showCodeScanner = true }
+                TextField("QR/barcode content", text: $qrExpectedCode)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                Text("Scan a code where you want to wake up, or enter its exact content.")
+                    .font(.caption)
             }
         }
     }
@@ -89,6 +116,7 @@ struct CreateAlarmView: View {
         Button(alarm == nil ? "Save alarm" : "Save changes") {
             saveAlarm()
         }
+        .disabled(mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
     }
 
     private func saveAlarm() {
@@ -106,6 +134,8 @@ struct CreateAlarmView: View {
         next.minute = minute
         next.weekdays = selectedDays
         next.missionType = mission
+        next.difficulty = difficulty
+        next.qrExpectedCode = qrExpectedCode.isEmpty ? nil : qrExpectedCode
 
         Task {
             let coordinator = AlarmCoordinator(store: store)
@@ -119,6 +149,44 @@ struct CreateAlarmView: View {
             } catch {
                 saveError = error.localizedDescription
             }
+        }
+    }
+}
+
+private struct AlarmCodeScanner: View {
+    let onCode: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var runtime = QRMissionRuntime()
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 18) {
+                if runtime.cameraUnavailable {
+                    Text("Camera is unavailable. You can enter the code content manually.")
+                } else {
+                    QRPreview(session: runtime.session)
+                        .frame(height: 300)
+                    Text("Point the camera at the QR or barcode you will use in the morning.")
+                }
+            }
+            .padding()
+            .navigationTitle("Scan QR/barcode")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+            .task {
+                if AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined {
+                    _ = await AVCaptureDevice.requestAccess(for: .video)
+                }
+                runtime.configure()
+                if !runtime.cameraUnavailable { runtime.start() }
+            }
+            .onChange(of: runtime.scannedCode) { _, code in
+                if let code { onCode(code) }
+            }
+            .onDisappear { runtime.stop() }
         }
     }
 }

@@ -16,7 +16,8 @@ class AlarmCoordinator(
         hour: Int,
         minute: Int,
         missionType: MissionType = MissionType.MATH,
-        difficulty: Difficulty = Difficulty.MEDIUM
+        difficulty: Difficulty = Difficulty.MEDIUM,
+        qrExpectedCode: String? = null
     ): Alarm {
         val alarm = Alarm(
             id = UUID.randomUUID().toString(),
@@ -25,7 +26,8 @@ class AlarmCoordinator(
             minute = minute,
             enabled = true,
             missionType = missionType,
-            difficulty = difficulty
+            difficulty = difficulty,
+            qrExpectedCode = qrExpectedCode
         )
         AlarmNotificationManager.requireAlarmAccess(context)
         try {

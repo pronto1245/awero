@@ -166,4 +166,8 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 
 ## Phase 3 — active
 
-The next package addresses P0 Mission runtime / recovery requirements: two-minute Steps/QR timeout to local Math, manual fallback, camera/sensor cleanup when the mission view is detached, and retrying a failed save after a validated mission. Math remains the deterministic local fallback. This does not complete Phase 3: barcode formats, mission settings, test-alarm history exclusion and the remaining mission E2E cases still require implementation/verification. Full localization stays in Phase 6.
+The first package addresses P0 Mission runtime / recovery requirements: two-minute Steps/QR timeout to local Math, manual fallback, camera/sensor cleanup when the mission view is detached, and retrying a failed save after a validated mission. Math remains the deterministic local fallback.
+
+The next scoped package adds camera-based QR/barcode capture during alarm creation/editing on both platforms, an optional exact-content field, blank-code save prevention, persisted expected code and iOS Math difficulty selection. Android scans ML Kit-supported formats; iOS uses the supported subset of QR, EAN/UPC-E, Code 39/93/128, PDF417, Aztec and Data Matrix. Permission denial/camera failure during setup preserves the draft and offers manual entry. The iOS persistence/edited-code validation test passed locally; Android's existing restart test now includes the expected code.
+
+Phase 3 remains active: test-alarm history exclusion and the remaining offline/permission/retry mission E2E cases still require implementation/verification. Camera decoding on physical devices remains a Phase 10 check. Full localization stays in Phase 6.

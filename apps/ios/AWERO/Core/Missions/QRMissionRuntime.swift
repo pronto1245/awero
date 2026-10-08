@@ -35,7 +35,16 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
         }
         session.addOutput(metadata)
         metadata.setMetadataObjectsDelegate(self, queue: .main)
-        metadata.metadataObjectTypes = [.qr]
+        let supportedTypes: [AVMetadataObject.ObjectType] = [
+            .qr, .ean8, .ean13, .upce, .code39, .code93, .code128, .pdf417, .aztec, .dataMatrix
+        ]
+        let availableTypes = supportedTypes.filter { metadata.availableMetadataObjectTypes.contains($0) }
+        guard !availableTypes.isEmpty else {
+            session.commitConfiguration()
+            cameraUnavailable = true
+            return
+        }
+        metadata.metadataObjectTypes = availableTypes
         output = metadata
         configured = true
         session.commitConfiguration()
