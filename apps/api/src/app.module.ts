@@ -8,6 +8,7 @@ import { AlarmsModule } from './alarms/alarms.module';
 import { WakeSessionsModule } from './wake-sessions/wake-sessions.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { SyncModule } from './sync/sync.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SyncModule } from './sync/sync.module';
     WakeSessionsModule,
     StatisticsModule,
     SyncModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

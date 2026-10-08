@@ -57,3 +57,9 @@ The client supplies UUIDs for the session and each event. Repeating the same cre
 - `POST /api/v1/sync` — atomically accept up to 100 queued operations and return their acknowledged UUIDs
 
 Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. IDs are idempotency keys: a retry with the same content is acknowledged again, while reusing an ID with different content returns a conflict. `occurredAt` accepts ISO dates, Unix milliseconds, Unix seconds, and Swift `Date` seconds since 2001. This endpoint stores the owner-scoped operation log; entity conflict resolution and applying operations to server entities remain separate work.
+
+## Analytics ingestion
+
+- `POST /api/v1/analytics/events` — atomically accept up to 100 client events
+
+Each event uses `id`, `eventName`, `eventVersion`, optional `properties`, and optional `occurredAt`. Event properties are limited to 16 KiB per event. IDs are idempotency keys, and reusing an ID with changed content returns a conflict. Analytics rows are scoped to the authenticated anonymous account and latest registered device.

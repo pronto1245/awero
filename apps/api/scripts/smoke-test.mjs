@@ -176,6 +176,29 @@ async function main() {
   });
   assert(conflictingSync.status === 409, 'reused sync operation ID accepted different content');
 
+  const analyticsEvent = {
+    id: randomUUID(),
+    eventName: 'alarm.updated',
+    eventVersion: 1,
+    properties: { source: 'smoke-test', alarmId },
+    occurredAt: Date.now(),
+  };
+  const analytics = await request('/analytics/events', {
+    method: 'POST', token, body: { events: [analyticsEvent] },
+  });
+  assert(
+    analytics.status === 201 && analytics.data.accepted === 1 && analytics.data.acceptedIds[0] === analyticsEvent.id,
+    'analytics event was not ingested',
+  );
+  const analyticsRetry = await request('/analytics/events', {
+    method: 'POST', token, body: { events: [analyticsEvent] },
+  });
+  assert(analyticsRetry.status === 201 && analyticsRetry.data.accepted === 1, 'analytics retry was not idempotent');
+  const conflictingAnalytics = await request('/analytics/events', {
+    method: 'POST', token, body: { events: [{ ...analyticsEvent, properties: { source: 'changed' } }] },
+  });
+  assert(conflictingAnalytics.status === 409, 'analytics event ID accepted changed properties');
+
   const secondRegistration = await request('/auth/anonymous', {
     method: 'POST',
     body: {
@@ -202,6 +225,10 @@ async function main() {
     method: 'POST', token: secondRegistration.data.accessToken, body: { operations: [syncOperation] },
   });
   assert(crossOwnerSync.status === 409, 'sync operation ID was reused across anonymous owners');
+  const crossOwnerAnalytics = await request('/analytics/events', {
+    method: 'POST', token: secondRegistration.data.accessToken, body: { events: [analyticsEvent] },
+  });
+  assert(crossOwnerAnalytics.status === 409, 'analytics event ID was reused across anonymous owners');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');
