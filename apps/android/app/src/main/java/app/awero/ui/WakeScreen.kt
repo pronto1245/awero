@@ -19,6 +19,7 @@ fun WakeScreen(flow: WakeFlowController) {
     val state by flow.state.collectAsState()
     val mission by flow.mission.collectAsState()
     val snoozeError by flow.snoozeError.collectAsState()
+    val actionError by flow.actionError.collectAsState()
 
     Column(
         modifier = Modifier
@@ -29,6 +30,7 @@ fun WakeScreen(flow: WakeFlowController) {
     ) {
         Text("AWERO", color = Color.White.copy(alpha = .45f))
         Text("GET UP", style = MaterialTheme.typography.displayLarge, color = Color.White)
+        actionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         when (state) {
             WakeFlowController.State.RINGING -> {
@@ -57,6 +59,9 @@ fun WakeScreen(flow: WakeFlowController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Complete mission")
+                }
+                TextButton(onClick = { scope.launch { flow.emergencyStop() } }) {
+                    Text("Emergency stop")
                 }
             }
 
