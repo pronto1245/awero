@@ -26,6 +26,7 @@ final class WakeFlowController: ObservableObject {
         scheduleSnooze: ((Alarm) async throws -> Void)? = nil,
         cancelSnooze: ((Alarm) async -> Void)? = nil
     ) {
+        print("SNOOZE init schedule=\(scheduleSnooze != nil) cancel=\(cancelSnooze != nil)")
         self.sessionManager = sessionManager ?? WakeSessionManager(database: database)
         self.scheduler = scheduler
         self.scheduleSnoozeOperation = scheduleSnooze
