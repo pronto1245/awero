@@ -2,13 +2,16 @@ package app.awero.core.storage
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 class PersistenceRecoveryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val databaseName = "awero-persistence-recovery.db"
@@ -70,7 +73,8 @@ class PersistenceRecoveryTest {
         database.close()
 
         database = AweroDatabase.createForTesting(context, databaseName)
-        val restored = dao.get("session-1")
+        val restoredDao = database.wakeSessions()
+        val restored = restoredDao.get("session-1")
         assertNotNull(restored)
         assertEquals(2000L, restored?.missionStartedAt)
         assertEquals(1, restored?.snoozeCount)
@@ -80,11 +84,11 @@ class PersistenceRecoveryTest {
             completedAt = 3000L,
             result = "SUCCESS"
         )
-        dao.upsert(completed)
-        dao.upsert(completed)
+        restoredDao.upsert(completed)
+        restoredDao.upsert(completed)
 
-        assertNull(dao.active())
-        assertEquals("SUCCESS", dao.get("session-1")?.result)
+        assertNull(restoredDao.active())
+        assertEquals("SUCCESS", restoredDao.get("session-1")?.result)
         database.close()
     }
 }
