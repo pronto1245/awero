@@ -16,6 +16,7 @@ final class WakeFlowController: ObservableObject {
     private let statistics: StatisticsStore
     private(set) var currentAlarm: Alarm?
     private var maxSnoozes = 3
+    private var snoozeInProgress = false
 
     init(
         sessionManager: WakeSessionManager? = nil,
@@ -92,7 +93,9 @@ final class WakeFlowController: ObservableObject {
         schedule: ((Alarm) async throws -> Void)?,
         cancel: ((Alarm) async -> Void)?
     ) async -> Bool {
-        guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
+        guard !snoozeInProgress, let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
+        snoozeInProgress = true
+        defer { snoozeInProgress = false }
         snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
         do {

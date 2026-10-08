@@ -154,3 +154,9 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 - [ ] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
 - [ ] Phase 5 — backend and sync isolated from the alarm-critical path
 - [ ] Phase 6 — user-facing UX and six-language completion
+
+## Current Phase 2 verification
+
+- Baseline `34932a904bae95069da485edf9cef45ac43fa5d7` passed all four jobs in [AWERO CI run 574](https://github.com/pronto1245/awero/actions/runs/37832150008).
+- Phase 2 remains in progress. The next scoped correction prevents overlapping iOS snooze requests from cancelling the successfully scheduled snooze. Its regression test suspends scheduling, repeats the request, verifies one schedule/no cancellation and persisted count, then verifies that a later delivery can snooze again. The existing failed-schedule retry test remains relevant.
+- Backend/sync changes and physical-device release gates are outside this correction.

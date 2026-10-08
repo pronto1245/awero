@@ -66,6 +66,58 @@ final class WakeFlowControllerTests: XCTestCase {
         XCTAssertEqual(statistics?.fallback, 1)
     }
 
+    func testRepeatedSnoozeWhileSchedulingDoesNotCancelSuccessfulAlarm() async throws {
+        let (database, alarm) = try await makeDatabase(maxSnoozes: 2)
+        let saved = await database.saveAlarm(alarm)
+        XCTAssertTrue(saved)
+        let flow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+        await flow.start(alarm: alarm, scheduledAt: .now)
+
+        var resumeSchedule: CheckedContinuation<Void, Never>?
+        var scheduledCount = 0
+        var cancelledCount = 0
+        let firstSnooze = Task { @MainActor in
+            await flow.snooze(
+                schedule: { _ in
+                    scheduledCount += 1
+                    await withCheckedContinuation { resumeSchedule = $0 }
+                },
+                cancel: { _ in cancelledCount += 1 }
+            )
+        }
+        while resumeSchedule == nil { await Task.yield() }
+
+        let repeated = await flow.snooze(
+            schedule: { _ in scheduledCount += 1 },
+            cancel: { _ in cancelledCount += 1 }
+        )
+        resumeSchedule?.resume()
+        let succeeded = await firstSnooze.value
+
+        XCTAssertFalse(repeated)
+        XCTAssertTrue(succeeded)
+        XCTAssertEqual(scheduledCount, 1)
+        XCTAssertEqual(cancelledCount, 0)
+        XCTAssertEqual(flow.state, .idle)
+        XCTAssertEqual(flow.snoozeCount, 1)
+        let session = await database.fetchActiveWakeSession()
+        XCTAssertEqual(session?.snoozeCount, 1)
+
+        // A later alarm delivery can still use the remaining snooze allowance.
+        await flow.start(alarm: alarm, scheduledAt: .now)
+        let laterSnooze = await flow.snooze(
+            schedule: { _ in scheduledCount += 1 },
+            cancel: { _ in cancelledCount += 1 }
+        )
+        XCTAssertTrue(laterSnooze)
+        XCTAssertEqual(scheduledCount, 2)
+        XCTAssertEqual(cancelledCount, 0)
+        XCTAssertEqual(flow.snoozeCount, 2)
+    }
+
     func testFailedSnoozeKeepsAlarmRingingAndCanRetry() async throws {
         let (database, alarm) = try await makeDatabase(maxSnoozes: 2)
         let saved = await database.saveAlarm(alarm)
