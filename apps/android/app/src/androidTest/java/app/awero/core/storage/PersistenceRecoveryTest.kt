@@ -9,6 +9,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -22,7 +23,7 @@ class PersistenceRecoveryTest {
     }
 
     @Test
-    fun syncOperationIsUniqueAndSurvivesDatabaseRestart() {
+    fun syncOperationIsUniqueAndSurvivesDatabaseRestart() = runBlocking {
         var database = AweroDatabase.createForTesting(context, databaseName)
         val dao = database.syncOperations()
         val operation = SyncOperationEntity(
@@ -51,7 +52,7 @@ class PersistenceRecoveryTest {
     }
 
     @Test
-    fun wakeSessionTransitionIsIdempotentAcrossRestart() {
+    fun wakeSessionTransitionIsIdempotentAcrossRestart() = runBlocking {
         var database = AweroDatabase.createForTesting(context, databaseName)
         val dao = database.wakeSessions()
         val session = WakeSessionEntity(
