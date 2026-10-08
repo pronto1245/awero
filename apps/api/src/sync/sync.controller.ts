@@ -72,10 +72,10 @@ export class SyncController {
         }
         const existing = await client.query(
           `SELECT anonymous_user_id AS "anonymousUserId",operation_type AS "operationType",entity_type AS "entityType",
-             entity_id AS "entityId",client_version AS "clientVersion",payload=$7::jsonb AS "samePayload",occurred_at=$8 AS "sameTime"
+             entity_id AS "entityId",client_version AS "clientVersion",payload=$2::jsonb AS "samePayload",
+             occurred_at=$3::timestamptz AS "sameTime"
            FROM sync_operations WHERE id=$1`,
-          [operation.id, owner.anonymousUserId, operation.operationType, operation.entityType, operation.entityId,
-            operation.clientVersion ?? null, JSON.stringify(payload), occurredAt],
+          [operation.id, JSON.stringify(payload), occurredAt],
         );
         const row = existing.rows[0];
         if (
