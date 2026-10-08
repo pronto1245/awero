@@ -91,6 +91,8 @@ jobs:
           script: |
             gradle -p apps/android :app:installDebug
             adb shell appops set app.awero SCHEDULE_EXACT_ALARM allow
+            adb shell cmd connectivity airplane-mode enable
+            test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = "1"
             gradle -p apps/android :app:connectedDebugAndroidTest
             bash apps/android/scripts/persistence-crash-test.sh
 
