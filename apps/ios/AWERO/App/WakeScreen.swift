@@ -31,6 +31,14 @@ struct WakeScreen: View {
                 }
             }.padding(28)
         }
+        .alert("Snooze unavailable", isPresented: Binding(
+            get: { flow.snoozeError != nil },
+            set: { if !$0 { flow.clearSnoozeError() } }
+        )) {
+            Button("OK", role: .cancel) { flow.clearSnoozeError() }
+        } message: {
+            Text(flow.snoozeError ?? "The alarm is still ringing.")
+        }
     }
 
     private func missionAlarm(from alarm: Alarm) -> Alarm {
