@@ -12,8 +12,6 @@ final class WakeFlowController: ObservableObject {
 
     private let sessionManager: WakeSessionManager
     private var scheduler: AlarmScheduler?
-    private let scheduleSnoozeOperation: ((Alarm) async throws -> Void)?
-    private let cancelSnoozeOperation: ((Alarm) async -> Void)?
     private let database: CoreDataStore
     private let statistics: StatisticsStore
     private(set) var currentAlarm: Alarm?
@@ -22,15 +20,10 @@ final class WakeFlowController: ObservableObject {
     init(
         sessionManager: WakeSessionManager? = nil,
         scheduler: AlarmScheduler? = nil,
-        database: CoreDataStore = .shared,
-        scheduleSnooze: ((Alarm) async throws -> Void)? = nil,
-        cancelSnooze: ((Alarm) async -> Void)? = nil
+        database: CoreDataStore = .shared
     ) {
-        print("SNOOZE init schedule=\(scheduleSnooze != nil) cancel=\(cancelSnooze != nil)")
         self.sessionManager = sessionManager ?? WakeSessionManager(database: database)
         self.scheduler = scheduler
-        self.scheduleSnoozeOperation = scheduleSnooze
-        self.cancelSnoozeOperation = cancelSnooze
         self.database = database
         self.statistics = StatisticsStore(database: database)
     }
@@ -84,14 +77,27 @@ final class WakeFlowController: ObservableObject {
 
     @discardableResult
     func snooze() async -> Bool {
+        await performSnooze(schedule: nil, cancel: nil)
+    }
+
+    @discardableResult
+    func snooze(
+        schedule: @escaping (Alarm) async throws -> Void,
+        cancel: @escaping (Alarm) async -> Void
+    ) async -> Bool {
+        await performSnooze(schedule: schedule, cancel: cancel)
+    }
+
+    private func performSnooze(
+        schedule: ((Alarm) async throws -> Void)?,
+        cancel: ((Alarm) async -> Void)?
+    ) async -> Bool {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
         snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
-        print("SNOOZE overrides schedule=\(scheduleSnoozeOperation != nil) cancel=\(cancelSnoozeOperation != nil)")
         do {
-            if let scheduleSnoozeOperation {
-                try await scheduleSnoozeOperation(alarm)
-                print("SNOOZE injected schedule completed")
+            if let schedule {
+                try await schedule(alarm)
             } else {
                 let alarmScheduler: AlarmScheduler
                 if let configuredScheduler = self.scheduler {
@@ -102,17 +108,14 @@ final class WakeFlowController: ObservableObject {
                     alarmScheduler = createdScheduler
                 }
                 try await alarmScheduler.scheduleSnooze(for: alarm)
-                print("SNOOZE default schedule completed")
             }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
-                print("SNOOZE session write failed")
-                await cancelScheduledSnooze(for: alarm)
+                await cancelScheduledSnooze(for: alarm, using: cancel)
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
-            print("SNOOZE operation failed: \(error)")
-            await cancelScheduledSnooze(for: alarm)
+            await cancelScheduledSnooze(for: alarm, using: cancel)
             snoozeError = error.localizedDescription
             return false
         }
@@ -126,9 +129,12 @@ final class WakeFlowController: ObservableObject {
         snoozeError = nil
     }
 
-    private func cancelScheduledSnooze(for alarm: Alarm) async {
-        if let cancelSnoozeOperation {
-            await cancelSnoozeOperation(alarm)
+    private func cancelScheduledSnooze(
+        for alarm: Alarm,
+        using cancel: ((Alarm) async -> Void)?
+    ) async {
+        if let cancel {
+            await cancel(alarm)
             return
         }
         let alarmScheduler: AlarmScheduler
