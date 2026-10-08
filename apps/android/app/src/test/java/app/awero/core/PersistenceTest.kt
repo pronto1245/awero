@@ -22,6 +22,40 @@ class PersistenceTest {
     private val context: Context
         get() = RuntimeEnvironment.getApplication()
 
+
+    @Test
+    fun alarmSurvivesRestartAndCanBeRescheduled() {
+        val name = "alarm-test.db"
+        val alarm = Alarm(
+            id = "alarm-persisted",
+            version = 3,
+            hour = 7,
+            minute = 45,
+            enabled = true,
+            weekdays = setOf(1, 2, 3, 4, 5),
+            missionType = MissionType.QR,
+            difficulty = Difficulty.HARD
+        )
+
+        val firstDb = AweroDatabase.createForTesting(context, name)
+        val firstStore = app.awero.core.alarm.AlarmStore(context, firstDb)
+        kotlinx.coroutines.runBlocking { firstStore.save(alarm) }
+        firstDb.close()
+
+        val secondDb = AweroDatabase.createForTesting(context, name)
+        val secondStore = app.awero.core.alarm.AlarmStore(context, secondDb)
+        val restored = kotlinx.coroutines.runBlocking { secondStore.get(alarm.id) }
+        assertEquals(alarm, restored)
+
+        val scheduler = app.awero.core.alarm.AlarmScheduler(context)
+        scheduler.schedule(restored!!)
+        assertEquals(true, scheduler.isScheduled(restored))
+
+        scheduler.cancel(restored)
+        secondDb.close()
+        context.deleteDatabase(name)
+    }
+
     @Test
     fun wakeSessionSurvivesRestartAndTransitionsAreIdempotent() {
         val name = "wake-test.db"
