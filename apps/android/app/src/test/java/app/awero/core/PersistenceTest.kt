@@ -57,6 +57,7 @@ class PersistenceTest {
         scheduler.cancel(restored)
         secondDb.close()
         context.deleteDatabase(name)
+        Unit
     }
 
 
@@ -105,6 +106,7 @@ class PersistenceTest {
 
         db.close()
         context.deleteDatabase(name)
+        Unit
     }
 
     @Test
@@ -144,6 +146,7 @@ class PersistenceTest {
 
         secondDb.close()
         context.deleteDatabase(name)
+        Unit
     }
 
     @Test
@@ -179,6 +182,7 @@ class PersistenceTest {
 
         reopened.close()
         context.deleteDatabase(name)
+        Unit
     }
 
     @Test
@@ -202,6 +206,7 @@ class PersistenceTest {
 
         migrated.close()
         context.deleteDatabase(name)
+        Unit
     }
 
     private fun createVersionOneDatabase(name: String) {
