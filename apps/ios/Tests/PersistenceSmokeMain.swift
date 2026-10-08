@@ -286,7 +286,6 @@ struct PersistenceSmokeMain {
         let cancelSnooze: (Alarm) async -> Void = { value in
             await scheduler.cancelSnooze(for: value)
         }
-        precondition(scheduleSnooze != nil && cancelSnooze != nil)
         let flow = WakeFlowController(
             sessionManager: WakeSessionManager(database: database),
             scheduler: scheduler,
