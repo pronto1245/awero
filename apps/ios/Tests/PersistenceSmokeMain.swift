@@ -4,6 +4,10 @@ import CoreData
 @main
 struct PersistenceSmokeMain {
     static func main() async throws {
+        if let phase = ProcessInfo.processInfo.environment["AWERO_CRASH_PHASE"] {
+            try await runCrashPhase(phase)
+            return
+        }
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("awero-smoke-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         let storeURL = root.appendingPathComponent("AWERO.sqlite")
@@ -193,6 +197,66 @@ struct PersistenceSmokeMain {
 
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
+    }
+
+    private static func runCrashPhase(_ phase: String) async throws {
+        guard let path = ProcessInfo.processInfo.environment["AWERO_CRASH_PATH"] else {
+            fatalError("AWERO_CRASH_PATH is required")
+        }
+        let storeURL = URL(fileURLWithPath: path)
+
+        if phase == "write" {
+            let store = CoreDataStore(storeURL: storeURL)
+            let alarm = Alarm(
+                id: UUID(),
+                version: 1,
+                hour: 7,
+                minute: 0,
+                enabled: true,
+                weekdays: Set(1...7),
+                timezoneMode: .deviceLocal,
+                fixedTimezone: nil,
+                missionType: .math,
+                difficulty: .medium
+            )
+            await store.saveAlarm(alarm)
+            let session = WakeSession(
+                id: UUID(),
+                alarmId: alarm.id,
+                alarmVersion: alarm.version,
+                scheduledAt: .now,
+                triggeredAt: .now,
+                missionStartedAt: .now,
+                completedAt: nil,
+                result: nil,
+                missionType: .math,
+                completionTimeSeconds: nil,
+                snoozeCount: 1,
+                fallbackUsed: true,
+                emergencyStop: false
+            )
+            await store.saveWakeSession(session)
+            print("AWERO crash phase write: READY")
+            while true {
+                try await Task.sleep(nanoseconds: 60_000_000_000)
+            }
+        }
+
+        if phase == "read" {
+            let store = CoreDataStore(storeURL: storeURL)
+            let alarms = await store.fetchAlarms()
+            precondition(alarms.count == 1)
+            precondition(alarms[0].hour == 7)
+            let session = await store.fetchActiveWakeSession()
+            precondition(session != nil)
+            precondition(session?.missionStartedAt != nil)
+            precondition(session?.snoozeCount == 1)
+            precondition(session?.fallbackUsed == true)
+            print("AWERO crash phase read: PASS")
+            return
+        }
+
+        fatalError("Unknown AWERO_CRASH_PHASE")
     }
 
     private static func load(_ container: NSPersistentContainer) async throws {
