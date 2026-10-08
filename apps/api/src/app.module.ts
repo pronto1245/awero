@@ -6,6 +6,7 @@ import { AnonymousModule } from './anonymous/anonymous.module';
 import { AuthModule } from './auth/auth.module';
 import { AlarmsModule } from './alarms/alarms.module';
 import { WakeSessionsModule } from './wake-sessions/wake-sessions.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { WakeSessionsModule } from './wake-sessions/wake-sessions.module';
     AuthModule,
     AlarmsModule,
     WakeSessionsModule,
+    StatisticsModule,
   ],
 })
 export class AppModule {}

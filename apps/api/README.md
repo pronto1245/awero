@@ -47,3 +47,7 @@ All API routes use the single global `/api/v1` prefix. Apply migrations through 
 - `GET /api/v1/wake-sessions/:id/events` — read the event history
 
 The client supplies UUIDs for the session and each event. Repeating the same create or event request is idempotent; reusing an ID with different content returns a conflict. A session must reference an alarm version owned by the caller. Events are appended in a transaction and invalid transitions are rejected without persisting the event. Supported events include `AWAKE`, `MISSION_STARTED`, `MISSION_VALIDATED`, `MISSION_FAILED`, `FALLBACK`, `SNOOZE`, `COMPLETED`, `EMERGENCY_STOP`, and `CANCELLED`. Snooze events carry `{ "count": 1 }` through `{ "count": 20 }` in `payload`.
+
+## Statistics
+
+- `GET /api/v1/statistics/summary` — return the caller's lifetime wake totals, completion rate, average completion time, and current/best consecutive-day streak. Successful wake days use each alarm's fixed timezone or the caller's latest registered device timezone.

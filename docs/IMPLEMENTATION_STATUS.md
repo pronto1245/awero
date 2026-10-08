@@ -81,7 +81,7 @@
 - [x] Anonymous account
 - [x] Device registration
 - [x] Alarm CRUD API
-- [ ] Wake session API
+- [x] Wake session API (transactional events, idempotency, owner checks)
 - [ ] Statistics API
 - [ ] Analytics ingestion
 - [ ] Offline sync queue

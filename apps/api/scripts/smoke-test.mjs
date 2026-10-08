@@ -80,12 +80,14 @@ async function main() {
 
   const sessionId = randomUUID();
   const triggerEventId = randomUUID();
+  const wakeStartedAt = new Date(Date.now() - 20_000);
+  const wakeStartedAtIso = wakeStartedAt.toISOString();
   const sessionBody = {
     id: sessionId,
     alarmId,
     alarmVersion: 1,
-    scheduledAt: '2026-10-08T04:30:00.000Z',
-    triggeredAt: '2026-10-08T04:30:00.000Z',
+    scheduledAt: wakeStartedAtIso,
+    triggeredAt: wakeStartedAtIso,
     missionType: 'MATH',
     eventId: triggerEventId,
   };
@@ -94,7 +96,7 @@ async function main() {
   assert(sessionCreated.data.item.id === sessionId, 'wake session id was not retained');
   const duplicateSession = await request('/wake-sessions', { method: 'POST', token, body: sessionBody });
   assert(duplicateSession.status === 201 && duplicateSession.data.duplicate, 'wake session create was not idempotent');
-  let wakeEventTime = Date.parse('2026-10-08T04:30:01.000Z');
+  let wakeEventTime = wakeStartedAt.getTime() + 1_000;
   const postWakeEvent = (eventType, payload) => request(`/wake-sessions/${sessionId}/events`, {
     method: 'POST',
     token,
@@ -141,6 +143,17 @@ async function main() {
     sessions.status === 200 && sessions.data.items[0].result === 'COMPLETED' && sessions.data.items[0].fallbackUsed,
     'wake session summary did not reflect its lifecycle',
   );
+  const statistics = await request('/statistics/summary', { token });
+  assert(
+    statistics.status === 200 &&
+      statistics.data.summary.totalWakes === 1 &&
+      statistics.data.summary.successfulWakes === 1 &&
+      statistics.data.summary.successRatePercent === 100 &&
+      statistics.data.summary.snoozedWakes === 1 &&
+      statistics.data.streak.current === 1 &&
+      statistics.data.streak.best === 1,
+    'statistics summary did not reflect the completed wake session',
+  );
 
   const secondRegistration = await request('/auth/anonymous', {
     method: 'POST',
@@ -159,6 +172,11 @@ async function main() {
   assert(crossOwnerUpdate.status === 404, 'a different anonymous owner accessed the alarm');
   const crossOwnerEvents = await request(`/wake-sessions/${sessionId}/events`, { token: secondRegistration.data.accessToken });
   assert(crossOwnerEvents.status === 404, 'a different anonymous owner accessed wake session events');
+  const otherOwnerStatistics = await request('/statistics/summary', { token: secondRegistration.data.accessToken });
+  assert(
+    otherOwnerStatistics.status === 200 && otherOwnerStatistics.data.summary.totalWakes === 0,
+    'statistics leaked wake data across anonymous accounts',
+  );
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');
