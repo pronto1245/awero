@@ -1,83 +1,18 @@
 # AWERO System Implementation Order
 
-## 1. Reliability foundation
-- Local alarm is source of truth.
-- Versioned scheduling.
-- Recurrence.
-- Timezone and DST.
-- Reboot/time-change recovery.
-- Test alarm.
-- Snooze.
-- Emergency stop.
+The single governing order is the phase table in [AWERO Product Specification and Implementation Plan](../AWERO_PRODUCT_SPEC_AND_IMPLEMENTATION_PLAN.md). Use it for dependencies, acceptance gates, and current status; this file must not define a second order.
 
-## 2. Mission runtime
-- Math validation.
-- Steps validation.
-- QR validation.
-- Permission failures.
-- Retry.
-- Fallback.
-- Technical failures never count as user failure.
+## Agreed sequence
 
-## 3. Local persistence
-- Android Room.
-- iOS Core Data/SQLite abstraction.
-- Transactional wake-session events.
-- Durable sync queue.
-- Crash recovery.
+1. Product baseline and competitor-informed scope.
+2. iOS and Android alarm reliability.
+3. Wake-session runtime and P0 Math/Steps/QR missions.
+4. Local persistence and recovery.
+5. Backend and sync, isolated from the active alarm path.
+6. UX completion and six-language localization.
+7. Free/Pro billing.
+8. P1 competitor capabilities: photo/object, exercise, cognitive missions, sequences, wake-up check, progress/history.
+9. P2 optional weather/morning briefing, sleep, social, and adaptive/AI features.
+10. Full automated and physical-device release validation.
 
-## 4. Backend
-- Anonymous auth.
-- Device registration.
-- Alarm CRUD.
-- Wake sessions/events.
-- Statistics.
-- Sync.
-- Analytics.
-- Support diagnostics.
-
-## 5. Product UX
-- Onboarding <= 60 sec.
-- First alarm without account.
-- Test before trust.
-- Alarm list/edit/delete/enable-disable.
-- Statistics.
-- Streak.
-- Failure/support flow.
-- Use the complete cross-platform feature scope and acceptance rules in [Product Requirements](../PRODUCT_REQUIREMENTS.md).
-- Use competitor and review findings as acceptance inputs: [Competitor and Review Gap Analysis](../research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md).
-- Keep all planned competitor capabilities tracked, including optional weather/morning briefing and exercise missions; sequence them after the reliability and core mission gates.
-- Visual direction and screen acceptance criteria: [Product UX Design](../design/PRODUCT_UX_DESIGN.md) (planned; not implemented).
-- Keep sort order and alarm edits predictable; explain repeat/timezone/next fire.
-- Never place ads, review prompts, login, paywall, or network-dependent flow in the ringing/mission path.
-- Preserve a usable basic alarm with no account or subscription; explain Free/Pro boundaries before setup friction.
-
-## 6. Monetization
-- Free entitlement always retains basic alarm.
-- StoreKit 2.
-- Google Play Billing.
-- Backend receipt validation.
-- Restore purchase.
-- Subscription expiry cannot break the basic alarm.
-
-## 7. Adaptive logic and AI
-- Local adaptive policy first.
-- Server AI recommendation second.
-- JSON schema validation.
-- Policy Engine.
-- AI never controls alarm time, permissions, subscription, timezone or emergency controls.
-
-## 8. Release
-- Unit.
-- Integration.
-- E2E.
-- Offline.
-- Reboot.
-- DST/timezone.
-- Permission denied.
-- Camera/motion unavailable.
-- Subscription expiry.
-- Device migration.
-- Store review gates.
-
-No layer is considered production-complete until the preceding layer has passed its tests.
+The order protects the immediate user outcome: a scheduled alarm rings and the wake flow can complete safely. Exercise and weather remain in the full scope; visual redesign is deferred until the related behavior and acceptance criteria are ready. Green CI does not replace physical iOS/Android alarm tests.
