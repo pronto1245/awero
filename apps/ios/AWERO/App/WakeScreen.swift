@@ -29,6 +29,11 @@ struct WakeScreen: View {
                     Text("SNOOZED").font(.title.bold()).foregroundStyle(.white)
                     Text("Your next wake-up is scheduled.").foregroundStyle(.white.opacity(0.55))
                 }
+                if let error = flow.actionError, flow.state == .ringing || flow.state == .mission {
+                    Text(error).foregroundStyle(.white.opacity(0.7))
+                    Button("Retry saving") { Task { await flow.retryPendingAction() } }
+                        .buttonStyle(PrimaryWakeButton())
+                }
             }.padding(28)
         }
         .alert("Snooze unavailable", isPresented: Binding(

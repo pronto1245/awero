@@ -9,6 +9,7 @@ final class WakeFlowController: ObservableObject {
     @Published private(set) var currentMission: MissionType = .math
     @Published private(set) var snoozeCount = 0
     @Published private(set) var snoozeError: String?
+    @Published private(set) var actionError: String?
 
     private let sessionManager: WakeSessionManager
     private var scheduler: AlarmScheduler?
@@ -17,6 +18,9 @@ final class WakeFlowController: ObservableObject {
     private(set) var currentAlarm: Alarm?
     private var maxSnoozes = 3
     private var snoozeInProgress = false
+    private enum PendingAction { case beginMission, fallback, complete }
+    private var pendingAction: PendingAction?
+    private var actionInProgress = false
 
     init(
         sessionManager: WakeSessionManager? = nil,
@@ -58,22 +62,55 @@ final class WakeFlowController: ObservableObject {
     }
 
     func beginMission() async {
-        guard state == .ringing else { return }
-        guard await sessionManager.startMission() else { return }
+        guard !actionInProgress, state == .ringing else { return }
+        actionInProgress = true
+        defer { actionInProgress = false }
+        guard await sessionManager.startMission() else {
+            pendingAction = .beginMission
+            actionError = "Could not save mission progress. The alarm is still active."
+            return
+        }
+        pendingAction = nil
+        actionError = nil
         state = .mission
     }
 
     func fallbackToMath() async {
-        guard state == .mission else { return }
-        guard await sessionManager.markFallback() else { return }
+        guard !actionInProgress, state == .mission else { return }
+        actionInProgress = true
+        defer { actionInProgress = false }
+        guard await sessionManager.markFallback() else {
+            pendingAction = .fallback
+            actionError = "Could not save the fallback. Your wake session is still active."
+            return
+        }
+        pendingAction = nil
+        actionError = nil
         currentMission = .math
     }
 
     func completeMission() async {
-        guard state == .mission else { return }
-        guard let session = await sessionManager.complete() else { return }
+        guard !actionInProgress, state == .mission else { return }
+        actionInProgress = true
+        defer { actionInProgress = false }
+        guard let session = await sessionManager.complete() else {
+            pendingAction = .complete
+            actionError = "Could not save completion. Your wake session is still active."
+            return
+        }
+        pendingAction = nil
+        actionError = nil
         await statistics.record(session)
         state = .completed
+    }
+
+    func retryPendingAction() async {
+        switch pendingAction {
+        case .beginMission: await beginMission()
+        case .fallback: await fallbackToMath()
+        case .complete: await completeMission()
+        case nil: break
+        }
     }
 
     @discardableResult
