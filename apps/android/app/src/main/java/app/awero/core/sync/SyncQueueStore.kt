@@ -6,8 +6,7 @@ import app.awero.core.storage.SyncOperationEntity
 import org.json.JSONObject
 import java.util.UUID
 
-class SyncQueueStore(context: Context) {
-    private val database = AweroDatabase.get(context.applicationContext)
+class SyncQueueStore(context: Context, private val database: AweroDatabase = AweroDatabase.get(context.applicationContext)) {
 
     suspend fun enqueue(
         operationType: String,
