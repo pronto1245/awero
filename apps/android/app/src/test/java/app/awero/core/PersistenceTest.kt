@@ -14,6 +14,7 @@ import app.awero.core.wake.WakeSessionStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -26,7 +27,7 @@ class PersistenceTest {
 
 
     @Test
-    fun alarmSurvivesRestartAndCanBeRescheduled() {
+    fun alarmSurvivesRestartAndCanBeRescheduled() = runBlocking {
         val name = "alarm-test.db"
         val alarm = Alarm(
             id = "alarm-persisted",
@@ -60,7 +61,7 @@ class PersistenceTest {
 
 
     @Test
-    fun fullWakeFlowRestoresUiAndPersistsStatistics() {
+    fun fullWakeFlowRestoresUiAndPersistsStatistics() = runBlocking {
         val name = "e2e-test.db"
         val db = AweroDatabase.createForTesting(context, name)
         val alarm = Alarm(
@@ -107,12 +108,13 @@ class PersistenceTest {
     }
 
     @Test
-    fun wakeSessionSurvivesRestartAndTransitionsAreIdempotent() {
+    fun wakeSessionSurvivesRestartAndTransitionsAreIdempotent() = runBlocking {
         val name = "wake-test.db"
         val alarm = Alarm(
             id = "alarm-1",
             version = 1,
             hour = 7,
+            enabled = true,
             minute = 30,
             missionType = MissionType.MATH,
             difficulty = Difficulty.MEDIUM
@@ -145,7 +147,7 @@ class PersistenceTest {
     }
 
     @Test
-    fun syncQueueIgnoresDuplicateIdsAndRetriesAfterRestart() {
+    fun syncQueueIgnoresDuplicateIdsAndRetriesAfterRestart() = runBlocking {
         val name = "sync-test.db"
         val db = AweroDatabase.createForTesting(context, name)
         val queue = SyncQueueStore(context, db)
@@ -180,7 +182,7 @@ class PersistenceTest {
     }
 
     @Test
-    fun migratesRealVersionOneDatabaseToVersionTwo() {
+    fun migratesRealVersionOneDatabaseToVersionTwo() = runBlocking {
         val name = "migration-test.db"
         createVersionOneDatabase(name)
 
