@@ -80,18 +80,24 @@ final class WakeFlowController: ObservableObject {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return false }
         snoozeError = nil
         let nextSnoozeCount = snoozeCount + 1
-        let scheduler = scheduler ?? AlarmScheduler()
-        self.scheduler = scheduler
+        let alarmScheduler: AlarmScheduler
+        if let configuredScheduler = self.scheduler {
+            alarmScheduler = configuredScheduler
+        } else {
+            let createdScheduler = AlarmScheduler()
+            self.scheduler = createdScheduler
+            alarmScheduler = createdScheduler
+        }
 
         do {
-            try await scheduler.scheduleSnooze(for: alarm)
+            try await alarmScheduler.scheduleSnooze(for: alarm)
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
-                await scheduler.cancelSnooze(for: alarm)
+                await alarmScheduler.cancelSnooze(for: alarm)
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
-            await scheduler.cancelSnooze(for: alarm)
+            await alarmScheduler.cancelSnooze(for: alarm)
             snoozeError = error.localizedDescription
             return false
         }
