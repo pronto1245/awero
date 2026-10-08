@@ -8,9 +8,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
-class StatisticsStore(context: Context) {
+class StatisticsStore(context: Context, private val database: AweroDatabase = AweroDatabase.get(context.applicationContext)) {
     private val appContext = context.applicationContext
-    private val database = AweroDatabase.get(appContext)
     private val preferences = appContext.getSharedPreferences("awero_statistics", Context.MODE_PRIVATE)
     private val mutex = Mutex()
 
