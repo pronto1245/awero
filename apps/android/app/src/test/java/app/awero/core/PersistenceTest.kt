@@ -7,6 +7,7 @@ import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.Difficulty
 import app.awero.core.alarm.MissionType
 import app.awero.core.storage.AweroDatabase
+import app.awero.core.storage.StatisticsEntity
 import app.awero.core.statistics.StatisticsStore
 import app.awero.core.wake.WakeFlowController
 import app.awero.core.sync.SyncQueueStore
@@ -25,6 +26,37 @@ class PersistenceTest {
     private val context: Context
         get() = RuntimeEnvironment.getApplication()
 
+    @Test
+    fun missingStatisticsMigrationMarkerDoesNotOverwriteCommittedCounters() = runBlocking {
+        val name = "statistics-migration-restart.db"
+        val preferences = context.getSharedPreferences("awero_statistics", Context.MODE_PRIVATE)
+        preferences.edit()
+            .putString("statistics", """{"planned":99,"completed":88}""")
+            .putBoolean("room_migrated", false)
+            .commit()
+        var database = AweroDatabase.createForTesting(context, name)
+        database.statistics().upsert(StatisticsEntity(planned = 4, completed = 2))
+        database.close()
+
+        database = AweroDatabase.createForTesting(context, name)
+        StatisticsStore(context, database).recordPlanned()
+        assertEquals(5, database.statistics().get()!!.planned)
+        assertEquals(2, database.statistics().get()!!.completed)
+        database.close()
+
+        preferences.edit().putBoolean("room_migrated", false).commit()
+        database = AweroDatabase.createForTesting(context, name)
+        try {
+            StatisticsStore(context, database).recordPlanned()
+            assertEquals(6, database.statistics().get()!!.planned)
+            assertEquals(2, database.statistics().get()!!.completed)
+        } finally {
+            database.close()
+            context.deleteDatabase(name)
+            preferences.edit().clear().commit()
+        }
+        Unit
+    }
 
     @Test
     fun alarmSurvivesRestart() = runBlocking {

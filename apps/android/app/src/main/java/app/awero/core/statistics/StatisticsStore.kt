@@ -48,7 +48,9 @@ class StatisticsStore(context: Context, private val database: AweroDatabase = Aw
 
     private suspend fun migrateLegacyIfNeeded() {
         if (preferences.getBoolean("room_migrated", false)) return
-        database.statistics().upsert(cached.toEntity())
+        if (database.statistics().get() == null) {
+            database.statistics().upsert(cached.toEntity())
+        }
         preferences.edit().putBoolean("room_migrated", true).apply()
     }
 

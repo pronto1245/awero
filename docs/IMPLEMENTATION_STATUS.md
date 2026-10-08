@@ -128,3 +128,10 @@ Current status: **MVP implementation in progress; repository contains foundation
 ## Reliability Foundation
 
 Status: CODE + CI VERIFIED
+
+
+## Local Persistence Hardening
+
+The approved ten-point **automated local persistence gate** has a complete successful CI baseline. Both platforms have crash/restart checks; Android additionally exercises real process SIGKILL and AlarmManager recovery. Core Data failure handling, Room 1→2 schema validation, sync retry deduplication, wake-flow restore and local E2E are covered.
+
+The verification matrix, workflow evidence and physical-device boundary are recorded in [Local Persistence Hardening](LOCAL_PERSISTENCE_HARDENING.md). Backend work is excluded from this gate.
