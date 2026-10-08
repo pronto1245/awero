@@ -224,7 +224,8 @@ final class AlarmScheduler {
     }
 
     private func scheduleNotifications(for alarm: Alarm) async throws {
-        for day in alarm.weekdays.sorted() {
+        do {
+            for day in alarm.weekdays.sorted() {
             var components = DateComponents()
             components.calendar = Calendar(identifier: .gregorian)
             components.weekday = day
@@ -250,6 +251,10 @@ final class AlarmScheduler {
                     trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
                 )
             )
+            }
+        } catch {
+            await removeNotifications(for: alarm)
+            throw error
         }
     }
 
