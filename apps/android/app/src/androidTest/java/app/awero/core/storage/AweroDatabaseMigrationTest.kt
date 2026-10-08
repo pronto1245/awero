@@ -27,7 +27,7 @@ class AweroDatabaseMigrationTest {
         val legacy = Room.databaseBuilder(context, LegacyAweroDatabase::class.java, databaseName).build()
         val db = legacy.openHelper.writableDatabase
         db.execSQL("INSERT INTO alarms (id, version, hour, minute, enabled, weekdays, timezoneMode, fixedTimezone, missionType, difficulty, maxSnoozes, snoozeMinutes, qrExpectedCode) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", arrayOf("alarm-1", 1, 7, 30, 1, "1,2,3,4,5", "DEVICE_LOCAL", null, "MATH", "MEDIUM", 3, 10, null))
-        db.execSQL("INSERT INTO wake_sessions (id, alarmId, alarmVersion, scheduledAt, triggeredAt, missionStartedAt, completedAt, result, missionType, completionTimeSeconds, snoozeCount, fallbackUsed, emergencyStop) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", arrayOf("session-1", "alarm-1", 1, 1000L, 1100L, null, null, null, "MATH", null, 0, 0, 0))
+        db.execSQL("INSERT INTO wake_sessions (id, alarmId, alarmVersion, scheduledAt, triggeredAt, missionStartedAt, completedAt, result, snoozeCount, fallbackUsed, emergencyStop) VALUES (?,?,?,?,?,?,?,?,?,?,?)", arrayOf("session-1", "alarm-1", 1, 1000L, 1100L, null, null, null, 0, 0, 0))
         legacy.close()
 
         val migrated = AweroDatabase.createForTesting(context, databaseName)
