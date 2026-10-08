@@ -118,6 +118,9 @@ private struct QRMissionView: View {
                     .foregroundStyle(.white.opacity(0.6))
                 Button("USE FALLBACK", action: onFailure)
                     .buttonStyle(WakeMissionButton())
+            } else if let scannedCode = runtime.scannedCode, scannedCode != expected {
+                Text("QR code does not match. Switching to the safe fallback.")
+                    .foregroundStyle(.white.opacity(0.7))
             } else {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
@@ -135,8 +138,12 @@ private struct QRMissionView: View {
             runtime.configure()
             runtime.start()
             while !Task.isCancelled {
-                if runtime.matches(expected: expected) {
-                    onSuccess()
+                if let scannedCode = runtime.scannedCode {
+                    if scannedCode == expected {
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
                     break
                 }
                 try? await Task.sleep(for: .milliseconds(200))
