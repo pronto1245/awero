@@ -5,6 +5,8 @@ RUNNER=app.awero.test/androidx.test.runner.AndroidJUnitRunner
 TEST_CLASS=app.awero.core.storage.ProcessCrashRecoveryTest
 REPORT_DIR=apps/android/app/build/outputs/process-crash
 mkdir -p "$REPORT_DIR"
+timeout 60s adb install -r apps/android/app/build/outputs/apk/debug/app-debug.apk
+timeout 60s adb install -r apps/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 adb shell run-as app.awero rm -f files/awero-crash-ready
 
 timeout 180s adb shell am instrument -w -e class "$TEST_CLASS" -e aweroCrashPhase write "$RUNNER" > "$REPORT_DIR/write.txt" 2>&1 &
@@ -31,6 +33,7 @@ APP_PID=$(adb shell pidof app.awero | tr -d '\r')
 [[ "$APP_PID" =~ ^[0-9]+$ ]]
 adb shell run-as app.awero kill -9 "$APP_PID"
 wait "$WRITER_PID" || true
+trap - EXIT
 adb shell dumpsys alarm > "$REPORT_DIR/alarms-after-sigkill.txt"
 rg -F 'app.awero.ALARM' "$REPORT_DIR/alarms-after-sigkill.txt"
 timeout 120s adb shell am instrument -w -e class "$TEST_CLASS" -e aweroCrashPhase read "$RUNNER" | tee "$REPORT_DIR/read.txt"

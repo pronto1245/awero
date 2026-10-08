@@ -328,7 +328,35 @@ struct PersistenceSmokeMain {
         precondition(repaired)
         let repairedRequests = await center.pendingNotificationRequests()
         precondition(repairedRequests.count == 2)
+        let defaults = UserDefaults.standard
+        let legacyKey = "awero.statistics.v1"
+        let migratedKey = "awero.coredata.statistics.migrated.v1"
+        let previousLegacy = defaults.object(forKey: legacyKey)
+        let previousMarker = defaults.object(forKey: migratedKey)
+        defer {
+            if let previousLegacy { defaults.set(previousLegacy, forKey: legacyKey) }
+            else { defaults.removeObject(forKey: legacyKey) }
+            if let previousMarker { defaults.set(previousMarker, forKey: migratedKey) }
+            else { defaults.removeObject(forKey: migratedKey) }
+        }
+        var legacyStatistics = WakeStatistics()
+        legacyStatistics.planned = 4
+        legacyStatistics.completed = 2
+        defaults.set(try JSONEncoder().encode(legacyStatistics), forKey: legacyKey)
+        defaults.set(false, forKey: migratedKey)
+        let failedMigration = StatisticsStore(database: CoreDataStore(storeURL: url, readOnly: true))
+        await failedMigration.load()
+        precondition(!defaults.bool(forKey: migratedKey))
+        precondition(failedMigration.statistics.planned == 0)
+        let missingStatistics = await restarted.fetchStatistics()
+        precondition(missingStatistics == nil)
+        let retriedMigration = StatisticsStore(database: restarted)
+        await retriedMigration.load()
+        precondition(defaults.bool(forKey: migratedKey))
+        let migratedStatistics = await restarted.fetchStatistics()
+        precondition(migratedStatistics?.planned == 4 && migratedStatistics?.completed == 2)
         print("AWERO alarm recovery and failed-write scheduling: PASS")
+        print("AWERO statistics migration failure and retry: PASS")
     }
 
     private static func runCrashPhase(_ phase: String) async throws {
