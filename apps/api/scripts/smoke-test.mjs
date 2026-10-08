@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 const baseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000/api/v1';
 
 async function request(path, { method = 'GET', token, body } = {}) {
@@ -76,6 +78,70 @@ async function main() {
   assert(updated.status === 200, 'alarm update failed');
   assert(updated.data.item.version === 2 && updated.data.item.minute === 45, 'alarm version did not advance');
 
+  const sessionId = randomUUID();
+  const triggerEventId = randomUUID();
+  const sessionBody = {
+    id: sessionId,
+    alarmId,
+    alarmVersion: 1,
+    scheduledAt: '2026-10-08T04:30:00.000Z',
+    triggeredAt: '2026-10-08T04:30:00.000Z',
+    missionType: 'MATH',
+    eventId: triggerEventId,
+  };
+  const sessionCreated = await request('/wake-sessions', { method: 'POST', token, body: sessionBody });
+  assert(sessionCreated.status === 201, 'wake session create failed');
+  assert(sessionCreated.data.item.id === sessionId, 'wake session id was not retained');
+  const duplicateSession = await request('/wake-sessions', { method: 'POST', token, body: sessionBody });
+  assert(duplicateSession.status === 201 && duplicateSession.data.duplicate, 'wake session create was not idempotent');
+  let wakeEventTime = Date.parse('2026-10-08T04:30:01.000Z');
+  const postWakeEvent = (eventType, payload) => request(`/wake-sessions/${sessionId}/events`, {
+    method: 'POST',
+    token,
+    body: {
+      id: randomUUID(),
+      eventType,
+      occurredAt: new Date(wakeEventTime++).toISOString(),
+      ...(payload ? { payload } : {}),
+    },
+  });
+
+  const prematureComplete = await request(`/wake-sessions/${sessionId}/events`, {
+    method: 'POST', token, body: { id: randomUUID(), eventType: 'COMPLETED' },
+  });
+  assert(prematureComplete.status === 409, 'wake session completed before a mission started');
+
+  const startedBody = {
+    id: randomUUID(),
+    eventType: 'MISSION_STARTED',
+    occurredAt: new Date(wakeEventTime++).toISOString(),
+  };
+  const started = await request(`/wake-sessions/${sessionId}/events`, { method: 'POST', token, body: startedBody });
+  assert(started.status === 201 && !started.data.item.duplicate, 'mission start event failed');
+  const duplicateStarted = await request(`/wake-sessions/${sessionId}/events`, {
+    method: 'POST', token, body: startedBody,
+  });
+  assert(duplicateStarted.status === 201 && duplicateStarted.data.item.duplicate, 'wake event was not idempotent');
+  const snooze = await postWakeEvent('SNOOZE', { count: 1 });
+  assert(snooze.status === 201, 'wake session snooze event failed');
+  const missionFailed = await postWakeEvent('MISSION_FAILED');
+  assert(missionFailed.status === 201, 'wake session mission failure event failed');
+  const fallback = await postWakeEvent('FALLBACK');
+  assert(fallback.status === 201, 'wake session fallback event failed');
+  const completed = await postWakeEvent('COMPLETED');
+  assert(completed.status === 201, 'wake session completion event failed');
+  const sessionEvents = await request(`/wake-sessions/${sessionId}/events`, { token });
+  assert(
+    sessionEvents.status === 200 && sessionEvents.data.items.map((event) => event.eventType).join(',') ===
+      'TRIGGERED,MISSION_STARTED,SNOOZE,MISSION_FAILED,FALLBACK,COMPLETED',
+    'wake session event history was incomplete or out of order',
+  );
+  const sessions = await request('/wake-sessions', { token });
+  assert(
+    sessions.status === 200 && sessions.data.items[0].result === 'COMPLETED' && sessions.data.items[0].fallbackUsed,
+    'wake session summary did not reflect its lifecycle',
+  );
+
   const secondRegistration = await request('/auth/anonymous', {
     method: 'POST',
     body: {
@@ -91,6 +157,8 @@ async function main() {
     body: { minute: 10 },
   });
   assert(crossOwnerUpdate.status === 404, 'a different anonymous owner accessed the alarm');
+  const crossOwnerEvents = await request(`/wake-sessions/${sessionId}/events`, { token: secondRegistration.data.accessToken });
+  assert(crossOwnerEvents.status === 404, 'a different anonymous owner accessed wake session events');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 3, 'alarm delete/tombstone failed');

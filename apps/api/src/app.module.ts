@@ -5,6 +5,7 @@ import { HealthModule } from './health/health.module';
 import { AnonymousModule } from './anonymous/anonymous.module';
 import { AuthModule } from './auth/auth.module';
 import { AlarmsModule } from './alarms/alarms.module';
+import { WakeSessionsModule } from './wake-sessions/wake-sessions.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AlarmsModule } from './alarms/alarms.module';
     AnonymousModule,
     AuthModule,
     AlarmsModule,
+    WakeSessionsModule,
   ],
 })
 export class AppModule {}

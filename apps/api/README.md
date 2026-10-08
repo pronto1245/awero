@@ -38,3 +38,12 @@ Registration returns a 30-day bearer token. Store the token securely on the devi
 Create requests require integer `hour` (0–23) and `minute` (0–59). Optional fields are `label`, `timezoneMode`, `fixedTimezone`, `snoozeEnabled`, `maxSnoozes`, `snoozeMinutes`, `missionType`, and `difficulty`. Unknown properties and invalid enum/timezone values are rejected.
 
 All API routes use the single global `/api/v1` prefix. Apply migrations through `pnpm --filter @awero/api db:migrate` for an empty database or through the local Docker Compose startup. Production schema changes remain migration-only.
+
+## Wake session endpoints
+
+- `GET /api/v1/wake-sessions` — list the caller's latest 100 sessions
+- `POST /api/v1/wake-sessions` — create a client-generated session and its `TRIGGERED` event
+- `POST /api/v1/wake-sessions/:id/events` — append one lifecycle event
+- `GET /api/v1/wake-sessions/:id/events` — read the event history
+
+The client supplies UUIDs for the session and each event. Repeating the same create or event request is idempotent; reusing an ID with different content returns a conflict. A session must reference an alarm version owned by the caller. Events are appended in a transaction and invalid transitions are rejected without persisting the event. Supported events include `AWAKE`, `MISSION_STARTED`, `MISSION_VALIDATED`, `MISSION_FAILED`, `FALLBACK`, `SNOOZE`, `COMPLETED`, `EMERGENCY_STOP`, and `CANCELLED`. Snooze events carry `{ "count": 1 }` through `{ "count": 20 }` in `payload`.
