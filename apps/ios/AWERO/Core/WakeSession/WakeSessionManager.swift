@@ -46,14 +46,16 @@ final class WakeSessionManager {
         return true
     }
 
-    func startMission() async {
+    @discardableResult
+    func startMission() async -> Bool {
         await acquireTransition()
         defer { releaseTransition() }
         await ensureCurrent()
-        guard var session = current, session.result == nil, session.missionStartedAt == nil else { return }
+        guard var session = current, session.result == nil, session.missionStartedAt == nil else { return false }
         session.missionStartedAt = .now
-        guard await database.saveWakeSession(session) else { return }
+        guard await database.saveWakeSession(session) else { return false }
         current = session
+        return true
     }
 
     func complete() async -> WakeSession? {
@@ -71,24 +73,28 @@ final class WakeSessionManager {
         return session
     }
 
-    func setSnoozeCount(_ count: Int) async {
+    @discardableResult
+    func setSnoozeCount(_ count: Int) async -> Bool {
         await acquireTransition()
         defer { releaseTransition() }
         await ensureCurrent()
-        guard var session = current, session.result == nil, session.snoozeCount != count else { return }
+        guard var session = current, session.result == nil, session.snoozeCount != count else { return false }
         session.snoozeCount = count
-        guard await database.saveWakeSession(session) else { return }
+        guard await database.saveWakeSession(session) else { return false }
         current = session
+        return true
     }
 
-    func markFallback() async {
+    @discardableResult
+    func markFallback() async -> Bool {
         await acquireTransition()
         defer { releaseTransition() }
         await ensureCurrent()
-        guard var session = current, session.result == nil, !session.fallbackUsed else { return }
+        guard var session = current, session.result == nil, !session.fallbackUsed else { return false }
         session.fallbackUsed = true
-        guard await database.saveWakeSession(session) else { return }
+        guard await database.saveWakeSession(session) else { return false }
         current = session
+        return true
     }
 
     func emergencyStop() async -> WakeSession? {

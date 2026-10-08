@@ -67,6 +67,12 @@ struct PersistenceSmokeMain {
         precondition(!failedTrigger)
         let failedCurrent = await MainActor.run { failedManager.current }
         precondition(failedCurrent == nil)
+        let failedFlow = await MainActor.run {
+            WakeFlowController(sessionManager: failedManager, database: readOnlyStore)
+        }
+        await failedFlow.start(alarm: restoredAlarm!)
+        let failedStartState = await MainActor.run { failedFlow.state }
+        precondition(failedStartState == .idle)
 
         let operation = SyncOperation(
             operationType: "UPDATE_ALARM",
@@ -117,6 +123,13 @@ struct PersistenceSmokeMain {
         precondition(unchangedSession?.fallbackUsed == false)
         precondition(unchangedSession?.result == nil && unchangedSession?.completedAt == nil)
         precondition(unchangedSession?.emergencyStop == false)
+        await failedFlow.restore()
+        await failedFlow.beginMission()
+        await failedFlow.snooze()
+        await failedFlow.emergencyStop()
+        let failedFlowState = await MainActor.run { failedFlow.state }
+        let failedSnoozes = await MainActor.run { failedFlow.snoozeCount }
+        precondition(failedFlowState == .ringing && failedSnoozes == 0)
         let restartedAgain = CoreDataStore(storeURL: storeURL)
         let active = await restartedAgain.fetchActiveWakeSession()
         precondition(active?.id == session.id)

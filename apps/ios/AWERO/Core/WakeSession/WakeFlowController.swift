@@ -38,39 +38,42 @@ final class WakeFlowController: ObservableObject {
     }
 
     func start(alarm: Alarm, scheduledAt: Date = .now) async {
+        guard await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt) else {
+            await restore()
+            return
+        }
         currentAlarm = alarm
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
         snoozeCount = 0
-        let created = await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt)
-        if created { await statistics.recordPlanned() }
+        await statistics.recordPlanned()
         state = .ringing
     }
 
     func beginMission() async {
         guard state == .ringing else { return }
+        guard await sessionManager.startMission() else { return }
         state = .mission
-        await sessionManager.startMission()
     }
 
     func fallbackToMath() async {
         guard state == .mission else { return }
+        guard await sessionManager.markFallback() else { return }
         currentMission = .math
-        await sessionManager.markFallback()
     }
 
     func completeMission() async {
         guard state == .mission else { return }
-        if let session = await sessionManager.complete() {
-            await statistics.record(session)
-        }
+        guard let session = await sessionManager.complete() else { return }
+        await statistics.record(session)
         state = .completed
     }
 
     func snooze() async {
         guard let alarm = currentAlarm, state == .ringing, snoozeCount < maxSnoozes else { return }
-        snoozeCount += 1
-        await sessionManager.setSnoozeCount(snoozeCount)
+        let nextSnoozeCount = snoozeCount + 1
+        guard await sessionManager.setSnoozeCount(nextSnoozeCount) else { return }
+        snoozeCount = nextSnoozeCount
         let scheduler = scheduler ?? AlarmScheduler()
         self.scheduler = scheduler
         Task {
@@ -80,9 +83,8 @@ final class WakeFlowController: ObservableObject {
     }
 
     func emergencyStop() async {
-        if let session = await sessionManager.emergencyStop() {
-            await statistics.record(session)
-        }
+        guard let session = await sessionManager.emergencyStop() else { return }
+        await statistics.record(session)
         state = .emergencyStopped
     }
 }
