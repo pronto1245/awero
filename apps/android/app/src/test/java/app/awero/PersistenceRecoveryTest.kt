@@ -73,7 +73,7 @@ class PersistenceRecoveryTest {
         val events = database.wakeEvents().forSession(sessionId)
         assertEquals(listOf("TRIGGERED", "MISSION_STARTED", "FALLBACK", "SNOOZE"), events.map { it.eventType })
 
-        val restoredFlow = WakeFlowController(restoredStore, context)
+        val restoredFlow = WakeFlowController(restoredStore, context, alarmStore = app.awero.core.alarm.AlarmStore(context, database))
         restoredFlow.restore()
         assertEquals(WakeFlowController.State.MISSION, restoredFlow.state.value)
 
@@ -118,31 +118,49 @@ class PersistenceRecoveryTest {
     @Test
     fun room_migration_1_to_2_creates_wake_events_on_real_v1_sqlite_database() {
         val name = "awero-migration-${System.nanoTime()}.db"
-        val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
-            .name(name)
-            .callback(object : SupportSQLiteOpenHelper.Callback(1) {
-                override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                    db.execSQL("CREATE TABLE legacy_state (id INTEGER NOT NULL PRIMARY KEY)")
-                }
+        val factory = FrameworkSQLiteOpenHelperFactory()
+        val v1 = factory.create(
+            SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(name)
+                .callback(object : SupportSQLiteOpenHelper.Callback(1) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                        db.execSQL("CREATE TABLE legacy_state (id INTEGER NOT NULL PRIMARY KEY)")
+                    }
 
-                override fun onUpgrade(
-                    db: androidx.sqlite.db.SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int
-                ) {
-                    AweroDatabase.MIGRATION_1_2.migrate(db)
-                }
-            })
-            .build()
+                    override fun onUpgrade(
+                        db: androidx.sqlite.db.SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int
+                    ) = Unit
+                })
+                .build()
+        )
+        v1.writableDatabase.close()
+        v1.close()
 
-        val helper = FrameworkSQLiteOpenHelperFactory().create(configuration)
-        val database = helper.writableDatabase
+        val v2 = factory.create(
+            SupportSQLiteOpenHelper.Configuration.builder(context)
+                .name(name)
+                .callback(object : SupportSQLiteOpenHelper.Callback(2) {
+                    override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) = Unit
+
+                    override fun onUpgrade(
+                        db: androidx.sqlite.db.SupportSQLiteDatabase,
+                        oldVersion: Int,
+                        newVersion: Int
+                    ) {
+                        AweroDatabase.MIGRATION_1_2.migrate(db)
+                    }
+                })
+                .build()
+        )
+        val database = v2.writableDatabase
         val tables = database.query(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'"
         )
         assertTrue(tables.moveToFirst())
         tables.close()
-        helper.close()
+        v2.close()
         context.getDatabasePath(name).delete()
     }
 }
