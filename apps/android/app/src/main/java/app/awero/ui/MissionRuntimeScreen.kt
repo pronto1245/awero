@@ -18,7 +18,7 @@ import app.awero.core.missions.QRMissionRuntime
 import app.awero.core.missions.StepsMission
 
 object MissionRuntimeScreen {
-    fun create(activity: ComponentActivity, alarm: Alarm, onSuccess: () -> Unit, onFailure: () -> Unit): View {
+    fun create(activity: ComponentActivity, alarm: Alarm, onSuccess: () -> Unit, onFailure: () -> Unit, timeoutMillis: Long = 120_000L): View {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
@@ -33,6 +33,30 @@ object MissionRuntimeScreen {
             setPadding(0, 16, 0, 16)
         }
         root.addView(label("WAKE MISSION", 28f))
+        var finished = false
+        var cleanup: () -> Unit = {}
+        var deadline: Runnable? = null
+        fun finish(success: Boolean) {
+            if (finished) return
+            finished = true
+            deadline?.let { root.removeCallbacks(it) }
+            cleanup()
+            if (success) onSuccess() else onFailure()
+        }
+        if (alarm.missionType == MissionType.STEPS || alarm.missionType == MissionType.QR) {
+            deadline = Runnable { finish(false) }
+            root.addView(label("After 2 minutes, this task switches to Math.", 16f))
+        }
+        root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View) {
+                if (!finished) deadline?.let { root.postDelayed(it, timeoutMillis.coerceAtLeast(0)) }
+            }
+            override fun onViewDetachedFromWindow(view: View) {
+                finished = true
+                deadline?.let { root.removeCallbacks(it) }
+                cleanup()
+            }
+        })
 
         when (alarm.missionType) {
             MissionType.MATH -> {
@@ -52,26 +76,27 @@ object MissionRuntimeScreen {
                     text = "CHECK"
                     setOnClickListener {
                         val value = answer.text.toString().toIntOrNull()
-                        if (value != null && mission.validate(value)) onSuccess()
+                        if (value != null && mission.validate(value)) finish(true)
                         else { answer.text.clear(); answer.hint = "Try again" }
                     }
                 })
             }
             MissionType.STEPS -> {
                 val mission = StepsMission(activity)
-                mission.start()
-                val status = label("Walk 30 steps", 30f)
+                cleanup = { mission.stop() }
+                val motionStarted = runCatching { mission.start() }.isSuccess && mission.available
+                val status = label(if (motionStarted) "Walk 30 steps" else "Motion unavailable. Use Math fallback.", 30f)
                 root.addView(status)
                 root.addView(Button(activity).apply {
                     text = "CHECK STEPS"
                     setOnClickListener {
                         status.text = "Steps: ${mission.steps} / 30"
-                        if (mission.validate()) { mission.stop(); onSuccess() }
+                        if (mission.validate()) finish(true)
                     }
                 })
                 root.addView(Button(activity).apply {
                     text = "I CAN'T WALK"
-                    setOnClickListener { mission.stop(); onFailure() }
+                    setOnClickListener { finish(false) }
                 })
             }
             MissionType.QR -> {
@@ -80,7 +105,7 @@ object MissionRuntimeScreen {
                     root.addView(label("QR mission is not configured.", 22f))
                     root.addView(Button(activity).apply {
                         text = "USE FALLBACK"
-                        setOnClickListener { onFailure() }
+                        setOnClickListener { finish(false) }
                     })
                 } else {
                     root.addView(label("Scan your wake-up QR code", 24f))
@@ -94,20 +119,26 @@ object MissionRuntimeScreen {
                         }
                     }
                     activity.lifecycle.addObserver(lifecycleObserver)
+                    cleanup = {
+                        runtime.close()
+                        activity.lifecycle.removeObserver(lifecycleObserver)
+                    }
                     runtime.start(activity, preview) {
                         activity.runOnUiThread {
-                            if (runtime.matches(expected)) onSuccess() else onFailure()
-                            runtime.close()
-                            activity.lifecycle.removeObserver(lifecycleObserver)
+                            finish(runtime.matches(expected))
                         }
                     }
+                    root.addView(Button(activity).apply {
+                        text = "USE MATH FALLBACK"
+                        setOnClickListener { finish(false) }
+                    })
                 }
             }
             else -> {
                 root.addView(label("This mission is not available in MVP.", 22f))
                 root.addView(Button(activity).apply {
                     text = "USE FALLBACK"
-                    setOnClickListener { onFailure() }
+                    setOnClickListener { finish(false) }
                 })
             }
         }

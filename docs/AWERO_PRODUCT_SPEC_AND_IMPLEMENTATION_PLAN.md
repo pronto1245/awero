@@ -99,10 +99,11 @@ Do not start a later phase until its dependencies are green. Each phase gets a n
 ### Current phase position
 
 - Phase 0 — product scope, competitor inputs, phase order, and acceptance gates are reconciled across the governing specification and linked plans. **Complete.**
-- Next: Phase 1 — verify and complete audible alarm reliability on physical iPhone and Android devices.
+- Phase 1 — code/CI reliability gate complete on the accepted baseline; physical-device release validation stays in Phase 10.
+- Phase 2 — automated wake-session runtime gate complete. Trigger routing, persisted terminal outcomes, restore/fallback, failed-save retry and duplicate snooze protection are covered by the passing baseline and scoped regression changes recorded in [Implementation Status](IMPLEMENTATION_STATUS.md). Latest gate: `a325fab24ec97c6f5059d2ae547e6bcfd1949deb`, [CI run 578](https://github.com/pronto1245/awero/actions/runs/37837964796), all four jobs successful.
+- Current: Phase 3 — P0 Math, Steps and QR/barcode mission runtime, starting with timeout, manual fallback and resource cleanup. No new Phase 2 audit is scheduled without a demonstrated regression.
 - Automated Local Persistence Hardening: recorded complete and green in CI.
-- Physical iPhone alarm delivery: **not passed**; the reported push notification without audible ringing is not an alarm-delivery pass. Physical iPhone and Android checks are deferred to Phase 10.
-- Android physical alarm delivery: **not recorded as passed**. Code-level reliability work and CI proceed now.
+- Physical iPhone and Android release matrix: remains a separate Phase 10 gate and is not implied by CI.
 - Six-language resource foundation exists; full app wiring and validation are **not complete**.
 - Core mission logic/foundations exist, but user-facing mission flows, retry/fallback UX, and end-to-end delivery are **not complete**.
 - Backend foundations exist in the repository. Their presence does not mean backend integration is product-complete.

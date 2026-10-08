@@ -148,18 +148,22 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 
 ## Governing plan position
 - [x] Phase 0 — reconcile scope, competitor inputs, phase order, and acceptance gates across product docs
-- [ ] Phase 1 — code-level iOS and Android alarm reliability with CI coverage; physical-device checks deferred to final release validation
-- [ ] Phase 2 — wake-session runtime
+- [x] Phase 1 — code-level iOS and Android alarm reliability with CI coverage; physical-device release checks remain deferred to Phase 10
+- [x] Phase 2 — wake-session runtime (automated gate; see verification below)
 - [ ] Phase 3 — P0 Math, Steps, and QR/barcode mission flows
 - [ ] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
 - [ ] Phase 5 — backend and sync isolated from the alarm-critical path
 - [ ] Phase 6 — user-facing UX and six-language completion
 
-## Current Phase 2 verification
+## Phase 2 automated gate — complete
 
 - Baseline `34932a904bae95069da485edf9cef45ac43fa5d7` passed all four jobs in [AWERO CI run 574](https://github.com/pronto1245/awero/actions/runs/37832150008).
-- Phase 2 remains in progress. Commit `da3992ad810ce152a8445c0712a8dd049e4191f7` prevents overlapping iOS snooze requests from cancelling the successfully scheduled snooze. Two targeted local XCTest cases passed, followed by all four jobs in [AWERO CI run 575](https://github.com/pronto1245/awero/actions/runs/37833128379).
+- Commit `da3992ad810ce152a8445c0712a8dd049e4191f7` prevents overlapping iOS snooze requests from cancelling the successfully scheduled snooze. Two targeted local XCTest cases passed, followed by all four jobs in [AWERO CI run 575](https://github.com/pronto1245/awero/actions/runs/37833128379).
 - Commit `28c1ae960d9515869b6c91101b8b6dc7dd93ffb5` makes Android wake UI render the restored controller state and selected mission, including a persisted Math fallback. Its emulator E2E re-delivers an alarm intent, checks the same session resumes, solves the fallback and verifies persisted success. All four jobs passed in [AWERO CI run 576](https://github.com/pronto1245/awero/actions/runs/37834366415).
 - Commit `ee3e2df07473c42e6d583321b93ab2388453178e` makes iOS mission start, fallback and completion report persistence failures and offer a retry of the failed action. A failed write keeps the session active and does not advance mission/result state. Three targeted local XCTest cases using a read-only store passed, followed by all four jobs in [AWERO CI run 577](https://github.com/pronto1245/awero/actions/runs/37835695292).
-- Android now also rejects overlapping snooze requests while the Room write is pending, preserving the successful OS schedule. A new emulator test sends the second tap during persistence, verifies one schedule/no cancellation and the saved count, then verifies another snooze after the next delivery. This correction is validated in CI.
+- Android now also rejects overlapping snooze requests while the Room write is pending, preserving the successful OS schedule. A new emulator test sends the second tap during persistence, verifies one schedule/no cancellation and the saved count, then verifies another snooze after the next delivery. Commit `a325fab24ec97c6f5059d2ae547e6bcfd1949deb` passed all four jobs in [AWERO CI run 578](https://github.com/pronto1245/awero/actions/runs/37837964796).
 - Backend/sync changes and physical-device release gates are outside this correction.
+
+## Phase 3 — active
+
+The next package addresses P0 Mission runtime / recovery requirements: two-minute Steps/QR timeout to local Math, manual fallback, camera/sensor cleanup when the mission view is detached, and retrying a failed save after a validated mission. Math remains the deterministic local fallback. This does not complete Phase 3: barcode formats, mission settings, test-alarm history exclusion and the remaining mission E2E cases still require implementation/verification. Full localization stays in Phase 6.

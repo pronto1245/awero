@@ -5,6 +5,7 @@ struct MissionView: View {
     let alarm: Alarm
     let onSuccess: () -> Void
     let onFailure: () -> Void
+    var timeout: Duration = .seconds(120)
 
     var body: some View {
         Group {
@@ -12,9 +13,9 @@ struct MissionView: View {
             case .math:
                 MathMissionView(difficulty: alarm.difficulty, onSuccess: onSuccess)
             case .steps:
-                StepsMissionView(onSuccess: onSuccess, onFailure: onFailure)
+                StepsMissionView(onSuccess: onSuccess, onFailure: onFailure, timeout: timeout)
             case .qr:
-                QRMissionView(expected: alarm.qrExpectedCode, onSuccess: onSuccess, onFailure: onFailure)
+                QRMissionView(expected: alarm.qrExpectedCode, onSuccess: onSuccess, onFailure: onFailure, timeout: timeout)
             default:
                 FallbackMissionView(onFailure: onFailure)
             }
@@ -68,6 +69,7 @@ private struct StepsMissionView: View {
     @StateObject private var runtime = StepsMissionRuntime()
     let onSuccess: () -> Void
     let onFailure: () -> Void
+    let timeout: Duration
 
     var body: some View {
         VStack(spacing: 22) {
@@ -80,8 +82,6 @@ private struct StepsMissionView: View {
             if runtime.unavailable {
                 Text("Motion data is unavailable.")
                     .foregroundStyle(.white.opacity(0.6))
-                Button("USE FALLBACK", action: onFailure)
-                    .buttonStyle(WakeMissionButton())
             } else if runtime.completed {
                 Button("CONTINUE", action: onSuccess)
                     .buttonStyle(WakeMissionButton())
@@ -89,10 +89,20 @@ private struct StepsMissionView: View {
                 Text("Keep walking until the target is reached.")
                     .foregroundStyle(.white.opacity(0.6))
             }
+            Button("USE MATH FALLBACK", action: onFailure)
+                .buttonStyle(WakeMissionButton())
+            Text("After 2 minutes, this task switches to Math.")
+                .font(.caption).foregroundStyle(.white.opacity(0.6))
         }
         .padding(28)
         .onAppear { runtime.start(target: 30) }
         .onDisappear { runtime.stop() }
+        .task {
+            do { try await Task.sleep(for: timeout) } catch { return }
+            guard !runtime.completed else { return }
+            runtime.stop()
+            onFailure()
+        }
     }
 }
 
@@ -100,6 +110,7 @@ private struct QRMissionView: View {
     let expected: String?
     let onSuccess: () -> Void
     let onFailure: () -> Void
+    let timeout: Duration
     @StateObject private var runtime = QRMissionRuntime()
 
     var body: some View {
@@ -127,7 +138,14 @@ private struct QRMissionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 Text(runtime.scannedCode == nil ? "Point the camera at your wake-up QR." : "Code detected.")
                     .foregroundStyle(.white.opacity(0.7))
+                Text("After 2 minutes, this task switches to Math.")
+                    .font(.caption).foregroundStyle(.white.opacity(0.6))
             }
+        }
+        .safeAreaInset(edge: .bottom) {
+            Button("USE MATH FALLBACK", action: onFailure)
+                .buttonStyle(WakeMissionButton())
+                .padding(.horizontal, 28)
         }
         .padding(28)
         .task {
@@ -136,7 +154,9 @@ private struct QRMissionView: View {
                 _ = await AVCaptureDevice.requestAccess(for: .video)
             }
             runtime.configure()
+            guard !runtime.cameraUnavailable else { onFailure(); return }
             runtime.start()
+            let deadline = ContinuousClock.now.advanced(by: timeout)
             while !Task.isCancelled {
                 if let scannedCode = runtime.scannedCode {
                     if scannedCode == expected {
@@ -144,6 +164,11 @@ private struct QRMissionView: View {
                     } else {
                         onFailure()
                     }
+                    break
+                }
+                if ContinuousClock.now >= deadline {
+                    runtime.stop()
+                    onFailure()
                     break
                 }
                 try? await Task.sleep(for: .milliseconds(200))

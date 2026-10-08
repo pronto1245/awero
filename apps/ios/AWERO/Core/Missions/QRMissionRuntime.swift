@@ -15,7 +15,7 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
 
     func configure() {
         guard !configured else { return }
-        guard AVCaptureDevice.authorizationStatus(for: .video) != .denied else {
+        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else {
             cameraUnavailable = true
             return
         }

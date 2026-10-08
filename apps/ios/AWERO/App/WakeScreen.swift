@@ -19,6 +19,8 @@ struct WakeScreen: View {
                     if let alarm = flow.currentAlarm {
                         MissionView(alarm: missionAlarm(from: alarm), onSuccess: { Task { await flow.completeMission() } }, onFailure: { Task { await flow.fallbackToMath() } })
                     }
+                    Button("Emergency stop") { Task { await flow.emergencyStop() } }
+                        .font(.caption).foregroundStyle(.red.opacity(0.9))
                 case .completed:
                     Text("YOU'RE UP").font(.title.bold()).foregroundStyle(.white)
                     Text("Wake session completed.").foregroundStyle(.white.opacity(0.55))
