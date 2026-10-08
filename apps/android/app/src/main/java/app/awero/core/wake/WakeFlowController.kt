@@ -16,18 +16,26 @@ class WakeFlowController(
     private val context: Context,
     private val statistics: StatisticsStore = StatisticsStore(context),
     private val testAlarm: Boolean = false,
-    private val alarmStore: AlarmStore = AlarmStore(context)
+    private val alarmStore: AlarmStore = AlarmStore(context),
+    private val scheduleAlarmSnooze: (Alarm, Int) -> Unit = { alarm, minutes ->
+        AlarmScheduler(context).scheduleSnooze(alarm, minutes)
+    },
+    private val cancelAlarmSnooze: (Alarm) -> Unit = { alarm ->
+        AlarmScheduler(context).cancelSnooze(alarm)
+    }
 ) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
 
     private val _state = MutableStateFlow(State.IDLE)
     private val _mission = MutableStateFlow(MissionType.MATH)
     private val _snoozeCount = MutableStateFlow(0)
+    private val _snoozeError = MutableStateFlow<String?>(null)
     private val _currentAlarm = MutableStateFlow<Alarm?>(null)
 
     val state: StateFlow<State> = _state.asStateFlow()
     val mission: StateFlow<MissionType> = _mission.asStateFlow()
     val snoozeCount: StateFlow<Int> = _snoozeCount.asStateFlow()
+    val snoozeError: StateFlow<String?> = _snoozeError.asStateFlow()
     val currentAlarm: StateFlow<Alarm?> = _currentAlarm.asStateFlow()
 
     suspend fun restore() {
@@ -40,11 +48,15 @@ class WakeFlowController(
     }
 
     suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()) {
+        val created = sessions.start(alarm, scheduledAt)
+        if (!created) {
+            restore()
+            return
+        }
         _currentAlarm.value = alarm
         _mission.value = alarm.missionType
         _snoozeCount.value = 0
-        val created = sessions.start(alarm, scheduledAt)
-        if (created && !testAlarm) statistics.recordPlanned()
+        if (!testAlarm) statistics.recordPlanned()
         _state.value = State.RINGING
     }
 
@@ -73,10 +85,19 @@ class WakeFlowController(
     suspend fun snooze(): Boolean {
         val alarm = _currentAlarm.value ?: return false
         if (_state.value != State.RINGING || _snoozeCount.value >= alarm.maxSnoozes) return false
-        val nextCount = _snoozeCount.value + 1
+        val previousCount = _snoozeCount.value
+        val nextCount = previousCount + 1
+        _snoozeError.value = null
+        try {
+            scheduleAlarmSnooze(alarm, alarm.snoozeMinutes)
+            sessions.setSnoozeCount(nextCount)
+        } catch (error: Exception) {
+            runCatching { cancelAlarmSnooze(alarm) }
+            runCatching { sessions.setSnoozeCount(previousCount) }
+            _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
+            return false
+        }
         _snoozeCount.value = nextCount
-        sessions.setSnoozeCount(nextCount)
-        AlarmScheduler(context).scheduleSnooze(alarm, alarm.snoozeMinutes)
         AlarmRingingService.stop(context)
         _state.value = State.IDLE
         return true
