@@ -21,8 +21,7 @@ final class WakeFlowControllerTests: XCTestCase {
         let activeSession = await database.fetchActiveWakeSession()
         XCTAssertEqual(activeSession?.alarmId, alarm.id)
 
-        let missionStarted = await flow.beginMission()
-        XCTAssertTrue(missionStarted)
+        await flow.beginMission()
         XCTAssertEqual(flow.state, .mission)
 
         await flow.emergencyStop()
