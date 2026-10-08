@@ -151,6 +151,6 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 - [ ] Phase 1 — code-level iOS and Android alarm reliability with CI coverage; physical-device checks deferred to final release validation
 - [ ] Phase 2 — wake-session runtime
 - [ ] Phase 3 — P0 Math, Steps, and QR/barcode mission flows
-- [ ] Phase 4 — local persistence device checks (the ten-point automated CI gate is already complete)
+- [ ] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
 - [ ] Phase 5 — backend and sync isolated from the alarm-critical path
 - [ ] Phase 6 — user-facing UX and six-language completion
