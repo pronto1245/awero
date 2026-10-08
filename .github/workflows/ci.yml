@@ -134,6 +134,14 @@ jobs:
         run: |
           SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
           find apps/ios -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
+      - name: Run iOS alarm scheduler smoke test
+        run: |
+          swiftc -framework UserNotifications \
+            apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmScheduler.swift \
+            apps/ios/Tests/AlarmSchedulerSmokeMain.swift \
+            -o /tmp/awero-alarm-scheduler-smoke
+          /tmp/awero-alarm-scheduler-smoke
 
   ios-persistence-smoke:
     runs-on: macos-15
