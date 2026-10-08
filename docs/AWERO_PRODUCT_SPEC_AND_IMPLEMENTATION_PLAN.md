@@ -85,7 +85,7 @@ Do not start a later phase until its dependencies are green. Each phase gets a n
 | Phase | Work | Exit gate |
 |---|---|---|
 | 0. Product baseline | This document governs; reconcile links/order in older plans; maintain a capability/status matrix; collect competitor review examples and mark research limits. | No conflicting phase orders; every in-scope feature has priority, owner/platform coverage, acceptance evidence, and honest status. |
-| 1. Alarm reliability | Audit current iOS and Android scheduling paths against actual OS APIs and store policy; complete permission, reschedule, edit/delete, reboot, time/timezone/DST, sound, lock-screen, and failure recovery. | Automated tests green on both platforms; physical iPhone and Android each demonstrate audible delivery, background/locked behavior, and recovery. A push-only test does not pass. |
+| 1. Alarm reliability — code and CI | Audit current iOS and Android scheduling paths against actual OS APIs and store policy; fix permission, reschedule, edit/delete, reboot, time/timezone/DST, sound, lock-screen, and failure-recovery gaps. | CI tests for scheduling, cancellation, recurrence, permissions, stale schedules, and recovery are green on both platforms; state is reported truthfully. Physical iPhone/Android verification is deferred to Phase 10 and is not claimed as passed. |
 | 2. Wake-session runtime | Connect actual ring to wake UI; implement stop, snooze, emergency stop, retry/fallback, duplicate-trigger handling, and local event persistence. | Device E2E from ring through each terminal path; no sign-in, paywall, ad, prompt, or network dependency interrupts the flow. |
 | 3. P0 mission runtime | Finish user-facing Math, Steps, QR/barcode missions and settings; deterministic local validation; clear retry, timeout, permission-denied, and fallback behavior. | iOS and Android tests plus device checks; offline mission E2E; test alarm excluded from history. |
 | 4. Local persistence | Preserve the approved ten-point hardening baseline. Fix only demonstrated regressions/gaps; verify alarm, session, history, and queue restoration on devices. | CI persistence suite green; device relaunch/reboot and duplicate/retry cases recorded. Existing automated gate is complete; physical checks are not implied by CI. |
@@ -101,8 +101,8 @@ Do not start a later phase until its dependencies are green. Each phase gets a n
 - Phase 0 — product scope, competitor inputs, phase order, and acceptance gates are reconciled across the governing specification and linked plans. **Complete.**
 - Next: Phase 1 — verify and complete audible alarm reliability on physical iPhone and Android devices.
 - Automated Local Persistence Hardening: recorded complete and green in CI.
-- Alarm delivery on a physical iPhone: **not passed**. The reported push notification without audible ringing is not an alarm-delivery pass.
-- Android physical alarm delivery: **not recorded as passed**.
+- Physical iPhone alarm delivery: **not passed**; the reported push notification without audible ringing is not an alarm-delivery pass. Physical iPhone and Android checks are deferred to Phase 10.
+- Android physical alarm delivery: **not recorded as passed**. Code-level reliability work and CI proceed now.
 - Six-language resource foundation exists; full app wiring and validation are **not complete**.
 - Core mission logic/foundations exist, but user-facing mission flows, retry/fallback UX, and end-to-end delivery are **not complete**.
 - Backend foundations exist in the repository. Their presence does not mean backend integration is product-complete.
