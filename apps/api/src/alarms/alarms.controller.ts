@@ -183,7 +183,10 @@ export class AlarmsController {
     @Body() body: UpdateAlarmDto,
   ) {
     const owner = await this.auth.resolve(authorization);
-    if (Object.keys(body).length === 0) throw new BadRequestException('EMPTY_UPDATE');
+    const changes = Object.fromEntries(
+      Object.entries(body).filter(([, value]) => value !== undefined),
+    ) as UpdateAlarmDto;
+    if (Object.keys(changes).length === 0) throw new BadRequestException('EMPTY_UPDATE');
     const result = await this.db.transaction(async (client) => {
       const current = await client.query(
         'SELECT id,version,label,hour,minute,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty FROM alarms WHERE id=$1 AND anonymous_user_id=$2 AND status<>\'DELETED\' FOR UPDATE',
@@ -191,7 +194,7 @@ export class AlarmsController {
       );
       if (!current.rows[0]) throw new NotFoundException('ALARM_NOT_FOUND');
 
-      const alarm = { ...current.rows[0], ...body };
+      const alarm = { ...current.rows[0], ...changes };
       if (alarm.timezoneMode === AlarmTimezoneMode.FIXED && !this.isValidTimezone(alarm.fixedTimezone)) {
         throw new BadRequestException('INVALID_TIMEZONE');
       }

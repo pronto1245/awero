@@ -59,6 +59,14 @@ async function main() {
     body: { fixedTimezone: 'not-a-timezone' },
   });
   assert(invalidTimezone.status === 400, 'invalid timezone was accepted');
+  const unchanged = await request('/alarms', { token });
+  assert(
+    unchanged.data.items[0].version === 1 && unchanged.data.items[0].fixedTimezone === 'Europe/Moscow',
+    'rejected alarm update changed persisted state',
+  );
+
+  const emptyUpdate = await request(`/alarms/${alarmId}`, { method: 'PATCH', token, body: {} });
+  assert(emptyUpdate.status === 400, 'empty alarm update was accepted');
 
   const updated = await request(`/alarms/${alarmId}`, {
     method: 'PATCH',
