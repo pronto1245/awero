@@ -44,7 +44,11 @@
 - Statistics.
 - Streak.
 - Failure/support flow.
+- Use competitor and review findings as acceptance inputs: [Competitor and Review Gap Analysis](../research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md).
 - Visual direction and screen acceptance criteria: [Product UX Design](../design/PRODUCT_UX_DESIGN.md) (planned; not implemented).
+- Keep sort order and alarm edits predictable; explain repeat/timezone/next fire.
+- Never place ads, review prompts, login, paywall, or network-dependent flow in the ringing/mission path.
+- Preserve a usable basic alarm with no account or subscription; explain Free/Pro boundaries before setup friction.
 
 ## 6. Monetization
 - Free entitlement always retains basic alarm.
