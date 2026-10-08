@@ -3,9 +3,10 @@ import Foundation
 @MainActor
 final class AlarmStore: ObservableObject {
     @Published private(set) var alarms: [Alarm] = []
-    private let database = CoreDataStore.shared
+    private let database: CoreDataStore
 
-    init() {
+    init(database: CoreDataStore = .shared) {
+        self.database = database
         Task { await load() }
     }
 

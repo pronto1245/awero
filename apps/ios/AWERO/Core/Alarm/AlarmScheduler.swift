@@ -3,8 +3,39 @@ import UserNotifications
 
 enum AlarmSchedulingError: Error { case invalidTimezone }
 
-final class AlarmScheduler {
+protocol AlarmNotificationCenter {
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func add(_ request: UNNotificationRequest) async throws
+    func pendingNotificationRequests() async -> [UNNotificationRequest]
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String])
+}
+
+private final class SystemAlarmNotificationCenter: AlarmNotificationCenter {
     private let center = UNUserNotificationCenter.current()
+
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        try await center.requestAuthorization(options: options)
+    }
+
+    func add(_ request: UNNotificationRequest) async throws {
+        try await center.add(request)
+    }
+
+    func pendingNotificationRequests() async -> [UNNotificationRequest] {
+        await center.pendingNotificationRequests()
+    }
+
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+}
+
+final class AlarmScheduler {
+    private let center: any AlarmNotificationCenter
+
+    init(center: (any AlarmNotificationCenter)? = nil) {
+        self.center = center ?? SystemAlarmNotificationCenter()
+    }
 
     func requestAuthorization() async throws {
         try await center.requestAuthorization(options: [.alert, .sound, .badge])

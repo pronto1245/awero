@@ -1,5 +1,6 @@
 import Foundation
 import CoreData
+import UserNotifications
 
 @main
 struct PersistenceSmokeMain {
@@ -263,8 +264,71 @@ struct PersistenceSmokeMain {
         let emergencyActive = await emergencyRestart.fetchActiveWakeSession()
         precondition(emergencyActive == nil)
 
+        try await runAlarmRecoveryChecks(root: root)
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
+    }
+
+    @MainActor
+    private static func runAlarmRecoveryChecks(root: URL) async throws {
+        let url = root.appendingPathComponent("alarm-recovery.sqlite")
+        let database = CoreDataStore(storeURL: url)
+        let enabled = Alarm(version: 3, hour: 9, minute: 15, weekdays: [1, 3],
+                            timezoneMode: .fixed, fixedTimezone: "Europe/Moscow")
+        var disabled = Alarm(hour: 10, minute: 0, enabled: false, weekdays: [2, 4])
+        let enabledSaved = await database.saveAlarm(enabled)
+        let disabledSaved = await database.saveAlarm(disabled)
+        precondition(enabledSaved && disabledSaved)
+
+        let center = SmokeNotificationCenter()
+        let scheduler = AlarmScheduler(center: center)
+        var stale = enabled
+        stale.version = 2
+        try await scheduler.schedule(stale)
+        disabled.enabled = true
+        try await scheduler.schedule(disabled)
+        disabled.enabled = false
+
+        let restarted = CoreDataStore(storeURL: url)
+        let store = AlarmStore(database: restarted)
+        await store.load()
+        let recovery = AlarmRecovery(scheduler: scheduler, store: store)
+        await recovery.reconcile()
+        let requests = await center.pendingNotificationRequests()
+        precondition(requests.count == 2)
+        precondition(Set(requests.map(\.identifier)) == Set(enabled.weekdays.map {
+            "awero:alarm:\(enabled.id.uuidString):v3:w\($0)"
+        }))
+        for request in requests {
+            let trigger = request.trigger as! UNCalendarNotificationTrigger
+            precondition(trigger.repeats)
+            precondition(trigger.dateComponents.hour == 9 && trigger.dateComponents.minute == 15)
+            precondition(trigger.dateComponents.timeZone?.identifier == "Europe/Moscow")
+        }
+        let additions = center.additions
+        await recovery.reconcile()
+        precondition(center.additions == additions)
+
+        let readOnly = AlarmStore(database: CoreDataStore(storeURL: url, readOnly: true))
+        await readOnly.load()
+        let coordinator = AlarmCoordinator(store: readOnly, scheduler: scheduler)
+        await coordinator.update(enabled)
+        await coordinator.delete(enabled)
+        await coordinator.create(Alarm(hour: 11, minute: 0))
+        let unchanged = await center.pendingNotificationRequests()
+        precondition(Set(unchanged.map(\.identifier)) == Set(requests.map(\.identifier)))
+        precondition(center.additions == additions)
+        precondition(readOnly.alarms.count == 2 && readOnly.alarms.contains { $0.id == enabled.id })
+
+        center.removePendingNotificationRequests(withIdentifiers: requests.map(\.identifier))
+        center.failNextAdd = true
+        await recovery.reconcile()
+        await recovery.reconcile()
+        let repaired = await scheduler.isScheduled(enabled)
+        precondition(repaired)
+        let repairedRequests = await center.pendingNotificationRequests()
+        precondition(repairedRequests.count == 2)
+        print("AWERO alarm recovery and failed-write scheduling: PASS")
     }
 
     private static func runCrashPhase(_ phase: String) async throws {
@@ -371,5 +435,30 @@ struct PersistenceSmokeMain {
                 }
             }
         }
+    }
+}
+
+private final class SmokeNotificationCenter: AlarmNotificationCenter {
+    private var requests: [String: UNNotificationRequest] = [:]
+    private(set) var additions = 0
+    var failNextAdd = false
+
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool { true }
+
+    func add(_ request: UNNotificationRequest) async throws {
+        if failNextAdd {
+            failNextAdd = false
+            throw NSError(domain: "AWERO.SmokeScheduling", code: 1)
+        }
+        requests[request.identifier] = request
+        additions += 1
+    }
+
+    func pendingNotificationRequests() async -> [UNNotificationRequest] {
+        Array(requests.values)
+    }
+
+    func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
+        for id in identifiers { requests.removeValue(forKey: id) }
     }
 }
