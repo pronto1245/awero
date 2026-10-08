@@ -57,5 +57,12 @@ abstract class AweroDatabase : RoomDatabase() {
                     "awero.db"
                 ).addMigrations(MIGRATION_1_2).build().also { instance = it }
             }
+
+        internal fun createForTesting(context: Context, name: String): AweroDatabase =
+            Room.databaseBuilder(
+                context.applicationContext,
+                AweroDatabase::class.java,
+                name
+            ).addMigrations(MIGRATION_1_2).build()
     }
 }
