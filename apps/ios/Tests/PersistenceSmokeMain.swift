@@ -365,6 +365,10 @@ struct PersistenceSmokeMain {
         await recovery.reconcile()
         let repaired = await scheduler.isScheduled(enabled)
         precondition(repaired)
+        precondition(await scheduler.readiness(for: enabled) == .notificationFallback)
+        center.canDeliverAudibleNotificationsValue = false
+        precondition(await scheduler.readiness(for: enabled) == .actionRequired)
+        center.canDeliverAudibleNotificationsValue = true
         let repairedRequests = await center.pendingNotificationRequests()
         precondition(repairedRequests.count == 2)
         let defaults = UserDefaults.standard
@@ -509,8 +513,11 @@ private final class SmokeNotificationCenter: AlarmNotificationCenter {
     private var requests: [String: UNNotificationRequest] = [:]
     private(set) var additions = 0
     var failNextAdd = false
+    var canDeliverAudibleNotificationsValue = true
 
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool { true }
+
+    func canDeliverAudibleNotifications() async -> Bool { canDeliverAudibleNotificationsValue }
 
     func add(_ request: UNNotificationRequest) async throws {
         if failNextAdd {

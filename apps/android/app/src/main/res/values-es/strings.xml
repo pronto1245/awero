@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Alarma programada</string>
+    <string name="alarm_state_permission">Acción necesaria: permite alarmas, notificaciones y alertas en pantalla completa en Ajustes.</string>
+    <string name="alarm_state_missing">No se ha confirmado la programación. Toca Reintentar.</string>
+    <string name="alarm_state_invalid">La configuración de la alarma no es válida. Edítala y guárdala de nuevo.</string>
+    <string name="alarm_state_checking">Comprobando la alarma…</string>
+    <string name="alarm_retry">Reintentar</string>
+    <string name="alarm_open_settings">Abrir Ajustes</string>
+</resources>

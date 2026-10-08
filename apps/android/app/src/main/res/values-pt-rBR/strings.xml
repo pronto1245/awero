@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Alarme agendado</string>
+    <string name="alarm_state_permission">Ação necessária: permita alarmes, notificações e alertas em tela cheia nas Configurações.</string>
+    <string name="alarm_state_missing">Não foi possível confirmar o agendamento. Toque em Tentar novamente.</string>
+    <string name="alarm_state_invalid">As configurações do alarme são inválidas. Edite e salve novamente.</string>
+    <string name="alarm_state_checking">Verificando o alarme…</string>
+    <string name="alarm_retry">Tentar novamente</string>
+    <string name="alarm_open_settings">Abrir Configurações</string>
+</resources>

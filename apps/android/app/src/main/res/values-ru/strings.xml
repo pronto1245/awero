@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Будильник запланирован</string>
+    <string name="alarm_state_permission">Нужно действие: разрешите будильники, уведомления и полноэкранные оповещения в настройках.</string>
+    <string name="alarm_state_missing">Не удалось подтвердить расписание будильника. Нажмите «Повторить».</string>
+    <string name="alarm_state_invalid">Настройки будильника неверны. Измените и сохраните его заново.</string>
+    <string name="alarm_state_checking">Проверяем расписание…</string>
+    <string name="alarm_retry">Повторить</string>
+    <string name="alarm_open_settings">Открыть настройки</string>
+</resources>

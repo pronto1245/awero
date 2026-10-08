@@ -29,6 +29,15 @@ class AlarmScheduleValidationTest {
     }
 
     @Test
+    fun readinessRequiresEnabledAlarmValidSchedulePermissionsAndRegistration() {
+        assertEquals(AlarmReadiness.DISABLED, resolveAlarmReadiness(false, true, true, true))
+        assertEquals(AlarmReadiness.INVALID, resolveAlarmReadiness(true, false, true, true))
+        assertEquals(AlarmReadiness.PERMISSION_REQUIRED, resolveAlarmReadiness(true, true, false, true))
+        assertEquals(AlarmReadiness.NOT_SCHEDULED, resolveAlarmReadiness(true, true, true, false))
+        assertEquals(AlarmReadiness.SCHEDULED, resolveAlarmReadiness(true, true, true, true))
+    }
+
+    @Test
     fun scheduledStateRequiresExactAlarmPermissionEvenWhenPendingIntentsRemain() {
         val alarm = alarm(weekdays = setOf(1, 2, 3))
         assertEquals(

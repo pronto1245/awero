@@ -1,0 +1,9 @@
+"alarm.status.scheduled" = "System alarm is scheduled.";
+"alarm.status.notificationFallback" = "Notification alarm is scheduled. Silent Mode or Focus may limit how it alerts.";
+"alarm.status.actionRequired" = "Alarm permission is required. Enable it in Settings.";
+"alarm.status.notScheduled" = "The alarm schedule is not confirmed. Retry to check it.";
+"alarm.status.disabled" = "Alarm is off.";
+"alarm.retry" = "Retry schedule";
+"alarm.openSettings" = "Open Settings";
+"alarm.status.errorTitle" = "Alarm needs attention";
+"alarm.status.errorBody" = "Check alarm permissions and try again.";

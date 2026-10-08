@@ -1,0 +1,9 @@
+"alarm.status.scheduled" = "Systemwecker ist geplant.";
+"alarm.status.notificationFallback" = "Benachrichtigungswecker ist geplant. Lautlosmodus oder Fokus kann den Alarm einschränken.";
+"alarm.status.actionRequired" = "Weckerberechtigung erforderlich. Aktiviere sie in den Einstellungen.";
+"alarm.status.notScheduled" = "Der Weckerzeitplan ist nicht bestätigt. Tippe auf Erneut versuchen.";
+"alarm.status.disabled" = "Wecker ausgeschaltet.";
+"alarm.retry" = "Erneut planen";
+"alarm.openSettings" = "Einstellungen öffnen";
+"alarm.status.errorTitle" = "Wecker benötigt Aufmerksamkeit";
+"alarm.status.errorBody" = "Prüfe die Weckerberechtigungen und versuche es erneut.";

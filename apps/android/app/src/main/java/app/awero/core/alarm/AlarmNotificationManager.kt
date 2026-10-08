@@ -42,6 +42,11 @@ object AlarmNotificationManager {
             .build()
     }
 
+    fun hasAlarmAccess(context: Context): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+            (Build.VERSION.SDK_INT < 34 ||
+                context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent())
+
     fun requireAlarmAccess(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             !NotificationManagerCompat.from(context).areNotificationsEnabled()

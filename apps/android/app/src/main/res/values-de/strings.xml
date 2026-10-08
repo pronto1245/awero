@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Wecker geplant</string>
+    <string name="alarm_state_permission">Aktion erforderlich: Erlaube Wecker, Benachrichtigungen und Vollbildalarme in den Einstellungen.</string>
+    <string name="alarm_state_missing">Der Weckerzeitplan ist nicht bestätigt. Tippe auf Erneut versuchen.</string>
+    <string name="alarm_state_invalid">Die Weckereinstellungen sind ungültig. Bearbeite und speichere den Wecker erneut.</string>
+    <string name="alarm_state_checking">Weckerzeitplan wird geprüft…</string>
+    <string name="alarm_retry">Erneut versuchen</string>
+    <string name="alarm_open_settings">Einstellungen öffnen</string>
+</resources>

@@ -11,6 +11,27 @@ import java.time.DateTimeException
 import java.time.ZoneId
 import java.util.TimeZone
 
+enum class AlarmReadiness {
+    DISABLED,
+    SCHEDULED,
+    PERMISSION_REQUIRED,
+    NOT_SCHEDULED,
+    INVALID
+}
+
+internal fun resolveAlarmReadiness(
+    enabled: Boolean,
+    scheduleValid: Boolean,
+    permissionsGranted: Boolean,
+    scheduleRegistered: Boolean
+): AlarmReadiness = when {
+    !enabled -> AlarmReadiness.DISABLED
+    !scheduleValid -> AlarmReadiness.INVALID
+    !permissionsGranted -> AlarmReadiness.PERMISSION_REQUIRED
+    scheduleRegistered -> AlarmReadiness.SCHEDULED
+    else -> AlarmReadiness.NOT_SCHEDULED
+}
+
 internal fun validateAlarmSchedule(alarm: Alarm) {
     if (!alarm.enabled) return
     require(alarm.hour in 0..23 && alarm.minute in 0..59) {
@@ -116,7 +137,7 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun isScheduled(a: Alarm): Boolean {
-        if (!a.enabled || a.weekdays.isEmpty()) return false
+        if (!a.enabled || a.weekdays.isEmpty() || !AlarmNotificationManager.hasAlarmAccess(context)) return false
         val exactAlarmAccessGranted =
             Build.VERSION.SDK_INT < VERSION_CODES.S || manager.canScheduleExactAlarms()
         val pendingWeekdays = a.weekdays.filter { day ->
@@ -127,6 +148,14 @@ class AlarmScheduler(private val context: Context) {
             ) != null
         }.toSet()
         return isAlarmScheduleRegistered(a, exactAlarmAccessGranted, pendingWeekdays)
+    }
+
+    fun readiness(a: Alarm): AlarmReadiness {
+        if (!a.enabled) return AlarmReadiness.DISABLED
+        val valid = runCatching { validateAlarmSchedule(a) }.isSuccess
+        val permissionsGranted = AlarmNotificationManager.hasAlarmAccess(context) &&
+            (Build.VERSION.SDK_INT < VERSION_CODES.S || manager.canScheduleExactAlarms())
+        return resolveAlarmReadiness(a.enabled, valid, permissionsGranted, isScheduled(a))
     }
 
     private fun set(at: Long, pending: PendingIntent) {

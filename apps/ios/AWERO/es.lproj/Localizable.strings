@@ -1,0 +1,9 @@
+"alarm.status.scheduled" = "Alarma del sistema programada.";
+"alarm.status.notificationFallback" = "Alarma mediante notificación programada. El modo silencio o Concentración puede limitar el aviso.";
+"alarm.status.actionRequired" = "Se necesita permiso para las alarmas. Actívalo en Ajustes.";
+"alarm.status.notScheduled" = "No se ha confirmado la programación. Toca Reintentar.";
+"alarm.status.disabled" = "Alarma desactivada.";
+"alarm.retry" = "Reintentar programación";
+"alarm.openSettings" = "Abrir Ajustes";
+"alarm.status.errorTitle" = "La alarma requiere atención";
+"alarm.status.errorBody" = "Comprueba los permisos de la alarma e inténtalo de nuevo.";

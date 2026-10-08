@@ -1,0 +1,9 @@
+"alarm.status.scheduled" = "Alarme système programmé.";
+"alarm.status.notificationFallback" = "Alarme par notification programmé. Le mode silencieux ou Concentration peut limiter l’alerte.";
+"alarm.status.actionRequired" = "L’autorisation des alarmes est requise. Activez-la dans Réglages.";
+"alarm.status.notScheduled" = "La programmation n’est pas confirmée. Appuyez sur Réessayer.";
+"alarm.status.disabled" = "Alarme désactivée.";
+"alarm.retry" = "Réessayer la programmation";
+"alarm.openSettings" = "Ouvrir les réglages";
+"alarm.status.errorTitle" = "Le réveil nécessite votre attention";
+"alarm.status.errorBody" = "Vérifiez les autorisations puis réessayez.";

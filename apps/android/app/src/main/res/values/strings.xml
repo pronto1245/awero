@@ -1,1 +1,10 @@
-<resources><string name="app_name">AWERO</string></resources>
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Alarm scheduled</string>
+    <string name="alarm_state_permission">Action required: allow alarms, notifications and full-screen alerts in Settings.</string>
+    <string name="alarm_state_missing">Alarm schedule is not confirmed. Retry to check it.</string>
+    <string name="alarm_state_invalid">Alarm settings are invalid. Edit and save the alarm again.</string>
+    <string name="alarm_state_checking">Checking alarm schedule…</string>
+    <string name="alarm_retry">Retry</string>
+    <string name="alarm_open_settings">Open Settings</string>
+</resources>

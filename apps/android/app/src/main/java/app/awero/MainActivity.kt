@@ -11,12 +11,16 @@ import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import app.awero.core.alarm.AlarmCoordinator
 import app.awero.ui.AweroApp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private var statusRefreshKey by mutableIntStateOf(0)
     private var exactAlarmSettingsOpened = false
     private var fullScreenSettingsOpened = false
 
@@ -27,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { AweroApp() }
+        setContent { AweroApp(statusRefreshKey) }
 
         if (Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -42,6 +46,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        statusRefreshKey++
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
         ) {

@@ -9,7 +9,7 @@ import app.awero.core.wake.WakeFlowController
 import app.awero.core.wake.WakeSessionStore
 
 @Composable
-fun AweroApp() {
+fun AweroApp(statusRefreshKey: Int = 0) {
     val context = LocalContext.current
     val flow = remember { WakeFlowController(WakeSessionStore(context), context) }
     val state by flow.state.collectAsState()
@@ -49,7 +49,8 @@ fun AweroApp() {
                     onEditAlarm = {
                         editingAlarm = it
                         screen = "edit"
-                    }
+                    },
+                    statusRefreshKey = statusRefreshKey
                 )
             }
         }

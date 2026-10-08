@@ -1,0 +1,9 @@
+"alarm.status.scheduled" = "Alarme do sistema agendado.";
+"alarm.status.notificationFallback" = "Alarme por notificação agendado. O modo silencioso ou Foco pode limitar o alerta.";
+"alarm.status.actionRequired" = "É necessária permissão para alarmes. Ative-a nos Ajustes.";
+"alarm.status.notScheduled" = "O agendamento não foi confirmado. Toque em Tentar novamente.";
+"alarm.status.disabled" = "Alarme desativado.";
+"alarm.retry" = "Tentar agendar novamente";
+"alarm.openSettings" = "Abrir Ajustes";
+"alarm.status.errorTitle" = "O alarme precisa de atenção";
+"alarm.status.errorBody" = "Verifique as permissões do alarme e tente novamente.";

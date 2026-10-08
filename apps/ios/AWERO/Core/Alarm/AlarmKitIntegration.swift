@@ -34,6 +34,11 @@ struct StartAweroMissionIntent: LiveActivityIntent {
 
 @available(iOS 26.0, *)
 enum SystemAlarmKitScheduler {
+    static var authorizationGranted: Bool {
+        if case .authorized = AlarmManager.shared.authorizationState { return true }
+        return false
+    }
+
     static func schedule(_ alarm: Alarm) async throws {
         try await ensureAuthorization()
 

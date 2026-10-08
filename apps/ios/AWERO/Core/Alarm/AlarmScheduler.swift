@@ -4,6 +4,24 @@ import UserNotifications
 import AlarmKit
 #endif
 
+enum AlarmReadiness: Equatable {
+    case disabled
+    case scheduled
+    case notificationFallback
+    case actionRequired
+    case notScheduled
+
+    var localizationKey: String {
+        switch self {
+        case .disabled: "alarm.status.disabled"
+        case .scheduled: "alarm.status.scheduled"
+        case .notificationFallback: "alarm.status.notificationFallback"
+        case .actionRequired: "alarm.status.actionRequired"
+        case .notScheduled: "alarm.status.notScheduled"
+        }
+    }
+}
+
 enum AlarmSchedulingError: LocalizedError {
     case invalidTimezone
     case alarmAuthorizationDenied
@@ -31,6 +49,7 @@ protocol AlarmNotificationCenter {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
     func add(_ request: UNNotificationRequest) async throws
     func pendingNotificationRequests() async -> [UNNotificationRequest]
+    func canDeliverAudibleNotifications() async -> Bool
     func removePendingNotificationRequests(withIdentifiers identifiers: [String])
 }
 
@@ -47,6 +66,13 @@ private final class SystemAlarmNotificationCenter: AlarmNotificationCenter {
 
     func pendingNotificationRequests() async -> [UNNotificationRequest] {
         await center.pendingNotificationRequests()
+    }
+
+    func canDeliverAudibleNotifications() async -> Bool {
+        let settings = await center.notificationSettings()
+        return settings.authorizationStatus == .authorized &&
+            settings.alertSetting == .enabled &&
+            settings.soundSetting == .enabled
     }
 
     func removePendingNotificationRequests(withIdentifiers identifiers: [String]) {
@@ -177,6 +203,20 @@ final class AlarmScheduler {
         return alarm.weekdays.allSatisfy {
             ids.contains("awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\($0)")
         }
+    }
+
+    func readiness(for alarm: Alarm) async -> AlarmReadiness {
+        guard alarm.enabled else { return .disabled }
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            guard SystemAlarmKitScheduler.authorizationGranted else { return .actionRequired }
+            return SystemAlarmKitScheduler.isScheduled(alarm) ? .scheduled : .notScheduled
+        }
+#endif
+        guard await center.canDeliverAudibleNotifications() else { return .actionRequired }
+        return await isScheduled(alarm) ? .notificationFallback : .notScheduled
     }
 
     func repair(_ alarm: Alarm) async throws {

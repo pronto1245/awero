@@ -2,9 +2,15 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var alarms: AlarmStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showingCreate = false
     @State private var editingAlarm: Alarm?
     @State private var testAlarmError: String?
+    @State private var readiness: [UUID: AlarmReadiness] = [:]
+
+    private var refreshKey: String {
+        alarms.alarms.map { "\($0.id.uuidString):\($0.version):\($0.enabled)" }.joined(separator: "|")
+    }
 
     var body: some View {
         NavigationStack {
@@ -28,6 +34,7 @@ struct HomeView: View {
                             ForEach(alarms.alarms) { alarm in
                                 AlarmCard(
                                     alarm: alarm,
+                                    readiness: readiness[alarm.id],
                                     onEdit: { editingAlarm = alarm },
                                     onTest: {
                                         Task {
@@ -37,6 +44,21 @@ struct HomeView: View {
                                                 testAlarmError = error.localizedDescription
                                             }
                                         }
+                                    },
+                                    onRetry: {
+                                        Task {
+                                            do {
+                                                try await AlarmScheduler().repair(alarm)
+                                                readiness[alarm.id] = await AlarmScheduler().readiness(for: alarm)
+                                            } catch {
+                                                testAlarmError = error.localizedDescription
+                                                readiness[alarm.id] = await AlarmScheduler().readiness(for: alarm)
+                                            }
+                                        }
+                                    },
+                                    onOpenSettings: {
+                                        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+                                        UIApplication.shared.open(url)
                                     },
                                     onDelete: { Task { await AlarmCoordinator(store: alarms).delete(alarm) } }
                                 )
@@ -58,28 +80,45 @@ struct HomeView: View {
                     .padding(24)
                 }
             }
-            .sheet(isPresented: $showingCreate) {
-                CreateAlarmView()
-            }
-            .sheet(item: $editingAlarm) { alarm in
-                CreateAlarmView(alarm: alarm)
-            }
-            .alert("Could not schedule test alarm", isPresented: Binding(
+            .sheet(isPresented: $showingCreate) { CreateAlarmView() }
+            .sheet(item: $editingAlarm) { alarm in CreateAlarmView(alarm: alarm) }
+            .alert("alarm.status.errorTitle", isPresented: Binding(
                 get: { testAlarmError != nil },
                 set: { if !$0 { testAlarmError = nil } }
             )) {
                 Button("OK", role: .cancel) { testAlarmError = nil }
             } message: {
-                Text(testAlarmError ?? "Please check alarm permissions and try again.")
+                Text(testAlarmError ?? "alarm.status.errorBody")
+            }
+            .task(id: refreshKey) {
+                await refreshReadiness()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task { await refreshReadiness() }
+                }
             }
         }
+    }
+
+    @MainActor
+    private func refreshReadiness() async {
+        let scheduler = AlarmScheduler()
+        var current: [UUID: AlarmReadiness] = [:]
+        for alarm in alarms.alarms {
+            current[alarm.id] = await scheduler.readiness(for: alarm)
+        }
+        readiness = current
     }
 }
 
 private struct AlarmCard: View {
     let alarm: Alarm
+    let readiness: AlarmReadiness?
     let onEdit: () -> Void
     let onTest: () -> Void
+    let onRetry: () -> Void
+    let onOpenSettings: () -> Void
     let onDelete: () -> Void
 
     var body: some View {
@@ -92,6 +131,17 @@ private struct AlarmCard: View {
             Text(alarm.missionType.rawValue)
                 .font(.caption.bold())
                 .foregroundStyle(.white.opacity(0.7))
+            if alarm.enabled, let readiness, readiness != .disabled {
+                Text(LocalizedStringKey(readiness.localizationKey))
+                    .font(.caption)
+                    .foregroundStyle(readiness == .scheduled ? .green : .orange)
+                if readiness == .notScheduled {
+                    Button("alarm.retry") { onRetry() }
+                } else if readiness == .actionRequired {
+                    Button("alarm.openSettings") { onOpenSettings() }
+                    Button("alarm.retry") { onRetry() }
+                }
+            }
             HStack {
                 Button("Test", action: onTest)
                 Button("Edit", action: onEdit)

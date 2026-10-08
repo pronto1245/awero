@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AWERO</string>
+    <string name="alarm_state_scheduled">Réveil programmé</string>
+    <string name="alarm_state_permission">Action requise : autorisez les alarmes, notifications et alertes plein écran dans les réglages.</string>
+    <string name="alarm_state_missing">La programmation du réveil n’est pas confirmée. Appuyez sur Réessayer.</string>
+    <string name="alarm_state_invalid">Les réglages du réveil sont invalides. Modifiez-le puis enregistrez-le à nouveau.</string>
+    <string name="alarm_state_checking">Vérification du réveil…</string>
+    <string name="alarm_retry">Réessayer</string>
+    <string name="alarm_open_settings">Ouvrir les réglages</string>
+</resources>
