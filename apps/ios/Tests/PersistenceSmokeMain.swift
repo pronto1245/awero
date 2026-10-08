@@ -44,6 +44,23 @@ struct PersistenceSmokeMain {
         let restoredAlarm = await restarted.fetchAlarm(id: alarmId)
         precondition(restoredAlarm?.hour == 7 && restoredAlarm?.minute == 30)
 
+        let readOnlyStore = CoreDataStore(storeURL: storeURL, readOnly: true)
+        let saveFailure = await readOnlyStore.saveAlarm(
+            Alarm(
+                id: alarmId,
+                version: 2,
+                hour: 8,
+                minute: 0,
+                enabled: true,
+                weekdays: Set(1...7),
+                timezoneMode: .deviceLocal,
+                fixedTimezone: nil,
+                missionType: .math,
+                difficulty: .medium
+            )
+        )
+        precondition(!saveFailure)
+
         let operation = SyncOperation(
             operationType: "UPDATE_ALARM",
             entityType: "ALARM",
