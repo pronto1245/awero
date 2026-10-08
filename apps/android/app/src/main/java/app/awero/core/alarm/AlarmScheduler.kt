@@ -9,7 +9,6 @@ import android.content.Intent
 import java.util.Calendar
 import java.time.DateTimeException
 import java.time.ZoneId
-import java.util.Calendar
 import java.util.TimeZone
 
 internal fun validateAlarmSchedule(alarm: Alarm) {
