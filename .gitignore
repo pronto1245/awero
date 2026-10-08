@@ -10,5 +10,6 @@ coverage/
 .vscode/
 DerivedData/
 *.xcuserstate
+apps/ios/AWERO.xcodeproj/
 .gradle/
 local.properties

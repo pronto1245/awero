@@ -1,6 +1,13 @@
 # AWERO Release Checklist
 
 ## Mobile
+- [ ] Generate `apps/ios/AWERO.xcodeproj` with XcodeGen and build the app for iOS Simulator
+- [ ] Install the signed development build on a physical iPhone from Xcode
+- [ ] Verify iOS notification permission, test alarm, sound and tap-to-open wake flow
+- [ ] Verify iOS local notification delivery while AWERO is terminated and offline
+- [ ] Verify iOS active wake mission restores after force-quit and relaunch
+- [ ] Verify edited/deleted iOS alarms do not deliver stale notifications
+- [ ] Reboot the iPhone, unlock and relaunch AWERO; verify alarms remain and reconcile
 - [ ] Build on physical iPhone
 - [ ] Build on physical Android
 - [ ] Alarm fires with app terminated

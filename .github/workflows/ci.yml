@@ -75,6 +75,21 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate iOS app project
+        working-directory: apps/ios
+        run: xcodegen generate --spec project.yml
+      - name: Build iOS app for simulator
+        working-directory: apps/ios
+        run: >-
+          xcodebuild
+          -project AWERO.xcodeproj
+          -scheme AWERO
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build
       - name: Typecheck Swift sources
         shell: bash
         run: |

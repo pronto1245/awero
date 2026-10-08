@@ -15,7 +15,7 @@ Status: automated gate verified on 2026-10-08. Physical-device release validatio
 | 5 | Core Data save failures | A read-only SQLite store rejects writes. Failed alarm/session/statistics writes do not publish unsaved state or mutate notification schedules. Failed statistics migration does not set the completion marker. |
 | 6 | Room migration 1 → 2 | Instrumentation opens a genuine Room v1 database, validates migration against the v2 entity schema, preserves alarm/session data and verifies the wake_events table and index. WakeEventEntity declares the same index created by MIGRATION_1_2. |
 | 7 | iOS migration | Smoke test opens a SQLite store created with the earlier alarm/statistics/session model, migrates it with Core Data and verifies existing alarm values. |
-| 8 | Persistence tests | CI runs Android build, Robolectric unit tests, real-emulator instrumentation, explicit cross-process SIGKILL phases, iOS typecheck and persistence smoke. Android reports and crash logs are retained as workflow artifacts. |
+| 8 | Persistence tests | CI runs Android build, Robolectric unit tests, real-emulator instrumentation, explicit cross-process SIGKILL phases, iOS Xcode project generation and simulator build, Swift typecheck and persistence smoke. Android reports and crash logs are retained as workflow artifacts. |
 | 9 | UI Wake Flow restore | Controllers reconstruct mission state, alarm, fallback mission and snooze count from persistent data. iOS tests failed-write transitions leave UI state unchanged. |
 | 10 | Final local E2E | Alarm → wake session → mission → process restart → restored flow → completion → reopened statistics; duplicate completion does not increase counters. iOS also verifies emergency-stop persistence. |
 
@@ -32,7 +32,7 @@ Status: automated gate verified on 2026-10-08. Physical-device release validatio
 
 ## Validation boundary
 
-This gate covers automated local persistence and controller-level E2E. iOS notification reconciliation uses an injected center and does not prove notification delivery on a physical iPhone. Android uses a real emulator AlarmManager and actual process SIGKILL; force-stop, device reboot, OEM power restrictions and physical-device wake delivery remain release-checklist items. No backend integration or production-ready claim is implied.
+This gate covers automated local persistence and controller-level E2E. iOS CI generates and builds the installable app for the simulator; notification reconciliation uses an injected center and does not prove notification delivery on a physical iPhone. Android uses a real emulator AlarmManager and actual process SIGKILL; force-stop, device reboot, OEM power restrictions and physical-device wake delivery remain release-checklist items. No backend integration or production-ready claim is implied.
 
 ## CI evidence
 

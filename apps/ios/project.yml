@@ -1,0 +1,27 @@
+name: AWERO
+options:
+  bundleIdPrefix: app
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  AWERO:
+    type: application
+    platform: iOS
+    sources:
+      - path: AWERO
+        excludes:
+          - App/README.md
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awero
+        PRODUCT_NAME: AWERO
+        SWIFT_VERSION: "5.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "YES"
+        INFOPLIST_KEY_CFBundleDisplayName: AWERO
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_NSCameraUsageDescription: AWERO uses the camera to scan QR codes for wake missions.
+        INFOPLIST_KEY_NSMotionUsageDescription: AWERO uses motion activity to count steps during wake missions.
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_PREVIEWS: "YES"
