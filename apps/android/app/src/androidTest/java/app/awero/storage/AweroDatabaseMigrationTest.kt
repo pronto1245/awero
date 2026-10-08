@@ -20,7 +20,7 @@ class AweroDatabaseMigrationTest {
     fun migrate1To2PreservesOldDataAndCreatesWakeEvents() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val databaseName = "awero-migration-${System.nanoTime()}"
-        val callback = object : SupportSQLiteOpenHelper.Callback(2) {
+        val createV1 = object : SupportSQLiteOpenHelper.Callback(1) {
             override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE alarms (id TEXT NOT NULL PRIMARY KEY, version INTEGER NOT NULL, hour INTEGER NOT NULL, minute INTEGER NOT NULL, enabled INTEGER NOT NULL, weekdays TEXT NOT NULL, timezoneMode TEXT NOT NULL, fixedTimezone TEXT, missionType TEXT NOT NULL, difficulty TEXT NOT NULL, maxSnoozes INTEGER NOT NULL, snoozeMinutes INTEGER NOT NULL, qrExpectedCode TEXT)")
                 db.execSQL("CREATE TABLE wake_sessions (id TEXT NOT NULL PRIMARY KEY, alarmId TEXT NOT NULL, alarmVersion INTEGER NOT NULL, scheduledAt INTEGER NOT NULL, triggeredAt INTEGER, missionStartedAt INTEGER, completedAt INTEGER, result TEXT, snoozeCount INTEGER NOT NULL, fallbackUsed INTEGER NOT NULL, emergencyStop INTEGER NOT NULL)")
@@ -31,15 +31,11 @@ class AweroDatabaseMigrationTest {
                 db.execSQL("DROP TABLE alarms_old_marker")
             }
 
-            override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                if (oldVersion == 1 && newVersion >= 2) {
-                    AweroDatabase.MIGRATION_1_2.migrate(db)
-                }
-            }
+            override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
         }
         val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
             .name(databaseName)
-            .callback(callback)
+            .callback(createV1)
             .build()
         val helper = FrameworkSQLiteOpenHelperFactory().create(configuration)
         val db = helper.writableDatabase
@@ -47,10 +43,16 @@ class AweroDatabaseMigrationTest {
         db.execSQL("INSERT INTO wake_sessions (id, alarmId, alarmVersion, scheduledAt, triggeredAt, missionStartedAt, completedAt, result, snoozeCount, fallbackUsed, emergencyStop) VALUES ('session-1', 'alarm-1', 1, 1000, 1100, 1200, NULL, NULL, 1, 0, 0)")
         db.close()
         helper.close()
+        val migrateV2 = object : SupportSQLiteOpenHelper.Callback(2) {
+            override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) = Unit
+            override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                if (oldVersion == 1 && newVersion >= 2) AweroDatabase.MIGRATION_1_2.migrate(db)
+            }
+        }
         val migratedHelper = FrameworkSQLiteOpenHelperFactory().create(
             SupportSQLiteOpenHelper.Configuration.builder(context)
                 .name(databaseName)
-                .callback(callback)
+                .callback(migrateV2)
                 .build()
         )
         val migrated = migratedHelper.writableDatabase
