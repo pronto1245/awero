@@ -49,6 +49,7 @@ class PersistenceRecoveryTest {
         )
 
         var database = AweroDatabase.createForTesting(context, name)
+        app.awero.core.alarm.AlarmStore(context, database).save(alarm)
         val firstStore = WakeSessionStore(context, database)
         assertTrue(firstStore.start(alarm, 1234L))
         firstStore.startMission()
