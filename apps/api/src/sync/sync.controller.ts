@@ -288,7 +288,10 @@ export class SyncController {
       if (key === 'weekdays') {
         let value = rawValue;
         if (typeof value === 'string') {
-          try { value = JSON.parse(value); } catch { value = value.split(',').map((part) => Number(part.trim())); }
+          const encoded = value;
+          try { value = JSON.parse(encoded); } catch {
+            value = encoded.split(',').map((part: string) => Number(part.trim()));
+          }
         }
         if (!Array.isArray(value)) throw new BadRequestException('INVALID_ALARM_WEEKDAYS');
         normalized[key] = value.map((item) => this.numberValue(item, key));
