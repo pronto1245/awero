@@ -46,7 +46,8 @@ class WakeSessionStore(
         true
     }
 
-    suspend fun startMission() = stateMutex.withLock {
+    suspend fun startMission() {
+        stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || it.missionStartedAt != null) return
@@ -54,14 +55,17 @@ class WakeSessionStore(
             it.missionStartedAt = System.currentTimeMillis()
             saveWithEvent(it, "MISSION_STARTED")
         }
+        }
     }
 
-    suspend fun markFallback() = stateMutex.withLock {
+    suspend fun markFallback() {
+        stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || it.fallbackUsed) return
             it.fallbackUsed = true
             saveWithEvent(it, "FALLBACK")
+        }
         }
     }
 
@@ -76,12 +80,14 @@ class WakeSessionStore(
         return session
     }
 
-    suspend fun setSnoozeCount(count: Int) = stateMutex.withLock {
+    suspend fun setSnoozeCount(count: Int) {
+        stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || count == it.snoozeCount) return
             it.snoozeCount = count
             saveWithEvent(it, "SNOOZE", """{"count":$count}""")
+        }
         }
     }
 
