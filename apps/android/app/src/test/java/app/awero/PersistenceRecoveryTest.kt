@@ -30,7 +30,7 @@ class PersistenceRecoveryTest {
         get() = ApplicationProvider.getApplicationContext()
 
     @Test
-    fun wakeSession_survives_close_and_reopen_and_transitions_are_idempotent() = runBlocking {
+    fun wakeSession_survives_close_and_reopen_and_transitions_are_idempotent(): Unit = runBlocking {
         val name = "awero-restart-${System.nanoTime()}.db"
         val alarm = Alarm(
             id = "alarm-restart",
@@ -91,7 +91,7 @@ class PersistenceRecoveryTest {
     }
 
     @Test
-    fun syncQueue_duplicate_id_is_stored_once_and_survives_restart() = runBlocking {
+    fun syncQueue_duplicate_id_is_stored_once_and_survives_restart(): Unit = runBlocking {
         val name = "awero-sync-${System.nanoTime()}.db"
         var database = AweroDatabase.createForTesting(context, name)
         val id = "sync-fixed-id"
