@@ -64,7 +64,7 @@ class PersistenceTest {
     fun syncQueueIgnoresDuplicateIdsAndRetriesAfterRestart() {
         val name = "sync-test.db"
         val db = AweroDatabase.createForTesting(context, name)
-        val queue = SyncQueueStore(context)
+        val queue = SyncQueueStore(context, db)
         val id = queue.enqueue(
             operationType = "UPDATE_ALARM",
             entityType = "ALARM",
@@ -85,7 +85,7 @@ class PersistenceTest {
         db.close()
 
         val reopened = AweroDatabase.createForTesting(context, name)
-        val restoredQueue = SyncQueueStore(context)
+        val restoredQueue = SyncQueueStore(context, reopened)
         assertEquals(0, restoredQueue.due(2000L).size)
         assertEquals(1, restoredQueue.due(System.currentTimeMillis() + 10000L).size)
         restoredQueue.acknowledge(id)
