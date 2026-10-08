@@ -18,9 +18,10 @@ class WakeSessionStore(
     private val appContext = context.applicationContext
     private val preferences = appContext.getSharedPreferences("awero_wake_sessions", Context.MODE_PRIVATE)
     private val migrationMutex = Mutex()
+    private val stateMutex = Mutex()
     private var active: WakeSession? = null
 
-    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): Boolean {
+    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): Boolean = stateMutex.withLock {
         migrateLegacyIfNeeded()
         val existing = database.wakeSessions().active()
         if (existing != null && existing.alarmId == alarm.id && existing.alarmVersion == alarm.version) {
@@ -42,10 +43,10 @@ class WakeSessionStore(
         )
         active = session
         saveWithEvent(session, "TRIGGERED")
-        return true
+        true
     }
 
-    suspend fun startMission() {
+    suspend fun startMission() = stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || it.missionStartedAt != null) return
@@ -55,7 +56,7 @@ class WakeSessionStore(
         }
     }
 
-    suspend fun markFallback() {
+    suspend fun markFallback() = stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || it.fallbackUsed) return
@@ -64,7 +65,7 @@ class WakeSessionStore(
         }
     }
 
-    suspend fun complete(): WakeSession? {
+    suspend fun complete(): WakeSession? = stateMutex.withLock {
         ensureActive()
         val session = active ?: return null
         if (session.result != null) return session
@@ -75,7 +76,7 @@ class WakeSessionStore(
         return session
     }
 
-    suspend fun setSnoozeCount(count: Int) {
+    suspend fun setSnoozeCount(count: Int) = stateMutex.withLock {
         ensureActive()
         active?.let {
             if (it.result != null || count == it.snoozeCount) return
@@ -84,7 +85,7 @@ class WakeSessionStore(
         }
     }
 
-    suspend fun emergencyStop(): WakeSession? {
+    suspend fun emergencyStop(): WakeSession? = stateMutex.withLock {
         ensureActive()
         val session = active ?: return null
         if (session.result != null) return session
