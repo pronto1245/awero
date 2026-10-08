@@ -283,7 +283,9 @@ struct PersistenceSmokeMain {
         let flow = WakeFlowController(
             sessionManager: WakeSessionManager(database: database),
             scheduler: scheduler,
-            database: database
+            database: database,
+            scheduleSnooze: { alarm in try await scheduler.scheduleSnooze(for: alarm) },
+            cancelSnooze: { alarm in await scheduler.cancelSnooze(for: alarm) }
         )
         await flow.start(alarm: alarm, scheduledAt: .now)
 
