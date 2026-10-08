@@ -51,6 +51,37 @@ class WakeFlowControllerTest {
     }
 
     @Test
+    fun terminalUiStateRequiresAPersistedSession() = runBlocking {
+        val store = AlarmStore(context, database)
+        val sessions = WakeSessionStore(context, database)
+        val stats = StatisticsStore(context, database)
+        val alarm = alarm("terminal-state")
+        store.save(alarm)
+
+        val flow = WakeFlowController(sessions, context, stats, alarmStore = store)
+        flow.start(alarm, 1_000L)
+        assertTrue(flow.beginMission())
+        assertTrue(sessions.complete() != null)
+
+        assertFalse(flow.completeMission())
+        assertEquals(WakeFlowController.State.MISSION, flow.state.value)
+        assertFalse(flow.emergencyStop())
+        assertEquals(WakeFlowController.State.MISSION, flow.state.value)
+    }
+
+    @Test
+    fun emergencyStopWithoutASessionDoesNotChangeState() = runBlocking {
+        val flow = WakeFlowController(
+            sessions = WakeSessionStore(context, database),
+            context = context,
+            statistics = StatisticsStore(context, database)
+        )
+
+        assertFalse(flow.emergencyStop())
+        assertEquals(WakeFlowController.State.IDLE, flow.state.value)
+    }
+
+    @Test
     fun failedSnoozeLeavesAlarmRingingAndDoesNotConsumeAllowance() = runBlocking {
         val store = AlarmStore(context, database)
         val sessions = WakeSessionStore(context, database)

@@ -34,32 +34,52 @@ object WakeAlarmScreen {
         val snooze = Button(activity).apply { text = "Snooze" }
         val emergency = Button(activity).apply { text = "Emergency stop" }
 
+        fun showError(message: String) {
+            status.text = message
+            if (status.parent == null) root.addView(status, 0)
+        }
+
+        fun showCompleted() {
+            root.removeAllViews()
+            root.addView(text("YOU'RE UP", 42f))
+            root.addView(text("Wake session completed", 18f))
+        }
+
+        fun showStopped() {
+            root.removeAllViews()
+            root.addView(text("STOPPED", 42f))
+            root.addView(text("Session recorded", 18f))
+        }
+
         fun showMission() {
             root.removeAllViews()
+            status.text = "AWERO"
+            root.addView(status)
             val missionView = MissionRuntimeScreen.create(
                 activity,
                 flow.currentAlarm.value!!,
                 onSuccess = {
                     activity.lifecycleScope.launch {
-                        flow.completeMission()
-                        root.removeAllViews()
-                        root.addView(text("YOU'RE UP", 42f))
-                        root.addView(text("Wake session completed", 18f))
+                        if (flow.completeMission()) showCompleted()
+                        else showError(flow.actionError.value ?: "Could not save completion. Your session is still active.")
                     }
                 },
                 onFailure = {
                     activity.lifecycleScope.launch {
-                        flow.fallbackToMath()
+                        if (!flow.fallbackToMath()) {
+                            showError(flow.actionError.value ?: "Could not save the fallback. Your session is still active.")
+                            return@launch
+                        }
                         root.removeAllViews()
-                        root.addView(text("FALLBACK", 30f))
+                        status.text = "FALLBACK"
+                        root.addView(status)
                         root.addView(MissionRuntimeScreen.create(
                             activity,
                             flow.currentAlarm.value!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
                             onSuccess = {
                                 activity.lifecycleScope.launch {
-                                    flow.completeMission()
-                                    root.removeAllViews()
-                                    root.addView(text("YOU'RE UP", 42f))
+                                    if (flow.completeMission()) showCompleted()
+                                    else showError(flow.actionError.value ?: "Could not save completion. Your session is still active.")
                                 }
                             },
                             onFailure = {}
@@ -68,6 +88,7 @@ object WakeAlarmScreen {
                 }
             )
             root.addView(missionView)
+            root.addView(emergency)
         }
 
         primary.setOnClickListener {
@@ -94,12 +115,11 @@ object WakeAlarmScreen {
 
         emergency.setOnClickListener {
             activity.lifecycleScope.launch {
-                flow.emergencyStop()
-                title.text = "STOPPED"
-                status.text = "Session recorded"
-                primary.isEnabled = false
-                snooze.isEnabled = false
-                emergency.isEnabled = false
+                if (flow.emergencyStop()) {
+                    showStopped()
+                } else {
+                    showError(flow.actionError.value ?: "Could not record the stop. The alarm is still active.")
+                }
             }
         }
 

@@ -41,66 +41,69 @@ class WakeSessionStore(
             scheduledAt = scheduledAt,
             triggeredAt = System.currentTimeMillis()
         )
-        active = session
         saveWithEvent(session, "TRIGGERED")
+        active = session
         true
     }
 
-    suspend fun startMission() {
-        stateMutex.withLock {
+    suspend fun startMission(): Boolean = stateMutex.withLock {
         ensureActive()
-        active?.let {
-            if (it.result != null || it.missionStartedAt != null) return
-            it.triggeredAt = it.triggeredAt ?: System.currentTimeMillis()
-            it.missionStartedAt = System.currentTimeMillis()
-            saveWithEvent(it, "MISSION_STARTED")
-        }
-        }
+        val session = active ?: return false
+        if (session.result != null || session.missionStartedAt != null) return false
+        val updated = session.copy(
+            triggeredAt = session.triggeredAt ?: System.currentTimeMillis(),
+            missionStartedAt = System.currentTimeMillis()
+        )
+        saveWithEvent(updated, "MISSION_STARTED")
+        active = updated
+        true
     }
 
-    suspend fun markFallback() {
-        stateMutex.withLock {
+    suspend fun markFallback(): Boolean = stateMutex.withLock {
         ensureActive()
-        active?.let {
-            if (it.result != null || it.fallbackUsed) return
-            it.fallbackUsed = true
-            saveWithEvent(it, "FALLBACK")
-        }
-        }
+        val session = active ?: return false
+        if (session.result != null || session.fallbackUsed) return false
+        val updated = session.copy(fallbackUsed = true)
+        saveWithEvent(updated, "FALLBACK")
+        active = updated
+        true
     }
 
     suspend fun complete(): WakeSession? = stateMutex.withLock {
         ensureActive()
         val session = active ?: return null
-        if (session.result != null) return session
-        session.completedAt = System.currentTimeMillis()
-        session.result = "SUCCESS"
-        saveWithEvent(session, "COMPLETED")
+        if (session.result != null) return null
+        val updated = session.copy(
+            completedAt = System.currentTimeMillis(),
+            result = "SUCCESS"
+        )
+        saveWithEvent(updated, "COMPLETED")
         active = null
-        return session
+        updated
     }
 
-    suspend fun setSnoozeCount(count: Int) {
-        stateMutex.withLock {
+    suspend fun setSnoozeCount(count: Int): Boolean = stateMutex.withLock {
         ensureActive()
-        active?.let {
-            if (it.result != null || count == it.snoozeCount) return
-            it.snoozeCount = count
-            saveWithEvent(it, "SNOOZE", """{"count":$count}""")
-        }
-        }
+        val session = active ?: return false
+        if (session.result != null || count == session.snoozeCount) return false
+        val updated = session.copy(snoozeCount = count)
+        saveWithEvent(updated, "SNOOZE", """{"count":$count}""")
+        active = updated
+        true
     }
 
     suspend fun emergencyStop(): WakeSession? = stateMutex.withLock {
         ensureActive()
         val session = active ?: return null
-        if (session.result != null) return session
-        session.emergencyStop = true
-        session.result = "EMERGENCY_STOP"
-        session.completedAt = System.currentTimeMillis()
-        saveWithEvent(session, "EMERGENCY_STOP")
+        if (session.result != null) return null
+        val updated = session.copy(
+            emergencyStop = true,
+            result = "EMERGENCY_STOP",
+            completedAt = System.currentTimeMillis()
+        )
+        saveWithEvent(updated, "EMERGENCY_STOP")
         active = null
-        return session
+        updated
     }
 
     suspend fun save(session: WakeSession) {

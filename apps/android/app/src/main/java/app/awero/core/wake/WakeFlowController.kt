@@ -30,12 +30,14 @@ class WakeFlowController(
     private val _mission = MutableStateFlow(MissionType.MATH)
     private val _snoozeCount = MutableStateFlow(0)
     private val _snoozeError = MutableStateFlow<String?>(null)
+    private val _actionError = MutableStateFlow<String?>(null)
     private val _currentAlarm = MutableStateFlow<Alarm?>(null)
 
     val state: StateFlow<State> = _state.asStateFlow()
     val mission: StateFlow<MissionType> = _mission.asStateFlow()
     val snoozeCount: StateFlow<Int> = _snoozeCount.asStateFlow()
     val snoozeError: StateFlow<String?> = _snoozeError.asStateFlow()
+    val actionError: StateFlow<String?> = _actionError.asStateFlow()
     val currentAlarm: StateFlow<Alarm?> = _currentAlarm.asStateFlow()
 
     suspend fun restore() {
@@ -60,26 +62,42 @@ class WakeFlowController(
         _state.value = State.RINGING
     }
 
-    suspend fun beginMission() {
-        if (_state.value == State.RINGING) {
-            sessions.startMission()
-            _state.value = State.MISSION
+    suspend fun beginMission(): Boolean {
+        if (_state.value != State.RINGING) return false
+        _actionError.value = null
+        val started = runCatching { sessions.startMission() }.getOrDefault(false)
+        if (!started) {
+            _actionError.value = "Could not save mission progress. The alarm is still active."
+            return false
         }
+        _state.value = State.MISSION
+        return true
     }
 
-    suspend fun fallbackToMath() {
-        if (_state.value == State.MISSION) {
-            sessions.markFallback()
-            _mission.value = MissionType.MATH
+    suspend fun fallbackToMath(): Boolean {
+        if (_state.value != State.MISSION) return false
+        _actionError.value = null
+        val saved = runCatching { sessions.markFallback() }.getOrDefault(false)
+        if (!saved) {
+            _actionError.value = "Could not save the fallback. Your wake session is still active."
+            return false
         }
+        _mission.value = MissionType.MATH
+        return true
     }
 
-    suspend fun completeMission() {
-        if (_state.value == State.MISSION) {
-            sessions.complete()?.let { if (!testAlarm) statistics.record(it) }
-            AlarmRingingService.stop(context)
-            _state.value = State.COMPLETED
+    suspend fun completeMission(): Boolean {
+        if (_state.value != State.MISSION) return false
+        _actionError.value = null
+        val session = runCatching { sessions.complete() }.getOrNull()
+        if (session == null) {
+            _actionError.value = "Could not save completion. Your wake session is still active."
+            return false
         }
+        if (!testAlarm) runCatching { statistics.record(session) }
+        AlarmRingingService.stop(context)
+        _state.value = State.COMPLETED
+        return true
     }
 
     suspend fun snooze(): Boolean {
@@ -90,10 +108,13 @@ class WakeFlowController(
         _snoozeError.value = null
         try {
             scheduleAlarmSnooze(alarm, alarm.snoozeMinutes)
-            sessions.setSnoozeCount(nextCount)
+            if (!sessions.setSnoozeCount(nextCount)) {
+                runCatching { cancelAlarmSnooze(alarm) }
+                _snoozeError.value = "Could not save snooze. The alarm is still ringing."
+                return false
+            }
         } catch (error: Exception) {
             runCatching { cancelAlarmSnooze(alarm) }
-            runCatching { sessions.setSnoozeCount(previousCount) }
             _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
             return false
         }
@@ -103,8 +124,19 @@ class WakeFlowController(
         return true
     }
 
-    suspend fun emergencyStop() {
-        sessions.emergencyStop()?.let { if (!testAlarm) statistics.record(it) }
+    suspend fun emergencyStop(): Boolean {
+        _actionError.value = null
+        val session = runCatching { sessions.emergencyStop() }.getOrNull()
+        if (session == null) {
+            _actionError.value = "Could not record the stop. The alarm is still active."
+            return false
+        }
+        if (!testAlarm) runCatching { statistics.record(session) }
+        AlarmRingingService.stop(context)
+        _state.value = State.EMERGENCY_STOPPED
+        return true
+    }
+}
         AlarmRingingService.stop(context)
         _state.value = State.EMERGENCY_STOPPED
     }
