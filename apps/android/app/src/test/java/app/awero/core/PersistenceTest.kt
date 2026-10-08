@@ -224,11 +224,5 @@ class PersistenceTest {
     version = 1,
     exportSchema = false
 )
-abstract class AweroDatabaseV1 : androidx.room.RoomDatabase() {
-    abstract fun alarms(): app.awero.core.storage.AlarmDao
-    abstract fun wakeSessions(): app.awero.core.storage.WakeSessionDao
-    abstract fun statistics(): app.awero.core.storage.StatisticsDao
-    abstract fun syncOperations(): app.awero.core.storage.SyncOperationDao
-    abstract fun analyticsEvents(): app.awero.core.storage.AnalyticsEventDao
-}
+abstract class AweroDatabaseV1 : androidx.room.RoomDatabase()
 
