@@ -32,7 +32,7 @@ The project uses bundle identifier `app.awero`, includes every Swift source unde
 ## Physical-device persistence and alarm check
 
 1. In AWERO, create an alarm for 3–5 minutes from now and save it.
-2. Lock the iPhone and wait for the local notification. Verify its sound and alert. Tap it and check that AWERO opens the wake flow.
+2. On iOS 26+, allow AlarmKit when prompted. Lock the iPhone and wait for the system alarm. Verify the alarm sound and alert, tap **Start mission**, and check that AWERO opens the wake flow. On iOS 17–25, verify the local notification fallback separately.
 3. Create a second alarm, close AWERO from the app switcher, and wait for its notification. This checks scheduled delivery while the app process is terminated.
 4. Tap **Test** on an alarm. The test notification is scheduled 30 seconds later. Tap the notification, start the mission, force-quit AWERO, then reopen it. The active mission should be restored.
 5. Create an alarm, edit its time, and confirm the old time does not alert. Delete an alarm and confirm it no longer alerts.

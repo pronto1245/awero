@@ -1,7 +1,22 @@
 import Foundation
 import UserNotifications
+#if canImport(AlarmKit) && canImport(AppIntents)
+import AlarmKit
+#endif
 
-enum AlarmSchedulingError: Error { case invalidTimezone }
+enum AlarmSchedulingError: LocalizedError {
+    case invalidTimezone
+    case alarmAuthorizationDenied
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidTimezone:
+            return "The selected alarm timezone is invalid."
+        case .alarmAuthorizationDenied:
+            return "Allow AWERO to schedule alarms in iPhone Settings, then try again."
+        }
+    }
+}
 
 protocol AlarmNotificationCenter {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
@@ -32,9 +47,11 @@ private final class SystemAlarmNotificationCenter: AlarmNotificationCenter {
 
 final class AlarmScheduler {
     private let center: any AlarmNotificationCenter
+    private let usesSystemAlarmKit: Bool
 
-    init(center: (any AlarmNotificationCenter)? = nil) {
+    init(center: (any AlarmNotificationCenter)? = nil, usesSystemAlarmKit: Bool? = nil) {
         self.center = center ?? SystemAlarmNotificationCenter()
+        self.usesSystemAlarmKit = usesSystemAlarmKit ?? (center == nil)
     }
 
     func requestAuthorization() async throws {
@@ -42,9 +59,105 @@ final class AlarmScheduler {
     }
 
     func schedule(_ alarm: Alarm) async throws {
-        await cancel(alarm)
-        guard alarm.enabled && !alarm.weekdays.isEmpty else { return }
+        guard alarm.enabled && !alarm.weekdays.isEmpty else {
+            await cancel(alarm)
+            return
+        }
 
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            try await SystemAlarmKitScheduler.schedule(alarm)
+            await removeNotifications(for: alarm)
+            return
+        }
+#endif
+
+        await cancel(alarm)
+        try await scheduleNotifications(for: alarm)
+    }
+
+    func scheduleTest(for alarm: Alarm, after seconds: TimeInterval = 30) async throws {
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            try await SystemAlarmKitScheduler.scheduleTest(for: alarm, after: seconds)
+            await removeNotifications(for: alarm, kind: "test")
+            return
+        }
+#endif
+
+        let content = UNMutableNotificationContent()
+        content.title = "AWERO — Test Alarm"
+        content.body = "Your alarm test is working."
+        content.sound = .default
+        try await center.add(
+            UNNotificationRequest(
+                identifier: "awero:test:\(alarm.id.uuidString):\(UUID().uuidString)",
+                content: content,
+                trigger: UNTimeIntervalNotificationTrigger(timeInterval: max(5, seconds), repeats: false)
+            )
+        )
+    }
+
+    func scheduleSnooze(for alarm: Alarm) async throws {
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            try await SystemAlarmKitScheduler.scheduleSnooze(for: alarm)
+            await removeNotifications(for: alarm, kind: "snooze")
+            return
+        }
+#endif
+
+        let content = UNMutableNotificationContent()
+        content.title = "AWERO"
+        content.body = "Wake up. Stay up."
+        content.sound = .default
+        try await center.add(
+            UNNotificationRequest(
+                identifier: "awero:snooze:\(alarm.id.uuidString):v\(alarm.version):\(UUID().uuidString)",
+                content: content,
+                trigger: UNTimeIntervalNotificationTrigger(
+                    timeInterval: TimeInterval(max(1, alarm.snoozeMinutes) * 60),
+                    repeats: false
+                )
+            )
+        )
+    }
+
+    func cancel(_ alarm: Alarm) async {
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *), usesSystemAlarmKit {
+            SystemAlarmKitScheduler.cancel(alarm)
+        }
+#endif
+        await removeNotifications(for: alarm)
+    }
+
+    func isScheduled(_ alarm: Alarm) async -> Bool {
+        guard alarm.enabled && !alarm.weekdays.isEmpty else { return false }
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           alarm.timezoneMode == .deviceLocal {
+            return SystemAlarmKitScheduler.isScheduled(alarm)
+        }
+#endif
+        let ids = Set((await center.pendingNotificationRequests()).map(\.identifier))
+        return alarm.weekdays.allSatisfy {
+            ids.contains("awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\($0)")
+        }
+    }
+
+    func repair(_ alarm: Alarm) async throws {
+        try await schedule(alarm)
+    }
+
+    private func scheduleNotifications(for alarm: Alarm) async throws {
         for day in alarm.weekdays.sorted() {
             var components = DateComponents()
             components.calendar = Calendar(identifier: .gregorian)
@@ -52,7 +165,9 @@ final class AlarmScheduler {
             components.hour = alarm.hour
             components.minute = alarm.minute
             if alarm.timezoneMode == .fixed {
-                guard let timezone = TimeZone(identifier: alarm.fixedTimezone ?? "") else { throw AlarmSchedulingError.invalidTimezone }
+                guard let timezone = TimeZone(identifier: alarm.fixedTimezone ?? "") else {
+                    throw AlarmSchedulingError.invalidTimezone
+                }
                 components.timeZone = timezone
             }
 
@@ -72,59 +187,21 @@ final class AlarmScheduler {
         }
     }
 
-    func scheduleTest(for alarm: Alarm, after seconds: TimeInterval = 30) async throws {
-        let content = UNMutableNotificationContent()
-        content.title = "AWERO — Test Alarm"
-        content.body = "Your alarm test is working."
-        content.sound = .default
-        try await center.add(
-            UNNotificationRequest(
-                identifier: "awero:test:\(alarm.id.uuidString):\(UUID().uuidString)",
-                content: content,
-                trigger: UNTimeIntervalNotificationTrigger(timeInterval: max(5, seconds), repeats: false)
-            )
-        )
-    }
-
-    func scheduleSnooze(for alarm: Alarm) async throws {
-        let content = UNMutableNotificationContent()
-        content.title = "AWERO"
-        content.body = "Wake up. Stay up."
-        content.sound = .default
-        try await center.add(
-            UNNotificationRequest(
-                identifier: "awero:snooze:\(alarm.id.uuidString):v\(alarm.version):\(UUID().uuidString)",
-                content: content,
-                trigger: UNTimeIntervalNotificationTrigger(
-                    timeInterval: TimeInterval(max(1, alarm.snoozeMinutes) * 60),
-                    repeats: false
-                )
-            )
-        )
-    }
-
-    func cancel(_ alarm: Alarm) async {
+    private func removeNotifications(for alarm: Alarm, kind: String? = nil) async {
         let requests = await center.pendingNotificationRequests()
-        let prefixes = [
-            "awero:alarm:\(alarm.id.uuidString):",
-            "awero:test:\(alarm.id.uuidString):",
-            "awero:snooze:\(alarm.id.uuidString):"
-        ]
+        let prefixes: [String]
+        if let kind {
+            prefixes = ["awero:\(kind):\(alarm.id.uuidString):"]
+        } else {
+            prefixes = [
+                "awero:alarm:\(alarm.id.uuidString):",
+                "awero:test:\(alarm.id.uuidString):",
+                "awero:snooze:\(alarm.id.uuidString):"
+            ]
+        }
         let ids = requests.map(\.identifier).filter { id in
             prefixes.contains { id.hasPrefix($0) }
         }
         center.removePendingNotificationRequests(withIdentifiers: ids)
-    }
-
-    func isScheduled(_ alarm: Alarm) async -> Bool {
-        guard alarm.enabled && !alarm.weekdays.isEmpty else { return false }
-        let ids = Set((await center.pendingNotificationRequests()).map(\.identifier))
-        return alarm.weekdays.allSatisfy {
-            ids.contains("awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\($0)")
-        }
-    }
-
-    func repair(_ alarm: Alarm) async throws {
-        try await schedule(alarm)
     }
 }

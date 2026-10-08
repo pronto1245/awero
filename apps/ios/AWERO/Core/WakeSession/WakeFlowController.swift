@@ -37,6 +37,11 @@ final class WakeFlowController: ObservableObject {
         state = session.missionStartedAt == nil ? .ringing : .mission
     }
 
+    func start(alarmID: UUID, scheduledAt: Date = .now) async {
+        guard let alarm = await database.fetchAlarm(id: alarmID), alarm.enabled else { return }
+        await start(alarm: alarm, scheduledAt: scheduledAt)
+    }
+
     func start(alarm: Alarm, scheduledAt: Date = .now) async {
         guard await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt) else {
             await restore()

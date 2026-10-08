@@ -3,7 +3,9 @@
 ## Mobile
 - [ ] Generate `apps/ios/AWERO.xcodeproj` with XcodeGen and build the app for iOS Simulator
 - [ ] Install the signed development build on a physical iPhone from Xcode
-- [ ] Verify iOS notification permission, test alarm, sound and tap-to-open wake flow
+- [ ] Verify AlarmKit authorization, lock-screen alarm sound and Start mission action on iOS 26+
+- [ ] Verify UserNotifications fallback and sound on iOS 17–25
+- [ ] Verify fixed-timezone notification fallback on iOS 26+
 - [ ] Verify iOS local notification delivery while AWERO is terminated and offline
 - [ ] Verify iOS active wake mission restores after force-quit and relaunch
 - [ ] Verify edited/deleted iOS alarms do not deliver stale notifications

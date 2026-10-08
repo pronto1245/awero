@@ -8,6 +8,7 @@ struct CreateAlarmView: View {
     @State private var wakeDate: Date
     @State private var selectedDays: Set<Int>
     @State private var mission: MissionType
+    @State private var saveError: String?
 
     init(alarm: Alarm? = nil) {
         self.alarm = alarm
@@ -30,6 +31,14 @@ struct CreateAlarmView: View {
                 saveSection
             }
             .navigationTitle(alarm == nil ? "Create Alarm" : "Edit Alarm")
+            .alert("Alarm not scheduled", isPresented: Binding(
+                get: { saveError != nil },
+                set: { if !$0 { saveError = nil } }
+            )) {
+                Button("OK", role: .cancel) { saveError = nil }
+            } message: {
+                Text(saveError ?? "Please try again.")
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -100,12 +109,16 @@ struct CreateAlarmView: View {
 
         Task {
             let coordinator = AlarmCoordinator(store: store)
-            if alarm == nil {
-                await coordinator.create(next)
-            } else {
-                await coordinator.update(next)
+            do {
+                if alarm == nil {
+                    try await coordinator.create(next)
+                } else {
+                    try await coordinator.update(next)
+                }
+                dismiss()
+            } catch {
+                saveError = error.localizedDescription
             }
-            dismiss()
         }
     }
 }
