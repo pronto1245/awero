@@ -89,12 +89,22 @@ struct PersistenceSmokeMain {
             missionType: .math,
             difficulty: .medium
         )
+        await restartedAgain.saveAlarm(alarm)
         let firstTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
         let secondTrigger = await manager.trigger(alarm: alarm, scheduledAt: .now)
         precondition(firstTrigger)
         precondition(!secondTrigger)
         await manager.startMission()
         await manager.startMission()
+
+        let restoredManager = await MainActor.run { WakeSessionManager(database: restartedAgain) }
+        let restoredFlow = await MainActor.run {
+            WakeFlowController(sessionManager: restoredManager)
+        }
+        await restoredFlow.restore()
+        let restoredState = await MainActor.run { restoredFlow.state }
+        precondition(restoredState == .mission)
+
         guard let completedSession = await manager.complete() else {
             fatalError("Expected wake session completion")
         }
