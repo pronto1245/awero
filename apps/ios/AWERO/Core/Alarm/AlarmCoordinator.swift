@@ -11,20 +11,20 @@ final class AlarmCoordinator {
     }
 
     func create(_ alarm: Alarm) async {
-        await store.save(alarm)
+        guard await store.save(alarm) else { return }
         try? await scheduler.schedule(alarm)
     }
 
     func update(_ alarm: Alarm) async {
         var next = alarm
         next.version += 1
-        await store.save(next)
+        guard await store.save(next) else { return }
         try? await scheduler.schedule(next)
     }
 
     func delete(_ alarm: Alarm) async {
+        guard await store.delete(alarm) else { return }
         await scheduler.cancel(alarm)
-        await store.delete(alarm)
     }
 
     func test(_ alarm: Alarm) async {
