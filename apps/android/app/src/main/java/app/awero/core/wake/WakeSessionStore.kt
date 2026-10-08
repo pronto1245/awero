@@ -26,6 +26,11 @@ class WakeSessionStore(context: Context) {
             return false
         }
 
+        if (existing != null && existing.result == null) {
+            active = WakeSessionMapper.fromEntity(existing)
+            return false
+        }
+
         val session = WakeSession(
             id = UUID.randomUUID().toString(),
             alarmId = alarm.id,
@@ -41,6 +46,7 @@ class WakeSessionStore(context: Context) {
     suspend fun startMission() {
         ensureActive()
         active?.let {
+            if (it.result != null || it.missionStartedAt != null) return
             it.triggeredAt = it.triggeredAt ?: System.currentTimeMillis()
             it.missionStartedAt = System.currentTimeMillis()
             saveWithEvent(it, "MISSION_STARTED")
@@ -50,6 +56,7 @@ class WakeSessionStore(context: Context) {
     suspend fun markFallback() {
         ensureActive()
         active?.let {
+            if (it.result != null || it.fallbackUsed) return
             it.fallbackUsed = true
             saveWithEvent(it, "FALLBACK")
         }
@@ -69,6 +76,7 @@ class WakeSessionStore(context: Context) {
     suspend fun setSnoozeCount(count: Int) {
         ensureActive()
         active?.let {
+            if (it.result != null || count == it.snoozeCount) return
             it.snoozeCount = count
             saveWithEvent(it, "SNOOZE", """{"count":$count}""")
         }
