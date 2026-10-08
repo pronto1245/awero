@@ -149,6 +149,10 @@ class AlarmScheduler(private val context: Context) {
             cancelPending(code(a, day), ACTION_ALARM)
         }
         cancelPending(testCode(a), ACTION_TEST)
+        cancelSnooze(a)
+    }
+
+    fun cancelSnooze(a: Alarm) {
         cancelPending(snoozeCode(a), ACTION_SNOOZE)
     }
 
