@@ -46,6 +46,24 @@ private struct AlarmSchedulerSmoke {
         let readiness = await scheduler.readiness(for: alarm)
         precondition(readiness == .notificationFallback, "Notification fallback readiness must be reported truthfully")
 
+        let recoveryCenter = RecordingNotificationCenter()
+        let recoveryScheduler = AlarmScheduler(center: recoveryCenter)
+        try await recoveryScheduler.schedule(alarm)
+        var revisedAlarm = alarm
+        revisedAlarm.version += 1
+        try await recoveryScheduler.repair(revisedAlarm)
+        let revisedIDs: Set<String> = [
+            "awero:alarm:\(revisedAlarm.id.uuidString):v\(revisedAlarm.version):w2",
+            "awero:alarm:\(revisedAlarm.id.uuidString):v\(revisedAlarm.version):w4"
+        ]
+        precondition(Set(recoveryCenter.requests.keys) == revisedIDs, "Repair must replace stale alarm versions")
+        recoveryCenter.requests.removeValue(forKey: revisedIDs.sorted().last!)
+        let incompleteSchedule = await recoveryScheduler.isScheduled(revisedAlarm)
+        precondition(!incompleteSchedule, "A schedule missing a selected weekday must not report as complete")
+        try await recoveryScheduler.repair(revisedAlarm)
+        let recoveredSchedule = await recoveryScheduler.isScheduled(revisedAlarm)
+        precondition(recoveredSchedule, "Repair must restore every selected weekday")
+
         let deniedCenter = RecordingNotificationCenter()
         deniedCenter.canDeliver = false
         let deniedScheduler = AlarmScheduler(center: deniedCenter)
