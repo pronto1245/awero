@@ -1,22 +1,39 @@
 import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
+import { IsIn, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 import { DatabaseService } from '../database/database.service';
 
 class RegisterAnonymousDto {
+  @IsString()
+  @Length(16, 128)
   deviceId!: string;
+
+  @IsIn(['IOS', 'ANDROID'])
   platform!: string;
+
+  @IsString()
+  @Length(1, 64)
   appVersion!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
   osVersion?: string;
+
+  @IsString()
+  @Length(1, 64)
   timezone!: string;
 }
 
-@Controller('api/v1/auth')
+@Controller('auth')
 export class AnonymousController {
   constructor(private readonly db: DatabaseService) {}
 
   @Post('anonymous')
   async register(@Body() body: RegisterAnonymousDto) {
-    if (!body.deviceId || !body.platform || !body.appVersion || !body.timezone) {
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: body.timezone });
+    } catch {
       throw new BadRequestException('INVALID_REQUEST');
     }
 

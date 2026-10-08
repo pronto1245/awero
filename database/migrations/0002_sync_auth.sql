@@ -28,15 +28,8 @@ CREATE TABLE sync_operations (
 CREATE INDEX sync_operations_owner_idx ON sync_operations(anonymous_user_id, user_id);
 CREATE INDEX sync_operations_entity_idx ON sync_operations(entity_type, entity_id);
 
-CREATE TABLE analytics_events (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  anonymous_user_id uuid REFERENCES anonymous_users(id) ON DELETE SET NULL,
-  user_id uuid REFERENCES users(id) ON DELETE SET NULL,
-  device_id uuid REFERENCES devices(id) ON DELETE SET NULL,
-  event_name text NOT NULL,
-  event_version integer NOT NULL DEFAULT 1,
-  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
-  occurred_at timestamptz NOT NULL DEFAULT now()
-);
+ALTER TABLE analytics_events
+  ADD COLUMN IF NOT EXISTS payload jsonb NOT NULL DEFAULT '{}'::jsonb;
 
-CREATE INDEX analytics_events_name_time_idx ON analytics_events(event_name, occurred_at DESC);
+CREATE INDEX IF NOT EXISTS analytics_events_name_time_idx
+  ON analytics_events(event_name, occurred_at DESC);

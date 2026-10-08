@@ -12,6 +12,22 @@ concurrency:
 jobs:
   repository-check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: awero
+          POSTGRES_PASSWORD: awero
+          POSTGRES_DB: awero
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U awero -d awero"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://awero:awero@localhost:5432/awero
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -23,6 +39,25 @@ jobs:
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm build
+      - name: Apply database migrations
+        run: pnpm --filter @awero/api db:migrate
+      - name: Run API smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node apps/api/dist/main.js &
+          API_PID=$!
+          trap 'kill "$API_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for ATTEMPT in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/v1/health >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          test "$READY" -eq 1
+          node apps/api/scripts/smoke-test.mjs
 
   android-build:
     runs-on: ubuntu-latest

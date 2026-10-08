@@ -7,7 +7,8 @@ export class AnonymousAuthService {
   constructor(private readonly db: DatabaseService) {}
 
   async resolve(authorization?: string) {
-    const token = authorization?.replace(/^Bearer\s+/i, '').trim();
+    const match = authorization?.trim().match(/^Bearer\s+([A-Za-z0-9_-]{43})$/i);
+    const token = match?.[1];
     if (!token) throw new UnauthorizedException('AUTH_REQUIRED');
     const hash = createHash('sha256').update(token).digest('hex');
     const result = await this.db.query(

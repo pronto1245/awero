@@ -14,6 +14,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://awero:awero@postgres:5432/awero
+      API_PORT: 3000
+    command: ["sh", "-c", "node apps/api/scripts/migrate.js && node apps/api/dist/main.js"]
+    ports:
+      - "3000:3000"
   redis:
     image: redis:7-alpine
     ports:
