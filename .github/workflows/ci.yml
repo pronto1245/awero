@@ -33,6 +33,13 @@ jobs:
           gradle-version: '8.9'
       - run: gradle -p apps/android :app:assembleDebug
       - run: gradle -p apps/android :app:testDebugUnitTest
+      - name: Run Android migration instrumentation test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          script: gradle -p apps/android :app:connectedDebugAndroidTest
 
   ios-syntax:
     runs-on: macos-15
@@ -64,6 +71,17 @@ jobs:
             apps/ios/Tests/PersistenceSmokeMain.swift \
             -o /tmp/awero-persistence-smoke
           /tmp/awero-persistence-smoke
+      - name: Crash and restart persistence test
+        shell: bash
+        run: |
+          ROOT=$(mktemp -d)
+          STORE="$ROOT/AWERO.sqlite"
+          AWERO_CRASH_PATH="$STORE" AWERO_CRASH_PHASE=write /tmp/awero-persistence-smoke &
+          PID=$!
+          sleep 3
+          kill -9 "$PID"
+          wait "$PID" 2>/dev/null || true
+          AWERO_CRASH_PATH="$STORE" AWERO_CRASH_PHASE=read /tmp/awero-persistence-smoke
 
       - name: Verify persistence across forced process termination
         shell: bash
