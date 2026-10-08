@@ -53,6 +53,24 @@ class WakeFlowControllerTest {
     }
 
     @Test
+    fun testAlarmCompletionDoesNotChangeWakeStatistics() = runBlocking {
+        val store = AlarmStore(context, database)
+        val sessions = WakeSessionStore(context, database)
+        val stats = StatisticsStore(context, database)
+        val alarm = alarm("test-alarm-history")
+        store.save(alarm)
+        val flow = WakeFlowController(sessions, context, stats, testAlarm = true, alarmStore = store)
+
+        flow.start(alarm, 1_000L)
+        assertTrue(flow.beginMission())
+        assertTrue(flow.completeMission())
+
+        assertEquals("SUCCESS", sessions.load().first().result)
+        assertEquals(0, stats.statistics().planned)
+        assertEquals(0, stats.statistics().completed)
+    }
+
+    @Test
     fun terminalUiStateRequiresAPersistedSession() = runBlocking {
         val store = AlarmStore(context, database)
         val sessions = WakeSessionStore(context, database)
