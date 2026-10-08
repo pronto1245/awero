@@ -40,8 +40,20 @@ class AweroDatabaseMigrationTest {
         ).addMigrations(AweroDatabase.MIGRATION_1_2).build()
 
         migrated.openHelper.writableDatabase
-        assertTrue(migrated.openHelper.writableDatabase.query(
+        val db = migrated.openHelper.writableDatabase
+        assertTrue(db.query(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'"
+        ).use { it.moveToFirst() })
+        assertTrue(db.query(
+            "SELECT name FROM sqlite_master WHERE type='index' AND name='index_wake_events_wakeSessionId'"
+        ).use { it.moveToFirst() })
+
+        db.execSQL(
+            "INSERT INTO wake_events(id, wakeSessionId, eventType, occurredAt, payload) VALUES(?,?,?,?,?)",
+            arrayOf("event-1", "session-1", "TRIGGERED", 123L, "{}")
+        )
+        assertTrue(db.query(
+            "SELECT payload FROM wake_events WHERE id='event-1'"
         ).use { it.moveToFirst() })
 
         migrated.close()
