@@ -140,7 +140,16 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 
 ## Product requirements and competitor coverage
 
-- [x] Cross-platform competitor-informed requirements recorded in [Product Requirements](PRODUCT_REQUIREMENTS.md)
+- [x] Governing cross-platform product specification and implementation order recorded in [AWERO Product Specification and Implementation Plan](AWERO_PRODUCT_SPEC_AND_IMPLEMENTATION_PLAN.md)
+- [x] Detailed capability inventory retained in [Product Requirements](PRODUCT_REQUIREMENTS.md)
 - [x] Erly, Alarmy, I Can't Wake Up!, WAKR and Wakey features/review signals mapped to AWERO acceptance criteria in [Competitor and Review Gap Analysis](research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md)
 - [x] Full feature inventory retained by stage: P0 reliability/core missions/localization; P1 exercise, photo/object, sequences, wake-up check and accurate progress; P2 optional weather briefing, sleep support, social accountability and AI/adaptive support
 - [ ] Product capabilities implemented and verified; documentation does not mark these features as shipped
+
+## Governing plan position
+- [x] Phase 0 — reconcile scope, competitor inputs, phase order, and acceptance gates across product docs
+- [ ] Phase 1 — physical iOS and Android alarm reliability; a push-only iPhone test is not an audible-alarm pass
+- [ ] Phase 2 — wake-session runtime and P0 mission flows
+- [ ] Phase 3 — local persistence device checks (the ten-point automated CI gate is already complete)
+- [ ] Phase 4 — backend and sync isolated from the alarm-critical path
+- [ ] Phase 5 — user-facing UX and six-language completion
