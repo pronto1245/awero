@@ -53,6 +53,7 @@ jobs:
         run: |
           swiftc \
             apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmScheduler.swift \
             apps/ios/AWERO/Core/Sync/SyncOperation.swift \
             apps/ios/AWERO/Core/WakeSession/WakeSession.swift \
             apps/ios/AWERO/Core/WakeSession/WakeSessionManager.swift \
