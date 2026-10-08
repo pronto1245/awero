@@ -18,6 +18,8 @@ final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
     private let database: CoreDataStore
     private var loaded = false
+    private var writeInProgress = false
+    private var writeWaiters: [CheckedContinuation<Void, Never>] = []
 
     init(database: CoreDataStore = .shared) {
         self.database = database
@@ -26,6 +28,12 @@ final class StatisticsStore: ObservableObject {
     }
 
     func load() async {
+        await acquireWrite()
+        defer { releaseWrite() }
+        await loadStoredStatistics()
+    }
+
+    private func loadStoredStatistics() async {
         if let stored = await database.fetchStatistics() {
             statistics = stored
             loaded = true
@@ -35,30 +43,56 @@ final class StatisticsStore: ObservableObject {
         let key = "awero.statistics.v1"
         if let data = UserDefaults.standard.data(forKey: key),
            let legacy = try? JSONDecoder().decode(WakeStatistics.self, from: data) {
+            guard await database.saveStatistics(legacy) else { return }
             statistics = legacy
-            await database.saveStatistics(legacy)
             UserDefaults.standard.set(true, forKey: "awero.coredata.statistics.migrated.v1")
         }
         loaded = true
     }
 
     func recordPlanned() async {
+        await acquireWrite()
+        defer { releaseWrite() }
         await ensureLoaded()
-        statistics.planned += 1
-        await database.saveStatistics(statistics)
+        var next = statistics
+        next.planned += 1
+        guard await database.saveStatistics(next) else { return }
+        statistics = next
     }
 
     func record(_ session: WakeSession) async {
+        await acquireWrite()
+        defer { releaseWrite() }
         await ensureLoaded()
-        statistics.completed += session.result == "COMPLETED" ? 1 : 0
-        statistics.snoozes += session.snoozeCount
-        statistics.fallback += session.fallbackUsed ? 1 : 0
-        statistics.emergencyStops += session.emergencyStop ? 1 : 0
-        statistics.totalCompletionSeconds += session.completionTimeSeconds ?? 0
-        await database.saveStatistics(statistics)
+        var next = statistics
+        next.completed += session.result == "COMPLETED" ? 1 : 0
+        next.snoozes += session.snoozeCount
+        next.fallback += session.fallbackUsed ? 1 : 0
+        next.emergencyStops += session.emergencyStop ? 1 : 0
+        next.totalCompletionSeconds += session.completionTimeSeconds ?? 0
+        guard await database.saveStatistics(next) else { return }
+        statistics = next
+    }
+
+    private func acquireWrite() async {
+        if !writeInProgress {
+            writeInProgress = true
+            return
+        }
+        await withCheckedContinuation { continuation in
+            writeWaiters.append(continuation)
+        }
+    }
+
+    private func releaseWrite() {
+        if writeWaiters.isEmpty {
+            writeInProgress = false
+        } else {
+            writeWaiters.removeFirst().resume()
+        }
     }
 
     private func ensureLoaded() async {
-        if !loaded { await load() }
+        if !loaded { await loadStoredStatistics() }
     }
 }

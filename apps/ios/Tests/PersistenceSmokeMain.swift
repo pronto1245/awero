@@ -130,6 +130,18 @@ struct PersistenceSmokeMain {
         let failedFlowState = await MainActor.run { failedFlow.state }
         let failedSnoozes = await MainActor.run { failedFlow.snoozeCount }
         precondition(failedFlowState == .ringing && failedSnoozes == 0)
+        let failedStatistics = await MainActor.run { StatisticsStore(database: readOnlyStore) }
+        await failedStatistics.recordPlanned()
+        var statisticsSession = session
+        statisticsSession.result = "COMPLETED"
+        statisticsSession.snoozeCount = 2
+        statisticsSession.fallbackUsed = true
+        statisticsSession.completionTimeSeconds = 10
+        await failedStatistics.record(statisticsSession)
+        let unchangedStatistics = await MainActor.run { failedStatistics.statistics }
+        precondition(unchangedStatistics.planned == 0 && unchangedStatistics.completed == 0)
+        precondition(unchangedStatistics.snoozes == 0 && unchangedStatistics.fallback == 0)
+        precondition(unchangedStatistics.totalCompletionSeconds == 0)
         let restartedAgain = CoreDataStore(storeURL: storeURL)
         let active = await restartedAgain.fetchActiveWakeSession()
         precondition(active?.id == session.id)
@@ -174,12 +186,14 @@ struct PersistenceSmokeMain {
         let completedSession = completions[0]
 
         let statistics = await MainActor.run { StatisticsStore(database: restartedAgain) }
-        await statistics.recordPlanned()
+        async let firstPlanned: Void = statistics.recordPlanned()
+        async let secondPlanned: Void = statistics.recordPlanned()
+        _ = await (firstPlanned, secondPlanned)
         await statistics.record(completedSession)
 
         let finalStore = CoreDataStore(storeURL: storeURL)
         let finalStatistics = await finalStore.fetchStatistics()
-        precondition(finalStatistics?.planned == 1)
+        precondition(finalStatistics?.planned == 2)
         precondition(finalStatistics?.completed == 1)
         let finalActive = await finalStore.fetchActiveWakeSession()
         precondition(finalActive == nil)
@@ -222,7 +236,7 @@ struct PersistenceSmokeMain {
         precondition(e2eCompletedState == .completed)
 
         let e2eStats = await finalStore.fetchStatistics()
-        precondition(e2eStats?.planned == 2)
+        precondition(e2eStats?.planned == 3)
         precondition(e2eStats?.completed == 2)
 
         let emergencyAlarm = Alarm(
