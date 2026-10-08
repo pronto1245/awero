@@ -158,5 +158,6 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 ## Current Phase 2 verification
 
 - Baseline `34932a904bae95069da485edf9cef45ac43fa5d7` passed all four jobs in [AWERO CI run 574](https://github.com/pronto1245/awero/actions/runs/37832150008).
-- Phase 2 remains in progress. The next scoped correction prevents overlapping iOS snooze requests from cancelling the successfully scheduled snooze. Its regression test suspends scheduling, repeats the request, verifies one schedule/no cancellation and persisted count, then verifies that a later delivery can snooze again. The existing failed-schedule retry test remains relevant.
+- Phase 2 remains in progress. Commit `da3992ad810ce152a8445c0712a8dd049e4191f7` prevents overlapping iOS snooze requests from cancelling the successfully scheduled snooze. Two targeted local XCTest cases passed, followed by all four jobs in [AWERO CI run 575](https://github.com/pronto1245/awero/actions/runs/37833128379).
+- Android wake UI now renders the restored controller state and selected mission, including a persisted Math fallback. A new emulator E2E test re-delivers an alarm intent, checks that the same session resumes, solves the fallback and verifies persisted success. Android validation for this change runs in CI; no local Android runtime is available in the current workspace.
 - Backend/sync changes and physical-device release gates are outside this correction.

@@ -57,7 +57,7 @@ object WakeAlarmScreen {
             root.addView(status)
             val missionView = MissionRuntimeScreen.create(
                 activity,
-                flow.currentAlarm.value!!,
+                flow.currentAlarm.value!!.copy(missionType = flow.mission.value),
                 onSuccess = {
                     activity.lifecycleScope.launch {
                         if (flow.completeMission()) showCompleted()
@@ -129,6 +129,12 @@ object WakeAlarmScreen {
         root.addView(primary)
         root.addView(snooze)
         root.addView(emergency)
+        when (flow.state.value) {
+            WakeFlowController.State.MISSION -> showMission()
+            WakeFlowController.State.COMPLETED -> showCompleted()
+            WakeFlowController.State.EMERGENCY_STOPPED -> showStopped()
+            else -> Unit
+        }
         return root
     }
 }
