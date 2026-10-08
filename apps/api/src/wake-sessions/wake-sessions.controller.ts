@@ -34,6 +34,8 @@ enum WakeEventType {
   CANCELLED = 'CANCELLED',
 }
 
+type StoredWakeEventType = WakeEventType | 'TRIGGERED';
+
 class CreateWakeSessionDto {
   @IsUUID()
   id!: string;
@@ -165,7 +167,7 @@ export class WakeSessionsController {
          WHERE wake_session_id=$1 AND event_type<>'SNOOZE' ORDER BY occurred_at DESC,id DESC LIMIT 1`,
         [id],
       );
-      const lastStateEvent = latest.rows[0]?.eventType as WakeEventType | undefined;
+      const lastStateEvent = latest.rows[0]?.eventType as StoredWakeEventType | undefined;
 
       const inserted = await client.query(
         `INSERT INTO wake_events(id,wake_session_id,event_type,occurred_at,payload)
