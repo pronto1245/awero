@@ -46,14 +46,19 @@ final class CoreDataStore: @unchecked Sendable {
         container.viewContext.undoManager = nil
     }
 
-    func saveAlarm(_ alarm: Alarm) async {
-        await performBackground { context in
+    func saveAlarm(_ alarm: Alarm) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", alarm.id.uuidString)
-            let object = (try? context.fetch(request).first) ?? NSManagedObject(
-                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AlarmRecord"]!,
-                insertInto: context
-            )
+            let object: NSManagedObject
+            if let existing = try context.fetch(request).first {
+                object = existing
+            } else {
+                object = NSManagedObject(
+                    entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AlarmRecord"]!,
+                    insertInto: context
+                )
+            }
             object.setValue(alarm.id.uuidString, forKey: "id")
             object.setValue(alarm.version, forKey: "version")
             object.setValue(alarm.hour, forKey: "hour")
@@ -89,11 +94,11 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func saveSyncOperation(_ operation: SyncOperation) async {
-        await performBackground { context in
+    func saveSyncOperation(_ operation: SyncOperation) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "id == %@", operation.id.uuidString)
-            guard (try? context.fetch(request).first) == nil else { return }
+            guard try context.fetch(request).first == nil else { return }
 
             let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["SyncOperationRecord"]!, insertInto: context)
             object.setValue(operation.id.uuidString, forKey: "id")
@@ -118,19 +123,19 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func deleteSyncOperation(_ id: UUID) async {
-        await performBackground { context in
+    func deleteSyncOperation(_ id: UUID) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
-            if let object = try? context.fetch(request).first { context.delete(object) }
+            if let object = try context.fetch(request).first { context.delete(object) }
         }
     }
 
-    func retrySyncOperation(_ id: UUID, nextAttemptAt: Date) async {
-        await performBackground { context in
+    func retrySyncOperation(_ id: UUID, nextAttemptAt: Date) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
-            if let object = try? context.fetch(request).first {
+            if let object = try context.fetch(request).first {
                 let attempts = object.value(forKey: "attempts") as? Int ?? 0
                 object.setValue(attempts + 1, forKey: "attempts")
                 object.setValue(nextAttemptAt, forKey: "nextAttemptAt")
@@ -138,11 +143,11 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func saveAnalyticsEvent(_ event: AnalyticsEvent) async {
-        await performBackground { context in
+    func saveAnalyticsEvent(_ event: AnalyticsEvent) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
             request.predicate = NSPredicate(format: "id == %@", event.id.uuidString)
-            guard (try? context.fetch(request).first) == nil else { return }
+            guard try context.fetch(request).first == nil else { return }
 
             let object = NSManagedObject(entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["AnalyticsEventRecord"]!, insertInto: context)
             object.setValue(event.id.uuidString, forKey: "id")
@@ -162,22 +167,27 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func deleteAnalyticsEvent(_ id: UUID) async {
-        await performBackground { context in
+    func deleteAnalyticsEvent(_ id: UUID) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
-            if let object = try? context.fetch(request).first { context.delete(object) }
+            if let object = try context.fetch(request).first { context.delete(object) }
         }
     }
 
-    func saveStatistics(_ statistics: WakeStatistics) async {
-        await performBackground { context in
+    func saveStatistics(_ statistics: WakeStatistics) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
             request.predicate = NSPredicate(format: "id == %@", "singleton")
-            let object = (try? context.fetch(request).first) ?? NSManagedObject(
-                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["StatisticsRecord"]!,
-                insertInto: context
-            )
+            let object: NSManagedObject
+            if let existing = try context.fetch(request).first {
+                object = existing
+            } else {
+                object = NSManagedObject(
+                    entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["StatisticsRecord"]!,
+                    insertInto: context
+                )
+            }
             object.setValue("singleton", forKey: "id")
             object.setValue(statistics.planned, forKey: "planned")
             object.setValue(statistics.completed, forKey: "completed")
@@ -204,14 +214,19 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func saveWakeSession(_ session: WakeSession) async {
-        await performBackground { context in
+    func saveWakeSession(_ session: WakeSession) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
             request.predicate = NSPredicate(format: "id == %@", session.id.uuidString)
-            let object = (try? context.fetch(request).first) ?? NSManagedObject(
-                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["WakeSessionRecord"]!,
-                insertInto: context
-            )
+            let object: NSManagedObject
+            if let existing = try context.fetch(request).first {
+                object = existing
+            } else {
+                object = NSManagedObject(
+                    entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["WakeSessionRecord"]!,
+                    insertInto: context
+                )
+            }
             object.setValue(session.id.uuidString, forKey: "id")
             object.setValue(session.alarmId.uuidString, forKey: "alarmId")
             object.setValue(session.alarmVersion, forKey: "alarmVersion")
@@ -237,11 +252,33 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func deleteAlarm(_ alarm: Alarm) async {
-        await performBackground { context in
+    func deleteAlarm(_ alarm: Alarm) async -> Bool {
+        await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", alarm.id.uuidString)
-            if let object = try? context.fetch(request).first { context.delete(object) }
+            if let object = try context.fetch(request).first { context.delete(object) }
+        }
+    }
+
+    private func performWrite(
+        _ work: @escaping @Sendable (NSManagedObjectContext) throws -> Void
+    ) async -> Bool {
+        await container.performBackgroundTask { context in
+            do {
+                try work(context)
+                if context.hasChanges {
+                    try context.save()
+                }
+                return true
+            } catch {
+                self.logger.error("Core Data persistence failed: \(error.localizedDescription, privacy: .public)")
+                NotificationCenter.default.post(
+                    name: .aweroPersistenceSaveFailed,
+                    object: nil,
+                    userInfo: ["error": error]
+                )
+                return false
+            }
         }
     }
 
@@ -249,20 +286,7 @@ final class CoreDataStore: @unchecked Sendable {
         _ work: @escaping @Sendable (NSManagedObjectContext) -> T
     ) async -> T {
         await container.performBackgroundTask { context in
-            let result = work(context)
-            if context.hasChanges {
-                do {
-                    try context.save()
-                } catch {
-                    self.logger.error("Core Data save failed: \(error.localizedDescription, privacy: .public)")
-                    NotificationCenter.default.post(
-                        name: .aweroPersistenceSaveFailed,
-                        object: nil,
-                        userInfo: ["error": error]
-                    )
-                }
-            }
-            return result
+            work(context)
         }
     }
 
