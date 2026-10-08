@@ -4,13 +4,13 @@ import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import app.awero.core.alarm.AlarmCoordinator
 import app.awero.ui.AweroApp
@@ -20,28 +20,24 @@ class MainActivity : ComponentActivity() {
     private var exactAlarmSettingsOpened = false
     private var fullScreenSettingsOpened = false
 
+    private val requestNotifications =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            requestExactAlarmAccess()
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { AweroApp() }
 
         if (Build.VERSION.SDK_INT >= 33 &&
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_NOTIFICATIONS)
+            requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
             requestExactAlarmAccess()
         }
 
         lifecycleScope.launch { runCatching { AlarmCoordinator(this@MainActivity).repair() } }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_NOTIFICATIONS) requestExactAlarmAccess()
     }
 
     override fun onResume() {
@@ -87,9 +83,5 @@ class MainActivity : ComponentActivity() {
                 }
             )
         }
-    }
-
-    companion object {
-        private const val REQUEST_NOTIFICATIONS = 4100
     }
 }
