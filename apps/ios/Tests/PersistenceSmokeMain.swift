@@ -58,7 +58,7 @@ struct PersistenceSmokeMain {
             alarmVersion: 1,
             scheduledAt: .now,
             triggeredAt: .now,
-            missionStartedAt: .now,
+            missionStartedAt: nil,
             completedAt: nil,
             result: nil,
             missionType: .math,
