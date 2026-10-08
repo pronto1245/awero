@@ -122,6 +122,28 @@ struct PersistenceSmokeMain {
         let finalActive = await finalStore.fetchActiveWakeSession()
         precondition(finalActive == nil)
 
+        let emergencyAlarm = Alarm(
+            id: UUID(),
+            version: 1,
+            hour: 8,
+            minute: 0,
+            enabled: true,
+            weekdays: Set(1...7),
+            timezoneMode: .deviceLocal,
+            fixedTimezone: nil,
+            missionType: .math,
+            difficulty: .easy
+        )
+        await finalStore.saveAlarm(emergencyAlarm)
+        let emergencyManager = await MainActor.run { WakeSessionManager(database: finalStore) }
+        precondition(await emergencyManager.trigger(alarm: emergencyAlarm, scheduledAt: .now))
+        guard let emergencySession = await emergencyManager.emergencyStop() else {
+            fatalError("Expected emergency stop session")
+        }
+        precondition(emergencySession.result == "EMERGENCY_STOP")
+        let emergencyRestart = CoreDataStore(storeURL: storeURL)
+        precondition(await emergencyRestart.fetchActiveWakeSession() == nil)
+
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
     }
