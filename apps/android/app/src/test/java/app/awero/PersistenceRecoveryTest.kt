@@ -88,6 +88,19 @@ class PersistenceRecoveryTest {
         assertEquals(null, database.wakeSessions().active())
         assertEquals("SUCCESS", database.wakeSessions().get(sessionId)!!.result)
         database.close()
+
+        database = AweroDatabase.createForTesting(context, name)
+        val emergencyStore = WakeSessionStore(context, database)
+        val emergencyAlarm = alarm.copy(id = "alarm-emergency", version = 1)
+        emergencyStore.start(emergencyAlarm, 2000L)
+        val emergency = emergencyStore.emergencyStop()
+        assertEquals("EMERGENCY_STOP", emergency!!.result)
+        database.close()
+
+        database = AweroDatabase.createForTesting(context, name)
+        assertEquals("EMERGENCY_STOP", database.wakeSessions().get(emergency.id)!!.result)
+        assertEquals(null, database.wakeSessions().active())
+        database.close()
         context.getDatabasePath(name).delete()
     }
 
