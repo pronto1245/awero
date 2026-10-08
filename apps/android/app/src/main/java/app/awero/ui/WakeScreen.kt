@@ -18,6 +18,7 @@ fun WakeScreen(flow: WakeFlowController) {
     val scope = rememberCoroutineScope()
     val state by flow.state.collectAsState()
     val mission by flow.mission.collectAsState()
+    val snoozeError by flow.snoozeError.collectAsState()
 
     Column(
         modifier = Modifier
@@ -32,6 +33,9 @@ fun WakeScreen(flow: WakeFlowController) {
         when (state) {
             WakeFlowController.State.RINGING -> {
                 Text("The alarm is active.", color = Color.White.copy(alpha = .6f))
+                snoozeError?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error)
+                }
                 Button(
                     onClick = { scope.launch { flow.beginMission() } },
                     modifier = Modifier.fillMaxWidth()
