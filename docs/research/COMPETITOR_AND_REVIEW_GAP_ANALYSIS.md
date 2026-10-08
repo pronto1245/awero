@@ -36,6 +36,16 @@ These findings refine the existing MVP and release plan; they do not move design
 4. **Then:** account-free onboarding and transparent Free/Pro boundaries; backend/sync must remain outside the ringing and mission-critical wake path.
 5. **Later:** progress/streak UI backed by real persisted history; evaluate photo/object missions, social accountability and sleep features only after reliability and privacy/consent trade-offs are specified.
 
+## Additional Android listing details verified
+
+The Google Play Erly listing also shows a recent product update for live push-up counting and exercise tracking, plus improvements to camera permission handling and Google sign-in recovery. It warns when an alarm is saved without a mission. Treat these as current store-page claims, not independently verified runtime behavior. The visible Play reviews include reports of timezone changes requiring manual alarm edits, alarms not ringing, and a math mission's Enter action routing to login and forcing the user to stop the app. These reports are individual cases, but they directly support the reliability, offline dismissal, and transparent mission-state acceptance criteria above.
+
+Alarmy's current Google Play page advertises loud alarm tones, photo/barcode, math, memory, typing, shake/squat missions, and a Wake Up Check. Visible reviews include missed alarms, alarms failing to sound, app lag that delayed dismissal, and ads blocking dismissal / awake check. These are review signals, not established rates of failure.
+
+I Can't Wake Up! advertises configurable task chains, a quiet task-test mode, configurable snoozes, an awake test, and volume ramp. Its Play listing says it was updated in July 2023; verify the currently installable build before copying those features. Visible reviews include confusion about settings after a redesign and a reported loss of playlist behavior.
+
+For AWERO, saving an alarm without a mission must clearly tell the user that no mission will be required to dismiss it. Sign-in, offline failure, or account recovery must never replace the active mission screen or prevent dismissal through the documented recovery/emergency path.
+
 ## Source links
 
 - [Erly App Store listing supplied by the product owner (Georgia storefront, Russian UI parameter)](https://apps.apple.com/ge/app/erly-wake-up-early/id6751428380?l=ru)
