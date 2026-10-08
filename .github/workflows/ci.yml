@@ -38,6 +38,8 @@ jobs:
           node-version: 22
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm typecheck
+      - name: Validate alarm status translations
+        run: node scripts/check-alarm-status-locales.mjs
       - run: pnpm build
       - name: Apply database migrations
         run: pnpm --filter @awero/api db:migrate
