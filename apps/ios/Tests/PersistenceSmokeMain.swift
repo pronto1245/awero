@@ -266,8 +266,46 @@ struct PersistenceSmokeMain {
         precondition(emergencyActive == nil)
 
         try await runAlarmRecoveryChecks(root: root)
+        try await runSnoozeFailureChecks(root: root)
         print("AWERO persistence smoke: PASS")
         try? FileManager.default.removeItem(at: root)
+    }
+
+    @MainActor
+    private static func runSnoozeFailureChecks(root: URL) async throws {
+        let database = CoreDataStore(storeURL: root.appendingPathComponent("wake-snooze.sqlite"))
+        let alarm = Alarm(hour: 7, minute: 30, weekdays: [2, 4], maxSnoozes: 2)
+        let saved = await database.saveAlarm(alarm)
+        precondition(saved)
+
+        let center = SmokeNotificationCenter()
+        let scheduler = AlarmScheduler(center: center)
+        let flow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            scheduler: scheduler,
+            database: database
+        )
+        await flow.start(alarm: alarm, scheduledAt: .now)
+
+        center.failNextAdd = true
+        let failed = await flow.snooze()
+        precondition(!failed)
+        precondition(flow.state == .ringing)
+        precondition(flow.snoozeCount == 0)
+        let activeAfterFailure = await database.fetchActiveWakeSession()
+        precondition(activeAfterFailure?.snoozeCount == 0)
+        let requestsAfterFailure = await center.pendingNotificationRequests()
+        precondition(requestsAfterFailure.isEmpty)
+
+        let succeeded = await flow.snooze()
+        precondition(succeeded)
+        precondition(flow.state == .idle)
+        precondition(flow.snoozeCount == 1)
+        let activeAfterSuccess = await database.fetchActiveWakeSession()
+        precondition(activeAfterSuccess?.snoozeCount == 1)
+        let requestsAfterSuccess = await center.pendingNotificationRequests()
+        precondition(requestsAfterSuccess.contains { $0.identifier.hasPrefix("awero:snooze:") })
+        print("AWERO snooze failure recovery: PASS")
     }
 
     private static func runAlarmScheduleValidationChecks() throws {
