@@ -14,11 +14,11 @@ class WakeFlowController(
     private val sessions: WakeSessionStore,
     private val context: Context,
     private val statistics: StatisticsStore = StatisticsStore(context),
-    private val testAlarm: Boolean = false
+    private val testAlarm: Boolean = false,
+    private val alarmStore: AlarmStore = AlarmStore(context)
 ) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
 
-    private val alarmStore = AlarmStore(context)
     private val _state = MutableStateFlow(State.IDLE)
     private val _mission = MutableStateFlow(MissionType.MATH)
     private val _snoozeCount = MutableStateFlow(0)
