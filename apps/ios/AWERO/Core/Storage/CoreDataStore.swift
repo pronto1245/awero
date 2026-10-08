@@ -12,7 +12,7 @@ final class CoreDataStore: @unchecked Sendable {
     private let container: NSPersistentContainer
     private let logger = Logger(subsystem: "app.awero", category: "persistence")
 
-    init(storeURL: URL? = nil) {
+    init(storeURL: URL? = nil, readOnly: Bool = false) {
         let model = Self.makeModel()
         container = NSPersistentContainer(name: "AWERO", managedObjectModel: model)
 
@@ -30,6 +30,9 @@ final class CoreDataStore: @unchecked Sendable {
         let description = NSPersistentStoreDescription(url: resolvedStoreURL)
         description.shouldMigrateStoreAutomatically = true
         description.shouldInferMappingModelAutomatically = true
+        if readOnly {
+            description.setOption(true as NSNumber, forKey: NSSQLiteReadOnlyOption)
+        }
         container.persistentStoreDescriptions = [description]
 
         var loadError: Error?
