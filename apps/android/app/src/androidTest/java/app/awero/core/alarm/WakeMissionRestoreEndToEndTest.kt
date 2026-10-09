@@ -42,6 +42,7 @@ class WakeMissionRestoreEndToEndTest {
         assertTrue(sessions.startMission())
         assertTrue(sessions.markFallback())
         val sessionId = sessions.loadActive()!!.id
+        alarms.save(original.copy(missionType = MissionType.MATH))
 
         // A duplicate delivery for the same test alarm resumes the persisted
         // fallback mission without starting another wake session.
