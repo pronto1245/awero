@@ -193,3 +193,6 @@ The localized alarm-home and alarm-setup slices passed all four jobs in [CI run 
 
 
 The home, setup and wake/mission packages passed all four CI jobs in [run 37915377895](https://github.com/pronto1245/awero/actions/runs/37915377895). This Phase 6 package wires localized notification contents and schedule/permission errors into both platform runtimes.
+
+
+The Phase 6 accessibility/localization slice now gives each iOS alarm switch a localized VoiceOver label that includes its time and uses the existing localized stopped-state title. Commits [a00aac7](https://github.com/pronto1245/awero/commit/a00aac7726cbf0a3cf7102ce7a9ec4fa1d654227) and [49c1d35](https://github.com/pronto1245/awero/commit/49c1d357edc7f4e55457b007c5e3e132c01f73d4) passed all four jobs in [CI run 37920473384](https://github.com/pronto1245/awero/actions/runs/37920473384). Phase 6 remains active; the approved-design status and the remaining Phase 6 versus Phase 8 work are recorded in [Product UX Design](design/PRODUCT_UX_DESIGN.md).
