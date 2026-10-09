@@ -146,12 +146,14 @@ private struct QRMissionView: View {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                if runtime.scannedCode == nil {
-                    Text("mission.qr_instructions")
-                } else {
-                    Text("mission.qr_detected")
+                Group {
+                    if runtime.scannedCode == nil {
+                        Text("mission.qr_instructions")
+                    } else {
+                        Text("mission.qr_detected")
+                    }
                 }
-                    .foregroundStyle(WakePalette.navy.opacity(0.7))
+                .foregroundStyle(WakePalette.navy.opacity(0.7))
                 Text("mission.timeout")
                     .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
             }
