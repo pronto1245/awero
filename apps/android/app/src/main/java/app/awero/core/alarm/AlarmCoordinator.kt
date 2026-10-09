@@ -52,7 +52,7 @@ class AlarmCoordinator(
 
     suspend fun update(alarm: Alarm): Alarm {
         val next = alarm.copy(version = alarm.version + 1)
-        AlarmNotificationManager.requireAlarmAccess(context)
+        if (next.enabled) AlarmNotificationManager.requireAlarmAccess(context)
         store.save(next)
         try {
             scheduler.schedule(next)

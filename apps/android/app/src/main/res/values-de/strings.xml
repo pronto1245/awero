@@ -7,4 +7,24 @@
     <string name="alarm_state_checking">Weckerzeitplan wird geprüft…</string>
     <string name="alarm_retry">Erneut versuchen</string>
     <string name="alarm_open_settings">Einstellungen öffnen</string>
+    <string name="home_greeting">Guten Morgen</string>
+    <string name="home_subtitle">Ein neuer Tag, neue Möglichkeiten</string>
+    <string name="home_next_alarm">Nächster Wecker</string>
+    <string name="home_alarms">Meine Wecker</string>
+    <string name="home_empty_title">Noch keine Wecker</string>
+    <string name="home_empty_body">Dein erster Wecker funktioniert ohne Internet und ohne Konto.</string>
+    <string name="home_add_alarm">Wecker hinzufügen</string>
+    <string name="home_test">Testen</string>
+    <string name="home_edit">Bearbeiten</string>
+    <string name="home_delete">Löschen</string>
+    <string name="home_enabled">Ein</string>
+    <string name="home_disabled">Aus</string>
+    <string name="home_mission_math">Mathematik</string>
+    <string name="home_mission_steps">Schritte</string>
+    <string name="home_mission_qr">QR-Code</string>
+    <string name="home_mission_photo">Foto</string>
+    <string name="home_mission_mixed">Aufgabenfolge</string>
+    <string name="home_toggle_alarm">Wecker um %1$s ein- oder ausschalten</string>
+    <string name="home_error_title">Weckeraktion fehlgeschlagen</string>
+    <string name="home_ok">OK</string>
 </resources>

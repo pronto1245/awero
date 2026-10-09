@@ -7,4 +7,24 @@
     <string name="alarm_state_checking">Vérification du réveil…</string>
     <string name="alarm_retry">Réessayer</string>
     <string name="alarm_open_settings">Ouvrir les réglages</string>
+    <string name="home_greeting">Bonjour</string>
+    <string name="home_subtitle">Un nouveau jour, de nouvelles possibilités</string>
+    <string name="home_next_alarm">Prochain réveil</string>
+    <string name="home_alarms">Mes réveils</string>
+    <string name="home_empty_title">Aucun réveil pour le moment</string>
+    <string name="home_empty_body">Votre premier réveil fonctionne sans Internet et sans compte.</string>
+    <string name="home_add_alarm">Ajouter un réveil</string>
+    <string name="home_test">Tester</string>
+    <string name="home_edit">Modifier</string>
+    <string name="home_delete">Supprimer</string>
+    <string name="home_enabled">Activé</string>
+    <string name="home_disabled">Désactivé</string>
+    <string name="home_mission_math">Mathématiques</string>
+    <string name="home_mission_steps">Pas</string>
+    <string name="home_mission_qr">Code QR</string>
+    <string name="home_mission_photo">Photo</string>
+    <string name="home_mission_mixed">Séquence de missions</string>
+    <string name="home_toggle_alarm">Activer ou désactiver le réveil à %1$s</string>
+    <string name="home_error_title">Impossible d’effectuer cette action sur le réveil</string>
+    <string name="home_ok">OK</string>
 </resources>

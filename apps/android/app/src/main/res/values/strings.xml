@@ -7,4 +7,24 @@
     <string name="alarm_state_checking">Checking alarm schedule…</string>
     <string name="alarm_retry">Retry</string>
     <string name="alarm_open_settings">Open Settings</string>
+    <string name="home_greeting">Good morning</string>
+    <string name="home_subtitle">A new day, new possibilities</string>
+    <string name="home_next_alarm">Next alarm</string>
+    <string name="home_alarms">My alarms</string>
+    <string name="home_empty_title">No alarms yet</string>
+    <string name="home_empty_body">Your first alarm works offline and without an account.</string>
+    <string name="home_add_alarm">Add alarm</string>
+    <string name="home_test">Test</string>
+    <string name="home_edit">Edit</string>
+    <string name="home_delete">Delete</string>
+    <string name="home_enabled">On</string>
+    <string name="home_disabled">Off</string>
+    <string name="home_mission_math">Math</string>
+    <string name="home_mission_steps">Steps</string>
+    <string name="home_mission_qr">QR code</string>
+    <string name="home_mission_photo">Photo</string>
+    <string name="home_mission_mixed">Mission sequence</string>
+    <string name="home_toggle_alarm">Enable or disable alarm at %1$s</string>
+    <string name="home_error_title">Alarm action failed</string>
+    <string name="home_ok">OK</string>
 </resources>

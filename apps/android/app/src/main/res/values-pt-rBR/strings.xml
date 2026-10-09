@@ -7,4 +7,24 @@
     <string name="alarm_state_checking">Verificando o alarme…</string>
     <string name="alarm_retry">Tentar novamente</string>
     <string name="alarm_open_settings">Abrir Configurações</string>
+    <string name="home_greeting">Bom dia</string>
+    <string name="home_subtitle">Um novo dia, novas possibilidades</string>
+    <string name="home_next_alarm">Próximo alarme</string>
+    <string name="home_alarms">Meus alarmes</string>
+    <string name="home_empty_title">Nenhum alarme ainda</string>
+    <string name="home_empty_body">Seu primeiro alarme funciona sem internet e sem conta.</string>
+    <string name="home_add_alarm">Adicionar alarme</string>
+    <string name="home_test">Testar</string>
+    <string name="home_edit">Editar</string>
+    <string name="home_delete">Excluir</string>
+    <string name="home_enabled">Ativado</string>
+    <string name="home_disabled">Desativado</string>
+    <string name="home_mission_math">Matemática</string>
+    <string name="home_mission_steps">Passos</string>
+    <string name="home_mission_qr">Código QR</string>
+    <string name="home_mission_photo">Foto</string>
+    <string name="home_mission_mixed">Sequência de missões</string>
+    <string name="home_toggle_alarm">Ativar ou desativar alarme às %1$s</string>
+    <string name="home_error_title">Não foi possível executar a ação do alarme</string>
+    <string name="home_ok">OK</string>
 </resources>

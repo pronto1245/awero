@@ -7,19 +7,36 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import app.awero.R
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmCoordinator
 import app.awero.core.alarm.AlarmReadiness
 import app.awero.core.alarm.AlarmScheduler
+import app.awero.core.alarm.MissionType
+import app.awero.core.alarm.nextAlarmOccurrence
+import java.text.DateFormat
+import java.text.DateFormatSymbols
+import java.time.Instant
+import java.util.Date
+import java.util.TimeZone
+
+private val AweroIvory = Color(0xFFFFF8EF)
+private val AweroNavy = Color(0xFF14294B)
+private val AweroCoral = Color(0xFFFF684B)
+private val AweroSage = Color(0xFF4F8B66)
 
 @Composable
 fun HomeScreen(
@@ -41,21 +58,124 @@ fun HomeScreen(
         readiness = alarms.associate { it.id to scheduler.readiness(it) }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black).padding(24.dp)) {
-        Text("AWERO", style = MaterialTheme.typography.displaySmall, color = Color.White)
-        Text("Wake up. Stay up.", color = Color.White.copy(alpha = .6f))
-        Spacer(Modifier.height(24.dp))
+    val now = remember(alarms, refreshKey) { Instant.now() }
+    val nextAlarm = remember(alarms, refreshKey) {
+        alarms.asSequence()
+            .filter { it.enabled }
+            .flatMap { alarm ->
+                alarm.weekdays.asSequence().mapNotNull { day ->
+                    runCatching { alarm to nextAlarmOccurrence(alarm, day, now) }.getOrNull()
+                }
+            }
+            .minByOrNull { it.second.toInstant() }
+    }
+    val nextAlarmDescription = nextAlarm?.let {
+        DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.SHORT).apply {
+            timeZone = TimeZone.getTimeZone(it.second.zone)
+        }.format(Date.from(it.second.toInstant()))
+    }
+    val nextAlarmTime = nextAlarm?.let {
+        DateFormat.getTimeInstance(DateFormat.SHORT).apply {
+            timeZone = TimeZone.getTimeZone(it.second.zone)
+        }.format(Date.from(it.second.toInstant()))
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
+    ) {
+        Spacer(Modifier.height(20.dp))
+        Text("AWERO", style = MaterialTheme.typography.headlineMedium, color = AweroNavy)
+        Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
+        Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .65f))
+        Spacer(Modifier.height(18.dp))
+
+        if (nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(Brush.verticalGradient(listOf(Color(0xFFFFE6C6), Color(0xFFFFFDF7))))
+                        .padding(20.dp)
+                        .fillMaxWidth()
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        Text("☀  " + stringResource(R.string.home_next_alarm), color = AweroNavy)
+                        Text(
+                            text = nextAlarmTime,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = AweroNavy
+                        )
+                        Text(nextAlarmDescription, color = AweroNavy.copy(alpha = .7f))
+                        Text(missionLabel(nextAlarm.first.missionType), color = AweroNavy.copy(alpha = .8f))
+                    }
+                }
+            }
+            Spacer(Modifier.height(22.dp))
+        }
+
+        Text(stringResource(R.string.home_alarms), style = MaterialTheme.typography.titleLarge, color = AweroNavy)
+        Spacer(Modifier.height(10.dp))
 
         if (alarms.isEmpty()) {
-            Text("No alarms", color = Color.White.copy(alpha = .7f))
+            Card(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(22.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(22.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleLarge, color = AweroNavy)
+                    Text(stringResource(R.string.home_empty_body), color = AweroNavy.copy(alpha = .7f))
+                }
+            }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.weight(1f)
+            ) {
                 items(alarms, key = { it.id }) { alarm ->
                     val state = readiness[alarm.id]
-                    Card(colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = .08f))) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(20.dp)
+                    ) {
                         Column(Modifier.fillMaxWidth().padding(16.dp)) {
-                            Text("%02d:%02d".format(alarm.hour, alarm.minute), color = Color.White, style = MaterialTheme.typography.headlineLarge)
-                            Text(alarm.missionType.name, color = Color.White.copy(alpha = .7f))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        "%02d:%02d".format(alarm.hour, alarm.minute),
+                                        color = AweroNavy,
+                                        style = MaterialTheme.typography.headlineMedium
+                                    )
+                                    Text(weekdaySummary(alarm), color = AweroNavy.copy(alpha = .55f))
+                                    Text(missionLabel(alarm.missionType), color = AweroNavy.copy(alpha = .65f))
+                                }
+                                Switch(
+                                    checked = alarm.enabled,
+                                    onCheckedChange = { enabled ->
+                                        scope.launch {
+                                            try {
+                                                coordinator.update(alarm.copy(enabled = enabled))
+                                                alarms = coordinator.all()
+                                            } catch (error: Exception) {
+                                                actionError = error.localizedMessage
+                                                    ?: context.getString(R.string.home_error_title)
+                                            }
+                                        }
+                                    },
+                                    modifier = Modifier.semantics {
+                                        contentDescription = context.getString(
+                                            R.string.home_toggle_alarm,
+                                            "%02d:%02d".format(alarm.hour, alarm.minute)
+                                        )
+                                    }
+                                )
+                            }
                             if (alarm.enabled) {
                                 Text(
                                     text = stringResource(
@@ -67,7 +187,7 @@ fun HomeScreen(
                                             else -> R.string.alarm_state_checking
                                         }
                                     ),
-                                    color = if (state == AlarmReadiness.SCHEDULED) Color(0xFF91E89A) else Color(0xFFFFC36B),
+                                    color = if (state == AlarmReadiness.SCHEDULED) AweroSage else AweroCoral,
                                     style = MaterialTheme.typography.bodySmall
                                 )
                                 if (state != AlarmReadiness.SCHEDULED) {
@@ -89,22 +209,24 @@ fun HomeScreen(
                                         }
                                     }
                                 }
+                            } else {
+                                Text(stringResource(R.string.home_disabled), color = AweroNavy.copy(alpha = .5f))
                             }
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 TextButton(onClick = {
                                     scope.launch {
                                         try { coordinator.test(alarm) } catch (error: Exception) {
-                                            actionError = error.message ?: "Could not start alarm test."
+                                            actionError = error.localizedMessage ?: context.getString(R.string.home_error_title)
                                         }
                                     }
-                                }) { Text("Test") }
-                                TextButton(onClick = { onEditAlarm(alarm) }) { Text("Edit") }
+                                }) { Text(stringResource(R.string.home_test)) }
+                                TextButton(onClick = { onEditAlarm(alarm) }) { Text(stringResource(R.string.home_edit)) }
                                 TextButton(onClick = {
                                     scope.launch {
                                         coordinator.delete(alarm)
                                         alarms = coordinator.all()
                                     }
-                                }) { Text("Delete") }
+                                }) { Text(stringResource(R.string.home_delete), color = AweroCoral) }
                             }
                         }
                     }
@@ -112,13 +234,46 @@ fun HomeScreen(
             }
         }
 
-        Button(onClick = onCreateAlarm, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Create alarm")
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = onCreateAlarm,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = AweroCoral),
+            shape = RoundedCornerShape(18.dp)
+        ) {
+            Text(stringResource(R.string.home_add_alarm), color = Color.White)
         }
+        Spacer(Modifier.height(10.dp))
     }
+
     if (actionError != null) {
-        AlertDialog(onDismissRequest = { actionError = null }, title = { Text("Alarm action failed") },
+        AlertDialog(
+            onDismissRequest = { actionError = null },
+            title = { Text(stringResource(R.string.home_error_title)) },
             text = { Text(actionError.orEmpty()) },
-            confirmButton = { TextButton(onClick = { actionError = null }) { Text("OK") } })
+            confirmButton = {
+                TextButton(onClick = { actionError = null }) {
+                    Text(stringResource(R.string.home_ok))
+                }
+            }
+        )
     }
+}
+
+@Composable
+private fun missionLabel(mission: MissionType): String = stringResource(
+    when (mission) {
+        MissionType.MATH -> R.string.home_mission_math
+        MissionType.STEPS -> R.string.home_mission_steps
+        MissionType.QR -> R.string.home_mission_qr
+        MissionType.PHOTO -> R.string.home_mission_photo
+        MissionType.MIXED -> R.string.home_mission_mixed
+    }
+)
+
+private fun weekdaySummary(alarm: Alarm): String {
+    val labels = DateFormatSymbols.getInstance().shortWeekdays
+    return alarm.weekdays.sorted().mapNotNull { day ->
+        labels.getOrNull(day)?.takeIf(String::isNotBlank)
+    }.joinToString(" · ")
 }

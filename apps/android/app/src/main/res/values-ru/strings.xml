@@ -7,4 +7,24 @@
     <string name="alarm_state_checking">Проверяем расписание…</string>
     <string name="alarm_retry">Повторить</string>
     <string name="alarm_open_settings">Открыть настройки</string>
+    <string name="home_greeting">Доброе утро</string>
+    <string name="home_subtitle">Новый день — новые возможности</string>
+    <string name="home_next_alarm">Следующий будильник</string>
+    <string name="home_alarms">Мои будильники</string>
+    <string name="home_empty_title">Пока нет будильников</string>
+    <string name="home_empty_body">Первый будильник работает без интернета и аккаунта.</string>
+    <string name="home_add_alarm">Добавить будильник</string>
+    <string name="home_test">Проверить</string>
+    <string name="home_edit">Изменить</string>
+    <string name="home_delete">Удалить</string>
+    <string name="home_enabled">Включён</string>
+    <string name="home_disabled">Выключен</string>
+    <string name="home_mission_math">Математика</string>
+    <string name="home_mission_steps">Шаги</string>
+    <string name="home_mission_qr">QR-код</string>
+    <string name="home_mission_photo">Фото</string>
+    <string name="home_mission_mixed">Последовательность заданий</string>
+    <string name="home_toggle_alarm">Включить или выключить будильник на %1$s</string>
+    <string name="home_error_title">Не удалось выполнить действие с будильником</string>
+    <string name="home_ok">ОК</string>
 </resources>
