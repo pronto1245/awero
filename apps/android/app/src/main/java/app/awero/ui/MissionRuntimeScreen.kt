@@ -118,7 +118,11 @@ object MissionRuntimeScreen {
                     })
                 } else {
                     root.addView(label(activity.getString(R.string.mission_qr_title), 24f))
-                    val preview = PreviewView(activity)
+                    val preview = PreviewView(activity).apply {
+                        contentDescription = activity.getString(R.string.mission_qr_instructions)
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
+                        isFocusable = true
+                    }
                     root.addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
                     val runtime = QRMissionRuntime(activity)
                     val lifecycleObserver = object : DefaultLifecycleObserver {

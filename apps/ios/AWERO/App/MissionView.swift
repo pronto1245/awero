@@ -146,6 +146,9 @@ private struct QRMissionView: View {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Text("mission.qr_instructions"))
+                    .accessibilityAddTraits(.isImage)
                 Group {
                     if runtime.scannedCode == nil {
                         Text("mission.qr_instructions")
