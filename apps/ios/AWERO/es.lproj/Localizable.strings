@@ -117,3 +117,11 @@
 "create.timezone_fixed" = "Mantener esta zona";
 "create.timezone_device_hint" = "Al viajar, la alarma sigue la zona horaria del dispositivo.";
 "create.timezone_fixed_hint" = "Al viajar, la alarma conserva la zona horaria %1$s.";
+
+"settings.title" = "Ajustes";
+"settings.language_title" = "Idioma de la app";
+"settings.language_body" = "Usa el idioma de tu teléfono";
+"settings.alarm_permissions_title" = "Permisos de alarma";
+"settings.alarm_permissions_body" = "Permite las notificaciones y alarmas de AWERO para recibir los avisos programados.";
+"settings.open_system_settings" = "Abrir ajustes del teléfono";
+"settings.back" = "Volver";

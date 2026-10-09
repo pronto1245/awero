@@ -117,3 +117,11 @@
 "create.timezone_fixed" = "Manter este fuso";
 "create.timezone_device_hint" = "Em viagens, o alarme acompanha o fuso do dispositivo.";
 "create.timezone_fixed_hint" = "Em viagens, o alarme permanece no fuso horário %1$s.";
+
+"settings.title" = "Ajustes";
+"settings.language_title" = "Idioma do app";
+"settings.language_body" = "Usa o idioma do seu celular";
+"settings.alarm_permissions_title" = "Permissões do alarme";
+"settings.alarm_permissions_body" = "Permita notificações e alarmes do AWERO para receber os alertas programados.";
+"settings.open_system_settings" = "Abrir ajustes do celular";
+"settings.back" = "Voltar";

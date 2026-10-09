@@ -160,6 +160,17 @@ struct HomeView: View {
                     Task { await refreshReadiness() }
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView()
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .foregroundStyle(AweroStyle.navy)
+                    }
+                    .accessibilityLabel(Text("settings.title"))
+                }
+            }
         }
     }
 

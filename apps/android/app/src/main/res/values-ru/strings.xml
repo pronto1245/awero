@@ -116,4 +116,11 @@
     <string name="create_timezone_fixed">Зафиксировать пояс</string>
     <string name="create_timezone_device_hint">В поездках будильник следует часовому поясу устройства.</string>
     <string name="create_timezone_fixed_hint">В поездках будильник остаётся в часовом поясе %1$s.</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language_title">Язык приложения</string>
+    <string name="settings_language_body">Используется язык телефона</string>
+    <string name="settings_alarm_permissions_title">Разрешения будильника</string>
+    <string name="settings_alarm_permissions_body">Разрешите уведомления и работу будильников AWERO, чтобы запланированные сигналы срабатывали.</string>
+    <string name="settings_open_system_settings">Открыть настройки телефона</string>
+    <string name="settings_back">Назад</string>
 </resources>

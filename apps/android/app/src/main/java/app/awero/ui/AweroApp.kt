@@ -33,6 +33,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 onSaved = { editingAlarm = null; screen = "home" }
             )
             "wake" -> WakeScreen(flow)
+            "settings" -> SettingsScreen(onBack = { screen = "home" })
             else -> {
                 if (state == WakeFlowController.State.RINGING ||
                     state == WakeFlowController.State.MISSION ||
@@ -46,6 +47,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                         editingAlarm = null
                         screen = "create"
                     },
+                    onOpenSettings = { screen = "settings" },
                     onEditAlarm = {
                         editingAlarm = it
                         screen = "edit"

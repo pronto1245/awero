@@ -117,3 +117,11 @@
 "create.timezone_fixed" = "Zeitzone beibehalten";
 "create.timezone_device_hint" = "Auf Reisen folgt der Alarm der Zeitzone deines Geräts.";
 "create.timezone_fixed_hint" = "Auf Reisen bleibt der Alarm in der Zeitzone %1$s.";
+
+"settings.title" = "Einstellungen";
+"settings.language_title" = "App-Sprache";
+"settings.language_body" = "Verwendet die Sprache deines Smartphones";
+"settings.alarm_permissions_title" = "Weckerberechtigungen";
+"settings.alarm_permissions_body" = "Erlaube AWERO Benachrichtigungen und Wecker, damit geplante Alarme ausgelöst werden.";
+"settings.open_system_settings" = "Telefoneinstellungen öffnen";
+"settings.back" = "Zurück";

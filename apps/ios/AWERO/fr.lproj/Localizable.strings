@@ -117,3 +117,11 @@
 "create.timezone_fixed" = "Conserver ce fuseau";
 "create.timezone_device_hint" = "En voyage, l’alarme suit le fuseau de votre appareil.";
 "create.timezone_fixed_hint" = "En voyage, l’alarme reste sur le fuseau horaire %1$s.";
+
+"settings.title" = "Réglages";
+"settings.language_title" = "Langue de l’app";
+"settings.language_body" = "Utilise la langue de votre téléphone";
+"settings.alarm_permissions_title" = "Autorisations de l’alarme";
+"settings.alarm_permissions_body" = "Autorisez les notifications et les alarmes AWERO pour recevoir les alertes programmées.";
+"settings.open_system_settings" = "Ouvrir les réglages du téléphone";
+"settings.back" = "Retour";

@@ -46,6 +46,7 @@ private fun alarmTimeZoneId(alarm: Alarm): String? =
 fun HomeScreen(
     onCreateAlarm: () -> Unit,
     onEditAlarm: (Alarm) -> Unit,
+    onOpenSettings: () -> Unit,
     statusRefreshKey: Int = 0
 ) {
     val context = LocalContext.current
@@ -87,8 +88,26 @@ fun HomeScreen(
     Column(
         modifier = Modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(20.dp))
-        Text("AWERO", style = MaterialTheme.typography.headlineMedium, color = AweroNavy)
+        Spacer(Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "AWERO",
+                style = MaterialTheme.typography.headlineMedium,
+                color = AweroNavy,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(
+                onClick = onOpenSettings,
+                modifier = Modifier
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    .semantics { contentDescription = context.getString(R.string.settings_title) }
+            ) {
+                Text("⚙", color = AweroNavy, style = MaterialTheme.typography.titleLarge)
+            }
+        }
         Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
         Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .65f))
         Spacer(Modifier.height(18.dp))
