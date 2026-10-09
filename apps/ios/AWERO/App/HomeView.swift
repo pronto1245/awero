@@ -15,6 +15,9 @@ struct HomeView: View {
     @State private var testAlarmError: String?
     @State private var readiness: [UUID: AlarmReadiness] = [:]
     @State private var now = Date()
+    @ScaledMetric(relativeTo: .largeTitle) private var wordmarkSize: CGFloat = 28
+    @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 34
+    @ScaledMetric(relativeTo: .largeTitle) private var nextAlarmSize: CGFloat = 46
 
     private var refreshKey: String {
         alarms.alarms.map { "\($0.id.uuidString):\($0.version):\($0.enabled)" }.joined(separator: "|")
@@ -34,10 +37,10 @@ struct HomeView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("AWERO")
-                            .font(.system(size: 28, weight: .black))
+                            .font(.system(size: wordmarkSize, weight: .black))
                             .foregroundStyle(AweroStyle.navy)
                         Text("home.greeting")
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .font(.system(size: greetingSize, weight: .bold, design: .rounded))
                             .foregroundStyle(AweroStyle.navy)
                         Text("home.subtitle")
                             .font(.subheadline)
@@ -49,7 +52,7 @@ struct HomeView: View {
                                     .font(.headline)
                                     .foregroundStyle(AweroStyle.coral)
                                 Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
-                                    .font(.system(size: 46, weight: .bold, design: .rounded))
+                                    .font(.system(size: nextAlarmSize, weight: .bold, design: .rounded))
                                     .foregroundStyle(AweroStyle.navy)
                                 Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .short))
                                     .font(.subheadline)
@@ -250,6 +253,7 @@ private struct AlarmCard: View {
     let onRetry: () -> Void
     let onOpenSettings: () -> Void
     let onDelete: () -> Void
+    @ScaledMetric(relativeTo: .largeTitle) private var alarmTimeSize: CGFloat = 38
 
     private var alarmTimeZone: TimeZone {
         if alarm.timezoneMode == .fixed,
@@ -286,7 +290,7 @@ private struct AlarmCard: View {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(alarmTimeText)
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.system(size: alarmTimeSize, weight: .bold, design: .rounded))
                         .foregroundStyle(AweroStyle.navy)
                     Text(weekdays)
                         .foregroundStyle(AweroStyle.navy.opacity(0.55))

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WakeScreen: View {
     @ObservedObject var flow: WakeFlowController
+    @ScaledMetric(relativeTo: .largeTitle) private var wakeTitleSize: CGFloat = 54
 
     var body: some View {
         ZStack {
@@ -11,7 +12,7 @@ struct WakeScreen: View {
 
                 switch flow.state {
                 case .ringing:
-                    Text("wake.title").font(.system(size: 54, weight: .black, design: .rounded)).foregroundStyle(WakePalette.navy)
+                    Text("wake.title").font(.system(size: wakeTitleSize, weight: .black, design: .rounded)).foregroundStyle(WakePalette.navy)
                     Button("wake.start") { Task { await flow.beginMission() } }.buttonStyle(PrimaryWakeButton())
                     Button("wake.snooze") { Task { await flow.snooze() } }.foregroundStyle(WakePalette.navy.opacity(0.7))
                     Button("wake.emergency_stop") { Task { await flow.emergencyStop() } }.font(.caption).foregroundStyle(.red.opacity(0.9))

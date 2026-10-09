@@ -35,6 +35,7 @@ private struct MathMissionView: View {
     @State private var mission: MathMission
     @State private var answer = ""
     @State private var invalid = false
+    @ScaledMetric(relativeTo: .largeTitle) private var problemSize: CGFloat = 42
 
     init(difficulty: Difficulty, onSuccess: @escaping () -> Void) {
         self.difficulty = difficulty
@@ -49,7 +50,7 @@ private struct MathMissionView: View {
             Text("mission.title").font(.caption.bold()).foregroundStyle(WakePalette.navy.opacity(0.5))
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
-                    .font(.system(size: 42, weight: .black, design: .rounded))
+                    .font(.system(size: problemSize, weight: .black, design: .rounded))
                     .foregroundStyle(WakePalette.navy)
             }
             TextField("mission.answer", text: $answer)
@@ -76,14 +77,16 @@ private struct StepsMissionView: View {
     let onSuccess: () -> Void
     let onFailure: () -> Void
     let timeout: Duration
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 34
+    @ScaledMetric(relativeTo: .largeTitle) private var stepCountSize: CGFloat = 50
 
     var body: some View {
         VStack(spacing: 22) {
             Text("mission.steps_title")
-                .font(.system(size: 34, weight: .black, design: .rounded))
+                .font(.system(size: titleSize, weight: .black, design: .rounded))
                 .foregroundStyle(WakePalette.navy)
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
-                .font(.system(size: 50, weight: .bold, design: .rounded))
+                .font(.system(size: stepCountSize, weight: .bold, design: .rounded))
                 .foregroundStyle(WakePalette.navy)
             if runtime.unavailable {
                 Text("mission.motion_unavailable")
@@ -118,11 +121,12 @@ private struct QRMissionView: View {
     let onFailure: () -> Void
     let timeout: Duration
     @StateObject private var runtime = QRMissionRuntime()
+    @ScaledMetric(relativeTo: .largeTitle) private var qrTitleSize: CGFloat = 32
 
     var body: some View {
         VStack(spacing: 18) {
             Text("mission.qr_title")
-                .font(.system(size: 32, weight: .black, design: .rounded))
+                .font(.system(size: qrTitleSize, weight: .black, design: .rounded))
                 .foregroundStyle(WakePalette.navy)
 
             if expected == nil || expected?.isEmpty == true {
@@ -142,7 +146,11 @@ private struct QRMissionView: View {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                Text(runtime.scannedCode == nil ? "Point the camera at your saved QR or barcode." : "Code detected.")
+                if runtime.scannedCode == nil {
+                    Text("mission.qr_instructions")
+                } else {
+                    Text("mission.qr_detected")
+                }
                     .foregroundStyle(WakePalette.navy.opacity(0.7))
                 Text("mission.timeout")
                     .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
