@@ -1,6 +1,12 @@
 import SwiftUI
 import AVFoundation
 
+enum WakePalette {
+    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
+    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
+    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
+}
+
 struct MissionView: View {
     let alarm: Alarm
     let onSuccess: () -> Void
@@ -40,18 +46,18 @@ private struct MathMissionView: View {
 
     var body: some View {
         VStack(spacing: 22) {
-            Text("WAKE MISSION").font(.caption.bold()).foregroundStyle(.white.opacity(0.5))
+            Text("mission.title").font(.caption.bold()).foregroundStyle(WakePalette.navy.opacity(0.5))
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
                     .font(.system(size: 42, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(WakePalette.navy)
             }
-            TextField("Answer", text: $answer)
+            TextField("mission.answer", text: $answer)
                 .keyboardType(.numbersAndPunctuation)
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.center)
-            if invalid { Text("Try again").foregroundStyle(.red) }
-            Button("CHECK") {
+            if invalid { Text("mission.try_again").foregroundStyle(.red) }
+            Button("mission.check") {
                 if let value = Int(answer), mission.validate(answer: value) {
                     onSuccess()
                 } else {
@@ -73,26 +79,26 @@ private struct StepsMissionView: View {
 
     var body: some View {
         VStack(spacing: 22) {
-            Text("WALK 30 STEPS")
+            Text("mission.steps_title")
                 .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-            Text("\(runtime.steps) / 30")
+                .foregroundStyle(WakePalette.navy)
+            Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
                 .font(.system(size: 50, weight: .bold, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(WakePalette.navy)
             if runtime.unavailable {
-                Text("Motion data is unavailable.")
-                    .foregroundStyle(.white.opacity(0.6))
+                Text("mission.motion_unavailable")
+                    .foregroundStyle(WakePalette.navy.opacity(0.6))
             } else if runtime.completed {
-                Button("CONTINUE", action: onSuccess)
+                Button("mission.continue", action: onSuccess)
                     .buttonStyle(WakeMissionButton())
             } else {
-                Text("Keep walking until the target is reached.")
-                    .foregroundStyle(.white.opacity(0.6))
+                Text("mission.keep_walking")
+                    .foregroundStyle(WakePalette.navy.opacity(0.6))
             }
-            Button("USE MATH FALLBACK", action: onFailure)
+            Button("mission.use_math", action: onFailure)
                 .buttonStyle(WakeMissionButton())
-            Text("After 2 minutes, this task switches to Math.")
-                .font(.caption).foregroundStyle(.white.opacity(0.6))
+            Text("mission.timeout")
+                .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
         }
         .padding(28)
         .onAppear { runtime.start(target: 30) }
@@ -115,35 +121,35 @@ private struct QRMissionView: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            Text("SCAN YOUR CODE")
+            Text("mission.qr_title")
                 .font(.system(size: 32, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+                .foregroundStyle(WakePalette.navy)
 
             if expected == nil || expected?.isEmpty == true {
-                Text("QR mission is not configured.")
-                    .foregroundStyle(.white.opacity(0.6))
-                Button("USE FALLBACK", action: onFailure)
+                Text("mission.qr_unconfigured")
+                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if runtime.cameraUnavailable {
-                Text("Camera is unavailable.")
-                    .foregroundStyle(.white.opacity(0.6))
-                Button("USE FALLBACK", action: onFailure)
+                Text("mission.camera_unavailable")
+                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if let scannedCode = runtime.scannedCode, scannedCode != expected {
-                Text("QR code does not match. Switching to the safe fallback.")
-                    .foregroundStyle(.white.opacity(0.7))
+                Text("mission.qr_mismatch")
+                    .foregroundStyle(WakePalette.navy.opacity(0.7))
             } else {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 Text(runtime.scannedCode == nil ? "Point the camera at your saved QR or barcode." : "Code detected.")
-                    .foregroundStyle(.white.opacity(0.7))
-                Text("After 2 minutes, this task switches to Math.")
-                    .font(.caption).foregroundStyle(.white.opacity(0.6))
+                    .foregroundStyle(WakePalette.navy.opacity(0.7))
+                Text("mission.timeout")
+                    .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
             }
         }
         .safeAreaInset(edge: .bottom) {
-            Button("USE MATH FALLBACK", action: onFailure)
+            Button("mission.use_math", action: onFailure)
                 .buttonStyle(WakeMissionButton())
                 .padding(.horizontal, 28)
         }
@@ -182,8 +188,8 @@ private struct FallbackMissionView: View {
     let onFailure: () -> Void
     var body: some View {
         VStack(spacing: 20) {
-            Text("MISSION UNAVAILABLE").foregroundStyle(.white)
-            Button("USE FALLBACK", action: onFailure).buttonStyle(WakeMissionButton())
+            Text("mission.unavailable").foregroundStyle(WakePalette.navy)
+            Button("mission.use_fallback", action: onFailure).buttonStyle(WakeMissionButton())
         }
     }
 }
@@ -209,8 +215,8 @@ private struct WakeMissionButton: ButtonStyle {
             .font(.headline.bold())
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(Color.white.opacity(configuration.isPressed ? 0.75 : 1))
-            .foregroundStyle(.black)
+            .background(WakePalette.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

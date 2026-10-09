@@ -5,46 +5,46 @@ struct WakeScreen: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            WakePalette.ivory.ignoresSafeArea()
             VStack(spacing: 24) {
-                Text("AWERO").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.45))
+                Text("AWERO").font(.caption.weight(.bold)).foregroundStyle(WakePalette.navy.opacity(0.45))
 
                 switch flow.state {
                 case .ringing:
-                    Text("GET UP").font(.system(size: 54, weight: .black, design: .rounded)).foregroundStyle(.white)
-                    Button("Start mission") { Task { await flow.beginMission() } }.buttonStyle(PrimaryWakeButton())
-                    Button("Snooze") { Task { await flow.snooze() } }.foregroundStyle(.white.opacity(0.7))
-                    Button("Emergency stop") { Task { await flow.emergencyStop() } }.font(.caption).foregroundStyle(.red.opacity(0.9))
+                    Text("wake.title").font(.system(size: 54, weight: .black, design: .rounded)).foregroundStyle(WakePalette.navy)
+                    Button("wake.start") { Task { await flow.beginMission() } }.buttonStyle(PrimaryWakeButton())
+                    Button("wake.snooze") { Task { await flow.snooze() } }.foregroundStyle(WakePalette.navy.opacity(0.7))
+                    Button("wake.emergency_stop") { Task { await flow.emergencyStop() } }.font(.caption).foregroundStyle(.red.opacity(0.9))
                 case .mission:
                     if let alarm = flow.currentAlarm {
                         MissionView(alarm: missionAlarm(from: alarm), onSuccess: { Task { await flow.completeMission() } }, onFailure: { Task { await flow.fallbackToMath() } })
                     }
-                    Button("Emergency stop") { Task { await flow.emergencyStop() } }
+                    Button("wake.emergency_stop") { Task { await flow.emergencyStop() } }
                         .font(.caption).foregroundStyle(.red.opacity(0.9))
                 case .completed:
-                    Text("YOU'RE UP").font(.title.bold()).foregroundStyle(.white)
-                    Text("Wake session completed.").foregroundStyle(.white.opacity(0.55))
+                    Text("wake.completed_title").font(.title.bold()).foregroundStyle(WakePalette.navy)
+                    Text("wake.completed_body").foregroundStyle(WakePalette.navy.opacity(0.55))
                 case .emergencyStopped:
-                    Text("Emergency stop").font(.title2.bold()).foregroundStyle(.white)
-                    Text("The session was recorded.").foregroundStyle(.white.opacity(0.55))
+                    Text("Emergency stop").font(.title2.bold()).foregroundStyle(WakePalette.navy)
+                    Text("wake.stopped_body").foregroundStyle(WakePalette.navy.opacity(0.55))
                 case .idle:
-                    Text("SNOOZED").font(.title.bold()).foregroundStyle(.white)
-                    Text("Your next wake-up is scheduled.").foregroundStyle(.white.opacity(0.55))
+                    Text("wake.snoozed_title").font(.title.bold()).foregroundStyle(WakePalette.navy)
+                    Text("wake.snoozed_body").foregroundStyle(WakePalette.navy.opacity(0.55))
                 }
                 if let error = flow.actionError, flow.state == .ringing || flow.state == .mission {
-                    Text(error).foregroundStyle(.white.opacity(0.7))
-                    Button("Retry saving") { Task { await flow.retryPendingAction() } }
+                    Text(error).foregroundStyle(WakePalette.navy.opacity(0.7))
+                    Button("wake.retry") { Task { await flow.retryPendingAction() } }
                         .buttonStyle(PrimaryWakeButton())
                 }
             }.padding(28)
         }
-        .alert("Snooze unavailable", isPresented: Binding(
+        .alert("wake.snooze_error_title", isPresented: Binding(
             get: { flow.snoozeError != nil },
             set: { if !$0 { flow.clearSnoozeError() } }
         )) {
-            Button("OK", role: .cancel) { flow.clearSnoozeError() }
+            Button("home.ok", role: .cancel) { flow.clearSnoozeError() }
         } message: {
-            Text(flow.snoozeError ?? "The alarm is still ringing.")
+            Group { if let error = flow.snoozeError { Text(error) } else { Text("wake.snooze_error_body") } }
         }
     }
 
@@ -58,7 +58,7 @@ struct WakeScreen: View {
 private struct PrimaryWakeButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.headline.bold()).frame(maxWidth: .infinity).padding(.vertical, 18)
-            .background(Color.white.opacity(configuration.isPressed ? 0.75 : 1))
-            .foregroundStyle(.black).clipShape(RoundedRectangle(cornerRadius: 16))
+            .background(WakePalette.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .foregroundStyle(.white).clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

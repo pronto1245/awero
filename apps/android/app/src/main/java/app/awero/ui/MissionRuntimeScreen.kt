@@ -2,6 +2,7 @@ package app.awero.ui
 
 import androidx.activity.ComponentActivity
 import android.graphics.Color
+import app.awero.R
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -23,16 +24,16 @@ object MissionRuntimeScreen {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(40, 40, 40, 40)
-            setBackgroundColor(Color.BLACK)
+            setBackgroundColor(Color.rgb(255, 248, 239))
         }
         fun label(value: String, size: Float = 22f) = TextView(activity).apply {
             text = value
             textSize = size
-            setTextColor(Color.WHITE)
+            setTextColor(Color.rgb(20, 41, 75))
             gravity = Gravity.CENTER
             setPadding(0, 16, 0, 16)
         }
-        root.addView(label("WAKE MISSION", 28f))
+        root.addView(label(activity.getString(R.string.mission_title), 28f))
         var finished = false
         var cleanup: () -> Unit = {}
         var deadline: Runnable? = null
@@ -45,7 +46,7 @@ object MissionRuntimeScreen {
         }
         if (alarm.missionType == MissionType.STEPS || alarm.missionType == MissionType.QR) {
             deadline = Runnable { finish(false) }
-            root.addView(label("After 2 minutes, this task switches to Math.", 16f))
+            root.addView(label(activity.getString(R.string.mission_timeout), 16f))
         }
         root.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(view: View) {
@@ -66,18 +67,20 @@ object MissionRuntimeScreen {
                 root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f))
                 val answer = EditText(activity).apply {
                     inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
-                    setTextColor(Color.WHITE)
+                    setTextColor(Color.rgb(20, 41, 75))
                     setTextSize(28f)
                     gravity = Gravity.CENTER
-                    hint = "Answer"
+                    hint = activity.getString(R.string.mission_answer)
                 }
                 root.addView(answer)
                 root.addView(Button(activity).apply {
-                    text = "CHECK"
+                    setTextColor(Color.WHITE)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    text = activity.getString(R.string.mission_check)
                     setOnClickListener {
                         val value = answer.text.toString().toIntOrNull()
                         if (value != null && mission.validate(value)) finish(true)
-                        else { answer.text.clear(); answer.hint = "Try again" }
+                        else { answer.text.clear(); answer.hint = activity.getString(R.string.mission_try_again) }
                     }
                 })
             }
@@ -85,30 +88,36 @@ object MissionRuntimeScreen {
                 val mission = StepsMission(activity)
                 cleanup = { mission.stop() }
                 val motionStarted = runCatching { mission.start() }.isSuccess && mission.available
-                val status = label(if (motionStarted) "Walk 30 steps" else "Motion unavailable. Use Math fallback.", 30f)
+                val status = label(if (motionStarted) activity.getString(R.string.mission_steps_title) else activity.getString(R.string.mission_motion_unavailable), 30f)
                 root.addView(status)
                 root.addView(Button(activity).apply {
-                    text = "CHECK STEPS"
+                    setTextColor(Color.WHITE)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    text = activity.getString(R.string.mission_check)
                     setOnClickListener {
-                        status.text = "Steps: ${mission.steps} / 30"
+                        status.text = activity.getString(R.string.mission_steps_progress, mission.steps)
                         if (mission.validate()) finish(true)
                     }
                 })
                 root.addView(Button(activity).apply {
-                    text = "I CAN'T WALK"
+                    setTextColor(Color.WHITE)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    text = activity.getString(R.string.mission_use_fallback)
                     setOnClickListener { finish(false) }
                 })
             }
             MissionType.QR -> {
                 val expected = alarm.qrExpectedCode
                 if (expected.isNullOrBlank()) {
-                    root.addView(label("QR mission is not configured.", 22f))
+                    root.addView(label(activity.getString(R.string.mission_qr_unconfigured), 22f))
                     root.addView(Button(activity).apply {
-                        text = "USE FALLBACK"
+                        setTextColor(Color.WHITE)
+                        backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                        text = activity.getString(R.string.mission_use_fallback)
                         setOnClickListener { finish(false) }
                     })
                 } else {
-                    root.addView(label("Scan your saved QR or barcode", 24f))
+                    root.addView(label(activity.getString(R.string.mission_qr_title), 24f))
                     val preview = PreviewView(activity)
                     root.addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
                     val runtime = QRMissionRuntime(activity)
@@ -129,15 +138,19 @@ object MissionRuntimeScreen {
                         }
                     }
                     root.addView(Button(activity).apply {
-                        text = "USE MATH FALLBACK"
+                        setTextColor(Color.WHITE)
+                        backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                        text = activity.getString(R.string.mission_use_math)
                         setOnClickListener { finish(false) }
                     })
                 }
             }
             else -> {
-                root.addView(label("This mission is not available in MVP.", 22f))
+                root.addView(label(activity.getString(R.string.mission_unavailable), 22f))
                 root.addView(Button(activity).apply {
-                    text = "USE FALLBACK"
+                    setTextColor(Color.WHITE)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    text = activity.getString(R.string.mission_use_fallback)
                     setOnClickListener { finish(false) }
                 })
             }

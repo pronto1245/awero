@@ -40,14 +40,15 @@ fun WakeScreen(flow: WakeFlowController) {
                 }
                 Button(
                     onClick = { scope.launch { flow.beginMission() } },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF684B))
                 ) {
                     Text("Start mission")
                 }
-                TextButton(onClick = { scope.launch { flow.snooze() } }) {
+                TextButton(onClick = { scope.launch { flow.snooze() } }, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF14294B))) {
                     Text("Snooze")
                 }
-                TextButton(onClick = { scope.launch { flow.emergencyStop() } }) {
+                TextButton(onClick = { scope.launch { flow.emergencyStop() } }, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE74B4B))) {
                     Text("Emergency stop")
                 }
             }
@@ -56,11 +57,12 @@ fun WakeScreen(flow: WakeFlowController) {
                 Text(mission.name, color = Color.White.copy(alpha = .7f))
                 Button(
                     onClick = { scope.launch { flow.completeMission() } },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF684B))
                 ) {
                     Text("Complete mission")
                 }
-                TextButton(onClick = { scope.launch { flow.emergencyStop() } }) {
+                TextButton(onClick = { scope.launch { flow.emergencyStop() } }, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE74B4B))) {
                     Text("Emergency stop")
                 }
             }
@@ -71,7 +73,7 @@ fun WakeScreen(flow: WakeFlowController) {
             }
 
             WakeFlowController.State.EMERGENCY_STOPPED -> {
-                Text("Emergency stop", color = Color.White)
+                Text(stringResource(R.string.wake_emergency_stop), color = Color(0xFF14294B))
                 Text("The session was recorded.", color = Color.White.copy(alpha = .6f))
             }
 
@@ -79,3 +81,4 @@ fun WakeScreen(flow: WakeFlowController) {
         }
     }
 }
+

@@ -187,3 +187,6 @@ The first UX/localization slice updates the iOS and Android home screens to the 
 
 
 The second Phase 6 slice completes the alarm setup flow on both platforms: repeat-day selection, localized mission/difficulty controls, QR setup guidance, and permission explanations. iOS now shows its notification-permission explanation before the first system request instead of requesting access at app launch. Android persists selected repeat days and offers Settings when required access blocks saving. Setup copy has exact six-locale key parity.
+
+
+The localized alarm-home and alarm-setup slices passed all four jobs in [CI run 37912583144](https://github.com/pronto1245/awero/actions/runs/37912583144). The current Phase 6 slice translates the wake controls and Math, Steps and QR mission prompts across both apps. Its acceptance is tracked by the six-locale parity check and the platform CI.
