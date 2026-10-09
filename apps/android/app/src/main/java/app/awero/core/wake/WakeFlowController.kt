@@ -97,7 +97,7 @@ class WakeFlowController(
             return false
         }
         if (!testAlarm) runCatching { statistics.record(session) }
-        AlarmRingingService.stop(context)
+        stopCurrentRing()
         _state.value = State.COMPLETED
         return true
     }
@@ -124,7 +124,7 @@ class WakeFlowController(
                 return false
             }
             _snoozeCount.value = nextCount
-            AlarmRingingService.stop(context)
+            stopCurrentRing()
             _state.value = State.IDLE
             return true
         } finally {
@@ -140,8 +140,14 @@ class WakeFlowController(
             return false
         }
         if (!testAlarm) runCatching { statistics.record(session) }
-        AlarmRingingService.stop(context)
+        stopCurrentRing()
         _state.value = State.EMERGENCY_STOPPED
         return true
+    }
+
+    private fun stopCurrentRing() {
+        _currentAlarm.value?.let { alarm ->
+            AlarmRingingService.stop(context, alarm.id, testAlarm)
+        }
     }
 }

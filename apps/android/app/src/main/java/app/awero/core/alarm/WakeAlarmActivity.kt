@@ -32,7 +32,7 @@ class WakeAlarmActivity : ComponentActivity() {
                 ?: return@launch finish()
             alarm = current
             if (current.version != alarmVersion || !current.enabled) {
-                AlarmRingingService.stop(this@WakeAlarmActivity)
+                AlarmRingingService.stop(this@WakeAlarmActivity, id, testAlarm)
                 return@launch finish()
             }
 

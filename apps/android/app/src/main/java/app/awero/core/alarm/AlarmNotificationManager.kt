@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import app.awero.R
 import androidx.core.app.NotificationCompat
@@ -13,11 +14,17 @@ import androidx.core.app.NotificationManagerCompat
 
 object AlarmNotificationManager {
     internal const val CHANNEL_ID = "awero_alarm_v2"
-    internal const val NOTIFICATION_ID = 7001
+    private const val NOTIFICATION_ID_BASE = 7_000
+
+    fun notificationId(alarmId: String, test: Boolean): Int {
+        val identity = "$alarmId:${if (test) "test" else "alarm"}"
+        return NOTIFICATION_ID_BASE + (identity.hashCode() and 0x3fff_ffff)
+    }
 
     fun build(context: Context, alarmId: String, version: Int, scheduledAt: Long, test: Boolean): Notification {
         ensureChannel(context)
         val intent = Intent(context, WakeAlarmActivity::class.java).apply {
+            data = wakeUri(alarmId, version, test)
             putExtra(AlarmScheduler.EXTRA_ID, alarmId)
             putExtra(AlarmScheduler.EXTRA_VERSION, version)
             putExtra(AlarmScheduler.EXTRA_AT, scheduledAt)
@@ -26,7 +33,7 @@ object AlarmNotificationManager {
         }
         val pending = PendingIntent.getActivity(
             context,
-            alarmId.hashCode() xor version,
+            notificationId(alarmId, test),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -42,6 +49,15 @@ object AlarmNotificationManager {
             .setContentIntent(pending)
             .build()
     }
+
+    private fun wakeUri(alarmId: String, version: Int, test: Boolean): Uri =
+        Uri.Builder()
+            .scheme("awero")
+            .authority("wake")
+            .appendPath(alarmId)
+            .appendPath(version.toString())
+            .appendPath(if (test) "test" else "alarm")
+            .build()
 
     fun hasAlarmAccess(context: Context): Boolean =
         NotificationManagerCompat.from(context).areNotificationsEnabled() &&

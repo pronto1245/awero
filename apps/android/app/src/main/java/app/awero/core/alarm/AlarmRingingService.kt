@@ -4,8 +4,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.AudioManager
+import android.app.NotificationManager
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.media.ToneGenerator
@@ -21,54 +22,87 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 
 class AlarmRingingService : Service() {
-    private var player: MediaPlayer? = null
-    private var fallbackTone: ToneGenerator? = null
+    private data class RingKey(val alarmId: String, val test: Boolean)
+
+    private data class RingSession(
+        val key: RingKey,
+        var version: Int,
+        var scheduledAt: Long,
+        var player: MediaPlayer? = null,
+        var fallbackTone: ToneGenerator? = null,
+        var fallbackLoop: Runnable? = null
+    )
+
+    private val rings = linkedMapOf<RingKey, RingSession>()
+    private var foregroundKey: RingKey? = null
     private var vibrator: Vibrator? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private val fallbackToneLoop = object : Runnable {
-        override fun run() {
-            val tone = fallbackTone ?: return
-            if (tone.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, FALLBACK_TONE_DURATION_MS)) {
-                mainHandler.postDelayed(this, FALLBACK_TONE_INTERVAL_MS)
-            }
-        }
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val alarmId = intent?.getStringExtra(AlarmScheduler.EXTRA_ID)
+        val test = intent?.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false) ?: false
         if (intent?.action == ACTION_STOP) {
-            stopRinging()
-            stopSelf()
+            if (alarmId != null) stopRinging(RingKey(alarmId, test))
+            if (rings.isEmpty()) stopSelf(startId)
             return START_NOT_STICKY
         }
-
-        val alarmId = intent?.getStringExtra(AlarmScheduler.EXTRA_ID)
         if (alarmId == null) {
-            stopSelf()
+            if (rings.isEmpty()) stopSelf(startId)
             return START_NOT_STICKY
         }
 
         val version = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
         val scheduledAt = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
-        val test = intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
-        val notification = AlarmNotificationManager.build(this, alarmId, version, scheduledAt, test)
-        ServiceCompat.startForeground(
-            this,
-            AlarmNotificationManager.NOTIFICATION_ID,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-        )
-        startRinging()
+        val key = RingKey(alarmId, test)
+        val existing = rings[key]
+        if (existing != null) {
+            existing.version = version
+            existing.scheduledAt = scheduledAt
+            ensureForeground(key)
+            return START_NOT_STICKY
+        }
+
+        val wasEmpty = rings.isEmpty()
+        val session = RingSession(key, version, scheduledAt)
+        rings[key] = session
+        if (wasEmpty) startVibration()
+        ensureForeground(key)
+        startRinging(session)
         return START_NOT_STICKY
     }
 
-    private fun startRinging() {
-        stopRinging()
-        startVibration()
+    private fun ensureForeground(key: RingKey) {
+        val session = rings[key] ?: return
+        val notification = AlarmNotificationManager.build(
+            this, key.alarmId, session.version, session.scheduledAt, key.test
+        )
+        val notificationId = AlarmNotificationManager.notificationId(key.alarmId, key.test)
+        if (foregroundKey == null) {
+            ServiceCompat.startForeground(
+                this,
+                notificationId,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
+            foregroundKey = key
+        } else if (foregroundKey == key) {
+            ServiceCompat.startForeground(
+                this,
+                notificationId,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
+        } else {
+            getSystemService(NotificationManager::class.java)
+                .notify(notificationId, notification)
+        }
+    }
+
+    private fun startRinging(session: RingSession) {
         try {
             val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
                 ?: Settings.System.DEFAULT_ALARM_ALERT_URI
             val mediaPlayer = MediaPlayer()
-            player = mediaPlayer
+            session.player = mediaPlayer
             mediaPlayer.apply {
                 setAudioAttributes(
                     AudioAttributes.Builder()
@@ -79,19 +113,23 @@ class AlarmRingingService : Service() {
                 setDataSource(this@AlarmRingingService, uri)
                 isLooping = true
                 setOnPreparedListener { preparedPlayer ->
-                    runCatching { preparedPlayer.start() }
-                        .onFailure { startFallbackTone() }
+                    if (rings[session.key] !== session) {
+                        releasePlayer(session, preparedPlayer)
+                    } else {
+                        runCatching { preparedPlayer.start() }
+                            .onFailure { startFallbackTone(session) }
+                    }
                 }
                 setOnErrorListener { failedPlayer, _, _ ->
-                    releasePlayer(failedPlayer)
-                    startFallbackTone()
+                    releasePlayer(session, failedPlayer)
+                    startFallbackTone(session)
                     true
                 }
                 prepareAsync()
             }
         } catch (_: Exception) {
-            releasePlayer()
-            startFallbackTone()
+            releasePlayer(session)
+            startFallbackTone(session)
         }
     }
 
@@ -107,39 +145,80 @@ class AlarmRingingService : Service() {
         }
     }
 
-    private fun startFallbackTone() {
-        releasePlayer()
-        if (fallbackTone != null) return
+    private fun startFallbackTone(session: RingSession) {
+        if (rings[session.key] !== session || session.fallbackTone != null) return
+        releasePlayer(session)
         runCatching {
-            fallbackTone = ToneGenerator(AudioManager.STREAM_ALARM, FALLBACK_TONE_VOLUME)
-            mainHandler.post(fallbackToneLoop)
+            val handler = Handler(Looper.getMainLooper())
+            val tone = ToneGenerator(AudioManager.STREAM_ALARM, FALLBACK_TONE_VOLUME)
+            val loop = object : Runnable {
+                override fun run() {
+                    if (rings[session.key] !== session || session.fallbackTone !== tone) return
+                    if (tone.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, FALLBACK_TONE_DURATION_MS)) {
+                        handler.postDelayed(this, FALLBACK_TONE_INTERVAL_MS)
+                    }
+                }
+            }
+            session.fallbackTone = tone
+            session.fallbackLoop = loop
+            handler.post(loop)
         }
     }
 
-    private fun releasePlayer(target: MediaPlayer? = player) {
+    private fun releasePlayer(session: RingSession, target: MediaPlayer? = session.player) {
         target?.runCatching {
             setOnPreparedListener(null)
             setOnErrorListener(null)
             if (isPlaying) stop()
             release()
         }
-        if (player === target) player = null
+        if (session.player === target) session.player = null
     }
 
-    private fun stopRinging() {
-        releasePlayer()
-        mainHandler.removeCallbacks(fallbackToneLoop)
-        fallbackTone?.runCatching {
+    private fun stopRinging(key: RingKey) {
+        val session = rings.remove(key) ?: return
+        releasePlayer(session)
+        session.fallbackLoop?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }
+        session.fallbackTone?.runCatching {
             stopTone()
             release()
         }
-        fallbackTone = null
-        vibrator?.cancel()
-        vibrator = null
+        getSystemService(NotificationManager::class.java)
+            .cancel(AlarmNotificationManager.notificationId(key.alarmId, key.test))
+
+        if (foregroundKey == key) {
+            foregroundKey = null
+            val nextKey = rings.keys.firstOrNull()
+            if (nextKey == null) {
+                vibrator?.cancel()
+                vibrator = null
+                ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+                stopSelf()
+            } else {
+                ensureForeground(nextKey)
+            }
+        } else if (rings.isEmpty()) {
+            vibrator?.cancel()
+            vibrator = null
+            stopSelf()
+        }
     }
 
     override fun onDestroy() {
-        stopRinging()
+        rings.values.toList().forEach { session ->
+            releasePlayer(session)
+            session.fallbackLoop?.let { Handler(Looper.getMainLooper()).removeCallbacks(it) }
+            session.fallbackTone?.runCatching {
+                stopTone()
+                release()
+            }
+            getSystemService(NotificationManager::class.java).cancel(
+                AlarmNotificationManager.notificationId(session.key.alarmId, session.key.test)
+            )
+        }
+        rings.clear()
+        vibrator?.cancel()
+        vibrator = null
         super.onDestroy()
     }
 
@@ -164,8 +243,13 @@ class AlarmRingingService : Service() {
             ContextCompat.startForegroundService(context, intent)
         }
 
-        fun stop(context: Context) {
-            context.stopService(Intent(context, AlarmRingingService::class.java))
+        fun stop(context: Context, alarmId: String, test: Boolean) {
+            val intent = Intent(context, AlarmRingingService::class.java).apply {
+                action = ACTION_STOP
+                putExtra(AlarmScheduler.EXTRA_ID, alarmId)
+                putExtra(AlarmScheduler.EXTRA_TEST, test)
+            }
+            context.startService(intent)
         }
     }
 }
