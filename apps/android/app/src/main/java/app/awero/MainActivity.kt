@@ -43,11 +43,11 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch { runCatching { AlarmCoordinator(this@MainActivity).repair() } }
-        lifecycleScope.launch { OfflineSyncCoordinator(this@MainActivity).runOnce() }
     }
 
     override fun onResume() {
         super.onResume()
+        lifecycleScope.launch { OfflineSyncCoordinator(this@MainActivity).runOnce() }
         statusRefreshKey++
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             getSystemService(AlarmManager::class.java).canScheduleExactAlarms()

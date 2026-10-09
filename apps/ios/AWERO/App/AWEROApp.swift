@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct AWEROApp: App {
     @UIApplicationDelegateAdaptor(AWEROAppDelegate.self) private var delegate
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var alarmStore = AlarmStore()
     @StateObject private var wakeFlow = WakeFlowController.shared
 
@@ -15,6 +16,9 @@ struct AWEROApp: App {
                     try? await AlarmScheduler().requestAuthorization()
                     await AlarmCoordinator(store: alarmStore).repairAll()
                     await wakeFlow.restore()
+                }
+                .onChange(of: scenePhase) { phase in
+                    guard phase == .active else { return }
                     Task { await OfflineSyncCoordinator.shared.runOnce() }
                 }
         }
