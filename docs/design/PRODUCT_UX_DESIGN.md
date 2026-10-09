@@ -13,14 +13,15 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 1. **Home / alarms — implemented.** Greeting, truthful next alarm, alarm list, enabled state, mission summary, add, edit, test, retry, and delete actions.
 2. **Create / edit alarm — implemented.** Time, repeat days, Math/Steps/QR mission selection, difficulty, QR setup, permission explanation, save, and scheduling behavior.
 3. **Wake / mission — implemented.** Ringing, selected mission, retry/fallback, snooze, completion, and emergency-stop states stay connected to the existing local wake flow.
-4. **Progress — deferred to Phase 8.** Persisted aggregate statistics exist, but dated daily history does not. Do not show a weekly chart, streak, or sample score until the supporting data is implemented.
+4. **Settings — implemented.** The approved gear control opens a localized screen with the device language and a direct link to phone app-permission settings.
+5. **Progress — deferred to Phase 8.** Persisted aggregate statistics exist, but dated daily history does not. Do not show a weekly chart, streak, or sample score until the supporting data is implemented.
 
 ## Visual direction
 
 - Warm ivory surfaces, deep navy text, sunrise coral for primary actions, and restrained sage for positive progress.
 - Clear type hierarchy, large time and mission content, rounded cards, comfortable touch targets, and strong contrast.
 - Keep wake screens focused and legible. The active wake screen currently uses the light palette; low-light behavior remains a separate design check.
-- User-facing copy is localized in English, Russian, Brazilian Portuguese, French, German, and Spanish. Locale walkthrough and full accessibility acceptance remain part of Phase 6.
+- User-facing copy, including settings, is localized in English, Russian, Brazilian Portuguese, French, German, and Spanish. Automated key parity and CI are green. The required per-locale walkthrough and VoiceOver/TalkBack review remain the final Phase 6 checks.
 
 ## Acceptance criteria
 
@@ -31,4 +32,4 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 
 ## Current implementation boundary
 
-Home, alarm setup, and wake screens are implemented on both platforms and their current CI gates are green. This does not close Phase 6: accessibility and locale walkthroughs remain, and progress stays deferred to Phase 8. Physical-device alarm validation remains in Phase 10.
+Home, alarm setup, wake/mission, and Settings are implemented on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs. Phase 6 remains active until the required locale and screen-reader walkthroughs are complete. Progress stays deferred to Phase 8. The user-requested real-device preview follows Phase 6; the full alarm reliability matrix remains in Phase 10.
