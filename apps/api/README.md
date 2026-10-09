@@ -35,7 +35,7 @@ Registration returns a 30-day bearer token. Store the token securely on the devi
 - `PATCH /api/v1/alarms/:id` — update an alarm and append a new version snapshot
 - `DELETE /api/v1/alarms/:id` — soft-delete an alarm and append a tombstone version
 
-Create requests require integer `hour` (0–23) and `minute` (0–59). Optional fields are `label`, `timezoneMode`, `fixedTimezone`, `snoozeEnabled`, `maxSnoozes`, `snoozeMinutes`, `missionType`, and `difficulty`. Unknown properties and invalid enum/timezone values are rejected.
+Create requests require integer `hour` (0–23) and `minute` (0–59). Optional fields are `label`, `timezoneMode`, `fixedTimezone`, `snoozeEnabled`, `maxSnoozes`, `snoozeMinutes`, `missionType`, `difficulty`, and `qrExpectedCode` (up to 2048 characters). Unknown properties and invalid enum/timezone values are rejected. QR alarms retain their exact expected code in alarm reads and version snapshots.
 
 All API routes use the single global `/api/v1` prefix. Apply migrations through `pnpm --filter @awero/api db:migrate` for an empty database or through the local Docker Compose startup. Production schema changes remain migration-only.
 
@@ -56,7 +56,7 @@ The client supplies UUIDs for the session and each event. Repeating the same cre
 
 - `POST /api/v1/sync` — atomically reconcile up to 100 queued `ALARM` operations
 
-Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. Supported alarm operation types are `CREATE_ALARM`, `UPDATE_ALARM`, `DELETE_ALARM`, and `UPSERT`. `clientVersion` is the expected server version for updates/deletes; a missing alarm can be created at client version 0 or 1. Successful operations are applied in the same transaction as their idempotency record and alarm version snapshot.
+Each operation uses the mobile queue shape: `id`, `operationType`, `entityType`, `entityId`, optional `clientVersion`, `payload`, and `occurredAt`. Supported alarm operation types are `CREATE_ALARM`, `UPDATE_ALARM`, `DELETE_ALARM`, and `UPSERT`. `clientVersion` is the expected server version for updates/deletes; a missing alarm can be created at client version 0 or 1. Alarm payloads support the same fields as the CRUD API, including `qrExpectedCode`. Successful operations are applied in the same transaction as their idempotency record and alarm version snapshot.
 
 The response keeps `acceptedIds` and `accepted` for applied or previously acknowledged operations and adds `conflicts`. A version mismatch returns the stored server alarm and version without changing the alarm. Replaying the same operation ID and content repeats its original applied/conflict result; reusing an ID with changed content returns HTTP 409. Unsupported entity types or operation types return HTTP 422. `occurredAt` accepts ISO dates, Unix milliseconds, Unix seconds, and Swift `Date` seconds since 2001. Existing intake records from before reconciliation remain acknowledged and are never replayed against alarm data.
 

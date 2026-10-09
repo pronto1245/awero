@@ -79,6 +79,20 @@ async function main() {
   assert(updated.status === 200, 'alarm update failed');
   assert(updated.data.item.version === 2 && updated.data.item.minute === 45, 'alarm version did not advance');
 
+  const qrAlarm = await request('/alarms', {
+    method: 'POST', token,
+    body: { hour: 8, minute: 15, missionType: 'QR', qrExpectedCode: 'setup-code-456' },
+  });
+  assert(qrAlarm.status === 201 && qrAlarm.data.item.qrExpectedCode === 'setup-code-456', 'QR alarm create lost its expected code');
+  const qrAlarmUpdate = await request(`/alarms/${qrAlarm.data.item.id}`, {
+    method: 'PATCH', token, body: { qrExpectedCode: 'updated-setup-code' },
+  });
+  assert(qrAlarmUpdate.status === 200 && qrAlarmUpdate.data.item.qrExpectedCode === 'updated-setup-code', 'QR alarm update lost its expected code');
+  const oversizedQrCode = await request(`/alarms/${qrAlarm.data.item.id}`, {
+    method: 'PATCH', token, body: { qrExpectedCode: 'x'.repeat(2049) },
+  });
+  assert(oversizedQrCode.status === 400, 'oversized QR expected code was accepted');
+
   const sessionId = randomUUID();
   const triggerEventId = randomUUID();
   const wakeStartedAt = new Date(Date.now() - 20_000);
@@ -211,23 +225,34 @@ async function main() {
   const syncedAlarmId = randomUUID();
   const syncCreate = {
     id: randomUUID(), operationType: 'CREATE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
-    clientVersion: 1, payload: { label: 'Offline alarm', hour: 6, minute: 15, enabled: true, weekdays: [1, 3, 5] },
+    clientVersion: 1, payload: {
+      label: 'Offline QR alarm', hour: 6, minute: 15, enabled: true, weekdays: [1, 3, 5],
+      missionType: 'QR', qrExpectedCode: 'wake-code-123',
+    },
     occurredAt: Date.now(),
   };
   const syncCreated = await request('/sync', { method: 'POST', token, body: { operations: [syncCreate] } });
   assert(syncCreated.status === 201 && syncCreated.data.accepted === 1, 'offline alarm create was not applied');
   const createdFromSync = await request('/alarms', { token });
-  assert(createdFromSync.data.items.some((item) => item.id === syncedAlarmId && item.hour === 6), 'synced alarm was not readable');
+  assert(
+    createdFromSync.data.items.some((item) =>
+      item.id === syncedAlarmId && item.hour === 6 && item.missionType === 'QR' && item.qrExpectedCode === 'wake-code-123'),
+    'synced QR alarm settings were not preserved',
+  );
   const syncUpdate = {
     id: randomUUID(), operationType: 'UPDATE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
-    clientVersion: 1, payload: { minute: 20 },
+    clientVersion: 1, payload: { minute: 20, qrExpectedCode: 'updated-wake-code' },
   };
   const syncUpdated = await request('/sync', { method: 'POST', token, body: { operations: [syncUpdate] } });
   assert(syncUpdated.data.accepted === 1, 'offline alarm update was not applied');
   const syncUpdateRetry = await request('/sync', { method: 'POST', token, body: { operations: [syncUpdate] } });
   assert(syncUpdateRetry.data.accepted === 1, 'offline alarm update retry without a timestamp was not idempotent');
   const verifiedSyncUpdate = await request('/alarms', { token });
-  assert(verifiedSyncUpdate.data.items.find((item) => item.id === syncedAlarmId).version === 2, 'timestamp-less sync retry applied twice');
+  const syncedQrUpdate = verifiedSyncUpdate.data.items.find((item) => item.id === syncedAlarmId);
+  assert(
+    syncedQrUpdate.version === 2 && syncedQrUpdate.qrExpectedCode === 'updated-wake-code',
+    'timestamp-less sync retry applied twice or lost the QR code update',
+  );
   const syncDelete = {
     id: randomUUID(), operationType: 'DELETE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
     clientVersion: 2, payload: {}, occurredAt: Date.now(),

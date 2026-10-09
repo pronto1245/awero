@@ -109,6 +109,11 @@ class CreateAlarmDto {
   @IsOptional()
   @IsEnum(AlarmDifficulty)
   difficulty?: AlarmDifficulty;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  qrExpectedCode?: string | null;
 }
 
 class UpdateAlarmDto {
@@ -175,6 +180,11 @@ class UpdateAlarmDto {
   @IsOptional()
   @IsEnum(AlarmDifficulty)
   difficulty?: AlarmDifficulty;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  qrExpectedCode?: string | null;
 }
 
 @Controller('alarms')
@@ -185,7 +195,7 @@ export class AlarmsController {
   async list(@Headers('authorization') authorization?: string) {
     const owner = await this.auth.resolve(authorization);
     const result = await this.db.query(
-      'SELECT id, version, label, hour, minute, status=\'ACTIVE\' AS enabled, weekdays, timezone_mode AS "timezoneMode", fixed_timezone AS "fixedTimezone", status, snooze_enabled AS "snoozeEnabled", max_snoozes AS "maxSnoozes", snooze_minutes AS "snoozeMinutes", mission_type AS "missionType", difficulty, created_at AS "createdAt", updated_at AS "updatedAt" FROM alarms WHERE anonymous_user_id=$1 AND status<>\'DELETED\' ORDER BY hour, minute',
+      'SELECT id, version, label, hour, minute, status=\'ACTIVE\' AS enabled, weekdays, timezone_mode AS "timezoneMode", fixed_timezone AS "fixedTimezone", status, snooze_enabled AS "snoozeEnabled", max_snoozes AS "maxSnoozes", snooze_minutes AS "snoozeMinutes", mission_type AS "missionType", difficulty, qr_expected_code AS "qrExpectedCode", created_at AS "createdAt", updated_at AS "updatedAt" FROM alarms WHERE anonymous_user_id=$1 AND status<>\'DELETED\' ORDER BY hour, minute',
       [owner.anonymousUserId],
     );
     return { items: result.rows };
@@ -206,8 +216,8 @@ export class AlarmsController {
     }
     const item = await this.db.transaction(async (client) => {
       const inserted = await client.query(
-        'INSERT INTO alarms(anonymous_user_id,label,hour,minute,weekdays,status,timezone_mode,fixed_timezone,snooze_enabled,max_snoozes,snooze_minutes,mission_type,difficulty) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"',
-        [owner.anonymousUserId, body.label ?? 'Alarm', body.hour, body.minute, weekdays, enabled ? 'ACTIVE' : 'PAUSED', timezoneMode, fixedTimezone, body.snoozeEnabled ?? true, body.maxSnoozes ?? 3, body.snoozeMinutes ?? 10, body.missionType ?? AlarmMissionType.MATH, body.difficulty ?? AlarmDifficulty.MEDIUM],
+        'INSERT INTO alarms(anonymous_user_id,label,hour,minute,weekdays,status,timezone_mode,fixed_timezone,snooze_enabled,max_snoozes,snooze_minutes,mission_type,difficulty,qr_expected_code) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"',
+        [owner.anonymousUserId, body.label ?? 'Alarm', body.hour, body.minute, weekdays, enabled ? 'ACTIVE' : 'PAUSED', timezoneMode, fixedTimezone, body.snoozeEnabled ?? true, body.maxSnoozes ?? 3, body.snoozeMinutes ?? 10, body.missionType ?? AlarmMissionType.MATH, body.difficulty ?? AlarmDifficulty.MEDIUM, body.qrExpectedCode ?? null],
       );
       const row = inserted.rows[0];
       await client.query(
@@ -232,7 +242,7 @@ export class AlarmsController {
     if (Object.keys(changes).length === 0) throw new BadRequestException('EMPTY_UPDATE');
     const result = await this.db.transaction(async (client) => {
       const current = await client.query(
-        'SELECT id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty FROM alarms WHERE id=$1 AND anonymous_user_id=$2 AND status<>\'DELETED\' FOR UPDATE',
+        'SELECT id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode" FROM alarms WHERE id=$1 AND anonymous_user_id=$2 AND status<>\'DELETED\' FOR UPDATE',
         [id, owner.anonymousUserId],
       );
       if (!current.rows[0]) throw new NotFoundException('ALARM_NOT_FOUND');
@@ -249,8 +259,8 @@ export class AlarmsController {
       if (alarm.timezoneMode === AlarmTimezoneMode.DEVICE_LOCAL) alarm.fixedTimezone = null;
 
       const updated = await client.query(
-        'UPDATE alarms SET version=version+1,label=$3,hour=$4,minute=$5,weekdays=$6,status=$7,timezone_mode=$8,fixed_timezone=$9,snooze_enabled=$10,max_snoozes=$11,snooze_minutes=$12,mission_type=$13,difficulty=$14,updated_at=now() WHERE id=$1 AND anonymous_user_id=$2 RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"',
-        [id, owner.anonymousUserId, alarm.label, alarm.hour, alarm.minute, alarm.weekdays, alarm.status, alarm.timezoneMode, alarm.fixedTimezone, alarm.snoozeEnabled, alarm.maxSnoozes, alarm.snoozeMinutes, alarm.missionType, alarm.difficulty],
+        'UPDATE alarms SET version=version+1,label=$3,hour=$4,minute=$5,weekdays=$6,status=$7,timezone_mode=$8,fixed_timezone=$9,snooze_enabled=$10,max_snoozes=$11,snooze_minutes=$12,mission_type=$13,difficulty=$14,qr_expected_code=$15,updated_at=now() WHERE id=$1 AND anonymous_user_id=$2 RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"',
+        [id, owner.anonymousUserId, alarm.label, alarm.hour, alarm.minute, alarm.weekdays, alarm.status, alarm.timezoneMode, alarm.fixedTimezone, alarm.snoozeEnabled, alarm.maxSnoozes, alarm.snoozeMinutes, alarm.missionType, alarm.difficulty, alarm.qrExpectedCode ?? null],
       );
       const row = updated.rows[0];
       await client.query(
@@ -270,7 +280,7 @@ export class AlarmsController {
     const owner = await this.auth.resolve(authorization);
     const deleted = await this.db.transaction(async (client) => {
       const result = await client.query(
-        'UPDATE alarms SET status=\'DELETED\',version=version+1,updated_at=now() WHERE id=$1 AND anonymous_user_id=$2 AND status<>\'DELETED\' RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"',
+        'UPDATE alarms SET status=\'DELETED\',version=version+1,updated_at=now() WHERE id=$1 AND anonymous_user_id=$2 AND status<>\'DELETED\' RETURNING id,version,label,hour,minute,status=\'ACTIVE\' AS enabled,weekdays,timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"',
         [id, owner.anonymousUserId],
       );
       if (!result.rows[0]) throw new NotFoundException('ALARM_NOT_FOUND');

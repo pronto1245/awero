@@ -71,12 +71,12 @@ class SyncBatchDto {
 
 const ALARM_FIELDS = new Set([
   'label', 'hour', 'minute', 'enabled', 'weekdays', 'timezoneMode', 'fixedTimezone',
-  'snoozeEnabled', 'maxSnoozes', 'snoozeMinutes', 'missionType', 'difficulty',
+  'snoozeEnabled', 'maxSnoozes', 'snoozeMinutes', 'missionType', 'difficulty', 'qrExpectedCode',
 ]);
 const SELECT_ALARM = `SELECT id,version,label,hour,minute,status='ACTIVE' AS enabled,weekdays,
   timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,
   snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",
-  mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"
+  mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"
   FROM alarms WHERE id=$1 AND anonymous_user_id=$2`;
 
 @Controller('sync')
@@ -209,7 +209,7 @@ export class SyncController {
          RETURNING id,version,label,hour,minute,status='ACTIVE' AS enabled,weekdays,
           timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,
           snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",
-          mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"`,
+          mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"`,
         [operation.entityId, ownerId],
       );
       await this.saveAlarmVersion(client, deleted.rows[0]);
@@ -227,15 +227,16 @@ export class SyncController {
     const updated = await client.query<AlarmSnapshot>(
       `UPDATE alarms SET version=version+1,label=$3,hour=$4,minute=$5,weekdays=$6,status=$7,
         timezone_mode=$8,fixed_timezone=$9,snooze_enabled=$10,max_snoozes=$11,snooze_minutes=$12,
-        mission_type=$13,difficulty=$14,updated_at=now()
+        mission_type=$13,difficulty=$14,qr_expected_code=$15,updated_at=now()
        WHERE id=$1 AND anonymous_user_id=$2
        RETURNING id,version,label,hour,minute,status='ACTIVE' AS enabled,weekdays,
         timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,
         snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",
-        mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"`,
+        mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"`,
       [operation.entityId, ownerId, merged.label, merged.hour, merged.minute, merged.weekdays,
         merged.enabled ? 'ACTIVE' : 'PAUSED', merged.timezoneMode, merged.fixedTimezone,
-        merged.snoozeEnabled, merged.maxSnoozes, merged.snoozeMinutes, merged.missionType, merged.difficulty],
+        merged.snoozeEnabled, merged.maxSnoozes, merged.snoozeMinutes, merged.missionType, merged.difficulty,
+        merged.qrExpectedCode ?? null],
     );
     await this.saveAlarmVersion(client, updated.rows[0]);
     return null;
@@ -256,15 +257,15 @@ export class SyncController {
     this.validateAlarm(merged);
     const inserted = await client.query<AlarmSnapshot>(
       `INSERT INTO alarms(id,anonymous_user_id,label,hour,minute,weekdays,status,timezone_mode,fixed_timezone,
-        snooze_enabled,max_snoozes,snooze_minutes,mission_type,difficulty)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+        snooze_enabled,max_snoozes,snooze_minutes,mission_type,difficulty,qr_expected_code)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        RETURNING id,version,label,hour,minute,status='ACTIVE' AS enabled,weekdays,
         timezone_mode AS "timezoneMode",fixed_timezone AS "fixedTimezone",status,
         snooze_enabled AS "snoozeEnabled",max_snoozes AS "maxSnoozes",snooze_minutes AS "snoozeMinutes",
-        mission_type AS "missionType",difficulty,created_at AS "createdAt",updated_at AS "updatedAt"`,
+        mission_type AS "missionType",difficulty,qr_expected_code AS "qrExpectedCode",created_at AS "createdAt",updated_at AS "updatedAt"`,
       [id, ownerId, merged.label, merged.hour, merged.minute, merged.weekdays, merged.enabled ? 'ACTIVE' : 'PAUSED',
         merged.timezoneMode, merged.fixedTimezone, merged.snoozeEnabled, merged.maxSnoozes, merged.snoozeMinutes,
-        merged.missionType, merged.difficulty],
+        merged.missionType, merged.difficulty, merged.qrExpectedCode ?? null],
     );
     return inserted.rows[0];
   }
@@ -280,7 +281,7 @@ export class SyncController {
     return {
       label: 'Alarm', hour: 7, minute: 0, enabled: true, weekdays: [1, 2, 3, 4, 5, 6, 7],
       timezoneMode: 'DEVICE_LOCAL', fixedTimezone: null, snoozeEnabled: true, maxSnoozes: 3,
-      snoozeMinutes: 10, missionType: 'MATH', difficulty: 'MEDIUM', ...snapshot,
+      snoozeMinutes: 10, missionType: 'MATH', difficulty: 'MEDIUM', qrExpectedCode: null, ...snapshot,
     };
   }
 
@@ -304,6 +305,11 @@ export class SyncController {
         normalized[key] = this.booleanValue(rawValue, key);
       } else if (key === 'fixedTimezone') {
         normalized[key] = rawValue === null || rawValue === '' ? null : String(rawValue);
+      } else if (key === 'qrExpectedCode') {
+        if (rawValue !== null && (typeof rawValue !== 'string' || rawValue.length > 2048)) {
+          throw new BadRequestException('INVALID_ALARM_FIELD:qrExpectedCode');
+        }
+        normalized[key] = rawValue;
       } else if (typeof rawValue === 'string' || rawValue === null) {
         normalized[key] = rawValue;
       } else {
