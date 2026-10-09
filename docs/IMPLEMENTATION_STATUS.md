@@ -47,11 +47,11 @@
 - [x] QR runtime foundation
 - [x] Android ML Kit QR decoding
 - [x] Mission fallback policy
-- [ ] Mission UI for Math
-- [ ] Mission UI for Steps
-- [ ] Mission UI for QR
-- [ ] Retry / timeout UX
-- [ ] Runtime fallback transitions
+- [x] Mission UI for Math
+- [x] Mission UI for Steps
+- [x] Mission UI for QR
+- [x] Retry / timeout UX
+- [x] Runtime fallback transitions
 - [ ] Photo AI mission (V2)
 - [ ] Mixed mission (V2)
 
@@ -150,8 +150,8 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 - [x] Phase 0 — reconcile scope, competitor inputs, phase order, and acceptance gates across product docs
 - [x] Phase 1 — code-level iOS and Android alarm reliability with CI coverage; physical-device release checks remain deferred to Phase 10
 - [x] Phase 2 — wake-session runtime (automated gate; see verification below)
-- [ ] Phase 3 — P0 Math, Steps, and QR/barcode mission flows
-- [ ] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
+- [x] Phase 3 — P0 Math, Steps, and QR/barcode mission flows (automated gate complete; device release matrix remains Phase 10)
+- [x] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
 - [ ] Phase 5 — backend and sync isolated from the alarm-critical path
 - [ ] Phase 6 — user-facing UX and six-language completion
 
@@ -164,14 +164,18 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 - Android now also rejects overlapping snooze requests while the Room write is pending, preserving the successful OS schedule. A new emulator test sends the second tap during persistence, verifies one schedule/no cancellation and the saved count, then verifies another snooze after the next delivery. Commit `a325fab24ec97c6f5059d2ae547e6bcfd1949deb` passed all four jobs in [AWERO CI run 578](https://github.com/pronto1245/awero/actions/runs/37837964796).
 - Backend/sync changes and physical-device release gates are outside this correction.
 
-## Phase 3 — active
+## Phase 3 — automated gate complete
 
 The first package addresses P0 Mission runtime / recovery requirements: two-minute Steps/QR timeout to local Math, manual fallback, camera/sensor cleanup when the mission view is detached, and retrying a failed save after a validated mission. Math remains the deterministic local fallback.
 
 The next scoped package adds camera-based QR/barcode capture during alarm creation/editing on both platforms, an optional exact-content field, blank-code save prevention, persisted expected code and iOS Math difficulty selection. Android scans ML Kit-supported formats; iOS uses the supported subset of QR, EAN/UPC-E, Code 39/93/128, PDF417, Aztec and Data Matrix. Permission denial/camera failure during setup preserves the draft and offers manual entry. The iOS persistence/edited-code validation test passed locally; Android's existing restart test now includes the expected code.
 
-Phase 3 remains active: Android instrumentation proves a test alarm can complete its persisted wake session without changing planned/completed wake statistics, and its alarm, mission, and persistence suite passes with emulator networking disabled in [CI run 37844092499](https://github.com/pronto1245/awero/actions/runs/37844092499). The Android E2E case for a failed completion write, “Retry saving,” and persisted success passed in [CI run 37877786906](https://github.com/pronto1245/awero/actions/runs/37877786906). Camera permission is now checked before CameraX starts so denial triggers the persisted Math fallback; a new E2E case verifies fallback and successful completion, with CI verification pending. Camera decoding on physical devices remains a Phase 10 check. Full localization stays in Phase 6.
+Android instrumentation verifies test alarms stay out of wake statistics, the alarm and mission flow works with emulator networking disabled, a validated result can be retried after a failed write, and denied camera permission persists a Math fallback that can complete successfully. These gates passed in [CI run 37844092499](https://github.com/pronto1245/awero/actions/runs/37844092499), [CI run 37877786906](https://github.com/pronto1245/awero/actions/runs/37877786906), and [CI run 37881243655](https://github.com/pronto1245/awero/actions/runs/37881243655), all four jobs green. The user also confirmed the guided QR, invalid-code fallback, Math, Steps and snooze walkthrough works on iPhone. Physical Android coverage and the broader release matrix remain Phase 10 checks. Full localization stays in Phase 6.
 
 ### User-reported iPhone walkthrough
 
 On 2026-10-08, the user confirmed that the guided iPhone walkthrough worked. The walkthrough covered creating a QR alarm, scanning the saved code at wake-up, invalid-code fallback to Math, Steps, and snooze. This is a manual report without recorded device/OS details; it does not replace the broader Phase 10 release matrix.
+
+## Phase 5 — active
+
+The first read-only audit of anonymous auth, alarm ownership/versioning, wake-session lifecycle, offline sync, analytics and support idempotency found that wake-session retries could reuse an ID with a changed mission/timestamp and wake-event retries did not compare a supplied timestamp. The API now rejects those changed-content retries, and the repository smoke scenario asserts both conflicts. CI verification is pending. Backend changes remain isolated from the on-device alarm and mission path.

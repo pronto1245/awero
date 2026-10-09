@@ -113,11 +113,17 @@ export class WakeSessionsController {
       );
       if (!inserted.rows[0]) {
         const existing = await client.query(
-          `SELECT ws.id FROM wake_sessions ws JOIN alarms a ON a.id=ws.alarm_id
+          `SELECT ws.id,ws.scheduled_at=$5::timestamptz AS "sameScheduledAt",
+             ws.triggered_at=$6::timestamptz AS "sameTriggeredAt",ws.mission_type=$7 AS "sameMissionType"
+           FROM wake_sessions ws JOIN alarms a ON a.id=ws.alarm_id
            WHERE ws.id=$1 AND ws.alarm_id=$2 AND ws.alarm_version=$3 AND a.anonymous_user_id=$4`,
-          [body.id, body.alarmId, body.alarmVersion, owner.anonymousUserId],
+          [body.id, body.alarmId, body.alarmVersion, owner.anonymousUserId,
+            body.scheduledAt, body.triggeredAt, body.missionType],
         );
-        if (!existing.rows[0]) throw new ConflictException('WAKE_SESSION_ID_CONFLICT');
+        if (
+          !existing.rows[0] || !existing.rows[0].sameScheduledAt || !existing.rows[0].sameTriggeredAt ||
+          !existing.rows[0].sameMissionType
+        ) throw new ConflictException('WAKE_SESSION_ID_CONFLICT');
         const triggerEvent = await client.query(
           `SELECT id FROM wake_events WHERE wake_session_id=$1 AND event_type='TRIGGERED'`,
           [body.id],
@@ -176,14 +182,15 @@ export class WakeSessionsController {
       );
       if (!inserted.rows[0]) {
         const existing = await client.query(
-          `SELECT wake_session_id AS "wakeSessionId",event_type AS "eventType",payload=$2::jsonb AS "samePayload"
+          `SELECT wake_session_id AS "wakeSessionId",event_type AS "eventType",payload=$2::jsonb AS "samePayload",
+             ($3::timestamptz IS NULL OR occurred_at=$3::timestamptz) AS "sameOccurredAt"
            FROM wake_events WHERE id=$1`,
-          [body.id, JSON.stringify(body.payload ?? {})],
+          [body.id, JSON.stringify(body.payload ?? {}), body.occurredAt ?? null],
         );
         if (
           existing.rows[0]?.wakeSessionId !== id ||
           existing.rows[0]?.eventType !== body.eventType ||
-          !existing.rows[0]?.samePayload
+          !existing.rows[0]?.samePayload || !existing.rows[0]?.sameOccurredAt
         ) throw new ConflictException('WAKE_EVENT_ID_CONFLICT');
         return { id, duplicate: true };
       }

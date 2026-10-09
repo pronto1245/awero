@@ -97,6 +97,10 @@ async function main() {
   assert(sessionCreated.data.item.id === sessionId, 'wake session id was not retained');
   const duplicateSession = await request('/wake-sessions', { method: 'POST', token, body: sessionBody });
   assert(duplicateSession.status === 201 && duplicateSession.data.duplicate, 'wake session create was not idempotent');
+  const changedSessionRetry = await request('/wake-sessions', {
+    method: 'POST', token, body: { ...sessionBody, missionType: 'QR' },
+  });
+  assert(changedSessionRetry.status === 409, 'wake session ID accepted changed mission content');
   let wakeEventTime = wakeStartedAt.getTime() + 1_000;
   const postWakeEvent = (eventType, payload) => request(`/wake-sessions/${sessionId}/events`, {
     method: 'POST',
@@ -125,6 +129,11 @@ async function main() {
     method: 'POST', token, body: startedBody,
   });
   assert(duplicateStarted.status === 201 && duplicateStarted.data.item.duplicate, 'wake event was not idempotent');
+  const changedEventRetry = await request(`/wake-sessions/${sessionId}/events`, {
+    method: 'POST', token,
+    body: { ...startedBody, occurredAt: new Date(wakeEventTime++).toISOString() },
+  });
+  assert(changedEventRetry.status === 409, 'wake event ID accepted a changed timestamp');
   const snooze = await postWakeEvent('SNOOZE', { count: 1 });
   assert(snooze.status === 201, 'wake session snooze event failed');
   const missionFailed = await postWakeEvent('MISSION_FAILED');
