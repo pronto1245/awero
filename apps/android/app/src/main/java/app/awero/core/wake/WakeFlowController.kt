@@ -15,7 +15,7 @@ class WakeFlowController(
     private val sessions: WakeSessionStore,
     private val context: Context,
     private val statistics: StatisticsStore = StatisticsStore(context),
-    testAlarm: Boolean = false,
+    private val testAlarm: Boolean = false,
     private val alarmStore: AlarmStore = AlarmStore(context),
     private val scheduleAlarmSnooze: (Alarm, Int, Boolean) -> Unit = { alarm, minutes, isTest ->
         AlarmScheduler(context).scheduleSnooze(alarm, minutes, isTest)
