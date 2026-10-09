@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SyncConflictEntity::class,
         AnalyticsEventEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class AweroDatabase : RoomDatabase() {
@@ -49,6 +49,12 @@ abstract class AweroDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE alarms ADD COLUMN label TEXT NOT NULL DEFAULT 'Alarm'")
+            }
+        }
+
         @Volatile
         private var instance: AweroDatabase? = null
 
@@ -65,7 +71,7 @@ abstract class AweroDatabase : RoomDatabase() {
                     context.applicationContext,
                     AweroDatabase::class.java,
                     "awero.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
             }
 
         internal fun createForTesting(context: Context, name: String): AweroDatabase =
@@ -73,6 +79,6 @@ abstract class AweroDatabase : RoomDatabase() {
                 context.applicationContext,
                 AweroDatabase::class.java,
                 name
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     }
 }

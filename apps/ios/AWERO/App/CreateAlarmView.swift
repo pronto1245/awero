@@ -14,6 +14,7 @@ struct CreateAlarmView: View {
     @AppStorage("awero.didExplainAlarmPermission.v1") private var didExplainAlarmPermission = false
 
     @State private var wakeDate: Date
+    @State private var label: String
     @State private var followsDeviceTimezone: Bool
     @State private var fixedTimezone: String
     @State private var selectedDays: Set<Int>
@@ -29,6 +30,7 @@ struct CreateAlarmView: View {
         let calendar = Calendar.current
         let base = calendar.date(from: DateComponents(hour: alarm?.hour ?? 7, minute: alarm?.minute ?? 30)) ?? Date()
         _wakeDate = State(initialValue: base)
+        _label = State(initialValue: alarm?.label ?? NSLocalizedString("create.label_default", comment: "Default alarm label"))
         _followsDeviceTimezone = State(initialValue: alarm?.timezoneMode != .fixed)
         _fixedTimezone = State(initialValue: alarm?.fixedTimezone ?? TimeZone.current.identifier)
         _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
@@ -40,6 +42,7 @@ struct CreateAlarmView: View {
     var body: some View {
         NavigationStack {
             Form {
+                labelSection
                 wakeTimeSection
                 timezoneSection
                 daysSection
@@ -104,6 +107,19 @@ struct CreateAlarmView: View {
     private var wakeTimeSection: some View {
         Section {
             DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
+        }
+        .listRowBackground(Color.white)
+    }
+
+    private var labelSection: some View {
+        Section {
+            TextField("create.label", text: Binding(
+                get: { label },
+                set: { label = String($0.prefix(80)) }
+            ))
+            .textInputAutocapitalization(.words)
+        } header: {
+            Text("create.label")
         }
         .listRowBackground(Color.white)
     }
@@ -214,6 +230,8 @@ struct CreateAlarmView: View {
         next.fixedTimezone = followsDeviceTimezone ? nil : fixedTimezone
         next.missionType = mission
         next.difficulty = difficulty
+        let trimmedLabel = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        next.label = trimmedLabel.isEmpty ? NSLocalizedString("create.label_default", comment: "Default alarm label") : String(trimmedLabel.prefix(80))
         let trimmedCode = qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines)
         next.qrExpectedCode = trimmedCode.isEmpty ? nil : trimmedCode
 

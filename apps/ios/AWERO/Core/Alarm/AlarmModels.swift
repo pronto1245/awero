@@ -18,6 +18,12 @@ struct Alarm: Identifiable, Codable {
     var maxSnoozes: Int
     var snoozeMinutes: Int
     var qrExpectedCode: String?
+    var label: String?
+
+    var syncLabel: String {
+        let trimmed = label?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? "Alarm" : String(trimmed.prefix(80))
+    }
 
     init(
         id: UUID = UUID(),
@@ -32,7 +38,8 @@ struct Alarm: Identifiable, Codable {
         difficulty: Difficulty = .medium,
         maxSnoozes: Int = 3,
         snoozeMinutes: Int = 10,
-        qrExpectedCode: String? = nil
+        qrExpectedCode: String? = nil,
+        label: String? = nil
     ) {
         self.id = id
         self.version = version
@@ -47,5 +54,6 @@ struct Alarm: Identifiable, Codable {
         self.maxSnoozes = max(0, maxSnoozes)
         self.snoozeMinutes = max(1, snoozeMinutes)
         self.qrExpectedCode = qrExpectedCode
+        self.label = label
     }
 }

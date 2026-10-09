@@ -29,6 +29,8 @@
     <string name="home_ok">OK</string>
     <string name="create_title">Nouveau réveil</string>
     <string name="create_edit_title">Modifier le réveil</string>
+    <string name="create_label">Nom</string>
+    <string name="create_label_default">Réveil</string>
     <string name="create_time">Heure</string>
     <string name="create_repeat">Répéter</string>
     <string name="create_mission">Mission de réveil</string>

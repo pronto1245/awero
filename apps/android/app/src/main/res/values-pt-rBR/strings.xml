@@ -29,6 +29,8 @@
     <string name="home_ok">OK</string>
     <string name="create_title">Novo alarme</string>
     <string name="create_edit_title">Editar alarme</string>
+    <string name="create_label">Nome</string>
+    <string name="create_label_default">Alarme</string>
     <string name="create_time">Horário</string>
     <string name="create_repeat">Repetir</string>
     <string name="create_mission">Missão para despertar</string>

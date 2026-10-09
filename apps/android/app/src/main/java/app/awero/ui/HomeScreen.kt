@@ -126,6 +126,7 @@ fun HomeScreen(
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         Text("☀  " + stringResource(R.string.home_next_alarm), color = AweroNavy)
+                        Text(nextAlarm.first.label, color = AweroNavy.copy(alpha = .72f))
                         Text(
                             text = nextAlarmTime,
                             style = MaterialTheme.typography.displaySmall,
@@ -175,6 +176,7 @@ fun HomeScreen(
                                         color = AweroNavy,
                                         style = MaterialTheme.typography.headlineMedium
                                     )
+                                    Text(alarm.label, color = AweroNavy.copy(alpha = .78f), style = MaterialTheme.typography.titleMedium)
                                     Text(weekdaySummary(alarm), color = AweroNavy.copy(alpha = .55f))
                                     Text(missionLabel(alarm.missionType), color = AweroNavy.copy(alpha = .65f))
                                 }

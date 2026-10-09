@@ -29,6 +29,8 @@
     <string name="home_ok">OK</string>
     <string name="create_title">Neuer Wecker</string>
     <string name="create_edit_title">Wecker bearbeiten</string>
+    <string name="create_label">Name</string>
+    <string name="create_label_default">Wecker</string>
     <string name="create_time">Uhrzeit</string>
     <string name="create_repeat">Wiederholen</string>
     <string name="create_mission">Aufgabe zum Aufwachen</string>

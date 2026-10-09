@@ -70,7 +70,8 @@ class PersistenceTest {
             weekdays = setOf(1, 2, 3, 4, 5),
             missionType = MissionType.QR,
             difficulty = Difficulty.HARD,
-            qrExpectedCode = "awero://wake/bedroom?code=one+two"
+            qrExpectedCode = "awero://wake/bedroom?code=one+two",
+            label = "Weekday"
         )
 
         val firstDb = AweroDatabase.createForTesting(context, name)

@@ -46,6 +46,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
     val coordinator = remember { AlarmCoordinator(context) }
     val scope = rememberCoroutineScope()
     val now = Calendar.getInstance()
+    var label by remember { mutableStateOf(alarm?.label ?: context.getString(R.string.create_label_default)) }
     var hour by remember { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
     var mission by remember { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
@@ -76,6 +77,13 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
         )
         Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = label,
+                    onValueChange = { if (it.length <= 80) label = it },
+                    label = { Text(stringResource(R.string.create_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Text(stringResource(R.string.create_time), color = FormNavy)
                 OutlinedButton(
                     onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, true).show() },
@@ -182,12 +190,14 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
                         val timezoneMode = if (followsDeviceTimezone) TimezoneMode.DEVICE_LOCAL else TimezoneMode.FIXED
                         val selectedFixedTimezone = if (followsDeviceTimezone) null else fixedTimezone
                         if (alarm == null) coordinator.create(
-                            hour, minute, mission, difficulty, code, weekdays, timezoneMode, selectedFixedTimezone
+                            hour, minute, mission, difficulty, code, weekdays, timezoneMode, selectedFixedTimezone,
+                            label = label.trim().ifBlank { context.getString(R.string.create_label_default) }
                         )
                         else coordinator.update(alarm.copy(
                             hour = hour, minute = minute, weekdays = weekdays,
                             timezoneMode = timezoneMode, fixedTimezone = selectedFixedTimezone,
-                            missionType = mission, difficulty = difficulty, qrExpectedCode = code
+                            missionType = mission, difficulty = difficulty, qrExpectedCode = code,
+                            label = label.trim().ifBlank { context.getString(R.string.create_label_default) }
                         ))
                         onSaved()
                     } catch (error: Exception) {

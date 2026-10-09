@@ -28,7 +28,8 @@ class AlarmCoordinator(
         qrExpectedCode: String? = null,
         weekdays: Set<Int> = (1..7).toSet(),
         timezoneMode: TimezoneMode = TimezoneMode.DEVICE_LOCAL,
-        fixedTimezone: String? = null
+        fixedTimezone: String? = null,
+        label: String = "Alarm"
     ): Alarm {
         val alarm = Alarm(
             id = UUID.randomUUID().toString(),
@@ -41,7 +42,8 @@ class AlarmCoordinator(
             fixedTimezone = if (timezoneMode == TimezoneMode.FIXED) fixedTimezone else null,
             missionType = missionType,
             difficulty = difficulty,
-            qrExpectedCode = qrExpectedCode
+            qrExpectedCode = qrExpectedCode,
+            label = label.trim().take(80).ifBlank { "Alarm" }
         )
         AlarmNotificationManager.requireAlarmAccess(context)
         try {
@@ -101,7 +103,7 @@ class AlarmCoordinator(
     }
 
     private fun alarmSyncPayload(alarm: Alarm) = JSONObject()
-        .put("label", "Alarm")
+        .put("label", alarm.label)
         .put("hour", alarm.hour)
         .put("minute", alarm.minute)
         .put("enabled", alarm.enabled)
