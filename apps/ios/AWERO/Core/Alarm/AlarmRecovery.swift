@@ -16,7 +16,8 @@ final class AlarmRecovery {
                 continue
             }
 
-            guard forceReschedule || !(await scheduler.isScheduled(alarm)) else { continue }
+            let isScheduled = await scheduler.isScheduled(alarm)
+            guard forceReschedule || !isScheduled else { continue }
             try? await scheduler.repair(alarm)
         }
     }

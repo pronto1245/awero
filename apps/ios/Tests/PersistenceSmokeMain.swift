@@ -409,7 +409,8 @@ struct PersistenceSmokeMain {
 
         await recovery.reconcile(forceReschedule: true)
         precondition(center.additions == additions + enabled.weekdays.count)
-        precondition(await scheduler.isScheduled(enabled))
+        let isScheduledAfterForceReschedule = await scheduler.isScheduled(enabled)
+        precondition(isScheduledAfterForceReschedule)
 
         center.removePendingNotificationRequests(withIdentifiers: requests.map(\.identifier))
         center.failNextAdd = true
