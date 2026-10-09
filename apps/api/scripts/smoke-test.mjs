@@ -101,7 +101,7 @@ async function main() {
     method: 'POST', token, body: { ...sessionBody, missionType: 'QR' },
   });
   assert(changedSessionRetry.status === 409, 'wake session ID accepted changed mission content');
-  let wakeEventTime = wakeStartedAt.getTime() + 1_000;
+  let wakeEventTime = Date.now() + 1_000;
   const postWakeEvent = (eventType, payload) => request(`/wake-sessions/${sessionId}/events`, {
     method: 'POST',
     token,
