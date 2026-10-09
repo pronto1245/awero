@@ -72,8 +72,11 @@ class AlarmStore private constructor(
     }
 
     private suspend fun restore(id: String, previous: Alarm?) {
-        if (previous == null) database.alarms().get(id)?.let(database.alarms()::delete)
-        else database.alarms().upsert(AlarmMapper.toEntity(previous))
+        if (previous == null) {
+            database.alarms().get(id)?.let { database.alarms().delete(it) }
+        } else {
+            database.alarms().upsert(AlarmMapper.toEntity(previous))
+        }
     }
 
     private suspend fun migrateLegacyIfNeeded() {
