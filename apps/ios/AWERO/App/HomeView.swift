@@ -280,7 +280,14 @@ private struct AlarmCard: View {
                 }
                 .labelsHidden()
                 .tint(AweroStyle.coral)
-                .accessibilityLabel("home.toggle_alarm")
+                .accessibilityLabel(
+                    Text(
+                        String.localizedStringWithFormat(
+                            NSLocalizedString("home.toggle_alarm", comment: "VoiceOver label for an alarm switch"),
+                            String(format: "%02d:%02d", alarm.hour, alarm.minute)
+                        )
+                    )
+                )
                 .accessibilityValue(alarm.enabled ? Text("home.enabled") : Text("home.disabled"))
             }
             Text(missionKey(alarm.missionType))
