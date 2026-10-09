@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.util.Calendar
 import java.util.UUID
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -63,6 +64,20 @@ class AlarmSchedulerInstrumentedTest {
         (1..7).forEach { day ->
             assertNull("Cancel must clear weekday $day", hasPendingIntent(alarm, day))
         }
+    }
+
+    @Test
+    fun recurringAlarmIsPublishedToTheSystemAlarmClock() {
+        val alarm = alarm(weekdays = setOf(Calendar.MONDAY))
+        scheduledAlarms += alarm
+
+        scheduler.schedule(alarm)
+
+        val nextAlarm = requireNotNull(alarmManager.nextAlarmClock) {
+            "Android should expose the next AWERO alarm"
+        }
+        assertTrue("The exposed alarm must be in the future", nextAlarm.triggerTime > System.currentTimeMillis())
+        assertEquals(context.packageName, nextAlarm.showIntent.creatorPackage)
     }
 
     @Test

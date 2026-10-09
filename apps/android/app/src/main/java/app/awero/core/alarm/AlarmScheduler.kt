@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.content.Context
 import android.content.Intent
+import app.awero.MainActivity
 import java.util.Calendar
 import java.time.DateTimeException
 import java.time.Instant
@@ -118,7 +119,7 @@ class AlarmScheduler(private val context: Context) {
                 context, code(a, day), intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            set(at.timeInMillis, pending)
+            setAlarmClock(a, at.timeInMillis, pending)
         }
     }
 
@@ -141,7 +142,7 @@ class AlarmScheduler(private val context: Context) {
             context, requestCode, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        set(at, pending)
+        setExactAndAllowWhileIdle(at, pending)
     }
 
     fun cancel(a: Alarm) {
@@ -150,6 +151,7 @@ class AlarmScheduler(private val context: Context) {
         }
         cancelPending(testCode(a), ACTION_TEST)
         cancelSnooze(a)
+        cancelShowIntent(a)
     }
 
     fun cancelSnooze(a: Alarm) {
@@ -190,7 +192,30 @@ class AlarmScheduler(private val context: Context) {
         return resolveAlarmReadiness(a.enabled, valid, permissionsGranted, isScheduled(a))
     }
 
-    private fun set(at: Long, pending: PendingIntent) {
+    private fun setAlarmClock(alarm: Alarm, at: Long, operation: PendingIntent) {
+        val showIntent = PendingIntent.getActivity(
+            context,
+            showCode(alarm),
+            Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_ID, alarm.id)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        manager.setAlarmClock(AlarmManager.AlarmClockInfo(at, showIntent), operation)
+    }
+
+    private fun cancelShowIntent(alarm: Alarm) {
+        val pending = PendingIntent.getActivity(
+            context,
+            showCode(alarm),
+            Intent(context, MainActivity::class.java),
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        pending?.cancel()
+    }
+
+    private fun setExactAndAllowWhileIdle(at: Long, pending: PendingIntent) {
         manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
     }
 
@@ -208,6 +233,7 @@ class AlarmScheduler(private val context: Context) {
     }
 
     private fun code(a: Alarm, day: Int) = a.id.hashCode() * 31 + day
+    private fun showCode(a: Alarm) = a.id.hashCode() xor 0x5A5A
     private fun testCode(a: Alarm) = a.id.hashCode() xor 0x55AA
     private fun snoozeCode(a: Alarm) = a.id.hashCode() xor 0xAA55
 
