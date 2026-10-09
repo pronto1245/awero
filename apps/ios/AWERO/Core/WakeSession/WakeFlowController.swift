@@ -4,12 +4,13 @@ import Combine
 @MainActor
 final class WakeFlowController: ObservableObject {
     static let shared = WakeFlowController()
-    enum State: Equatable { case idle, ringing, mission, completed, emergencyStopped }
+    enum State: Equatable { case idle, ringing, mission, completed, emergencyStopped, storageError }
     @Published private(set) var state: State = .idle
     @Published private(set) var currentMission: MissionType = .math
     @Published private(set) var snoozeCount = 0
     @Published private(set) var snoozeError: String?
     @Published private(set) var actionError: String?
+    @Published private(set) var storageError: String?
 
     private let sessionManager: WakeSessionManager
     private var scheduler: AlarmScheduler?
@@ -34,8 +35,20 @@ final class WakeFlowController: ObservableObject {
     }
 
     func restore() async {
-        guard let session = await sessionManager.restore(),
-              let alarm = await database.fetchAlarm(id: session.alarmId) else { return }
+        guard let session = await sessionManager.restore() else {
+            if sessionManager.persistenceReadFailed { presentStorageError() }
+            else if state == .storageError { storageError = nil; state = .idle }
+            return
+        }
+        guard case let .success(alarmValue) = await database.fetchAlarm(id: session.alarmId) else {
+            presentStorageError()
+            return
+        }
+        guard let alarm = alarmValue else {
+            presentStorageError()
+            return
+        }
+        storageError = nil
         currentAlarm = alarm
         currentMission = session.fallbackUsed ? .math : session.missionType
         maxSnoozes = alarm.maxSnoozes
@@ -44,15 +57,21 @@ final class WakeFlowController: ObservableObject {
     }
 
     func start(alarmID: UUID, scheduledAt: Date = .now, isTestAlarm: Bool = false) async {
-        guard let alarm = await database.fetchAlarm(id: alarmID), alarm.enabled else { return }
+        guard case let .success(alarmValue) = await database.fetchAlarm(id: alarmID) else {
+            presentStorageError()
+            return
+        }
+        guard let alarm = alarmValue, alarm.enabled else { return }
         await start(alarm: alarm, scheduledAt: scheduledAt, isTestAlarm: isTestAlarm)
     }
 
     func start(alarm: Alarm, scheduledAt: Date = .now, isTestAlarm: Bool = false) async {
         guard await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt, isTest: isTestAlarm) else {
+            if sessionManager.persistenceReadFailed { presentStorageError(); return }
             await restore()
             return
         }
+        storageError = nil
         currentAlarm = alarm
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
@@ -66,6 +85,7 @@ final class WakeFlowController: ObservableObject {
         actionInProgress = true
         defer { actionInProgress = false }
         guard await sessionManager.startMission() else {
+            if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .beginMission
             actionError = "Could not save mission progress. The alarm is still active."
             return
@@ -81,6 +101,7 @@ final class WakeFlowController: ObservableObject {
         actionInProgress = true
         defer { actionInProgress = false }
         guard await sessionManager.markFallback() else {
+            if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .fallback
             actionError = "Could not save the fallback. Your wake session is still active."
             return
@@ -95,6 +116,7 @@ final class WakeFlowController: ObservableObject {
         actionInProgress = true
         defer { actionInProgress = false }
         guard let session = await sessionManager.complete() else {
+            if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .complete
             actionError = "Could not save completion. Your wake session is still active."
             return
@@ -155,6 +177,7 @@ final class WakeFlowController: ObservableObject {
             }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
                 await cancelScheduledSnooze(for: alarm, using: cancel)
+                if sessionManager.persistenceReadFailed { presentStorageError(); return false }
                 snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
@@ -196,8 +219,16 @@ final class WakeFlowController: ObservableObject {
     }
 
     func emergencyStop() async {
-        guard let session = await sessionManager.emergencyStop() else { return }
+        guard let session = await sessionManager.emergencyStop() else {
+            if sessionManager.persistenceReadFailed { presentStorageError() }
+            return
+        }
         await statistics.record(session)
         state = .emergencyStopped
+    }
+
+    func presentStorageError() {
+        storageError = String(localized: "persistence.read_error")
+        state = .storageError
     }
 }

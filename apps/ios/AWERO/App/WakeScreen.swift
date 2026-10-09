@@ -28,6 +28,12 @@ struct WakeScreen: View {
                 case .emergencyStopped:
                     Text("wake.emergency_stop").font(.title2.bold()).foregroundStyle(WakePalette.navy)
                     Text("wake.stopped_body").foregroundStyle(WakePalette.navy.opacity(0.55))
+                case .storageError:
+                    Text("persistence.read_error_title").font(.title2.bold()).foregroundStyle(WakePalette.navy)
+                    Text(flow.storageError ?? String(localized: "persistence.read_error"))
+                        .foregroundStyle(WakePalette.navy.opacity(0.7))
+                    Button("persistence.retry_read") { Task { await flow.restore() } }
+                        .buttonStyle(PrimaryWakeButton())
                 case .idle:
                     Text("wake.snoozed_title").font(.title.bold()).foregroundStyle(WakePalette.navy)
                     Text("wake.snoozed_body").foregroundStyle(WakePalette.navy.opacity(0.55))

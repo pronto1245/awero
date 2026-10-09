@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 final class WakeSessionManager {
     private(set) var current: WakeSession?
+    private(set) var persistenceReadFailed = false
     private var transitionInProgress = false
     private var transitionWaiters: [CheckedContinuation<Void, Never>] = []
     private let database: CoreDataStore
@@ -21,7 +22,13 @@ final class WakeSessionManager {
     func trigger(alarm: Alarm, scheduledAt: Date, isTest: Bool = false) async -> Bool {
         await acquireTransition()
         defer { releaseTransition() }
-        if let existing = await database.fetchActiveWakeSession(alarmID: alarm.id, isTest: isTest) {
+        let existingResult = await database.fetchActiveWakeSession(alarmID: alarm.id, isTest: isTest)
+        guard case let .success(existing) = existingResult else {
+            persistenceReadFailed = true
+            return false
+        }
+        persistenceReadFailed = false
+        if let existing {
             current = existing
             return false
         }
@@ -131,7 +138,13 @@ final class WakeSessionManager {
 
     private func ensureCurrent() async {
         if current == nil {
-            current = await database.fetchActiveWakeSession()
+            switch await database.fetchActiveWakeSession() {
+            case let .success(session):
+                current = session
+                persistenceReadFailed = false
+            case .failure:
+                persistenceReadFailed = true
+            }
         }
     }
 }

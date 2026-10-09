@@ -30,7 +30,7 @@ actor AnalyticsQueueStore {
         await database.saveAnalyticsEvent(event)
     }
 
-    func pending() async -> [AnalyticsEvent] {
+    func pending() async -> Result<[AnalyticsEvent], PersistenceError> {
         await database.fetchPendingAnalyticsEvents()
     }
 

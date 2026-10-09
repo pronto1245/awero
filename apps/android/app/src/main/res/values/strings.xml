@@ -123,4 +123,7 @@
     <string name="settings_alarm_permissions_body">Allow AWERO notifications and alarm access so scheduled alarms can alert you.</string>
     <string name="settings_open_system_settings">Open phone settings</string>
     <string name="settings_back">Back</string>
+    <string name="home_alarms_load_error_title">Could not load saved alarms</string>
+    <string name="home_alarms_load_error_body">AWERO could not read your saved alarms. They are not treated as an empty list. Try again to recover them.</string>
+    <string name="home_retry_loading_alarms">Retry loading</string>
 </resources>

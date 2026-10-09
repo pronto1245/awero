@@ -6,7 +6,7 @@ struct ContentView: View {
     var body: some View {
         Group {
             switch wakeFlow.state {
-            case .ringing, .mission, .completed, .emergencyStopped:
+            case .ringing, .mission, .completed, .emergencyStopped, .storageError:
                 WakeScreen(flow: wakeFlow)
             case .idle:
                 HomeView()

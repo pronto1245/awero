@@ -4,6 +4,10 @@ Scope: the approved ten-point local persistence gate. Backend is excluded.
 
 Status: automated gate verified on 2026-10-08. Physical-device release validation remains separate.
 
+## Data-loss boundary
+
+Alarms, wake sessions, statistics, and pending offline operations are stored locally on each device. The current product does not provide a server restore path for this local state. If application data is removed and the operating system does not restore it from a device backup, AWERO cannot recover those records. A successful local migration preserves the records on that device; a failed migration remains retryable and is shown as a storage error rather than as an empty alarm list. Physical backup and reinstall behavior remains part of the Phase 10 release matrix.
+
 ## Automated verification matrix
 
 | # | Requirement | Verification |

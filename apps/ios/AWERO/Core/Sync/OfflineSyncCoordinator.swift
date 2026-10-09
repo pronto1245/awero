@@ -1,9 +1,11 @@
 import Foundation
+import os
 
 actor OfflineSyncCoordinator {
     static let shared = OfflineSyncCoordinator()
     private let configuration: SyncAPIConfiguration
     private let sessionStore: AnonymousAuthSessionStore
+    private let logger = Logger(subsystem: "app.awero", category: "sync")
     private var isRunning = false
 
     init(configuration: SyncAPIConfiguration = SyncAPIConfiguration(), sessionStore: AnonymousAuthSessionStore = AnonymousAuthSessionStore()) {
@@ -21,7 +23,10 @@ actor OfflineSyncCoordinator {
         do {
             guard let session = try sessionStore.loadSession(), session.expiresAt > now else { return }
             let queue = SyncQueueStore.shared
-            let operations = await queue.due()
+            guard case let .success(operations) = await queue.due() else {
+                logger.error("Could not read the persisted sync queue; queued operations were left untouched.")
+                return
+            }
             guard !operations.isEmpty else { return }
 
             let response: SyncBatchResponse
@@ -50,7 +55,10 @@ actor OfflineSyncCoordinator {
                 }
             }
         } catch {
-            let operations = await SyncQueueStore.shared.due()
+            guard case let .success(operations) = await SyncQueueStore.shared.due() else {
+                logger.error("Could not read the persisted sync queue after a sync failure; queued operations were left untouched.")
+                return
+            }
             for operation in operations {
                 await SyncQueueStore.shared.retry(operation.id)
             }

@@ -11,10 +11,11 @@ final class AlarmStore: ObservableObject {
     @Published private(set) var alarms: [Alarm] = []
     @Published private(set) var loadState: AlarmStoreLoadState = .loading
     private let database: CoreDataStore
+    private let defaults: UserDefaults
 
-    init(database: CoreDataStore = .shared) {
+    init(database: CoreDataStore = .shared, defaults: UserDefaults = .standard) {
         self.database = database
-        Task { await load() }
+        self.defaults = defaults
     }
 
     func load() async {
@@ -24,7 +25,10 @@ final class AlarmStore: ObservableObject {
             return
         }
         alarms = loadedAlarms
-        await migrateLegacyIfNeeded()
+        guard await migrateLegacyIfNeeded() else {
+            loadState = .failed
+            return
+        }
         loadState = .loaded
     }
 
@@ -52,32 +56,31 @@ final class AlarmStore: ObservableObject {
         return true
     }
 
-    private func migrateLegacyIfNeeded() async {
+    private func migrateLegacyIfNeeded() async -> Bool {
         let key = "awero.coredata.migrated.v1"
-        guard !UserDefaults.standard.bool(forKey: key) else { return }
+        guard !defaults.bool(forKey: key) else { return true }
 
         let legacyKey = "awero.alarms.v1"
-        guard
-            let data = UserDefaults.standard.data(forKey: legacyKey),
-            let legacy = try? JSONDecoder().decode([Alarm].self, from: data)
-        else {
-            UserDefaults.standard.set(true, forKey: key)
-            return
+        guard let data = defaults.data(forKey: legacyKey) else {
+            defaults.set(true, forKey: key)
+            return true
         }
+        guard let legacy = try? JSONDecoder().decode([Alarm].self, from: data) else { return false }
 
         for alarm in legacy {
-            await database.saveAlarm(alarm)
+            guard await database.saveAlarm(alarm) else { return false }
         }
 
         guard case let .success(persistedAlarms) = await database.fetchAlarms() else {
-            return
+            return false
         }
         let persistedIds = Set(persistedAlarms.map(\.id))
         guard legacy.allSatisfy({ persistedIds.contains($0.id) }) else {
-            return
+            return false
         }
 
         alarms = persistedAlarms
-        UserDefaults.standard.set(true, forKey: key)
+        defaults.set(true, forKey: key)
+        return true
     }
 }

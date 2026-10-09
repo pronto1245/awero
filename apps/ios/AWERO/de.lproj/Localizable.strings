@@ -130,3 +130,7 @@
 "home.alarms_load_error_body" = "AWERO konnte deine gespeicherten Wecker nicht lesen. Sie wurden nicht gelöscht. Versuche es erneut.";
 "home.retry_loading_alarms" = "Erneut versuchen";
 "alarm.error.schedule_incomplete" = "iOS konnte nicht alle Weckererinnerungen registrieren. Wähle weniger Tage oder Wecker und versuche es erneut.";
+
+"persistence.read_error_title" = "Gespeicherte Weckdaten sind nicht verfügbar";
+"persistence.read_error" = "AWERO konnte gespeicherte Daten nicht lesen. Sie werden nicht als leer behandelt. Versuche es erneut, um den Weckstatus wiederherzustellen.";
+"persistence.retry_read" = "Lesen erneut versuchen";

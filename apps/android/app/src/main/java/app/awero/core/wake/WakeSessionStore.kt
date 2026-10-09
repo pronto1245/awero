@@ -167,15 +167,12 @@ class WakeSessionStore(
             if (preferences.getBoolean("room_migrated", false)) return
             val raw = preferences.getString("sessions", null)
             if (!raw.isNullOrBlank()) {
-                val migrated = runCatching {
-                    val array = JSONArray(raw)
-                    for (i in 0 until array.length()) {
-                        database.wakeSessions().upsert(
-                            WakeSessionMapper.toEntity(fromJson(array.getJSONObject(i)))
-                        )
-                    }
+                val array = JSONArray(raw)
+                for (i in 0 until array.length()) {
+                    database.wakeSessions().upsert(
+                        WakeSessionMapper.toEntity(fromJson(array.getJSONObject(i)))
+                    )
                 }
-                if (migrated.isFailure) return
             }
             preferences.edit().putBoolean("room_migrated", true).apply()
         }

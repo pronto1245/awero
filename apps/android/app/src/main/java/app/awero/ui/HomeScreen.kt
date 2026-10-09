@@ -39,6 +39,8 @@ private val AweroNavy = Color(0xFF14294B)
 private val AweroCoral = Color(0xFFFF684B)
 private val AweroSage = Color(0xFF4F8B66)
 
+private enum class AlarmLoadState { Loading, Loaded, Failed }
+
 private fun alarmTimeZoneId(alarm: Alarm): String? =
     if (alarm.timezoneMode == app.awero.core.alarm.TimezoneMode.FIXED) alarm.fixedTimezone else null
 
@@ -52,19 +54,29 @@ fun HomeScreen(
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
     var alarms by remember { mutableStateOf(emptyList<Alarm>()) }
+    var alarmLoadState by remember { mutableStateOf(AlarmLoadState.Loading) }
     var readiness by remember { mutableStateOf<Map<String, AlarmReadiness>>(emptyMap()) }
     var refreshKey by remember { mutableIntStateOf(0) }
     var actionError by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) { alarms = coordinator.all() }
+    LaunchedEffect(refreshKey) {
+        alarmLoadState = AlarmLoadState.Loading
+        try {
+            alarms = coordinator.all()
+            alarmLoadState = AlarmLoadState.Loaded
+        } catch (_: Exception) {
+            alarmLoadState = AlarmLoadState.Failed
+        }
+    }
     LaunchedEffect(alarms, refreshKey, statusRefreshKey) {
         val scheduler = AlarmScheduler(context)
         readiness = alarms.associate { it.id to scheduler.readiness(it) }
     }
 
     val now = remember(alarms, refreshKey) { Instant.now() }
-    val nextAlarm = remember(alarms, refreshKey) {
+    val nextAlarm = remember(alarms, refreshKey, alarmLoadState) {
+        if (alarmLoadState != AlarmLoadState.Loaded) return@remember null
         alarms.asSequence()
             .filter { it.enabled }
             .flatMap { alarm ->
@@ -112,7 +124,7 @@ fun HomeScreen(
         Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .65f))
         Spacer(Modifier.height(18.dp))
 
-        if (nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {
+        if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(24.dp),
@@ -142,7 +154,31 @@ fun HomeScreen(
         Text(stringResource(R.string.home_alarms), style = MaterialTheme.typography.titleLarge, color = AweroNavy)
         Spacer(Modifier.height(10.dp))
 
-        if (alarms.isEmpty()) {
+        if (alarmLoadState == AlarmLoadState.Loading) {
+            Card(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(22.dp)
+            ) {
+                Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = AweroCoral)
+                }
+            }
+        } else if (alarmLoadState == AlarmLoadState.Failed) {
+            Card(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(22.dp)
+            ) {
+                Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(stringResource(R.string.home_alarms_load_error_title), style = MaterialTheme.typography.titleLarge, color = AweroNavy)
+                    Text(stringResource(R.string.home_alarms_load_error_body), color = AweroNavy.copy(alpha = .7f))
+                    TextButton(onClick = { refreshKey++ }) {
+                        Text(stringResource(R.string.home_retry_loading_alarms), color = AweroCoral)
+                    }
+                }
+            }
+        } else if (alarms.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -262,7 +298,8 @@ fun HomeScreen(
             onClick = onCreateAlarm,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AweroCoral),
-            shape = RoundedCornerShape(18.dp)
+            shape = RoundedCornerShape(18.dp),
+            enabled = alarmLoadState == AlarmLoadState.Loaded
         ) {
             Text(stringResource(R.string.home_add_alarm), color = Color.White)
         }

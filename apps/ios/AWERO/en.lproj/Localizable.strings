@@ -130,3 +130,7 @@
 "home.alarms_load_error_body" = "AWERO could not read your saved alarms. Your data has not been deleted. Try again.";
 "home.retry_loading_alarms" = "Try again";
 "alarm.error.schedule_incomplete" = "iOS could not register every alarm reminder. Select fewer days or alarms, then try again.";
+
+"persistence.read_error_title" = "Your saved wake state is unavailable";
+"persistence.read_error" = "AWERO could not read saved data. It has not been treated as empty. Try again to restore your alarm state.";
+"persistence.retry_read" = "Try reading again";

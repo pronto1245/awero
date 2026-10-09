@@ -21,6 +21,7 @@ struct AWEROApp: App {
                 .environmentObject(alarmStore)
                 .environmentObject(wakeFlow)
                 .task {
+                    await alarmStore.load()
                     recoveryTrigger.appDidBecomeActive()
                     await wakeFlow.restore()
                 }

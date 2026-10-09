@@ -43,7 +43,7 @@ struct PersistenceSmokeMain {
         try oldContainer.viewContext.save()
 
         let restarted = CoreDataStore(storeURL: storeURL)
-        let restoredAlarm = await restarted.fetchAlarm(id: alarmId)
+        let restoredAlarm = try await restarted.fetchAlarm(id: alarmId).get()
         precondition(restoredAlarm?.hour == 7 && restoredAlarm?.minute == 30)
 
         let readOnlyStore = CoreDataStore(storeURL: storeURL, readOnly: true)
@@ -62,7 +62,7 @@ struct PersistenceSmokeMain {
             )
         )
         precondition(!saveFailure)
-        let unchangedAlarm = await restarted.fetchAlarm(id: alarmId)
+        let unchangedAlarm = try await restarted.fetchAlarm(id: alarmId).get()
         precondition(unchangedAlarm?.version == 1 && unchangedAlarm?.hour == 7)
         let failedManager = await MainActor.run { WakeSessionManager(database: readOnlyStore) }
         let failedTrigger = await failedManager.trigger(alarm: restoredAlarm!, scheduledAt: .now)
@@ -85,13 +85,13 @@ struct PersistenceSmokeMain {
         )
         await restarted.saveSyncOperation(operation)
         await restarted.saveSyncOperation(operation)
-        let pending = await restarted.fetchDueSyncOperations()
+        let pending = try await restarted.fetchDueSyncOperations().get()
         precondition(pending.count == 1)
         await restarted.retrySyncOperation(operation.id, nextAttemptAt: Date(timeIntervalSinceNow: 3600))
-        let retryBlocked = await restarted.fetchDueSyncOperations()
+        let retryBlocked = try await restarted.fetchDueSyncOperations().get()
         precondition(retryBlocked.isEmpty)
         await restarted.retrySyncOperation(operation.id, nextAttemptAt: .distantPast)
-        let retryDue = await restarted.fetchDueSyncOperations()
+        let retryDue = try await restarted.fetchDueSyncOperations().get()
         precondition(retryDue.count == 1)
 
         let session = WakeSession(
@@ -149,7 +149,7 @@ struct PersistenceSmokeMain {
         precondition(unchangedStatistics.snoozes == 0 && unchangedStatistics.fallback == 0)
         precondition(unchangedStatistics.totalCompletionSeconds == 0)
         let restartedAgain = CoreDataStore(storeURL: storeURL)
-        let active = await restartedAgain.fetchActiveWakeSession()
+        let active = try await restartedAgain.fetchActiveWakeSession().get()
         precondition(active?.id == session.id)
         var closedSession = session
         closedSession.completedAt = .now
@@ -198,10 +198,10 @@ struct PersistenceSmokeMain {
         await statistics.record(completedSession)
 
         let finalStore = CoreDataStore(storeURL: storeURL)
-        let finalStatistics = await finalStore.fetchStatistics()
+        let finalStatistics = try await finalStore.fetchStatistics().get()
         precondition(finalStatistics?.planned == 2)
         precondition(finalStatistics?.completed == 1)
-        let finalActive = await finalStore.fetchActiveWakeSession()
+        let finalActive = try await finalStore.fetchActiveWakeSession().get()
         precondition(finalActive == nil)
 
         let e2eAlarm = Alarm(
@@ -241,7 +241,7 @@ struct PersistenceSmokeMain {
         let e2eCompletedState = await MainActor.run { e2eRestoredController.state }
         precondition(e2eCompletedState == .completed)
 
-        let e2eStats = await finalStore.fetchStatistics()
+        let e2eStats = try await finalStore.fetchStatistics().get()
         precondition(e2eStats?.planned == 3)
         precondition(e2eStats?.completed == 2)
 
@@ -266,7 +266,7 @@ struct PersistenceSmokeMain {
         }
         precondition(emergencySession.result == "EMERGENCY_STOP")
         let emergencyRestart = CoreDataStore(storeURL: storeURL)
-        let emergencyActive = await emergencyRestart.fetchActiveWakeSession()
+        let emergencyActive = try await emergencyRestart.fetchActiveWakeSession().get()
         precondition(emergencyActive == nil)
 
         try await runAlarmRecoveryChecks(root: root)
@@ -302,7 +302,7 @@ struct PersistenceSmokeMain {
         precondition(!failed)
         precondition(flow.state == .ringing)
         precondition(flow.snoozeCount == 0)
-        let activeAfterFailure = await database.fetchActiveWakeSession()
+        let activeAfterFailure = try await database.fetchActiveWakeSession().get()
         precondition(activeAfterFailure?.snoozeCount == 0)
         let requestsAfterFailure = await center.pendingNotificationRequests()
         precondition(requestsAfterFailure.isEmpty)
@@ -311,7 +311,7 @@ struct PersistenceSmokeMain {
         precondition(succeeded)
         precondition(flow.state == .idle)
         precondition(flow.snoozeCount == 1)
-        let activeAfterSuccess = await database.fetchActiveWakeSession()
+        let activeAfterSuccess = try await database.fetchActiveWakeSession().get()
         precondition(activeAfterSuccess?.snoozeCount == 1)
         let requestsAfterSuccess = await center.pendingNotificationRequests()
         precondition(requestsAfterSuccess.contains { $0.identifier.hasPrefix("awero:snooze:") })
@@ -446,12 +446,12 @@ struct PersistenceSmokeMain {
         await failedMigration.load()
         precondition(!defaults.bool(forKey: migratedKey))
         precondition(failedMigration.statistics.planned == 0)
-        let missingStatistics = await restarted.fetchStatistics()
+        let missingStatistics = try await restarted.fetchStatistics().get()
         precondition(missingStatistics == nil)
         let retriedMigration = StatisticsStore(database: restarted)
         await retriedMigration.load()
         precondition(defaults.bool(forKey: migratedKey))
-        let migratedStatistics = await restarted.fetchStatistics()
+        let migratedStatistics = try await restarted.fetchStatistics().get()
         precondition(migratedStatistics?.planned == 4 && migratedStatistics?.completed == 2)
         print("AWERO alarm recovery and failed-write scheduling: PASS")
         print("AWERO statistics migration failure and retry: PASS")
@@ -524,21 +524,21 @@ struct PersistenceSmokeMain {
             }
             precondition(alarms.count == 1)
             precondition(alarms[0].hour == 7)
-            let session = await store.fetchActiveWakeSession()
+            let session = try await store.fetchActiveWakeSession().get()
             precondition(session != nil)
             precondition(session?.missionStartedAt != nil)
             precondition(session?.snoozeCount == 1)
             precondition(session?.fallbackUsed == true)
-            let blockedRetry = await store.fetchDueSyncOperations()
+            let blockedRetry = try await store.fetchDueSyncOperations().get()
             precondition(blockedRetry.isEmpty)
             let operationId = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
             let retrySaved = await store.retrySyncOperation(operationId, nextAttemptAt: .distantPast)
             precondition(retrySaved)
-            let recoveredQueue = await store.fetchDueSyncOperations()
+            let recoveredQueue = try await store.fetchDueSyncOperations().get()
             precondition(recoveredQueue.count == 1 && recoveredQueue[0].id == operationId)
             let duplicateSaved = await store.saveSyncOperation(recoveredQueue[0])
             precondition(duplicateSaved)
-            let stillUnique = await store.fetchDueSyncOperations()
+            let stillUnique = try await store.fetchDueSyncOperations().get()
             precondition(stillUnique.count == 1)
             let controller = await MainActor.run {
                 WakeFlowController(sessionManager: WakeSessionManager(database: store), database: store)

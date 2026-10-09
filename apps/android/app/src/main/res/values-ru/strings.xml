@@ -123,4 +123,7 @@
     <string name="settings_alarm_permissions_body">Разрешите уведомления и работу будильников AWERO, чтобы запланированные сигналы срабатывали.</string>
     <string name="settings_open_system_settings">Открыть настройки телефона</string>
     <string name="settings_back">Назад</string>
+    <string name="home_alarms_load_error_title">Не удалось загрузить будильники</string>
+    <string name="home_alarms_load_error_body">AWERO не удалось прочитать сохранённые будильники. Данные не считаются пустыми. Повторите попытку восстановления.</string>
+    <string name="home_retry_loading_alarms">Повторить чтение</string>
 </resources>

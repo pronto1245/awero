@@ -29,8 +29,8 @@ final class SyncConflictPersistenceTests: XCTestCase {
         let conflictSaved = await store.recordSyncConflict(operation, conflict: conflict)
         XCTAssertTrue(conflictSaved)
 
-        let queued = await store.fetchDueSyncOperations()
-        let conflicts = await store.fetchSyncConflicts()
+        let queued = try await store.fetchDueSyncOperations().get()
+        let conflicts = try await store.fetchSyncConflicts().get()
         XCTAssertTrue(queued.isEmpty)
         XCTAssertEqual(conflicts.count, 1)
         XCTAssertEqual(conflicts[0].operationId, operationId)

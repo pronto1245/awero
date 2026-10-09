@@ -123,4 +123,7 @@
     <string name="settings_alarm_permissions_body">Autorisez les notifications et les alarmes AWERO pour recevoir les alertes programmées.</string>
     <string name="settings_open_system_settings">Ouvrir les réglages du téléphone</string>
     <string name="settings_back">Retour</string>
+    <string name="home_alarms_load_error_title">Impossible de charger les alarmes</string>
+    <string name="home_alarms_load_error_body">AWERO ne peut pas lire les alarmes enregistrées. Elles ne sont pas considérées comme absentes. Réessayez pour les récupérer.</string>
+    <string name="home_retry_loading_alarms">Réessayer</string>
 </resources>

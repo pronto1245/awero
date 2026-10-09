@@ -16,13 +16,16 @@ struct WakeStatistics: Codable, Sendable {
 @MainActor
 final class StatisticsStore: ObservableObject {
     @Published private(set) var statistics: WakeStatistics
+    @Published private(set) var loadFailed = false
     private let database: CoreDataStore
+    private let defaults: UserDefaults
     private var loaded = false
     private var writeInProgress = false
     private var writeWaiters: [CheckedContinuation<Void, Never>] = []
 
-    init(database: CoreDataStore = .shared) {
+    init(database: CoreDataStore = .shared, defaults: UserDefaults = .standard) {
         self.database = database
+        self.defaults = defaults
         statistics = WakeStatistics()
         Task { await load() }
     }
@@ -34,26 +37,42 @@ final class StatisticsStore: ObservableObject {
     }
 
     private func loadStoredStatistics() async {
-        if let stored = await database.fetchStatistics() {
+        loaded = false
+        loadFailed = false
+        switch await database.fetchStatistics() {
+        case let .success(stored?):
             statistics = stored
             loaded = true
-            return
-        }
-
-        let key = "awero.statistics.v1"
-        if let data = UserDefaults.standard.data(forKey: key),
-           let legacy = try? JSONDecoder().decode(WakeStatistics.self, from: data) {
-            guard await database.saveStatistics(legacy) else { return }
+        case .failure:
+            loadFailed = true
+        case .success(nil):
+            let key = "awero.statistics.v1"
+            let migrationKey = "awero.coredata.statistics.migrated.v1"
+            guard !defaults.bool(forKey: migrationKey) else {
+                loaded = true
+                return
+            }
+            guard let data = defaults.data(forKey: key) else {
+                defaults.set(true, forKey: migrationKey)
+                loaded = true
+                return
+            }
+            guard let legacy = try? JSONDecoder().decode(WakeStatistics.self, from: data),
+                  await database.saveStatistics(legacy) else {
+                loadFailed = true
+                return
+            }
             statistics = legacy
-            UserDefaults.standard.set(true, forKey: "awero.coredata.statistics.migrated.v1")
+            defaults.set(true, forKey: migrationKey)
+            loaded = true
         }
-        loaded = true
     }
 
     func recordPlanned() async {
         await acquireWrite()
         defer { releaseWrite() }
         await ensureLoaded()
+        guard loaded else { return }
         var next = statistics
         next.planned += 1
         guard await database.saveStatistics(next) else { return }
@@ -65,6 +84,7 @@ final class StatisticsStore: ObservableObject {
         await acquireWrite()
         defer { releaseWrite() }
         await ensureLoaded()
+        guard loaded else { return }
         var next = statistics
         next.completed += session.result == "COMPLETED" ? 1 : 0
         next.snoozes += session.snoozeCount

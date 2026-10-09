@@ -11,7 +11,7 @@ final class WakeSaveRetryTests: XCTestCase {
         await flow.retryPendingAction()
         XCTAssertEqual(flow.state, .ringing)
         XCTAssertNotNil(flow.actionError)
-        let session = await database.fetchActiveWakeSession()
+        let session = try await database.fetchActiveWakeSession().get()
         XCTAssertNil(session?.missionStartedAt)
     }
 
@@ -23,7 +23,7 @@ final class WakeSaveRetryTests: XCTestCase {
         await flow.retryPendingAction()
         XCTAssertEqual(flow.state, .mission)
         XCTAssertEqual(flow.currentMission, .qr)
-        let session = await database.fetchActiveWakeSession()
+        let session = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(session?.fallbackUsed, false)
     }
 
@@ -34,7 +34,7 @@ final class WakeSaveRetryTests: XCTestCase {
         XCTAssertNotNil(flow.actionError)
         await flow.retryPendingAction()
         XCTAssertEqual(flow.state, .mission)
-        let session = await database.fetchActiveWakeSession()
+        let session = try await database.fetchActiveWakeSession().get()
         XCTAssertNotNil(session)
         XCTAssertNil(session?.result)
         XCTAssertNil(session?.completedAt)

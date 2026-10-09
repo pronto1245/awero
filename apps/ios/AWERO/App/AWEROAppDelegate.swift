@@ -43,8 +43,7 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
             guard let id = UUID(uuidString: String(parts[2])) else { return }
             let isTestAlarm = parts[1] == "test" || parts.contains("test")
             Task { @MainActor in
-                guard let alarm = await database.fetchAlarm(id: id), alarm.enabled else { return }
-                await wakeFlow.start(alarm: alarm, scheduledAt: .now, isTestAlarm: isTestAlarm)
+                await loadAndStartAlarm(id: id, isTestAlarm: isTestAlarm)
             }
             return
         }
@@ -57,10 +56,18 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
         }
 
         Task { @MainActor in
-            guard let alarm = await database.fetchAlarm(id: id),
-                  alarm.version == version,
-                  alarm.enabled else { return }
-            await wakeFlow.start(alarm: alarm, scheduledAt: .now)
+            await loadAndStartAlarm(id: id, version: version)
+        }
+    }
+
+    private func loadAndStartAlarm(id: UUID, version: Int? = nil, isTestAlarm: Bool = false) async {
+        switch await database.fetchAlarm(id: id) {
+        case let .success(alarmValue):
+            guard let alarm = alarmValue, alarm.enabled,
+                  version == nil || alarm.version == version else { return }
+            await wakeFlow.start(alarm: alarm, scheduledAt: .now, isTestAlarm: isTestAlarm)
+        case .failure:
+            wakeFlow.presentStorageError()
         }
     }
 }

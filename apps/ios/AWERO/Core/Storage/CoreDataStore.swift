@@ -83,26 +83,24 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchAlarm(id: UUID) async -> Alarm? {
-        await performBackground(onFailure: nil) { context in
+    func fetchAlarm(id: UUID) async -> Result<Alarm?, PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
-            return try? context.fetch(request).first.flatMap(Self.alarm(from:))
+            guard let object = try context.fetch(request).first else { return nil }
+            guard let alarm = Self.alarm(from: object) else { throw Self.invalidRecord() }
+            return alarm
         }
     }
 
     func fetchAlarms() async -> Result<[Alarm], PersistenceError> {
-        await performBackground(onFailure: .failure(.storeUnavailable)) { context in
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.sortDescriptors = [
                 NSSortDescriptor(key: "hour", ascending: true),
                 NSSortDescriptor(key: "minute", ascending: true)
             ]
-            do {
-                return .success(try context.fetch(request).compactMap(Self.alarm(from:)))
-            } catch {
-                return .failure(.readFailed(underlying: error))
-            }
+            return try Self.requireAllMapped(context.fetch(request), transform: Self.alarm(from:))
         }
     }
 
@@ -125,13 +123,13 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchDueSyncOperations() async -> [SyncOperation] {
-        await performBackground(onFailure: []) { context in
+    func fetchDueSyncOperations() async -> Result<[SyncOperation], PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "nextAttemptAt <= %@", Date.now as NSDate)
             request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
             request.fetchLimit = 100
-            return (try? context.fetch(request).compactMap(Self.syncOperation(from:))) ?? []
+            return try Self.requireAllMapped(context.fetch(request), transform: Self.syncOperation(from:))
         }
     }
 
@@ -182,11 +180,11 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchSyncConflicts() async -> [SyncConflictRecord] {
-        await performBackground(onFailure: []) { context in
+    func fetchSyncConflicts() async -> Result<[SyncConflictRecord], PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncConflictRecord")
             request.sortDescriptors = [NSSortDescriptor(key: "detectedAt", ascending: true)]
-            return (try? context.fetch(request).compactMap(Self.syncConflict(from:))) ?? []
+            return try Self.requireAllMapped(context.fetch(request), transform: Self.syncConflict(from:))
         }
     }
 
@@ -213,12 +211,12 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchPendingAnalyticsEvents() async -> [AnalyticsEvent] {
-        await performBackground(onFailure: []) { context in
+    func fetchPendingAnalyticsEvents() async -> Result<[AnalyticsEvent], PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
             request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
             request.fetchLimit = 100
-            return (try? context.fetch(request).compactMap(Self.analyticsEvent(from:))) ?? []
+            return try Self.requireAllMapped(context.fetch(request), transform: Self.analyticsEvent(from:))
         }
     }
 
@@ -253,18 +251,26 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchStatistics() async -> WakeStatistics? {
-        await performBackground(onFailure: nil) { context in
+    func fetchStatistics() async -> Result<WakeStatistics?, PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
             request.predicate = NSPredicate(format: "id == %@", "singleton")
-            guard let object = try? context.fetch(request).first else { return nil }
+            guard let object = try context.fetch(request).first else { return nil }
+            guard let planned = object.value(forKey: "planned") as? Int,
+                  let completed = object.value(forKey: "completed") as? Int,
+                  let snoozes = object.value(forKey: "snoozes") as? Int,
+                  let fallback = object.value(forKey: "fallback") as? Int,
+                  let emergencyStops = object.value(forKey: "emergencyStops") as? Int,
+                  let totalCompletionSeconds = object.value(forKey: "totalCompletionSeconds") as? Int else {
+                throw Self.invalidRecord()
+            }
             return WakeStatistics(
-                planned: object.value(forKey: "planned") as? Int ?? 0,
-                completed: object.value(forKey: "completed") as? Int ?? 0,
-                snoozes: object.value(forKey: "snoozes") as? Int ?? 0,
-                fallback: object.value(forKey: "fallback") as? Int ?? 0,
-                emergencyStops: object.value(forKey: "emergencyStops") as? Int ?? 0,
-                totalCompletionSeconds: object.value(forKey: "totalCompletionSeconds") as? Int ?? 0
+                planned: planned,
+                completed: completed,
+                snoozes: snoozes,
+                fallback: fallback,
+                emergencyStops: emergencyStops,
+                totalCompletionSeconds: totalCompletionSeconds
             )
         }
     }
@@ -299,8 +305,8 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchActiveWakeSession(alarmID: UUID? = nil, isTest: Bool? = nil) async -> WakeSession? {
-        await performBackground(onFailure: nil) { context in
+    func fetchActiveWakeSession(alarmID: UUID? = nil, isTest: Bool? = nil) async -> Result<WakeSession?, PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
             var predicates = [NSPredicate(format: "completedAt == nil")]
             if let alarmID {
@@ -311,19 +317,21 @@ final class CoreDataStore: @unchecked Sendable {
             }
             request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
             request.sortDescriptors = [NSSortDescriptor(key: "scheduledAt", ascending: false)]
-            return try? context.fetch(request).first.flatMap(Self.wakeSession(from:))
+            guard let object = try context.fetch(request).first else { return nil }
+            guard let session = Self.wakeSession(from: object) else { throw Self.invalidRecord() }
+            return session
         }
     }
 
-    func fetchWakeSessions(includeTestAlarms: Bool = false, limit: Int = 200) async -> [WakeSession] {
-        await performBackground(onFailure: []) { context in
+    func fetchWakeSessions(includeTestAlarms: Bool = false, limit: Int = 200) async -> Result<[WakeSession], PersistenceError> {
+        await performRead { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
             if !includeTestAlarms {
                 request.predicate = NSPredicate(format: "isTest == NO")
             }
             request.sortDescriptors = [NSSortDescriptor(key: "scheduledAt", ascending: false)]
             request.fetchLimit = max(1, limit)
-            return (try? context.fetch(request).compactMap(Self.wakeSession(from:))) ?? []
+            return try Self.requireAllMapped(context.fetch(request), transform: Self.wakeSession(from:))
         }
     }
 
@@ -358,14 +366,36 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    private func performBackground<T: Sendable>(
-        onFailure: T,
-        _ work: @escaping @Sendable (NSManagedObjectContext) -> T
-    ) async -> T {
-        guard await waitForPersistentStore() else { return onFailure }
+    private func performRead<T: Sendable>(
+        _ work: @escaping @Sendable (NSManagedObjectContext) throws -> T
+    ) async -> Result<T, PersistenceError> {
+        guard await waitForPersistentStore() else { return .failure(.storeUnavailable) }
         return await container.performBackgroundTask { context in
-            work(context)
+            do {
+                return .success(try work(context))
+            } catch {
+                self.logger.error("Core Data read failed: \(error.localizedDescription, privacy: .public)")
+                return .failure(.readFailed(underlying: error))
+            }
         }
+    }
+
+    private static func requireAllMapped<Source, Destination>(
+        _ values: [Source],
+        transform: (Source) throws -> Destination?
+    ) throws -> [Destination] {
+        try values.map { value in
+            guard let mapped = try transform(value) else { throw invalidRecord() }
+            return mapped
+        }
+    }
+
+    private static func invalidRecord() -> NSError {
+        NSError(
+            domain: "app.awero.persistence",
+            code: 1,
+            userInfo: [NSLocalizedDescriptionKey: "A persisted record could not be decoded."]
+        )
     }
 
     private func waitForPersistentStore() async -> Bool {
@@ -378,18 +408,30 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    private static func syncOperation(from object: NSManagedObject) -> SyncOperation? {
-        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? "") else { return nil }
-        let payloadData = Data((object.value(forKey: "payload") as? String ?? "{}").utf8)
-        let payload = (try? JSONDecoder().decode([String: SyncJSONValue].self, from: payloadData)) ?? [:]
-        return SyncOperation(id: id, operationType: object.value(forKey: "operationType") as? String ?? "", entityType: object.value(forKey: "entityType") as? String ?? "", entityId: object.value(forKey: "entityId") as? String ?? "", clientVersion: object.value(forKey: "clientVersion") as? Int, payload: payload, occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now)
+    private static func syncOperation(from object: NSManagedObject) throws -> SyncOperation? {
+        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? ""),
+              let operationType = object.value(forKey: "operationType") as? String,
+              let entityType = object.value(forKey: "entityType") as? String,
+              let entityId = object.value(forKey: "entityId") as? String,
+              let payloadString = object.value(forKey: "payload") as? String,
+              let occurredAt = object.value(forKey: "occurredAt") as? Date else { return nil }
+        let payload = try JSONDecoder().decode([String: SyncJSONValue].self, from: Data(payloadString.utf8))
+        return SyncOperation(id: id, operationType: operationType, entityType: entityType, entityId: entityId, clientVersion: object.value(forKey: "clientVersion") as? Int, payload: payload, occurredAt: occurredAt)
     }
 
-    private static func syncConflict(from object: NSManagedObject) -> SyncConflictRecord? {
-        guard let operationId = UUID(uuidString: object.value(forKey: "operationId") as? String ?? "") else { return nil }
+    private static func syncConflict(from object: NSManagedObject) throws -> SyncConflictRecord? {
+        guard let operationId = UUID(uuidString: object.value(forKey: "operationId") as? String ?? ""),
+              let localPayloadString = object.value(forKey: "localPayload") as? String,
+              let occurredAt = object.value(forKey: "occurredAt") as? Date,
+              let detectedAt = object.value(forKey: "detectedAt") as? Date else { return nil }
         let decoder = JSONDecoder()
-        let localPayload = (try? decoder.decode([String: SyncJSONValue].self, from: Data((object.value(forKey: "localPayload") as? String ?? "{}").utf8))) ?? [:]
-        let serverEntity = (object.value(forKey: "serverEntityJson") as? String).flatMap { try? decoder.decode(SyncJSONValue.self, from: Data($0.utf8)) }
+        let localPayload = try decoder.decode([String: SyncJSONValue].self, from: Data(localPayloadString.utf8))
+        let serverEntity: SyncJSONValue?
+        if let rawServerEntity = object.value(forKey: "serverEntityJson") as? String {
+            serverEntity = try decoder.decode(SyncJSONValue.self, from: Data(rawServerEntity.utf8))
+        } else {
+            serverEntity = nil
+        }
         return SyncConflictRecord(
             operationId: operationId,
             operationType: object.value(forKey: "operationType") as? String ?? "",
@@ -397,19 +439,22 @@ final class CoreDataStore: @unchecked Sendable {
             entityId: object.value(forKey: "entityId") as? String ?? "",
             clientVersion: object.value(forKey: "clientVersion") as? Int,
             localPayload: localPayload,
-            occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now,
+            occurredAt: occurredAt,
             code: object.value(forKey: "code") as? String ?? "",
             serverVersion: object.value(forKey: "serverVersion") as? Int,
             serverEntity: serverEntity,
-            detectedAt: object.value(forKey: "detectedAt") as? Date ?? .now
+            detectedAt: detectedAt
         )
     }
 
-    private static func analyticsEvent(from object: NSManagedObject) -> AnalyticsEvent? {
-        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? "") else { return nil }
-        let payloadData = Data((object.value(forKey: "payload") as? String ?? "{}").utf8)
-        let payload = (try? JSONDecoder().decode([String: String].self, from: payloadData)) ?? [:]
-        return AnalyticsEvent(id: id, name: object.value(forKey: "name") as? String ?? "", version: object.value(forKey: "version") as? Int ?? 1, payload: payload, occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now)
+    private static func analyticsEvent(from object: NSManagedObject) throws -> AnalyticsEvent? {
+        guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? ""),
+              let name = object.value(forKey: "name") as? String,
+              let version = object.value(forKey: "version") as? Int,
+              let payloadString = object.value(forKey: "payload") as? String,
+              let occurredAt = object.value(forKey: "occurredAt") as? Date else { return nil }
+        let payload = try JSONDecoder().decode([String: String].self, from: Data(payloadString.utf8))
+        return AnalyticsEvent(id: id, name: name, version: version, payload: payload, occurredAt: occurredAt)
     }
 
     private static func wakeSession(from object: NSManagedObject) -> WakeSession? {
@@ -419,21 +464,27 @@ final class CoreDataStore: @unchecked Sendable {
             let alarmIdString = object.value(forKey: "alarmId") as? String,
             let alarmId = UUID(uuidString: alarmIdString),
             let missionRaw = object.value(forKey: "missionType") as? String,
-            let mission = MissionType(rawValue: missionRaw)
+            let mission = MissionType(rawValue: missionRaw),
+            let alarmVersion = object.value(forKey: "alarmVersion") as? Int,
+            let scheduledAt = object.value(forKey: "scheduledAt") as? Date,
+            let snoozeCount = object.value(forKey: "snoozeCount") as? Int,
+            let fallbackUsed = object.value(forKey: "fallbackUsed") as? Bool,
+            let emergencyStop = object.value(forKey: "emergencyStop") as? Bool,
+            let isTest = object.value(forKey: "isTest") as? Bool
         else { return nil }
 
         return WakeSession(
-            id: id, alarmId: alarmId, alarmVersion: object.value(forKey: "alarmVersion") as? Int ?? 1,
-            scheduledAt: object.value(forKey: "scheduledAt") as? Date ?? .now,
+            id: id, alarmId: alarmId, alarmVersion: alarmVersion,
+            scheduledAt: scheduledAt,
             triggeredAt: object.value(forKey: "triggeredAt") as? Date,
             missionStartedAt: object.value(forKey: "missionStartedAt") as? Date,
             completedAt: object.value(forKey: "completedAt") as? Date,
             result: object.value(forKey: "result") as? String, missionType: mission,
             completionTimeSeconds: object.value(forKey: "completionTimeSeconds") as? Int,
-            snoozeCount: object.value(forKey: "snoozeCount") as? Int ?? 0,
-            fallbackUsed: object.value(forKey: "fallbackUsed") as? Bool ?? false,
-            emergencyStop: object.value(forKey: "emergencyStop") as? Bool ?? false,
-            isTest: object.value(forKey: "isTest") as? Bool ?? false
+            snoozeCount: snoozeCount,
+            fallbackUsed: fallbackUsed,
+            emergencyStop: emergencyStop,
+            isTest: isTest
         )
     }
 
@@ -446,26 +497,33 @@ final class CoreDataStore: @unchecked Sendable {
             let missionRaw = object.value(forKey: "missionType") as? String,
             let mission = MissionType(rawValue: missionRaw),
             let difficultyRaw = object.value(forKey: "difficulty") as? String,
-            let difficulty = Difficulty(rawValue: difficultyRaw)
+            let difficulty = Difficulty(rawValue: difficultyRaw),
+            let version = object.value(forKey: "version") as? Int,
+            let hour = object.value(forKey: "hour") as? Int,
+            let minute = object.value(forKey: "minute") as? Int,
+            let enabled = object.value(forKey: "enabled") as? Bool,
+            let weekdays = object.value(forKey: "weekdays") as? String,
+            let maxSnoozes = object.value(forKey: "maxSnoozes") as? Int,
+            let snoozeMinutes = object.value(forKey: "snoozeMinutes") as? Int
         else { return nil }
 
-        let days = Set((object.value(forKey: "weekdays") as? String ?? "")
+        let days = Set(weekdays
             .split(separator: ",")
             .compactMap { Int($0) })
 
         return Alarm(
             id: id,
-            version: object.value(forKey: "version") as? Int ?? 1,
-            hour: object.value(forKey: "hour") as? Int ?? 7,
-            minute: object.value(forKey: "minute") as? Int ?? 30,
-            enabled: object.value(forKey: "enabled") as? Bool ?? true,
+            version: version,
+            hour: hour,
+            minute: minute,
+            enabled: enabled,
             weekdays: days,
             timezoneMode: timezone,
             fixedTimezone: object.value(forKey: "fixedTimezone") as? String,
             missionType: mission,
             difficulty: difficulty,
-            maxSnoozes: object.value(forKey: "maxSnoozes") as? Int ?? 3,
-            snoozeMinutes: object.value(forKey: "snoozeMinutes") as? Int ?? 10,
+            maxSnoozes: maxSnoozes,
+            snoozeMinutes: snoozeMinutes,
             qrExpectedCode: object.value(forKey: "qrExpectedCode") as? String
         )
     }

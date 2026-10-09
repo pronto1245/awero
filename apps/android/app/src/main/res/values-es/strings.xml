@@ -123,4 +123,7 @@
     <string name="settings_alarm_permissions_body">Permite las notificaciones y alarmas de AWERO para recibir los avisos programados.</string>
     <string name="settings_open_system_settings">Abrir ajustes del teléfono</string>
     <string name="settings_back">Volver</string>
+    <string name="home_alarms_load_error_title">No se pudieron cargar las alarmas</string>
+    <string name="home_alarms_load_error_body">AWERO no pudo leer las alarmas guardadas. No se consideran inexistentes. Intenta recuperarlas de nuevo.</string>
+    <string name="home_retry_loading_alarms">Volver a cargar</string>
 </resources>

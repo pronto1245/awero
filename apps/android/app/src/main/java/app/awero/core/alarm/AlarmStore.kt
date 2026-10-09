@@ -85,11 +85,10 @@ class AlarmStore private constructor(
             if (preferences.getBoolean("room_migrated", false)) return
             val ids = preferences.getStringSet("ids", emptySet()).orEmpty()
             for (id in ids) {
-                val raw = preferences.getString("alarm:$id", null) ?: continue
-                val migrated = runCatching {
-                    database.alarms().upsert(AlarmMapper.toEntity(fromJson(JSONObject(raw))))
-                }
-                if (migrated.isFailure) return
+                if (database.alarms().get(id) != null) continue
+                val raw = preferences.getString("alarm:$id", null)
+                    ?: error("Legacy alarm $id is missing; migration was not marked complete.")
+                database.alarms().upsert(AlarmMapper.toEntity(fromJson(JSONObject(raw))))
             }
             preferences.edit().putBoolean("room_migrated", true).apply()
         }

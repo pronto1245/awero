@@ -18,7 +18,7 @@ final class WakeFlowControllerTests: XCTestCase {
         await StartAweroMissionIntent.trigger(alarmID: alarm.id.uuidString, using: flow)
 
         XCTAssertEqual(flow.state, .mission)
-        let activeSession = await database.fetchActiveWakeSession()
+        let activeSession = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(activeSession?.alarmId, alarm.id)
         XCTAssertNotNil(activeSession?.missionStartedAt)
 
@@ -55,9 +55,9 @@ final class WakeFlowControllerTests: XCTestCase {
         await restoredFlow.completeMission()
         XCTAssertEqual(restoredFlow.state, .completed)
 
-        let persisted = await database.fetchActiveWakeSession()
+        let persisted = try await database.fetchActiveWakeSession().get()
         XCTAssertNil(persisted)
-        let statistics = await database.fetchStatistics()
+        let statistics = try await database.fetchStatistics().get()
         XCTAssertEqual(statistics?.completed, 1)
         XCTAssertEqual(statistics?.fallback, 1)
     }
@@ -82,7 +82,7 @@ final class WakeFlowControllerTests: XCTestCase {
 
         XCTAssertEqual(restored.state, .ringing)
         XCTAssertEqual(restored.snoozeCount, 1)
-        let activeSession = await database.fetchActiveWakeSession()
+        let activeSession = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(activeSession?.snoozeCount, 1)
     }
 
@@ -99,11 +99,11 @@ final class WakeFlowControllerTests: XCTestCase {
         await flow.beginMission()
         await flow.completeMission()
 
-        let stats = await database.fetchStatistics()
+        let stats = try await database.fetchStatistics().get()
         XCTAssertNil(stats, "Test alarms must not create real statistics")
-        let realHistory = await database.fetchWakeSessions()
+        let realHistory = try await database.fetchWakeSessions().get()
         XCTAssertTrue(realHistory.isEmpty)
-        let savedTest = await database.fetchWakeSessions(includeTestAlarms: true)
+        let savedTest = try await database.fetchWakeSessions(includeTestAlarms: true).get()
         XCTAssertEqual(savedTest.count, 1)
         XCTAssertTrue(savedTest[0].isTest)
     }
@@ -134,10 +134,10 @@ final class WakeFlowControllerTests: XCTestCase {
         await restored.beginMission()
         await restored.completeMission()
 
-        let stats = await database.fetchStatistics()
+        let stats = try await database.fetchStatistics().get()
         XCTAssertNil(stats, "Test alarms must not create real statistics")
-        let realHistory = await database.fetchWakeSessions()
-        let allHistory = await database.fetchWakeSessions(includeTestAlarms: true)
+        let realHistory = try await database.fetchWakeSessions().get()
+        let allHistory = try await database.fetchWakeSessions(includeTestAlarms: true).get()
         XCTAssertTrue(realHistory.isEmpty)
         XCTAssertEqual(allHistory.count, 1)
     }
@@ -179,7 +179,7 @@ final class WakeFlowControllerTests: XCTestCase {
         XCTAssertEqual(cancelledCount, 0)
         XCTAssertEqual(flow.state, .idle)
         XCTAssertEqual(flow.snoozeCount, 1)
-        let session = await database.fetchActiveWakeSession()
+        let session = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(session?.snoozeCount, 1)
 
         // A later alarm delivery can still use the remaining snooze allowance.
@@ -219,7 +219,7 @@ final class WakeFlowControllerTests: XCTestCase {
         XCTAssertEqual(flow.snoozeCount, 0)
         XCTAssertEqual(scheduledCount, 1)
         XCTAssertEqual(cancelledCount, 1)
-        let sessionAfterFailure = await database.fetchActiveWakeSession()
+        let sessionAfterFailure = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(sessionAfterFailure?.snoozeCount, 0)
 
         let succeeded = await flow.snooze(
@@ -229,7 +229,7 @@ final class WakeFlowControllerTests: XCTestCase {
         XCTAssertTrue(succeeded)
         XCTAssertEqual(flow.state, .idle)
         XCTAssertEqual(flow.snoozeCount, 1)
-        let sessionAfterRetry = await database.fetchActiveWakeSession()
+        let sessionAfterRetry = try await database.fetchActiveWakeSession().get()
         XCTAssertEqual(sessionAfterRetry?.snoozeCount, 1)
     }
 
@@ -252,7 +252,7 @@ final class WakeFlowControllerTests: XCTestCase {
         await flow.beginMission()
         await flow.emergencyStop()
         XCTAssertEqual(flow.state, .emergencyStopped)
-        let activeSession = await database.fetchActiveWakeSession()
+        let activeSession = try await database.fetchActiveWakeSession().get()
         XCTAssertNil(activeSession)
     }
 

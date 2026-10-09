@@ -8,7 +8,7 @@ actor SyncQueueStore {
         await database.saveSyncOperation(operation)
     }
 
-    func due() async -> [SyncOperation] {
+    func due() async -> Result<[SyncOperation], PersistenceError> {
         await database.fetchDueSyncOperations()
     }
 
@@ -24,7 +24,7 @@ actor SyncQueueStore {
         await database.recordSyncConflict(operation, conflict: conflict)
     }
 
-    func conflicts() async -> [SyncConflictRecord] {
+    func conflicts() async -> Result<[SyncConflictRecord], PersistenceError> {
         await database.fetchSyncConflicts()
     }
 

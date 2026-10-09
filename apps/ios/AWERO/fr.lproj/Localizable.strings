@@ -130,3 +130,7 @@
 "home.alarms_load_error_body" = "AWERO n’a pas pu lire vos réveils enregistrés. Ils n’ont pas été supprimés. Réessayez.";
 "home.retry_loading_alarms" = "Réessayer";
 "alarm.error.schedule_incomplete" = "iOS n’a pas pu enregistrer tous les rappels. Choisissez moins de jours ou d’alarmes, puis réessayez.";
+
+"persistence.read_error_title" = "Données de réveil indisponibles";
+"persistence.read_error" = "AWERO n’a pas pu lire les données enregistrées. Elles ne sont pas considérées comme vides. Réessayez pour restaurer l’état du réveil.";
+"persistence.retry_read" = "Réessayer la lecture";

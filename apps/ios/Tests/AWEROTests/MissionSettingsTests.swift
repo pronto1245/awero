@@ -14,7 +14,7 @@ final class MissionSettingsTests: XCTestCase {
         let saved = await store.saveAlarm(alarm)
         XCTAssertTrue(saved)
         let restarted = CoreDataStore(storeURL: url)
-        let restored = await restarted.fetchAlarm(id: alarm.id)
+        let restored = try await restarted.fetchAlarm(id: alarm.id).get()
         XCTAssertEqual(restored?.difficulty, .hard)
         XCTAssertEqual(restored?.qrExpectedCode, originalCode)
 
@@ -23,7 +23,7 @@ final class MissionSettingsTests: XCTestCase {
         let edited = await restarted.saveAlarm(alarm)
         XCTAssertTrue(edited)
         let reopened = CoreDataStore(storeURL: url)
-        let latest = await reopened.fetchAlarm(id: alarm.id)
+        let latest = try await reopened.fetchAlarm(id: alarm.id).get()
         let latestCode = try XCTUnwrap(latest?.qrExpectedCode)
         let mission = QRMission(expectedPayload: latestCode)
         XCTAssertTrue(mission.validate(payload: "0123456789012"))

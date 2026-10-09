@@ -130,3 +130,7 @@
 "home.alarms_load_error_body" = "AWERO no pudo leer tus alarmas guardadas. No se han eliminado. Inténtalo de nuevo.";
 "home.retry_loading_alarms" = "Intentar de nuevo";
 "alarm.error.schedule_incomplete" = "iOS no pudo registrar todos los recordatorios. Elige menos días o alarmas e inténtalo de nuevo.";
+
+"persistence.read_error_title" = "Los datos de alarma no están disponibles";
+"persistence.read_error" = "AWERO no pudo leer los datos guardados. No se consideran vacíos. Vuelve a intentarlo para restaurar el estado de la alarma.";
+"persistence.retry_read" = "Volver a leer";

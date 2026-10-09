@@ -92,7 +92,10 @@ final class AlarmCoordinator {
     }
 
     func repairAll(forceReschedule: Bool = false) async {
-        await store.load()
+        if store.loadState != .loaded {
+            await store.load()
+        }
+        guard store.loadState == .loaded else { return }
         await AlarmRecovery(scheduler: scheduler, store: store).reconcile(forceReschedule: forceReschedule)
     }
 }
