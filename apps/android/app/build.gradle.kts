@@ -18,6 +18,7 @@ android {
         versionCode=1
         versionName="0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["aweroApiBaseUrl"] = providers.gradleProperty("aweroApiBaseUrl").orNull.orEmpty()
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
