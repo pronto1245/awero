@@ -2,6 +2,7 @@ package app.awero.core.alarm
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -26,6 +27,8 @@ import java.util.UUID
 class MissionCameraPermissionFallbackEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
+    private val cameraPermissionInitiallyGranted =
+        context.checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
     private val databaseName = "awero-camera-permission-fallback.db"
     private val database = AweroDatabase.createForTesting(context, databaseName)
     private val testAlarms = AlarmStore(context, database)
@@ -37,7 +40,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
 
     @After
     fun cleanup() = runBlocking {
-        setCameraAppOp("allow")
+        setCameraPermission(cameraPermissionInitiallyGranted)
         activity?.let { current -> instrumentation.runOnMainSync { current.finish() } }
         alarm?.let { current ->
             if (defaultSessions.loadActive()?.alarmId == current.id) defaultSessions.complete()
@@ -68,7 +71,8 @@ class MissionCameraPermissionFallbackEndToEndTest {
         }
         activity = instrumentation.startActivitySync(intent) as WakeAlarmActivity
         awaitCondition("Wake host did not finish initialization") { hasText("Start mission") }
-        setCameraAppOp("deny")
+        setCameraPermission(granted = false)
+        assertEquals(PackageManager.PERMISSION_DENIED, context.checkSelfPermission(android.Manifest.permission.CAMERA))
 
         val flow = WakeFlowController(
             sessions = testSessions,
@@ -98,8 +102,11 @@ class MissionCameraPermissionFallbackEndToEndTest {
         assertTrue(completed.fallbackUsed)
     }
 
-    private fun setCameraAppOp(mode: String) {
-        instrumentation.uiAutomation.executeShellCommand("appops set ${context.packageName} CAMERA $mode").close()
+    private fun setCameraPermission(granted: Boolean) {
+        val action = if (granted) "grant" else "revoke"
+        instrumentation.uiAutomation.executeShellCommand(
+            "pm $action ${context.packageName} ${android.Manifest.permission.CAMERA}"
+        ).close()
     }
 
     private fun solveCurrentMathProblem() = instrumentation.runOnMainSync {
