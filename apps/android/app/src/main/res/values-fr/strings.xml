@@ -111,4 +111,9 @@
     <string name="alarm_error_permission_notifications">Autorisez les notifications AWERO pour que les réveils puissent sonner.</string>
     <string name="alarm_error_permission_fullscreen">Autorisez les alertes plein écran pour AWERO dans les réglages Android.</string>
     <string name="alarm_error_persistence">AWERO n’a pas pu enregistrer le réveil. Vérifiez l’espace disponible puis réessayez.</string>
+    <string name="create_timezone">Fuseau horaire</string>
+    <string name="create_timezone_device">Suivre l’appareil</string>
+    <string name="create_timezone_fixed">Conserver ce fuseau</string>
+    <string name="create_timezone_device_hint">En voyage, l’alarme suit le fuseau de votre appareil.</string>
+    <string name="create_timezone_fixed_hint">En voyage, l’alarme reste sur le fuseau horaire %1$s.</string>
 </resources>

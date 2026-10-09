@@ -111,4 +111,9 @@
     <string name="alarm_error_permission_notifications">Permita as notificações do AWERO para que os alarmes toquem.</string>
     <string name="alarm_error_permission_fullscreen">Permita alertas em tela cheia para o AWERO nas Configurações do Android.</string>
     <string name="alarm_error_persistence">O AWERO não conseguiu salvar o alarme. Verifique o armazenamento disponível e tente novamente.</string>
+    <string name="create_timezone">Fuso horário</string>
+    <string name="create_timezone_device">Seguir dispositivo</string>
+    <string name="create_timezone_fixed">Manter este fuso</string>
+    <string name="create_timezone_device_hint">Em viagens, o alarme acompanha o fuso do dispositivo.</string>
+    <string name="create_timezone_fixed_hint">Em viagens, o alarme permanece no fuso horário %1$s.</string>
 </resources>

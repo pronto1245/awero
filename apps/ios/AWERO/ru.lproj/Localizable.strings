@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Разрешите уведомления AWERO, чтобы будильники могли звонить.";
 "alarm.error.permission_fullscreen" = "Разрешите полноэкранные оповещения AWERO в настройках Android.";
 "alarm.error.persistence" = "Не удалось сохранить будильник AWERO. Проверьте свободное место и повторите попытку.";
+
+"create.timezone" = "Часовой пояс";
+"create.timezone_device" = "Следовать за устройством";
+"create.timezone_fixed" = "Зафиксировать пояс";
+"create.timezone_device_hint" = "В поездках будильник следует часовому поясу устройства.";
+"create.timezone_fixed_hint" = "В поездках будильник остаётся в часовом поясе %1$s.";

@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Autorisez les notifications AWERO pour que les réveils puissent sonner.";
 "alarm.error.permission_fullscreen" = "Autorisez les alertes plein écran pour AWERO dans les réglages Android.";
 "alarm.error.persistence" = "AWERO n’a pas pu enregistrer le réveil. Vérifiez l’espace disponible puis réessayez.";
+
+"create.timezone" = "Fuseau horaire";
+"create.timezone_device" = "Suivre l’appareil";
+"create.timezone_fixed" = "Conserver ce fuseau";
+"create.timezone_device_hint" = "En voyage, l’alarme suit le fuseau de votre appareil.";
+"create.timezone_fixed_hint" = "En voyage, l’alarme reste sur le fuseau horaire %1$s.";

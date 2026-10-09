@@ -26,7 +26,9 @@ class AlarmCoordinator(
         missionType: MissionType = MissionType.MATH,
         difficulty: Difficulty = Difficulty.MEDIUM,
         qrExpectedCode: String? = null,
-        weekdays: Set<Int> = (1..7).toSet()
+        weekdays: Set<Int> = (1..7).toSet(),
+        timezoneMode: TimezoneMode = TimezoneMode.DEVICE_LOCAL,
+        fixedTimezone: String? = null
     ): Alarm {
         val alarm = Alarm(
             id = UUID.randomUUID().toString(),
@@ -35,6 +37,8 @@ class AlarmCoordinator(
             minute = minute,
             enabled = true,
             weekdays = weekdays,
+            timezoneMode = timezoneMode,
+            fixedTimezone = if (timezoneMode == TimezoneMode.FIXED) fixedTimezone else null,
             missionType = missionType,
             difficulty = difficulty,
             qrExpectedCode = qrExpectedCode

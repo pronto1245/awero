@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Permita as notificações do AWERO para que os alarmes toquem.";
 "alarm.error.permission_fullscreen" = "Permita alertas em tela cheia para o AWERO nas Configurações do Android.";
 "alarm.error.persistence" = "O AWERO não conseguiu salvar o alarme. Verifique o armazenamento disponível e tente novamente.";
+
+"create.timezone" = "Fuso horário";
+"create.timezone_device" = "Seguir dispositivo";
+"create.timezone_fixed" = "Manter este fuso";
+"create.timezone_device_hint" = "Em viagens, o alarme acompanha o fuso do dispositivo.";
+"create.timezone_fixed_hint" = "Em viagens, o alarme permanece no fuso horário %1$s.";

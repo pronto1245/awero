@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Allow AWERO notifications so alarms can ring.";
 "alarm.error.permission_fullscreen" = "Allow full-screen alarms for AWERO in Android Settings.";
 "alarm.error.persistence" = "AWERO could not save the alarm. Check available storage and try again.";
+
+"create.timezone" = "Time zone";
+"create.timezone_device" = "Follow device";
+"create.timezone_fixed" = "Keep current zone";
+"create.timezone_device_hint" = "The alarm follows your device time zone when you travel.";
+"create.timezone_fixed_hint" = "The alarm stays in time zone %1$s while you travel.";

@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Erlaube AWERO-Mitteilungen, damit Wecker klingeln können.";
 "alarm.error.permission_fullscreen" = "Erlaube Vollbildalarme für AWERO in den Android-Einstellungen.";
 "alarm.error.persistence" = "AWERO konnte den Wecker nicht speichern. Prüfe den verfügbaren Speicher und versuche es erneut.";
+
+"create.timezone" = "Zeitzone";
+"create.timezone_device" = "Gerätezeitzone folgen";
+"create.timezone_fixed" = "Zeitzone beibehalten";
+"create.timezone_device_hint" = "Auf Reisen folgt der Alarm der Zeitzone deines Geräts.";
+"create.timezone_fixed_hint" = "Auf Reisen bleibt der Alarm in der Zeitzone %1$s.";

@@ -14,6 +14,8 @@ struct CreateAlarmView: View {
     @AppStorage("awero.didExplainAlarmPermission.v1") private var didExplainAlarmPermission = false
 
     @State private var wakeDate: Date
+    @State private var followsDeviceTimezone: Bool
+    @State private var fixedTimezone: String
     @State private var selectedDays: Set<Int>
     @State private var mission: MissionType
     @State private var difficulty: Difficulty
@@ -27,6 +29,8 @@ struct CreateAlarmView: View {
         let calendar = Calendar.current
         let base = calendar.date(from: DateComponents(hour: alarm?.hour ?? 7, minute: alarm?.minute ?? 30)) ?? Date()
         _wakeDate = State(initialValue: base)
+        _followsDeviceTimezone = State(initialValue: alarm?.timezoneMode != .fixed)
+        _fixedTimezone = State(initialValue: alarm?.fixedTimezone ?? TimeZone.current.identifier)
         _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
         _mission = State(initialValue: alarm?.missionType ?? .math)
         _difficulty = State(initialValue: alarm?.difficulty ?? .medium)
@@ -37,6 +41,7 @@ struct CreateAlarmView: View {
         NavigationStack {
             Form {
                 wakeTimeSection
+                timezoneSection
                 daysSection
                 missionSection
                 permissionSection
@@ -99,6 +104,34 @@ struct CreateAlarmView: View {
     private var wakeTimeSection: some View {
         Section {
             DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
+        }
+        .listRowBackground(Color.white)
+    }
+
+    private var timezoneSection: some View {
+        Section {
+            Picker("create.timezone", selection: $followsDeviceTimezone) {
+                Text("create.timezone_device").tag(true)
+                Text("create.timezone_fixed").tag(false)
+            }
+            .pickerStyle(.menu)
+
+            if followsDeviceTimezone {
+                Text("create.timezone_device_hint")
+                    .font(.footnote)
+                    .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+            } else {
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString("create.timezone_fixed_hint", comment: "Fixed alarm time zone description"),
+                        fixedTimezone
+                    )
+                )
+                .font(.footnote)
+                .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+            }
+        } header: {
+            Text("create.timezone")
         }
         .listRowBackground(Color.white)
     }
@@ -177,6 +210,8 @@ struct CreateAlarmView: View {
         next.hour = hour
         next.minute = minute
         next.weekdays = selectedDays
+        next.timezoneMode = followsDeviceTimezone ? .deviceLocal : .fixed
+        next.fixedTimezone = followsDeviceTimezone ? nil : fixedTimezone
         next.missionType = mission
         next.difficulty = difficulty
         let trimmedCode = qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines)

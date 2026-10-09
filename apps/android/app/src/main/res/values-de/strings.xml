@@ -111,4 +111,9 @@
     <string name="alarm_error_permission_notifications">Erlaube AWERO-Mitteilungen, damit Wecker klingeln können.</string>
     <string name="alarm_error_permission_fullscreen">Erlaube Vollbildalarme für AWERO in den Android-Einstellungen.</string>
     <string name="alarm_error_persistence">AWERO konnte den Wecker nicht speichern. Prüfe den verfügbaren Speicher und versuche es erneut.</string>
+    <string name="create_timezone">Zeitzone</string>
+    <string name="create_timezone_device">Gerätezeitzone folgen</string>
+    <string name="create_timezone_fixed">Zeitzone beibehalten</string>
+    <string name="create_timezone_device_hint">Auf Reisen folgt der Alarm der Zeitzone deines Geräts.</string>
+    <string name="create_timezone_fixed_hint">Auf Reisen bleibt der Alarm in der Zeitzone %1$s.</string>
 </resources>

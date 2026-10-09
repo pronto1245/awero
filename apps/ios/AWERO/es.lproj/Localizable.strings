@@ -111,3 +111,9 @@
 "alarm.error.permission_notifications" = "Permite las notificaciones de AWERO para que suenen las alarmas.";
 "alarm.error.permission_fullscreen" = "Permite las alertas a pantalla completa de AWERO en Ajustes de Android.";
 "alarm.error.persistence" = "AWERO no pudo guardar la alarma. Comprueba el espacio disponible e inténtalo de nuevo.";
+
+"create.timezone" = "Zona horaria";
+"create.timezone_device" = "Seguir dispositivo";
+"create.timezone_fixed" = "Mantener esta zona";
+"create.timezone_device_hint" = "Al viajar, la alarma sigue la zona horaria del dispositivo.";
+"create.timezone_fixed_hint" = "Al viajar, la alarma conserva la zona horaria %1$s.";

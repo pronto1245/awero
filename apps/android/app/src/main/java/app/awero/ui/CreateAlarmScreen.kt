@@ -31,8 +31,10 @@ import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmCoordinator
 import app.awero.core.alarm.Difficulty
 import app.awero.core.alarm.MissionType
+import app.awero.core.alarm.TimezoneMode
 import app.awero.core.missions.QRMissionRuntime
 import java.util.Calendar
+import java.util.TimeZone
 
 private val FormIvory = Color(0xFFFFF8EF)
 private val FormNavy = Color(0xFF14294B)
@@ -49,6 +51,8 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
     var mission by remember { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
     var difficulty by remember { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
     var weekdays by remember { mutableStateOf(alarm?.weekdays ?: (1..7).toSet()) }
+    var followsDeviceTimezone by remember { mutableStateOf(alarm?.timezoneMode != TimezoneMode.FIXED) }
+    var fixedTimezone by remember { mutableStateOf(alarm?.fixedTimezone ?: TimeZone.getDefault().id) }
     var qrExpectedCode by remember { mutableStateOf(alarm?.qrExpectedCode.orEmpty()) }
     var showCodeScanner by remember { mutableStateOf(false) }
     var scannerError by remember { mutableStateOf<String?>(null) }
@@ -79,6 +83,30 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
                 ) {
                     Text("%02d:%02d".format(hour, minute), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
                 }
+                Text(stringResource(R.string.create_timezone), color = FormNavy)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FilterChip(
+                        selected = followsDeviceTimezone,
+                        onClick = { followsDeviceTimezone = true },
+                        label = { Text(stringResource(R.string.create_timezone_device)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    FilterChip(
+                        selected = !followsDeviceTimezone,
+                        onClick = { followsDeviceTimezone = false },
+                        label = { Text(stringResource(R.string.create_timezone_fixed)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+                Text(
+                    text = if (followsDeviceTimezone) {
+                        stringResource(R.string.create_timezone_device_hint)
+                    } else {
+                        stringResource(R.string.create_timezone_fixed_hint, fixedTimezone)
+                    },
+                    color = FormNavy.copy(alpha = .7f),
+                    style = MaterialTheme.typography.bodySmall
+                )
                 Text(stringResource(R.string.create_repeat), color = FormNavy)
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
@@ -151,9 +179,14 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
                 scope.launch {
                     try {
                         val code = qrExpectedCode.ifEmpty { null }
-                        if (alarm == null) coordinator.create(hour, minute, mission, difficulty, code, weekdays)
+                        val timezoneMode = if (followsDeviceTimezone) TimezoneMode.DEVICE_LOCAL else TimezoneMode.FIXED
+                        val selectedFixedTimezone = if (followsDeviceTimezone) null else fixedTimezone
+                        if (alarm == null) coordinator.create(
+                            hour, minute, mission, difficulty, code, weekdays, timezoneMode, selectedFixedTimezone
+                        )
                         else coordinator.update(alarm.copy(
                             hour = hour, minute = minute, weekdays = weekdays,
+                            timezoneMode = timezoneMode, fixedTimezone = selectedFixedTimezone,
                             missionType = mission, difficulty = difficulty, qrExpectedCode = code
                         ))
                         onSaved()

@@ -111,4 +111,9 @@
     <string name="alarm_error_permission_notifications">Allow AWERO notifications so alarms can ring.</string>
     <string name="alarm_error_permission_fullscreen">Allow full-screen alarms for AWERO in Android Settings.</string>
     <string name="alarm_error_persistence">AWERO could not save the alarm. Check available storage and try again.</string>
+    <string name="create_timezone">Time zone</string>
+    <string name="create_timezone_device">Follow device</string>
+    <string name="create_timezone_fixed">Keep current zone</string>
+    <string name="create_timezone_device_hint">The alarm follows your device time zone when you travel.</string>
+    <string name="create_timezone_fixed_hint">The alarm stays in time zone %1$s while you travel.</string>
 </resources>

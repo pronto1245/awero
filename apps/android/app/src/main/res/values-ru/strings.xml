@@ -111,4 +111,9 @@
     <string name="alarm_error_permission_notifications">Разрешите уведомления AWERO, чтобы будильники могли звонить.</string>
     <string name="alarm_error_permission_fullscreen">Разрешите полноэкранные оповещения AWERO в настройках Android.</string>
     <string name="alarm_error_persistence">Не удалось сохранить будильник AWERO. Проверьте свободное место и повторите попытку.</string>
+    <string name="create_timezone">Часовой пояс</string>
+    <string name="create_timezone_device">Следовать за устройством</string>
+    <string name="create_timezone_fixed">Зафиксировать пояс</string>
+    <string name="create_timezone_device_hint">В поездках будильник следует часовому поясу устройства.</string>
+    <string name="create_timezone_fixed_hint">В поездках будильник остаётся в часовом поясе %1$s.</string>
 </resources>
