@@ -32,7 +32,7 @@ class WakeFlowControllerTest {
     }
 
     @Test
-    fun duplicateTriggerRestoresTheExistingSession() = runBlocking {
+    fun distinctAlarmTriggerStartsAnIndependentWakeSession() = runBlocking {
         val store = AlarmStore(context, database)
         val sessions = WakeSessionStore(context, database)
         val stats = StatisticsStore(context, database)
@@ -46,10 +46,13 @@ class WakeFlowControllerTest {
         flow.beginMission()
         flow.start(second, 2_000L)
 
-        assertEquals(WakeFlowController.State.MISSION, flow.state.value)
-        assertEquals(first.id, flow.currentAlarm.value?.id)
+        assertEquals(WakeFlowController.State.RINGING, flow.state.value)
+        assertEquals(second.id, flow.currentAlarm.value?.id)
         assertEquals(MissionType.MATH, flow.mission.value)
-        assertEquals(1, stats.statistics().planned)
+        assertEquals(2, stats.statistics().planned)
+        assertEquals(first.id, sessions.loadActive(first.id, false)?.alarmId)
+        assertTrue(sessions.loadActive(first.id, false)?.missionStartedAt != null)
+        assertEquals(second.id, sessions.loadActive(second.id, false)?.alarmId)
     }
 
     @Test

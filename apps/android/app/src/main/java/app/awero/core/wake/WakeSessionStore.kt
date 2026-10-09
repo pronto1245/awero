@@ -135,10 +135,10 @@ class WakeSessionStore(
             entity?.let(WakeSessionMapper::fromEntity).also { active = it }
         }
 
-    suspend fun load(): List<WakeSession> {
+    suspend fun load(includeTestAlarms: Boolean = false): List<WakeSession> {
         return transitionMutex.withLock {
             migrateLegacyIfNeeded()
-            database.wakeSessions().recent().map(WakeSessionMapper::fromEntity)
+            database.wakeSessions().recent(includeTestAlarms).map(WakeSessionMapper::fromEntity)
         }
     }
 

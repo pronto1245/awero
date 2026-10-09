@@ -115,7 +115,7 @@ class WakeSaveRetryEndToEndTest {
             hasText("YOU'RE UP") && runBlocking { testSessions.loadActive() == null }
         }
         assertEquals(2, completionAttempts)
-        assertEquals("SUCCESS", testSessions.load().single().result)
+        assertEquals("SUCCESS", testSessions.load(includeTestAlarms = true).single().result)
     }
 
     private fun hasText(expected: String): Boolean {

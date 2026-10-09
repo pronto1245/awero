@@ -97,7 +97,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
         awaitCondition("Fallback mission did not complete") {
             hasText("YOU'RE UP") && runBlocking { testSessions.loadActive() == null }
         }
-        val completed = testSessions.load().single()
+        val completed = testSessions.load(includeTestAlarms = true).single()
         assertEquals("SUCCESS", completed.result)
         assertTrue(completed.fallbackUsed)
     }

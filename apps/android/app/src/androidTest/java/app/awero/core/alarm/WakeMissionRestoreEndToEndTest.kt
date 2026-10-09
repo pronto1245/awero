@@ -36,20 +36,19 @@ class WakeMissionRestoreEndToEndTest {
     @Test
     fun repeatedDeliveryShowsRestoredMathFallbackAndCanComplete() = runBlocking {
         val original = alarm(MissionType.QR)
-        val incoming = alarm(MissionType.MATH)
-        savedAlarms.addAll(listOf(original, incoming))
+        savedAlarms.add(original)
         savedAlarms.forEach { alarms.save(it) }
-        assertTrue(sessions.start(original, 1_000L))
+        assertTrue(sessions.start(original, 1_000L, isTest = true))
         assertTrue(sessions.startMission())
         assertTrue(sessions.markFallback())
         val sessionId = sessions.loadActive()!!.id
 
-        // A duplicate delivery must resume the persisted mission, even when the
-        // incoming alarm has a different type. No camera or network is needed.
+        // A duplicate delivery for the same test alarm resumes the persisted
+        // fallback mission without starting another wake session.
         val intent = Intent(context, WakeAlarmActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra(AlarmScheduler.EXTRA_ID, incoming.id)
-            putExtra(AlarmScheduler.EXTRA_VERSION, incoming.version)
+            putExtra(AlarmScheduler.EXTRA_ID, original.id)
+            putExtra(AlarmScheduler.EXTRA_VERSION, original.version)
             putExtra(AlarmScheduler.EXTRA_AT, 2_000L)
             putExtra(AlarmScheduler.EXTRA_TEST, true)
         }
@@ -84,7 +83,7 @@ class WakeMissionRestoreEndToEndTest {
             }
             completed
         }
-        val completed = sessions.load().single { it.id == sessionId }
+        val completed = sessions.load(includeTestAlarms = true).single { it.id == sessionId }
         assertEquals("SUCCESS", completed.result)
         assertTrue(completed.fallbackUsed)
     }
