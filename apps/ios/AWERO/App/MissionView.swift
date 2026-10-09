@@ -122,6 +122,10 @@ private struct QRMissionView: View {
     let timeout: Duration
     @StateObject private var runtime = QRMissionRuntime()
     @ScaledMetric(relativeTo: .largeTitle) private var qrTitleSize: CGFloat = 32
+    private var mission: QRMission? {
+        guard let expected, !expected.isEmpty else { return nil }
+        return QRMission(expectedPayload: expected)
+    }
 
     var body: some View {
         VStack(spacing: 18) {
@@ -139,7 +143,7 @@ private struct QRMissionView: View {
                     .foregroundStyle(WakePalette.navy.opacity(0.6))
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
-            } else if let scannedCode = runtime.scannedCode, scannedCode != expected {
+            } else if let scannedCode = runtime.scannedCode, mission?.validate(payload: scannedCode) == false {
                 Text("mission.qr_mismatch")
                     .foregroundStyle(WakePalette.navy.opacity(0.7))
             } else {
@@ -178,7 +182,7 @@ private struct QRMissionView: View {
             let deadline = ContinuousClock.now.advanced(by: timeout)
             while !Task.isCancelled {
                 if let scannedCode = runtime.scannedCode {
-                    if scannedCode == expected {
+                    if mission?.validate(payload: scannedCode) == true {
                         onSuccess()
                     } else {
                         onFailure()

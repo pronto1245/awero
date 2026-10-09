@@ -1,14 +1,5 @@
 package app.awero.core.missions
 
-import app.awero.core.alarm.Difficulty
-
-class QRMission(
-    private val difficulty: Difficulty,
-    private val expectedPayload: String
-) : Mission {
-    override fun start() {}
-    override fun retry() {}
-    override fun validate(): Boolean = false
-
+class QRMission(private val expectedPayload: String) {
     fun validatePayload(payload: String): Boolean = payload == expectedPayload
 }

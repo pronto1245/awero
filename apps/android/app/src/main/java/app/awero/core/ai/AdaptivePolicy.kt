@@ -1,6 +1,6 @@
 package app.awero.core.ai
 
-import app.awero.core.missions.MissionType
+import app.awero.core.alarm.MissionType
 import app.awero.core.statistics.WakeStatistics
 
 data class Recommendation(val mission:MissionType,val difficulty:String,val reasonCode:String,val confidence:Double)

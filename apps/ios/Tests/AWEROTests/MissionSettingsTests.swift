@@ -25,7 +25,7 @@ final class MissionSettingsTests: XCTestCase {
         let reopened = CoreDataStore(storeURL: url)
         let latest = await reopened.fetchAlarm(id: alarm.id)
         let latestCode = try XCTUnwrap(latest?.qrExpectedCode)
-        let mission = QRMission(difficulty: .hard, expectedPayload: latestCode)
+        let mission = QRMission(expectedPayload: latestCode)
         XCTAssertTrue(mission.validate(payload: "0123456789012"))
         XCTAssertFalse(mission.validate(payload: originalCode))
         XCTAssertEqual(latest?.version, 2)

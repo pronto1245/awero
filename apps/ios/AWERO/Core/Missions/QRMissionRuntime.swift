@@ -67,7 +67,4 @@ final class QRMissionRuntime: NSObject, ObservableObject, AVCaptureMetadataOutpu
         }
     }
 
-    func matches(expected: String) -> Bool {
-        scannedCode == expected
-    }
 }

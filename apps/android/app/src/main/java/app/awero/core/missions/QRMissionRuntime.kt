@@ -88,12 +88,6 @@ class QRMissionRuntime(private val context: Context) {
         }, androidx.core.content.ContextCompat.getMainExecutor(context))
     }
 
-    fun accept(code: String) {
-        if (!closed) scannedCode = code
-    }
-
-    fun matches(expected: String) = scannedCode == expected
-
     fun close() {
         if (closed) return
         closed = true

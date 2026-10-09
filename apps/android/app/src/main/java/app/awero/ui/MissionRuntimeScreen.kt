@@ -117,6 +117,7 @@ object MissionRuntimeScreen {
                         setOnClickListener { finish(false) }
                     })
                 } else {
+                    val mission = app.awero.core.missions.QRMission(expected)
                     root.addView(label(activity.getString(R.string.mission_qr_title), 24f))
                     val preview = PreviewView(activity).apply {
                         contentDescription = activity.getString(R.string.mission_qr_instructions)
@@ -136,9 +137,9 @@ object MissionRuntimeScreen {
                         runtime.close()
                         activity.lifecycle.removeObserver(lifecycleObserver)
                     }
-                    runtime.start(activity, preview) {
+                    runtime.start(activity, preview) { scannedCode ->
                         activity.runOnUiThread {
-                            finish(runtime.matches(expected))
+                            finish(mission.validatePayload(scannedCode))
                         }
                     }
                     root.addView(Button(activity).apply {

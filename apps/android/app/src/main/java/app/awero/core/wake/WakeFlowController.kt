@@ -81,13 +81,14 @@ class WakeFlowController(
 
     suspend fun fallbackToMath(): Boolean {
         if (_state.value != State.MISSION) return false
+        val fallback = MissionFallbackPolicy.nextAfter(_mission.value) ?: return false
         _actionError.value = null
         val saved = runCatching { sessions.markFallback() }.getOrDefault(false)
         if (!saved) {
             _actionError.value = "Could not save the fallback. Your wake session is still active."
             return false
         }
-        _mission.value = MissionType.MATH
+        _mission.value = fallback
         return true
     }
 

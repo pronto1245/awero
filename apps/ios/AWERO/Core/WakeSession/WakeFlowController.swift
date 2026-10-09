@@ -77,6 +77,7 @@ final class WakeFlowController: ObservableObject {
 
     func fallbackToMath() async {
         guard !actionInProgress, state == .mission else { return }
+        guard let fallback = MissionFallbackPolicy.next(after: currentMission) else { return }
         actionInProgress = true
         defer { actionInProgress = false }
         guard await sessionManager.markFallback() else {
@@ -86,7 +87,7 @@ final class WakeFlowController: ObservableObject {
         }
         pendingAction = nil
         actionError = nil
-        currentMission = .math
+        currentMission = fallback
     }
 
     func completeMission() async {

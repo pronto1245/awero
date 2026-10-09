@@ -1,20 +1,10 @@
 import Foundation
 
-struct QRMission: Mission {
-    let type: MissionType = .qr
-    let difficulty: Difficulty
+struct QRMission {
     let expectedPayload: String
 
-    init(difficulty: Difficulty, expectedPayload: String) {
-        self.difficulty = difficulty
+    init(expectedPayload: String) {
         self.expectedPayload = expectedPayload
-    }
-
-    func start() {}
-    func retry() {}
-
-    func validate() -> Bool {
-        false
     }
 
     func validate(payload: String) -> Bool {
