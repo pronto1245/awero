@@ -141,6 +141,7 @@ const expectedAndroid = new Set([
   "settings_alarm_permissions_title",
   "settings_alarm_permissions_body",
   "settings_open_system_settings",
+  "settings_back",
 ]);
 const expectedIOS = new Set([
   "alarm.status.scheduled",
