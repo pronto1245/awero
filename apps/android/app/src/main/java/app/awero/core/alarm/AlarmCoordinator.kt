@@ -25,7 +25,8 @@ class AlarmCoordinator(
         minute: Int,
         missionType: MissionType = MissionType.MATH,
         difficulty: Difficulty = Difficulty.MEDIUM,
-        qrExpectedCode: String? = null
+        qrExpectedCode: String? = null,
+        weekdays: Set<Int> = (1..7).toSet()
     ): Alarm {
         val alarm = Alarm(
             id = UUID.randomUUID().toString(),
@@ -33,6 +34,7 @@ class AlarmCoordinator(
             hour = hour,
             minute = minute,
             enabled = true,
+            weekdays = weekdays,
             missionType = missionType,
             difficulty = difficulty,
             qrExpectedCode = qrExpectedCode

@@ -184,3 +184,6 @@ The first read-only audit of anonymous auth, alarm ownership/versioning, wake-se
 ## Phase 6 — active
 
 The first UX/localization slice updates the iOS and Android home screens to the approved warm ivory, navy and coral design. It selects the next enabled alarm using each alarm’s configured timezone, shows repeat days and mission, supports enable/disable, and explains that the first alarm works offline without an account. Home-screen copy and actions now have matching keys in English, Russian, Brazilian Portuguese, French, German and Spanish; the locale parity check covers those keys. Alarm setup, permission education and mission/settings/notification copy remain open in Phase 6.
+
+
+The second Phase 6 slice completes the alarm setup flow on both platforms: repeat-day selection, localized mission/difficulty controls, QR setup guidance, and permission explanations. iOS now shows its notification-permission explanation before the first system request instead of requesting access at app launch. Android persists selected repeat days and offers Settings when required access blocks saving. Setup copy has exact six-locale key parity.

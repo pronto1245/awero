@@ -1,10 +1,16 @@
 import SwiftUI
-import AVFoundation
+
+private enum CreateAweroStyle {
+    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
+    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
+    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
+}
 
 struct CreateAlarmView: View {
     let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("awero.didExplainAlarmPermission.v1") private var didExplainAlarmPermission = false
 
     @State private var wakeDate: Date
     @State private var selectedDays: Set<Int>
@@ -12,15 +18,13 @@ struct CreateAlarmView: View {
     @State private var difficulty: Difficulty
     @State private var qrExpectedCode: String
     @State private var showCodeScanner = false
+    @State private var showingPermissionIntro = false
     @State private var saveError: String?
 
     init(alarm: Alarm? = nil) {
         self.alarm = alarm
         let calendar = Calendar.current
-        let base = calendar.date(from: DateComponents(
-            hour: alarm?.hour ?? 7,
-            minute: alarm?.minute ?? 30
-        )) ?? Date()
+        let base = calendar.date(from: DateComponents(hour: alarm?.hour ?? 7, minute: alarm?.minute ?? 30)) ?? Date()
         _wakeDate = State(initialValue: base)
         _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
         _mission = State(initialValue: alarm?.missionType ?? .math)
@@ -34,21 +38,53 @@ struct CreateAlarmView: View {
                 wakeTimeSection
                 daysSection
                 missionSection
-                saveSection
+                permissionSection
             }
-            .navigationTitle(alarm == nil ? "Create Alarm" : "Edit Alarm")
-            .alert("Alarm not scheduled", isPresented: Binding(
+            .scrollContentBackground(.hidden)
+            .background(CreateAweroStyle.ivory)
+            .tint(CreateAweroStyle.coral)
+            .navigationTitle(alarm == nil ? "create.title" : "create.edit_title")
+            .alert("permission.ios_alarm_title", isPresented: $showingPermissionIntro) {
+                Button("permission.continue") {
+                    didExplainAlarmPermission = true
+                    Task {
+                        do {
+                            _ = try await AlarmScheduler().requestAuthorization()
+                            saveAlarmNow()
+                        } catch {
+                            saveError = error.localizedDescription
+                        }
+                    }
+                }
+                Button("create.cancel", role: .cancel) {}
+            } message: {
+                Text("permission.ios_alarm_body")
+            }
+            .alert("create.error_title", isPresented: Binding(
                 get: { saveError != nil },
                 set: { if !$0 { saveError = nil } }
             )) {
-                Button("OK", role: .cancel) { saveError = nil }
+                Button("home.ok", role: .cancel) { saveError = nil }
             } message: {
-                Text(saveError ?? "Please try again.")
+                Text(saveError ?? "alarm.status.errorBody")
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("create.cancel") { dismiss() }
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button(alarm == nil ? "create.save" : "create.save_changes", action: saveAlarm)
+                    .disabled((mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) || selectedDays.isEmpty)
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(CreateAweroStyle.coral)
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
+                    .background(CreateAweroStyle.ivory.opacity(0.96))
             }
         }
         .sheet(isPresented: $showCodeScanner) {
@@ -60,95 +96,112 @@ struct CreateAlarmView: View {
     }
 
     private var wakeTimeSection: some View {
-        DatePicker(
-            "Wake time",
-            selection: $wakeDate,
-            displayedComponents: .hourAndMinute
-        )
+        Section {
+            DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
+        }
+        .listRowBackground(Color.white)
     }
 
     private var daysSection: some View {
-        Section("Days") {
+        Section {
             ForEach(1...7, id: \.self) { day in
                 Toggle(
-                    "Day \(day)",
+                    weekdayKey(day),
                     isOn: Binding(
                         get: { selectedDays.contains(day) },
                         set: { enabled in
-                            if enabled {
-                                selectedDays.insert(day)
-                            } else {
-                                selectedDays.remove(day)
-                            }
+                            if enabled { selectedDays.insert(day) }
+                            else { selectedDays.remove(day) }
                         }
                     )
                 )
             }
+            if selectedDays.isEmpty {
+                Text("create.no_weekdays").font(.footnote).foregroundStyle(CreateAweroStyle.coral)
+            }
+        } header: {
+            Text("create.repeat")
         }
+        .listRowBackground(Color.white)
     }
 
     private var missionSection: some View {
-        Section("Wake mission") {
-            Picker("Mission", selection: $mission) {
-                Text("Math").tag(MissionType.math)
-                Text("Steps").tag(MissionType.steps)
-                Text("QR/barcode").tag(MissionType.qr)
+        Section {
+            Picker("create.mission", selection: $mission) {
+                Text("home.mission.math").tag(MissionType.math)
+                Text("home.mission.steps").tag(MissionType.steps)
+                Text("home.mission.qr").tag(MissionType.qr)
             }
             if mission == .math {
-                Picker("Difficulty", selection: $difficulty) {
-                    Text("Easy").tag(Difficulty.easy)
-                    Text("Medium").tag(Difficulty.medium)
-                    Text("Hard").tag(Difficulty.hard)
+                Picker("create.difficulty", selection: $difficulty) {
+                    Text("difficulty.easy").tag(Difficulty.easy)
+                    Text("difficulty.medium").tag(Difficulty.medium)
+                    Text("difficulty.hard").tag(Difficulty.hard)
                 }
             }
             if mission == .qr {
-                Button("Scan QR/barcode") { showCodeScanner = true }
-                TextField("QR/barcode content", text: $qrExpectedCode)
+                Text("permission.camera_body").font(.caption)
+                Button("create.scan") { showCodeScanner = true }
+                TextField("create.qr_content", text: $qrExpectedCode)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Text("Scan a code where you want to wake up, or enter its exact content.")
-                    .font(.caption)
+                Text("create.qr_instructions").font(.caption)
             }
+        } header: {
+            Text("create.mission")
         }
+        .listRowBackground(Color.white)
     }
 
-    private var saveSection: some View {
-        Button(alarm == nil ? "Save alarm" : "Save changes") {
-            saveAlarm()
+    private var permissionSection: some View {
+        Section {
+            Text("permission.ios_alarm_body").font(.footnote)
         }
-        .disabled(mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        .listRowBackground(Color(red: 1, green: 0.937, blue: 0.859))
     }
 
     private func saveAlarm() {
+        if alarm == nil && !didExplainAlarmPermission {
+            showingPermissionIntro = true
+        } else {
+            saveAlarmNow()
+        }
+    }
+
+    private func saveAlarmNow() {
         let components = Calendar.current.dateComponents([.hour, .minute], from: wakeDate)
         let hour = components.hour ?? 7
         let minute = components.minute ?? 30
-
-        var next = alarm ?? Alarm(
-            hour: hour,
-            minute: minute,
-            weekdays: selectedDays,
-            missionType: mission
-        )
+        var next = alarm ?? Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
         next.hour = hour
         next.minute = minute
         next.weekdays = selectedDays
         next.missionType = mission
         next.difficulty = difficulty
-        next.qrExpectedCode = qrExpectedCode.isEmpty ? nil : qrExpectedCode
+        let trimmedCode = qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        next.qrExpectedCode = trimmedCode.isEmpty ? nil : trimmedCode
 
         Task {
             let coordinator = AlarmCoordinator(store: store)
             do {
-                if alarm == nil {
-                    try await coordinator.create(next)
-                } else {
-                    try await coordinator.update(next)
-                }
+                if alarm == nil { try await coordinator.create(next) }
+                else { try await coordinator.update(next) }
                 dismiss()
             } catch {
                 saveError = error.localizedDescription
             }
+        }
+    }
+
+    private func weekdayKey(_ day: Int) -> LocalizedStringKey {
+        switch day {
+        case 1: "day.sunday"
+        case 2: "day.monday"
+        case 3: "day.tuesday"
+        case 4: "day.wednesday"
+        case 5: "day.thursday"
+        case 6: "day.friday"
+        default: "day.saturday"
         }
     }
 }
@@ -162,18 +215,17 @@ private struct AlarmCodeScanner: View {
         NavigationStack {
             VStack(spacing: 18) {
                 if runtime.cameraUnavailable {
-                    Text("Camera is unavailable. You can enter the code content manually.")
+                    Text("permission.camera_unavailable")
                 } else {
-                    QRPreview(session: runtime.session)
-                        .frame(height: 300)
-                    Text("Point the camera at the QR or barcode you will use in the morning.")
+                    QRPreview(session: runtime.session).frame(height: 300)
+                    Text("create.point_camera")
                 }
             }
             .padding()
-            .navigationTitle("Scan QR/barcode")
+            .navigationTitle("create.scan")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("create.cancel") { dismiss() }
                 }
             }
             .task {
