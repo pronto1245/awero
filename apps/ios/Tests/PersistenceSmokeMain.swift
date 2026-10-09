@@ -519,7 +519,9 @@ struct PersistenceSmokeMain {
 
         if phase == "read" {
             let store = CoreDataStore(storeURL: storeURL)
-            let alarms = await store.fetchAlarms()
+            guard case let .success(alarms) = await store.fetchAlarms() else {
+                fatalError("Could not read alarms after process restart")
+            }
             precondition(alarms.count == 1)
             precondition(alarms[0].hour == 7)
             let session = await store.fetchActiveWakeSession()

@@ -4,6 +4,8 @@ import os
 
 enum PersistenceError: Error {
     case saveFailed(underlying: Error)
+    case readFailed(underlying: Error)
+    case storeUnavailable
 }
 
 final class CoreDataStore: @unchecked Sendable {
@@ -89,14 +91,18 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func fetchAlarms() async -> [Alarm] {
-        await performBackground(onFailure: []) { context in
+    func fetchAlarms() async -> Result<[Alarm], PersistenceError> {
+        await performBackground(onFailure: .failure(.storeUnavailable)) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.sortDescriptors = [
                 NSSortDescriptor(key: "hour", ascending: true),
                 NSSortDescriptor(key: "minute", ascending: true)
             ]
-            return (try? context.fetch(request).compactMap(Self.alarm(from:))) ?? []
+            do {
+                return .success(try context.fetch(request).compactMap(Self.alarm(from:)))
+            } catch {
+                return .failure(.readFailed(underlying: error))
+            }
         }
     }
 

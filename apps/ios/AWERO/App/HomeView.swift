@@ -77,7 +77,29 @@ struct HomeView: View {
                             .font(.title3.bold())
                             .foregroundStyle(AweroStyle.navy)
 
-                        if alarms.alarms.isEmpty {
+                        if alarms.loadState == .loading {
+                            ProgressView("home.loading_alarms")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(22)
+                                .background(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 22))
+                        } else if alarms.loadState == .failed {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("home.alarms_load_error_title").font(.title3.bold())
+                                Text("home.alarms_load_error_body")
+                                    .foregroundStyle(AweroStyle.navy.opacity(0.7))
+                                Button("home.retry_loading_alarms") {
+                                    Task { await alarms.load() }
+                                }
+                                .font(.headline)
+                                .foregroundStyle(AweroStyle.coral)
+                            }
+                            .foregroundStyle(AweroStyle.navy)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(22)
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 22))
+                        } else if alarms.alarms.isEmpty {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("home.empty_title").font(.title3.bold())
                                 Text("home.empty_body").foregroundStyle(AweroStyle.navy.opacity(0.7))

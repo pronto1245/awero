@@ -124,3 +124,8 @@
 "settings.alarm_permissions_title" = "Autorisations de l’alarme";
 "settings.alarm_permissions_body" = "Autorisez les notifications et les alarmes AWERO pour recevoir les alertes programmées.";
 "settings.open_system_settings" = "Ouvrir les réglages du téléphone";
+
+"home.loading_alarms" = "Chargement des réveils…";
+"home.alarms_load_error_title" = "Impossible de charger les réveils";
+"home.alarms_load_error_body" = "AWERO n’a pas pu lire vos réveils enregistrés. Ils n’ont pas été supprimés. Réessayez.";
+"home.retry_loading_alarms" = "Réessayer";

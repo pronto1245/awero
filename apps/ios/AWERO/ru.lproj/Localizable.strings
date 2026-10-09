@@ -124,3 +124,8 @@
 "settings.alarm_permissions_title" = "Разрешения будильника";
 "settings.alarm_permissions_body" = "Разрешите уведомления и работу будильников AWERO, чтобы запланированные сигналы срабатывали.";
 "settings.open_system_settings" = "Открыть настройки телефона";
+
+"home.loading_alarms" = "Загрузка будильников…";
+"home.alarms_load_error_title" = "Не удалось загрузить будильники";
+"home.alarms_load_error_body" = "AWERO не удалось прочитать сохранённые будильники. Данные не удалены. Повторите попытку.";
+"home.retry_loading_alarms" = "Повторить";

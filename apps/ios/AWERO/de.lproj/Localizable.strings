@@ -124,3 +124,8 @@
 "settings.alarm_permissions_title" = "Weckerberechtigungen";
 "settings.alarm_permissions_body" = "Erlaube AWERO Benachrichtigungen und Wecker, damit geplante Alarme ausgelöst werden.";
 "settings.open_system_settings" = "Telefoneinstellungen öffnen";
+
+"home.loading_alarms" = "Wecker werden geladen…";
+"home.alarms_load_error_title" = "Wecker konnten nicht geladen werden";
+"home.alarms_load_error_body" = "AWERO konnte deine gespeicherten Wecker nicht lesen. Sie wurden nicht gelöscht. Versuche es erneut.";
+"home.retry_loading_alarms" = "Erneut versuchen";

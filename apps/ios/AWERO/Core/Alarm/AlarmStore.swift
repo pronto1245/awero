@@ -1,8 +1,15 @@
 import Foundation
 
+enum AlarmStoreLoadState: Equatable {
+    case loading
+    case loaded
+    case failed
+}
+
 @MainActor
 final class AlarmStore: ObservableObject {
     @Published private(set) var alarms: [Alarm] = []
+    @Published private(set) var loadState: AlarmStoreLoadState = .loading
     private let database: CoreDataStore
 
     init(database: CoreDataStore = .shared) {
@@ -11,8 +18,14 @@ final class AlarmStore: ObservableObject {
     }
 
     func load() async {
-        alarms = await database.fetchAlarms()
+        loadState = .loading
+        guard case let .success(loadedAlarms) = await database.fetchAlarms() else {
+            loadState = .failed
+            return
+        }
+        alarms = loadedAlarms
         await migrateLegacyIfNeeded()
+        loadState = .loaded
     }
 
     @discardableResult
@@ -56,12 +69,15 @@ final class AlarmStore: ObservableObject {
             await database.saveAlarm(alarm)
         }
 
-        let persistedIds = Set((await database.fetchAlarms()).map(\.id))
+        guard case let .success(persistedAlarms) = await database.fetchAlarms() else {
+            return
+        }
+        let persistedIds = Set(persistedAlarms.map(\.id))
         guard legacy.allSatisfy({ persistedIds.contains($0.id) }) else {
             return
         }
 
-        alarms = await database.fetchAlarms()
+        alarms = persistedAlarms
         UserDefaults.standard.set(true, forKey: key)
     }
 }

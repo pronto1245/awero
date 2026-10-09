@@ -124,3 +124,8 @@
 "settings.alarm_permissions_title" = "Permissões do alarme";
 "settings.alarm_permissions_body" = "Permita notificações e alarmes do AWERO para receber os alertas programados.";
 "settings.open_system_settings" = "Abrir ajustes do celular";
+
+"home.loading_alarms" = "Carregando alarmes…";
+"home.alarms_load_error_title" = "Não foi possível carregar os alarmes";
+"home.alarms_load_error_body" = "O AWERO não conseguiu ler seus alarmes salvos. Eles não foram apagados. Tente novamente.";
+"home.retry_loading_alarms" = "Tentar novamente";
