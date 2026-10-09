@@ -21,7 +21,7 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 - Warm ivory surfaces, deep navy text, sunrise coral for primary actions, and restrained sage for positive progress.
 - Clear type hierarchy, large time and mission content, rounded cards, comfortable touch targets, and strong contrast.
 - Keep wake screens focused and legible. The active wake screen currently uses the light palette; low-light behavior remains a separate design check.
-- User-facing copy, including settings, is localized in English, Russian, Brazilian Portuguese, French, German, and Spanish. Automated key parity and CI are green. The required per-locale walkthrough and VoiceOver/TalkBack review remain the final Phase 6 checks.
+- Localization resources and automated key-parity checks cover English, Russian, Brazilian Portuguese, French, German, and Spanish. The user reports the iPhone walkthrough/manual checks are complete; do not request or repeat them. Source audit still identifies hard-coded active alarm-delivery strings and accessibility/localization implementation gaps that must be fixed before Phase 6 acceptance.
 
 ## Acceptance criteria
 
@@ -32,4 +32,4 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 
 ## Current implementation boundary
 
-Home, alarm setup, wake/mission, and Settings are implemented on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs. Phase 6 remains active until the required locale and screen-reader walkthroughs are complete. Progress stays deferred to Phase 8. The user-requested real-device preview follows Phase 6; the full alarm reliability matrix remains in Phase 10.
+Home, alarm setup, wake/mission, and Settings have implementations on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs. Phase 6 remains active because code-level localization/accessibility gaps remain. The user reports the iPhone walkthrough/manual checks are already complete, so do not repeat them. Progress stays deferred to Phase 8; the broader physical alarm reliability matrix remains in Phase 10.

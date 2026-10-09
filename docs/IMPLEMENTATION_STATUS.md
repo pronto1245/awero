@@ -60,8 +60,8 @@
 - [x] Prototype wake-session storage
 - [x] Statistics model
 - [x] Adaptive policy
-- [ ] Room production storage
-- [ ] Core Data/SQLite production storage
+- [x] Room local persistence and schema migration path
+- [x] Core Data local persistence path
 - [ ] Persistent statistics/streak UI
 
 ## 7. Onboarding / localization
@@ -87,6 +87,8 @@
 - [x] Conflict resolution (optimistic versions, stable retry results, server snapshot returned)
 - [x] Support diagnostics tickets (bounded, owner-scoped, idempotent)
 
+These checks describe backend endpoint/storage capabilities. They do **not** mean mobile clients have complete end-to-end flows for every endpoint. Client integration is tracked separately below; full alarm download/reconciliation, wake-session delivery, and diagnostics submission remain incomplete.
+
 ## 9. Monetization
 - [ ] iOS StoreKit 2
 - [ ] Android Google Play Billing
@@ -106,16 +108,9 @@
 - [ ] Explainable reason codes
 
 ## 11. QA
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] E2E tests
-- [ ] Offline tests
-- [ ] Reboot tests
-- [ ] Timezone/DST tests
-- [ ] Permission-denied tests
-- [ ] Subscription tests
-- [ ] Physical iOS test
-- [ ] Physical Android test
+- [x] Automated unit, integration, Android instrumentation, iOS simulator, offline, persistence, and selected recovery scenarios run in CI (see phase-specific evidence below)
+- [ ] Full physical-device P0 release matrix on both platforms
+- [ ] Store purchase tests (pending Phase 7)
 
 ## Release gate
 
@@ -148,12 +143,23 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 
 ## Governing plan position
 - [x] Phase 0 — reconcile scope, competitor inputs, phase order, and acceptance gates across product docs
-- [x] Phase 1 — code-level iOS and Android alarm reliability with CI coverage; physical-device release checks remain deferred to Phase 10
-- [x] Phase 2 — wake-session runtime (automated gate; see verification below)
-- [x] Phase 3 — P0 Math, Steps, and QR/barcode mission flows (automated gate complete; device release matrix remains Phase 10)
-- [x] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
-- [x] Phase 5 — backend and sync integrated; foreground retry and persisted queue/conflict handling are covered by the green CI gate
-- [ ] Phase 6 — user-facing UX and six-language completion (active)
+- [x] Phase 1 — automated code/CI gate passed; targeted closure gaps remain in iOS time/timezone recovery and full P0 alarm setup requirements
+- [x] Phase 2 — automated wake-session gate passed; targeted iOS snooze-restore and test-alarm-statistics gaps remain
+- [x] Phase 3 — automated Math, Steps, and QR/barcode gate passed; the iPhone walkthrough is user-reported complete and must not be repeated
+- [x] Phase 4 — ten-point automated local-persistence gate passed; targeted iOS read-error presentation gap remains
+- [ ] Phase 5 — **partial**: backend APIs, anonymous auth, alarm upload queue and retry exist; complete mobile alarm round trip, wake-session sync, diagnostics submission, and user-facing conflict resolution are not end-to-end
+- [ ] Phase 6 — **current**: UX/localization/accessibility code gaps remain. User reports iPhone/manual checks complete; do not request or repeat those checks.
+
+## Cross-phase acceptance rule
+
+Every implementation slice uses real production data paths: native OS APIs and local persistence for offline alarm/wake behavior, and a live configured HTTPS API for remotely backed features. Production screens must not contain mock responses, seeded demo records, fabricated statistics, or fake success states. Mocks/fixtures are allowed only in test targets. Empty, offline, permission-denied, and service-error states must be truthful. This rule applies immediately in every phase.
+
+## Audit snapshot at `acc7fa6`
+
+- Green CI proves only the jobs listed in that run; it does not close missing client/API flows or device gates.
+- The governed phase table is in [AWERO Product Specification and Implementation Plan](AWERO_PRODUCT_SPEC_AND_IMPLEMENTATION_PLAN.md). Phase 5 is partial despite the older completion note below; that note is retained as history, not current acceptance status.
+- The user-confirmed iPhone walkthrough/manual checks are accepted as completed. The source audit identified code-level gaps but does not authorize repeating the same manual checks.
+- Remaining product scope includes billing, P1 progress/history and missions, P2 weather/sleep/social/AI, and the broader Phase 10 release matrix.
 
 ## Phase 2 automated gate — complete
 
@@ -176,9 +182,9 @@ Android instrumentation verifies test alarms stay out of wake statistics, the al
 
 On 2026-10-08, the user confirmed that the guided iPhone walkthrough worked. The walkthrough covered creating a QR alarm, scanning the saved code at wake-up, invalid-code fallback to Math, Steps, and snooze. This is a manual report without recorded device/OS details; it does not replace the broader Phase 10 release matrix.
 
-## Phase 5 — complete
+## Phase 5 — historical CI/API work (product gate remains partial)
 
-The first read-only audit of anonymous auth, alarm ownership/versioning, wake-session lifecycle, offline sync, analytics and support idempotency found that wake-session retries could reuse an ID with a changed mission/timestamp and wake-event retries did not compare a supplied timestamp. The API now rejects those changed-content retries, and the repository smoke scenario asserts both conflicts; all four jobs passed in [CI run 37882395259](https://github.com/pronto1245/awero/actions/runs/37882395259). A follow-up audit found that identical retries with omitted optional `occurredAt` fields could conflict because the server generated a new time each attempt. Sync, analytics and wake-event retries now ignore generated time when the client omitted it; smoke coverage confirms the retry result remains stable. Commit `f939239db0e49d30b588cb10b37e60cd3d902a6f` adds automatic retry when the app returns to the foreground. [CI run 603](https://github.com/pronto1245/awero/actions/runs/37887632818) passed all four jobs. The Android/iOS client tests cover transport errors, persistent queue backoff and retry after restart; the API smoke suite covers idempotent sync retries and conflicts. Backend remains isolated from the on-device alarm and mission path. Phase 6 is now active.
+The first read-only audit of anonymous auth, alarm ownership/versioning, wake-session lifecycle, offline sync, analytics and support idempotency found that wake-session retries could reuse an ID with a changed mission/timestamp and wake-event retries did not compare a supplied timestamp. The API now rejects those changed-content retries, and the repository smoke scenario asserts both conflicts; all four jobs passed in [CI run 37882395259](https://github.com/pronto1245/awero/actions/runs/37882395259). A follow-up audit found that identical retries with omitted optional `occurredAt` fields could conflict because the server generated a new time each attempt. Sync, analytics and wake-event retries now ignore generated time when the client omitted it; smoke coverage confirms the retry result remains stable. Commit `f939239db0e49d30b588cb10b37e60cd3d902a6f` adds automatic retry when the app returns to the foreground. [CI run 603](https://github.com/pronto1245/awero/actions/runs/37887632818) passed all four jobs. The Android/iOS client tests cover transport errors, persistent queue backoff and retry after restart; the API smoke suite covers idempotent sync retries and conflicts. These are valid CI/API results, but they do not prove a complete client round trip for alarms, wake sessions, diagnostics, or conflict resolution. Phase 5 remains product-partial; Phase 6 UX work is current, and Phase 7 must wait for the Phase 5 acceptance gaps to close.
 
 
 ## Phase 6 — active
@@ -200,4 +206,4 @@ The Phase 6 accessibility/localization slice now gives each iOS alarm switch a l
 The latest accessibility/localization packet adds the approved gear entry and a localized Settings screen on iOS and Android. The screen identifies the device language and links to app permissions; its labels and settings copy have exact parity in all six locales. The QR camera preview now has a localized screen-reader description, and the primary wake and mission text scales with Dynamic Type. Commit [2f08649](https://github.com/pronto1245/awero/commit/2f08649b57232138dce73825177a43eb3bfe2c43) passed all four jobs in [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590).
 
 
-Phase 6 still needs a simulator/emulator walkthrough in English, Russian, Brazilian Portuguese, French, German, and Spanish, plus a VoiceOver/TalkBack pass. Once those checks are complete, show the result and run the user-requested real-device preview before starting Phase 7. The full physical alarm reliability matrix remains in Phase 10.
+The user reports the iPhone walkthrough and manual checks are complete; do not ask for or repeat that work. The code audit still identifies Android first-run routing, hard-coded strings in the active alarm-delivery path, and accessibility/localization implementation gaps. Close those code gaps and reconcile existing manual-check evidence before accepting Phase 6. The full physical alarm reliability matrix remains in Phase 10; the already confirmed iPhone walkthrough is not to be repeated.
