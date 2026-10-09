@@ -25,6 +25,7 @@ import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmCoordinator
 import app.awero.core.alarm.AlarmReadiness
 import app.awero.core.alarm.AlarmScheduler
+import app.awero.core.alarm.AlarmTimeFormatter
 import app.awero.core.alarm.MissionType
 import app.awero.core.alarm.nextAlarmOccurrence
 import java.text.DateFormat
@@ -37,6 +38,9 @@ private val AweroIvory = Color(0xFFFFF8EF)
 private val AweroNavy = Color(0xFF14294B)
 private val AweroCoral = Color(0xFFFF684B)
 private val AweroSage = Color(0xFF4F8B66)
+
+private fun alarmTimeZoneId(alarm: Alarm): String? =
+    if (alarm.timezoneMode == app.awero.core.alarm.TimezoneMode.FIXED) alarm.fixedTimezone else null
 
 @Composable
 fun HomeScreen(
@@ -148,7 +152,7 @@ fun HomeScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text(
-                                        "%02d:%02d".format(alarm.hour, alarm.minute),
+                                        AlarmTimeFormatter.format(alarm.hour, alarm.minute, alarmTimeZoneId(alarm)),
                                         color = AweroNavy,
                                         style = MaterialTheme.typography.headlineMedium
                                     )

@@ -251,6 +251,23 @@ private struct AlarmCard: View {
     let onOpenSettings: () -> Void
     let onDelete: () -> Void
 
+    private var alarmTimeZone: TimeZone {
+        if alarm.timezoneMode == .fixed,
+           let identifier = alarm.fixedTimezone,
+           let timeZone = TimeZone(identifier: identifier) {
+            return timeZone
+        }
+        return .current
+    }
+
+    private var alarmTimeText: String {
+        AlarmTimeFormatter.string(
+            hour: alarm.hour,
+            minute: alarm.minute,
+            timeZone: alarmTimeZone
+        )
+    }
+
     private var weekdays: String {
         var calendar = Calendar(identifier: .gregorian)
         if alarm.timezoneMode == .fixed, let identifier = alarm.fixedTimezone,
@@ -268,7 +285,7 @@ private struct AlarmCard: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(String(format: "%02d:%02d", alarm.hour, alarm.minute))
+                    Text(alarmTimeText)
                         .font(.system(size: 38, weight: .bold, design: .rounded))
                         .foregroundStyle(AweroStyle.navy)
                     Text(weekdays)
@@ -284,7 +301,7 @@ private struct AlarmCard: View {
                     Text(
                         String.localizedStringWithFormat(
                             NSLocalizedString("home.toggle_alarm", comment: "VoiceOver label for an alarm switch"),
-                            String(format: "%02d:%02d", alarm.hour, alarm.minute)
+                            alarmTimeText
                         )
                     )
                 )
