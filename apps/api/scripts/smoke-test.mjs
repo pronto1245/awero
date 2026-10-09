@@ -112,6 +112,11 @@ async function main() {
       ...(payload ? { payload } : {}),
     },
   });
+  const awakeBody = { id: randomUUID(), eventType: 'AWAKE' };
+  const awake = await request(`/wake-sessions/${sessionId}/events`, { method: 'POST', token, body: awakeBody });
+  assert(awake.status === 201 && !awake.data.item.duplicate, 'wake event without a timestamp failed');
+  const awakeRetry = await request(`/wake-sessions/${sessionId}/events`, { method: 'POST', token, body: awakeBody });
+  assert(awakeRetry.status === 201 && awakeRetry.data.item.duplicate, 'wake event retry without a timestamp was not idempotent');
 
   const prematureComplete = await request(`/wake-sessions/${sessionId}/events`, {
     method: 'POST', token, body: { id: randomUUID(), eventType: 'COMPLETED' },
@@ -145,7 +150,7 @@ async function main() {
   const sessionEvents = await request(`/wake-sessions/${sessionId}/events`, { token });
   assert(
     sessionEvents.status === 200 && sessionEvents.data.items.map((event) => event.eventType).join(',') ===
-      'TRIGGERED,MISSION_STARTED,SNOOZE,MISSION_FAILED,FALLBACK,COMPLETED',
+      'TRIGGERED,AWAKE,MISSION_STARTED,SNOOZE,MISSION_FAILED,FALLBACK,COMPLETED',
     'wake session event history was incomplete or out of order',
   );
   const sessions = await request('/wake-sessions', { token });
@@ -215,10 +220,14 @@ async function main() {
   assert(createdFromSync.data.items.some((item) => item.id === syncedAlarmId && item.hour === 6), 'synced alarm was not readable');
   const syncUpdate = {
     id: randomUUID(), operationType: 'UPDATE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
-    clientVersion: 1, payload: { minute: 20 }, occurredAt: Date.now(),
+    clientVersion: 1, payload: { minute: 20 },
   };
   const syncUpdated = await request('/sync', { method: 'POST', token, body: { operations: [syncUpdate] } });
   assert(syncUpdated.data.accepted === 1, 'offline alarm update was not applied');
+  const syncUpdateRetry = await request('/sync', { method: 'POST', token, body: { operations: [syncUpdate] } });
+  assert(syncUpdateRetry.data.accepted === 1, 'offline alarm update retry without a timestamp was not idempotent');
+  const verifiedSyncUpdate = await request('/alarms', { token });
+  assert(verifiedSyncUpdate.data.items.find((item) => item.id === syncedAlarmId).version === 2, 'timestamp-less sync retry applied twice');
   const syncDelete = {
     id: randomUUID(), operationType: 'DELETE_ALARM', entityType: 'ALARM', entityId: syncedAlarmId,
     clientVersion: 2, payload: {}, occurredAt: Date.now(),
@@ -238,7 +247,6 @@ async function main() {
     eventName: 'alarm.updated',
     eventVersion: 1,
     properties: { source: 'smoke-test', alarmId },
-    occurredAt: Date.now(),
   };
   const analytics = await request('/analytics/events', {
     method: 'POST', token, body: { events: [analyticsEvent] },

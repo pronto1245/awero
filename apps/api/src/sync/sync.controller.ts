@@ -105,6 +105,9 @@ export class SyncController {
         }
 
         const occurredAt = this.parseOccurredAt(operation.occurredAt);
+        const retryOccurredAt = operation.occurredAt === undefined || operation.occurredAt === null
+          ? null
+          : occurredAt;
         const payload = operation.payload ?? {};
         const normalizedPayload = operation.operationType === 'DELETE_ALARM'
           ? this.normalizePayload({})
@@ -121,9 +124,9 @@ export class SyncController {
           const existing = await client.query(
             `SELECT anonymous_user_id AS "anonymousUserId",operation_type AS "operationType",entity_type AS "entityType",
                entity_id AS "entityId",client_version AS "clientVersion",payload=$2::jsonb AS "samePayload",
-               occurred_at=$3::timestamptz AS "sameTime",outcome,result
+               ($3::timestamptz IS NULL OR occurred_at=$3::timestamptz) AS "sameTime",outcome,result
              FROM sync_operations WHERE id=$1`,
-            [operation.id, JSON.stringify(payload), occurredAt],
+            [operation.id, JSON.stringify(payload), retryOccurredAt],
           );
           const row = existing.rows[0];
           if (

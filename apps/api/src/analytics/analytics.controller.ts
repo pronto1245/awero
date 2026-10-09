@@ -63,6 +63,9 @@ export class AnalyticsController {
           throw new BadRequestException('ANALYTICS_PROPERTIES_TOO_LARGE');
         }
         const occurredAt = this.parseOccurredAt(event.occurredAt);
+        const retryOccurredAt = event.occurredAt === undefined || event.occurredAt === null
+          ? null
+          : occurredAt;
         const inserted = await client.query(
           `INSERT INTO analytics_events(id,anonymous_user_id,device_id,event_name,event_version,occurred_at,properties)
            VALUES ($1,$2,(SELECT id FROM devices WHERE anonymous_user_id=$2 ORDER BY updated_at DESC LIMIT 1),$3,$4,$5,$6::jsonb)
@@ -75,9 +78,9 @@ export class AnalyticsController {
         }
         const existing = await client.query(
           `SELECT anonymous_user_id AS "anonymousUserId",event_name AS "eventName",event_version AS "eventVersion",
-             occurred_at=$2::timestamptz AS "sameTime",properties=$3::jsonb AS "sameProperties"
+             ($2::timestamptz IS NULL OR occurred_at=$2::timestamptz) AS "sameTime",properties=$3::jsonb AS "sameProperties"
            FROM analytics_events WHERE id=$1`,
-          [event.id, occurredAt, JSON.stringify(properties)],
+          [event.id, retryOccurredAt, JSON.stringify(properties)],
         );
         const row = existing.rows[0];
         if (
