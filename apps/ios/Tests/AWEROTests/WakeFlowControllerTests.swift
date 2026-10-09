@@ -100,8 +100,7 @@ final class WakeFlowControllerTests: XCTestCase {
         await flow.completeMission()
 
         let stats = await database.fetchStatistics()
-        XCTAssertEqual(stats?.planned, 0)
-        XCTAssertEqual(stats?.completed, 0)
+        XCTAssertNil(stats, "Test alarms must not create real statistics")
         let realHistory = await database.fetchWakeSessions()
         XCTAssertTrue(realHistory.isEmpty)
         let savedTest = await database.fetchWakeSessions(includeTestAlarms: true)
@@ -136,8 +135,7 @@ final class WakeFlowControllerTests: XCTestCase {
         await restored.completeMission()
 
         let stats = await database.fetchStatistics()
-        XCTAssertEqual(stats?.planned, 0)
-        XCTAssertEqual(stats?.completed, 0)
+        XCTAssertNil(stats, "Test alarms must not create real statistics")
         let realHistory = await database.fetchWakeSessions()
         let allHistory = await database.fetchWakeSessions(includeTestAlarms: true)
         XCTAssertTrue(realHistory.isEmpty)
