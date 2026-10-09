@@ -135,6 +135,12 @@ const expectedAndroid = new Set([
   "alarm_error_permission_notifications",
   "alarm_error_permission_fullscreen",
   "alarm_error_persistence",
+  "settings_title",
+  "settings_language_title",
+  "settings_language_body",
+  "settings_alarm_permissions_title",
+  "settings_alarm_permissions_body",
+  "settings_open_system_settings",
 ]);
 const expectedIOS = new Set([
   "alarm.status.scheduled",
@@ -255,6 +261,12 @@ const expectedIOS = new Set([
   "alarm.error.permission_notifications",
   "alarm.error.permission_fullscreen",
   "alarm.error.persistence",
+  "settings.title",
+  "settings.language_title",
+  "settings.language_body",
+  "settings.alarm_permissions_title",
+  "settings.alarm_permissions_body",
+  "settings.open_system_settings",
 ]);
 
 function assertKeys(platform, locale, path, expected, pattern) {

@@ -124,4 +124,3 @@
 "settings.alarm_permissions_title" = "Alarm permissions";
 "settings.alarm_permissions_body" = "Allow AWERO notifications and alarm access so scheduled alarms can alert you.";
 "settings.open_system_settings" = "Open phone settings";
-"settings.back" = "Back";

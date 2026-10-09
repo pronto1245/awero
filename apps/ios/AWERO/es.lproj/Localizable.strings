@@ -124,4 +124,3 @@
 "settings.alarm_permissions_title" = "Permisos de alarma";
 "settings.alarm_permissions_body" = "Permite las notificaciones y alarmas de AWERO para recibir los avisos programados.";
 "settings.open_system_settings" = "Abrir ajustes del teléfono";
-"settings.back" = "Volver";
