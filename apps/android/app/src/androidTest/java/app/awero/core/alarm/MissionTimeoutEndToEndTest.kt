@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.awero.core.wake.WakeSessionStore
+import app.awero.R
 import app.awero.ui.MissionRuntimeScreen
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -56,7 +57,7 @@ class MissionTimeoutEndToEndTest {
         }
         assertTrue("Steps did not request fallback", fallback.await(5, TimeUnit.SECONDS))
         instrumentation.runOnMainSync {
-            views(root!!).filterIsInstance<TextView>().single { it.text.toString() == "I CAN'T WALK" }.performClick()
+            views(root!!).filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_use_math) }.performClick()
         }
         assertEquals(1, calls.get())
     }
@@ -96,7 +97,7 @@ class MissionTimeoutEndToEndTest {
         while (System.currentTimeMillis() < deadline) {
             var ready = false
             instrumentation.runOnMainSync {
-                ready = views(current.window.decorView).any { it is TextView && it.text.toString() == "Start mission" }
+                ready = views(current.window.decorView).any { it is TextView && it.text.toString() == context.getString(R.string.wake_start) }
             }
             if (ready) return current
             Thread.sleep(50)

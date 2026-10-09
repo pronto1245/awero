@@ -102,7 +102,7 @@ object MissionRuntimeScreen {
                 root.addView(Button(activity).apply {
                     setTextColor(Color.WHITE)
                     backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
-                    text = activity.getString(R.string.mission_use_fallback)
+                    text = activity.getString(R.string.mission_use_math)
                     setOnClickListener { finish(false) }
                 })
             }
