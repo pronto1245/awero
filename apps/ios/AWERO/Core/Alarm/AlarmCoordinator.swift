@@ -72,7 +72,7 @@ final class AlarmCoordinator {
             entityId: alarm.id.uuidString,
             clientVersion: clientVersion,
             payload: payload ?? [
-                "label": .string(alarm.syncLabel),
+                "label": .string("Alarm"),
                 "hour": .integer(Int64(alarm.hour)),
                 "minute": .integer(Int64(alarm.minute)),
                 "enabled": .boolean(alarm.enabled),

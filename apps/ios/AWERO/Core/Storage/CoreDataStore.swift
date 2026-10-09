@@ -80,7 +80,6 @@ final class CoreDataStore: @unchecked Sendable {
             object.setValue(alarm.maxSnoozes, forKey: "maxSnoozes")
             object.setValue(alarm.snoozeMinutes, forKey: "snoozeMinutes")
             object.setValue(alarm.qrExpectedCode, forKey: "qrExpectedCode")
-            object.setValue(alarm.syncLabel, forKey: "label")
         }
     }
 
@@ -446,8 +445,7 @@ final class CoreDataStore: @unchecked Sendable {
             difficulty: difficulty,
             maxSnoozes: object.value(forKey: "maxSnoozes") as? Int ?? 3,
             snoozeMinutes: object.value(forKey: "snoozeMinutes") as? Int ?? 10,
-            qrExpectedCode: object.value(forKey: "qrExpectedCode") as? String,
-            label: object.value(forKey: "label") as? String ?? "Alarm"
+            qrExpectedCode: object.value(forKey: "qrExpectedCode") as? String
         )
     }
 
@@ -471,8 +469,7 @@ final class CoreDataStore: @unchecked Sendable {
                 ("difficulty", .stringAttributeType, false),
                 ("maxSnoozes", .integer64AttributeType, false),
                 ("snoozeMinutes", .integer64AttributeType, false),
-                ("qrExpectedCode", .stringAttributeType, true),
-                ("label", .stringAttributeType, false)
+                ("qrExpectedCode", .stringAttributeType, true)
             ]),
             entity(name: "SyncOperationRecord", attributes: [
                 ("id", .stringAttributeType, false), ("operationType", .stringAttributeType, false), ("entityType", .stringAttributeType, false), ("entityId", .stringAttributeType, false), ("clientVersion", .integer64AttributeType, true), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false), ("attempts", .integer64AttributeType, false), ("nextAttemptAt", .dateAttributeType, false)
@@ -523,9 +520,6 @@ final class CoreDataStore: @unchecked Sendable {
             attribute.name = name
             attribute.attributeType = type
             attribute.isOptional = optional
-            if entity.name == "AlarmRecord", attribute.name == "label" {
-                attribute.defaultValue = "Alarm"
-            }
             return attribute
         }
         return entity

@@ -29,8 +29,6 @@
 "home.ok" = "OK";
 "create.title" = "New alarm";
 "create.edit_title" = "Edit alarm";
-"create.label" = "Name";
-"create.label_default" = "Alarm";
 "create.time" = "Time";
 "create.repeat" = "Repeat";
 "create.mission" = "Wake-up mission";

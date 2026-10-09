@@ -29,8 +29,6 @@
 "home.ok" = "OK";
 "create.title" = "Nouveau réveil";
 "create.edit_title" = "Modifier le réveil";
-"create.label" = "Nom";
-"create.label_default" = "Réveil";
 "create.time" = "Heure";
 "create.repeat" = "Répéter";
 "create.mission" = "Mission de réveil";

@@ -29,8 +29,6 @@
     <string name="home_ok">ОК</string>
     <string name="create_title">Новый будильник</string>
     <string name="create_edit_title">Изменить будильник</string>
-    <string name="create_label">Название</string>
-    <string name="create_label_default">Будильник</string>
     <string name="create_time">Время</string>
     <string name="create_repeat">Повторять</string>
     <string name="create_mission">Задание для пробуждения</string>

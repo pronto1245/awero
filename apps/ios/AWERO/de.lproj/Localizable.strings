@@ -29,8 +29,6 @@
 "home.ok" = "OK";
 "create.title" = "Neuer Wecker";
 "create.edit_title" = "Wecker bearbeiten";
-"create.label" = "Name";
-"create.label_default" = "Wecker";
 "create.time" = "Uhrzeit";
 "create.repeat" = "Wiederholen";
 "create.mission" = "Aufgabe zum Aufwachen";

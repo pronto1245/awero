@@ -17,8 +17,7 @@ data class Alarm(
     val difficulty: Difficulty,
     val maxSnoozes: Int = 3,
     val snoozeMinutes: Int = 10,
-    val qrExpectedCode: String? = null,
-    val label: String = "Alarm"
+    val qrExpectedCode: String? = null
 )
 
 /** The non-sensitive fields required to schedule and restore an alarm before first unlock. */

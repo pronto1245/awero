@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
@@ -35,13 +33,12 @@ class AweroDatabaseMigrationTest {
         val migrated = AweroDatabase.createForTesting(context, databaseName)
         val migratedDb = migrated.openHelper.writableDatabase
 
-        val alarm = migratedDb.query("SELECT hour, minute, label FROM alarms WHERE id='alarm-1'").use {
+        val alarm = migratedDb.query("SELECT hour, minute FROM alarms WHERE id='alarm-1'").use {
             assertTrue(it.moveToFirst())
-            Triple(it.getInt(0), it.getInt(1), it.getString(2))
+            it.getInt(0) to it.getInt(1)
         }
         assertEquals(7, alarm.first)
         assertEquals(30, alarm.second)
-        assertEquals("Alarm", alarm.third)
 
         assertTrue(migratedDb.query("SELECT id FROM wake_sessions WHERE id='session-1'").use { it.moveToFirst() })
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'").use { it.moveToFirst() })
@@ -60,25 +57,8 @@ class AweroDatabaseMigrationTest {
 }
 
 @Database(
-    entities = [LegacyAlarmEntity::class, WakeSessionEntity::class, StatisticsEntity::class, SyncOperationEntity::class, AnalyticsEventEntity::class],
+    entities = [AlarmEntity::class, WakeSessionEntity::class, StatisticsEntity::class, SyncOperationEntity::class, AnalyticsEventEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class LegacyAweroDatabase : RoomDatabase()
-
-@Entity(tableName = "alarms")
-data class LegacyAlarmEntity(
-    @PrimaryKey val id: String,
-    val version: Int,
-    val hour: Int,
-    val minute: Int,
-    val enabled: Boolean,
-    val weekdays: String,
-    val timezoneMode: String,
-    val fixedTimezone: String?,
-    val missionType: String,
-    val difficulty: String,
-    val maxSnoozes: Int,
-    val snoozeMinutes: Int,
-    val qrExpectedCode: String?
-)

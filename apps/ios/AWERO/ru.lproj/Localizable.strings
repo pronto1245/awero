@@ -29,8 +29,6 @@
 "home.ok" = "ОК";
 "create.title" = "Новый будильник";
 "create.edit_title" = "Изменить будильник";
-"create.label" = "Название";
-"create.label_default" = "Будильник";
 "create.time" = "Время";
 "create.repeat" = "Повторять";
 "create.mission" = "Задание для пробуждения";

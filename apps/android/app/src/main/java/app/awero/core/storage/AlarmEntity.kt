@@ -1,7 +1,6 @@
 package app.awero.core.storage
 
 import androidx.room.Entity
-import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "alarms")
@@ -18,6 +17,5 @@ data class AlarmEntity(
     val difficulty: String,
     val maxSnoozes: Int,
     val snoozeMinutes: Int,
-    val qrExpectedCode: String?,
-    @ColumnInfo(defaultValue = "'Alarm'") val label: String
+    val qrExpectedCode: String?
 )
