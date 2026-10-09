@@ -91,8 +91,8 @@ final class AlarmCoordinator {
         Task { await OfflineSyncCoordinator.shared.runOnce() }
     }
 
-    func repairAll() async {
+    func repairAll(forceReschedule: Bool = false) async {
         await store.load()
-        await AlarmRecovery(scheduler: scheduler, store: store).reconcile()
+        await AlarmRecovery(scheduler: scheduler, store: store).reconcile(forceReschedule: forceReschedule)
     }
 }
