@@ -152,8 +152,8 @@ The verification matrix, workflow evidence and physical-device boundary are reco
 - [x] Phase 2 — wake-session runtime (automated gate; see verification below)
 - [x] Phase 3 — P0 Math, Steps, and QR/barcode mission flows (automated gate complete; device release matrix remains Phase 10)
 - [x] Phase 4 — local persistence CI/simulator checks (the ten-point automated CI gate is complete; physical-device checks are deferred to final release validation)
-- [ ] Phase 5 — backend and sync isolated from the alarm-critical path
-- [ ] Phase 6 — user-facing UX and six-language completion
+- [x] Phase 5 — backend and sync integrated; foreground retry and persisted queue/conflict handling are covered by the green CI gate
+- [ ] Phase 6 — user-facing UX and six-language completion (active)
 
 ## Phase 2 automated gate — complete
 
@@ -176,6 +176,6 @@ Android instrumentation verifies test alarms stay out of wake statistics, the al
 
 On 2026-10-08, the user confirmed that the guided iPhone walkthrough worked. The walkthrough covered creating a QR alarm, scanning the saved code at wake-up, invalid-code fallback to Math, Steps, and snooze. This is a manual report without recorded device/OS details; it does not replace the broader Phase 10 release matrix.
 
-## Phase 5 — active
+## Phase 5 — complete
 
-The first read-only audit of anonymous auth, alarm ownership/versioning, wake-session lifecycle, offline sync, analytics and support idempotency found that wake-session retries could reuse an ID with a changed mission/timestamp and wake-event retries did not compare a supplied timestamp. The API now rejects those changed-content retries, and the repository smoke scenario asserts both conflicts; all four jobs passed in [CI run 37882395259](https://github.com/pronto1245/awero/actions/runs/37882395259). A follow-up audit found that identical retries with omitted optional `occurredAt` fields could conflict because the server generated a new time each attempt. Sync, analytics and wake-event retries now ignore generated time when the client omitted it; smoke coverage is added, with CI verification pending. Backend changes remain isolated from the on-device alarm and mission path.
+The first read-only audit of anonymous auth, alarm ownership/versioning, wake-session lifecycle, offline sync, analytics and support idempotency found that wake-session retries could reuse an ID with a changed mission/timestamp and wake-event retries did not compare a supplied timestamp. The API now rejects those changed-content retries, and the repository smoke scenario asserts both conflicts; all four jobs passed in [CI run 37882395259](https://github.com/pronto1245/awero/actions/runs/37882395259). A follow-up audit found that identical retries with omitted optional `occurredAt` fields could conflict because the server generated a new time each attempt. Sync, analytics and wake-event retries now ignore generated time when the client omitted it; smoke coverage confirms the retry result remains stable. Commit `f939239db0e49d30b588cb10b37e60cd3d902a6f` adds automatic retry when the app returns to the foreground. [CI run 603](https://github.com/pronto1245/awero/actions/runs/37887632818) passed all four jobs. The Android/iOS client tests cover transport errors, persistent queue backoff and retry after restart; the API smoke suite covers idempotent sync retries and conflicts. Backend remains isolated from the on-device alarm and mission path. Phase 6 is now active.
