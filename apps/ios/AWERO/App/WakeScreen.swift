@@ -25,7 +25,7 @@ struct WakeScreen: View {
                     Text("wake.completed_title").font(.title.bold()).foregroundStyle(WakePalette.navy)
                     Text("wake.completed_body").foregroundStyle(WakePalette.navy.opacity(0.55))
                 case .emergencyStopped:
-                    Text("Emergency stop").font(.title2.bold()).foregroundStyle(WakePalette.navy)
+                    Text("wake.emergency_stop").font(.title2.bold()).foregroundStyle(WakePalette.navy)
                     Text("wake.stopped_body").foregroundStyle(WakePalette.navy.opacity(0.55))
                 case .idle:
                     Text("wake.snoozed_title").font(.title.bold()).foregroundStyle(WakePalette.navy)
