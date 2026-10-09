@@ -4,7 +4,7 @@ enum AlarmCoordinatorError: LocalizedError {
     case persistenceFailed
 
     var errorDescription: String? {
-        "AWERO could not save the alarm. Check available storage and try again."
+        String(localized: "alarm.error.persistence")
     }
 }
 

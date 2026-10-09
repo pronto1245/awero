@@ -196,9 +196,7 @@ class AlarmScheduler(private val context: Context) {
 
     private fun requireExactAlarmAccess() {
         if (Build.VERSION.SDK_INT >= VERSION_CODES.S && !manager.canScheduleExactAlarms()) {
-            throw IllegalStateException(
-                "Allow AWERO to set alarms and reminders in Android Settings to use reliable alarms."
-            )
+            throw IllegalStateException(context.getString(app.awero.R.string.alarm_error_permission_exact))
         }
     }
 

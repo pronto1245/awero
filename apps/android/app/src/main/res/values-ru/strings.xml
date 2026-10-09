@@ -94,4 +94,21 @@
     <string name="mission_unavailable">ЗАДАНИЕ НЕДОСТУПНО</string>
     <string name="mission_use_fallback">Запасной вариант</string>
     <string name="mission_camera_denied">Нет доступа к камере. Перейдите к математическому заданию.</string>
+    <string name="notification_alarm_title">AWERO</string>
+    <string name="notification_alarm_body">Пора просыпаться.</string>
+    <string name="notification_test_title">Тест будильника AWERO</string>
+    <string name="notification_test_body">Это тест. Он не будет засчитан как завершённое пробуждение.</string>
+    <string name="notification_snooze_title">AWERO</string>
+    <string name="notification_snooze_body">Пора просыпаться.</string>
+    <string name="notification_channel_name">Будильники AWERO</string>
+    <string name="notification_channel_description">Оповещения для запланированных будильников.</string>
+    <string name="alarm_error_invalid_timezone">Выбран неверный часовой пояс будильника.</string>
+    <string name="alarm_error_permission_required">Разрешите AWERO планировать будильники в настройках iPhone и повторите попытку.</string>
+    <string name="alarm_error_weekdays_required">Выберите хотя бы один день повтора.</string>
+    <string name="alarm_error_invalid_time">Введите корректное время будильника.</string>
+    <string name="alarm_error_invalid_weekday">Выберите допустимые дни повтора.</string>
+    <string name="alarm_error_permission_exact">Разрешите AWERO устанавливать будильники и напоминания в настройках Android.</string>
+    <string name="alarm_error_permission_notifications">Разрешите уведомления AWERO, чтобы будильники могли звонить.</string>
+    <string name="alarm_error_permission_fullscreen">Разрешите полноэкранные оповещения AWERO в настройках Android.</string>
+    <string name="alarm_error_persistence">Не удалось сохранить будильник AWERO. Проверьте свободное место и повторите попытку.</string>
 </resources>

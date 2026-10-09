@@ -32,15 +32,15 @@ enum AlarmSchedulingError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidTimezone:
-            return "The selected alarm timezone is invalid."
+            return String(localized: "alarm.error.invalid_timezone")
         case .alarmAuthorizationDenied:
-            return "Allow AWERO to schedule alarms in iPhone Settings, then try again."
+            return String(localized: "alarm.error.permission_required")
         case .noWeekdaysSelected:
-            return "Select at least one day for this repeating alarm."
+            return String(localized: "alarm.error.weekdays_required")
         case .invalidAlarmTime:
-            return "Enter a valid alarm time."
+            return String(localized: "alarm.error.invalid_time")
         case .invalidWeekday:
-            return "Select valid days for this repeating alarm."
+            return String(localized: "alarm.error.invalid_weekday")
         }
     }
 }
@@ -142,8 +142,8 @@ final class AlarmScheduler {
 #endif
 
         let content = UNMutableNotificationContent()
-        content.title = "AWERO — Test Alarm"
-        content.body = "Your alarm test is working."
+        content.title = String(localized: "notification.test_title")
+        content.body = String(localized: "notification.test_body")
         content.sound = .default
         try await center.add(
             UNNotificationRequest(
@@ -166,8 +166,8 @@ final class AlarmScheduler {
 #endif
 
         let content = UNMutableNotificationContent()
-        content.title = "AWERO"
-        content.body = "Wake up. Stay up."
+        content.title = String(localized: "notification.snooze_title")
+        content.body = String(localized: "notification.snooze_body")
         content.sound = .default
         try await center.add(
             UNNotificationRequest(
@@ -250,8 +250,8 @@ final class AlarmScheduler {
             }
 
             let content = UNMutableNotificationContent()
-            content.title = "AWERO"
-            content.body = "Wake up. Stay up."
+            content.title = String(localized: "notification.alarm_title")
+            content.body = String(localized: "notification.alarm_body")
             content.sound = .default
 
             let id = "awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\(day)"

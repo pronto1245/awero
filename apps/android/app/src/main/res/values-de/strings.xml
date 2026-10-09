@@ -94,4 +94,21 @@
     <string name="mission_unavailable">AUFGABE NICHT VERFÜGBAR</string>
     <string name="mission_use_fallback">Ersatzaufgabe verwenden</string>
     <string name="mission_camera_denied">Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.</string>
+    <string name="notification_alarm_title">AWERO</string>
+    <string name="notification_alarm_body">Zeit zum Aufwachen.</string>
+    <string name="notification_test_title">AWERO-Weckertest</string>
+    <string name="notification_test_body">Dies ist ein Test. Er zählt nicht als abgeschlossenes Aufwachen.</string>
+    <string name="notification_snooze_title">AWERO</string>
+    <string name="notification_snooze_body">Zeit zum Aufwachen.</string>
+    <string name="notification_channel_name">AWERO-Wecker</string>
+    <string name="notification_channel_description">Mitteilungen für geplante Wecker.</string>
+    <string name="alarm_error_invalid_timezone">Die ausgewählte Weckerzeitzone ist ungültig.</string>
+    <string name="alarm_error_permission_required">Erlaube AWERO, Wecker in den iPhone-Einstellungen zu planen, und versuche es erneut.</string>
+    <string name="alarm_error_weekdays_required">Wähle mindestens einen Wiederholungstag.</string>
+    <string name="alarm_error_invalid_time">Gib eine gültige Weckzeit ein.</string>
+    <string name="alarm_error_invalid_weekday">Wähle gültige Wiederholungstage.</string>
+    <string name="alarm_error_permission_exact">Erlaube AWERO, Wecker und Erinnerungen in den Android-Einstellungen zu stellen.</string>
+    <string name="alarm_error_permission_notifications">Erlaube AWERO-Mitteilungen, damit Wecker klingeln können.</string>
+    <string name="alarm_error_permission_fullscreen">Erlaube Vollbildalarme für AWERO in den Android-Einstellungen.</string>
+    <string name="alarm_error_persistence">AWERO konnte den Wecker nicht speichern. Prüfe den verfügbaren Speicher und versuche es erneut.</string>
 </resources>

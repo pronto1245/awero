@@ -94,4 +94,21 @@
     <string name="mission_unavailable">MISSION UNAVAILABLE</string>
     <string name="mission_use_fallback">Use fallback</string>
     <string name="mission_camera_denied">Camera access is unavailable. Use the Math fallback.</string>
+    <string name="notification_alarm_title">AWERO</string>
+    <string name="notification_alarm_body">Wake up. Stay up.</string>
+    <string name="notification_test_title">AWERO test alarm</string>
+    <string name="notification_test_body">This is an alarm test. It will not count as a completed wake-up.</string>
+    <string name="notification_snooze_title">AWERO</string>
+    <string name="notification_snooze_body">Time to wake up.</string>
+    <string name="notification_channel_name">AWERO alarms</string>
+    <string name="notification_channel_description">Alerts for scheduled wake-up alarms.</string>
+    <string name="alarm_error_invalid_timezone">The selected alarm time zone is invalid.</string>
+    <string name="alarm_error_permission_required">Allow AWERO to schedule alarms in iPhone Settings, then try again.</string>
+    <string name="alarm_error_weekdays_required">Select at least one repeat day.</string>
+    <string name="alarm_error_invalid_time">Enter a valid alarm time.</string>
+    <string name="alarm_error_invalid_weekday">Select valid repeat days.</string>
+    <string name="alarm_error_permission_exact">Allow AWERO to set alarms and reminders in Android Settings.</string>
+    <string name="alarm_error_permission_notifications">Allow AWERO notifications so alarms can ring.</string>
+    <string name="alarm_error_permission_fullscreen">Allow full-screen alarms for AWERO in Android Settings.</string>
+    <string name="alarm_error_persistence">AWERO could not save the alarm. Check available storage and try again.</string>
 </resources>

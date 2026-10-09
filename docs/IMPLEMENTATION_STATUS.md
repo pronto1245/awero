@@ -190,3 +190,6 @@ The second Phase 6 slice completes the alarm setup flow on both platforms: repea
 
 
 The localized alarm-home and alarm-setup slices passed all four jobs in [CI run 37912583144](https://github.com/pronto1245/awero/actions/runs/37912583144). The current Phase 6 slice translates the wake controls and Math, Steps and QR mission prompts across both apps. Its acceptance is tracked by the six-locale parity check and the platform CI.
+
+
+The home, setup and wake/mission packages passed all four CI jobs in [run 37915377895](https://github.com/pronto1245/awero/actions/runs/37915377895). This Phase 6 package wires localized notification contents and schedule/permission errors into both platform runtimes.

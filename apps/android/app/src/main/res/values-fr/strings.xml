@@ -94,4 +94,21 @@
     <string name="mission_unavailable">MISSION INDISPONIBLE</string>
     <string name="mission_use_fallback">Utiliser la solution de secours</string>
     <string name="mission_camera_denied">L’accès à la caméra est indisponible. Utilisez le calcul de secours.</string>
+    <string name="notification_alarm_title">AWERO</string>
+    <string name="notification_alarm_body">C’est l’heure de se réveiller.</string>
+    <string name="notification_test_title">Test de réveil AWERO</string>
+    <string name="notification_test_body">Ceci est un test. Il ne comptera pas comme un réveil terminé.</string>
+    <string name="notification_snooze_title">AWERO</string>
+    <string name="notification_snooze_body">C’est l’heure de se réveiller.</string>
+    <string name="notification_channel_name">Réveils AWERO</string>
+    <string name="notification_channel_description">Alertes pour les réveils programmés.</string>
+    <string name="alarm_error_invalid_timezone">Le fuseau horaire sélectionné pour le réveil est invalide.</string>
+    <string name="alarm_error_permission_required">Autorisez AWERO à programmer les réveils dans les réglages de l’iPhone, puis réessayez.</string>
+    <string name="alarm_error_weekdays_required">Sélectionnez au moins un jour de répétition.</string>
+    <string name="alarm_error_invalid_time">Saisissez une heure de réveil valide.</string>
+    <string name="alarm_error_invalid_weekday">Sélectionnez des jours de répétition valides.</string>
+    <string name="alarm_error_permission_exact">Autorisez AWERO à programmer des réveils et rappels dans les réglages Android.</string>
+    <string name="alarm_error_permission_notifications">Autorisez les notifications AWERO pour que les réveils puissent sonner.</string>
+    <string name="alarm_error_permission_fullscreen">Autorisez les alertes plein écran pour AWERO dans les réglages Android.</string>
+    <string name="alarm_error_persistence">AWERO n’a pas pu enregistrer le réveil. Vérifiez l’espace disponible puis réessayez.</string>
 </resources>

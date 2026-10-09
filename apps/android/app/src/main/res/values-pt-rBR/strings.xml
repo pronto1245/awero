@@ -94,4 +94,21 @@
     <string name="mission_unavailable">MISSÃO INDISPONÍVEL</string>
     <string name="mission_use_fallback">Usar alternativa</string>
     <string name="mission_camera_denied">O acesso à câmera está indisponível. Use a alternativa de matemática.</string>
+    <string name="notification_alarm_title">AWERO</string>
+    <string name="notification_alarm_body">Hora de acordar.</string>
+    <string name="notification_test_title">Teste de alarme do AWERO</string>
+    <string name="notification_test_body">Este é um teste. Ele não será contado como um despertar concluído.</string>
+    <string name="notification_snooze_title">AWERO</string>
+    <string name="notification_snooze_body">Hora de acordar.</string>
+    <string name="notification_channel_name">Alarmes do AWERO</string>
+    <string name="notification_channel_description">Alertas de alarmes programados.</string>
+    <string name="alarm_error_invalid_timezone">O fuso horário do alarme selecionado é inválido.</string>
+    <string name="alarm_error_permission_required">Permita que o AWERO agende alarmes nos Ajustes do iPhone e tente novamente.</string>
+    <string name="alarm_error_weekdays_required">Selecione pelo menos um dia de repetição.</string>
+    <string name="alarm_error_invalid_time">Informe um horário de alarme válido.</string>
+    <string name="alarm_error_invalid_weekday">Selecione dias de repetição válidos.</string>
+    <string name="alarm_error_permission_exact">Permita que o AWERO programe alarmes e lembretes nas Configurações do Android.</string>
+    <string name="alarm_error_permission_notifications">Permita as notificações do AWERO para que os alarmes toquem.</string>
+    <string name="alarm_error_permission_fullscreen">Permita alertas em tela cheia para o AWERO nas Configurações do Android.</string>
+    <string name="alarm_error_persistence">O AWERO não conseguiu salvar o alarme. Verifique o armazenamento disponível e tente novamente.</string>
 </resources>

@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import app.awero.R
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
@@ -31,8 +32,8 @@ object AlarmNotificationManager {
         )
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(if (test) "AWERO — Test Alarm" else "AWERO")
-            .setContentText("Wake up. Stay up.")
+            .setContentTitle(context.getString(if (test) R.string.notification_test_title else R.string.notification_alarm_title))
+            .setContentText(context.getString(if (test) R.string.notification_test_body else R.string.notification_alarm_body))
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(!test)
@@ -51,12 +52,12 @@ object AlarmNotificationManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             !NotificationManagerCompat.from(context).areNotificationsEnabled()
         ) {
-            throw IllegalStateException("Allow AWERO notifications so alarms can ring.")
+            throw IllegalStateException(context.getString(R.string.alarm_error_permission_notifications))
         }
         if (Build.VERSION.SDK_INT >= 34 &&
             !context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
         ) {
-            throw IllegalStateException("Allow AWERO full-screen alarms in Android Settings.")
+            throw IllegalStateException(context.getString(R.string.alarm_error_permission_fullscreen))
         }
     }
 
@@ -64,10 +65,10 @@ object AlarmNotificationManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "AWERO alarms",
+                context.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Wake-up alarms"
+                description = context.getString(R.string.notification_channel_description)
                 setSound(null, null)
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
