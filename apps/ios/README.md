@@ -31,6 +31,8 @@ The project uses bundle identifier `app.awero`, includes every Swift source unde
 
 ## Physical-device persistence and alarm check
 
+This checklist belongs to Phase 10 release validation. The product owner has already confirmed the iPhone walkthrough; do not ask them to repeat it. Run only a specific new check if changed code requires that exact behavior.
+
 1. In AWERO, create an alarm for 3–5 minutes from now and save it.
 2. On iOS 26+, allow AlarmKit when prompted. Lock the iPhone and wait for the system alarm. Verify the alarm sound and alert, tap **Start mission**, and check that AWERO opens the wake flow. On iOS 17–25, verify the local notification fallback separately.
 3. Create a second alarm, close AWERO from the app switcher, and wait for its notification. This checks scheduled delivery while the app process is terminated.

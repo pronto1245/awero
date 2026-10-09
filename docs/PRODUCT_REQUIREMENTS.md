@@ -4,7 +4,7 @@
 **Platforms:** iOS and Android.  
 **Research baseline:** 2026-10-08.  
 **Governing specification and implementation order:** [AWERO Product Specification and Implementation Plan](AWERO_PRODUCT_SPEC_AND_IMPLEMENTATION_PLAN.md).  
-**Related docs:** [Competitor and Review Gap Analysis](research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md), [MVP Release Plan](architecture/MVP_RELEASE_PLAN.md), [System Implementation Order](architecture/SYSTEM_ORDER.md).
+**Supporting research:** [Competitor and Review Gap Analysis](research/COMPETITOR_AND_REVIEW_GAP_ANALYSIS.md). This capability inventory does not define an implementation order; only the governing plan above does.
 
 ## Product outcome
 

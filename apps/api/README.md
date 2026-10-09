@@ -2,6 +2,8 @@
 
 NestJS modular monolith for anonymous identity, device registration, and alarm metadata. The mobile device remains authoritative for firing alarms.
 
+**Development only:** do not expose this API as a production service until Phase 5 closes the account-takeover, registration-abuse, batch-failure, ownership, date-validation, rate-limit, and security-header findings recorded in the governing plan. Endpoint availability does not mean production security or complete mobile sync is accepted.
+
 ## Start a fresh local backend
 
 From the repository root, run:

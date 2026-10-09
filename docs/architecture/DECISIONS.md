@@ -2,7 +2,7 @@
 
 ## ADR-001: Monorepo
 
-One repository contains independently deployable backend, worker, admin, iOS and Android applications plus shared contracts.
+One repository contains the NestJS API, native iOS and Android apps, database migrations, and shared package foundations. There is no worker, admin app, or shared validation app in the repository.
 
 ## ADR-002: Local-first alarm
 
@@ -10,11 +10,11 @@ The device is authoritative for the next critical alarm. Backend is not part of 
 
 ## ADR-003: Modular monolith
 
-MVP backend uses one NestJS application. Separate worker process is available for asynchronous jobs. Microservices are deferred.
+MVP backend uses one NestJS application. No separate worker process is implemented; any future background processing must be assigned to a phase before it is added. Microservices are deferred.
 
 ## ADR-004: AI behind policy
 
-AI returns structured recommendations only. Schema validation and a deterministic policy engine decide what may be applied.
+Intended policy: AI returns structured recommendations only; runtime schema validation and a deterministic policy engine must decide what may be applied. Runtime schema validation is not implemented yet.
 
 ## ADR-005: Anonymous-first
 

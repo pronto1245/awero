@@ -1,4 +1,6 @@
-# AWERO Schemas
+# AWERO AI Schema Policy (Documentation Only)
+
+This file records the intended validation policy; it is not executable schema code. No runtime AI schema package is implemented yet. Runtime validation is assigned to Phase 9 and must use a real schema in the production path before AI results are accepted.
 
 All AI output is treated as untrusted input.
 
