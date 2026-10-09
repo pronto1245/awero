@@ -16,7 +16,8 @@ struct SyncAPIConfiguration {
             return
         }
 
-        components.path = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let prefix = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        components.path = prefix.isEmpty ? "" : "/" + prefix
         baseComponents = components
     }
 
@@ -36,8 +37,9 @@ struct SyncAPIConfiguration {
                       && !decoded.contains("/") && !decoded.contains("\\")
               }) else { return nil }
 
-        let prefix = components.path
-        components.path = [prefix, relativePath].filter { !$0.isEmpty }.joined(separator: "/")
+        let prefix = components.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        let combinedPath = [prefix, relativePath].filter { !$0.isEmpty }.joined(separator: "/")
+        components.path = combinedPath.isEmpty ? "/" : "/" + combinedPath
         return components.url
     }
 }
