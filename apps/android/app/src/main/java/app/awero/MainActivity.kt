@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import app.awero.core.alarm.AlarmCoordinator
+import app.awero.core.sync.OfflineSyncCoordinator
 import app.awero.ui.AweroApp
 import kotlinx.coroutines.launch
 
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
         }
 
         lifecycleScope.launch { runCatching { AlarmCoordinator(this@MainActivity).repair() } }
+        lifecycleScope.launch { OfflineSyncCoordinator(this@MainActivity).runOnce() }
     }
 
     override fun onResume() {

@@ -16,9 +16,19 @@ actor SyncQueueStore {
         await database.deleteSyncOperation(id)
     }
 
-    func retry(_ id: UUID, attempts: Int) async {
-        let exponent = min(max(attempts, 0), 6)
-        let delay = Double(1 << exponent)
-        await database.retrySyncOperation(id, nextAttemptAt: .now.addingTimeInterval(delay))
+    func retry(_ id: UUID) async {
+        await database.retrySyncOperation(id)
+    }
+
+    func recordConflict(_ operation: SyncOperation, conflict: SyncConflict) async -> Bool {
+        await database.recordSyncConflict(operation, conflict: conflict)
+    }
+
+    func conflicts() async -> [SyncConflictRecord] {
+        await database.fetchSyncConflicts()
+    }
+
+    func deleteConflict(_ operationId: UUID) async {
+        await database.deleteSyncConflict(operationId)
     }
 }

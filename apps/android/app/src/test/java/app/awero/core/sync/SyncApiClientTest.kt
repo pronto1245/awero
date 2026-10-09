@@ -16,7 +16,7 @@ class SyncApiClientTest {
     @Test
     fun sendsIdempotentBatchAndReturnsAcceptedIdsAndConflicts() = runBlocking {
         var requestedEndpoint = ""
-        var requestedToken = ""
+        var requestedToken: String? = null
         var requestBody = ""
         val client = SyncApiClient(
             SyncApiConfiguration.fromValue("https://api.example.test/api/v1/"),

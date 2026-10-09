@@ -12,7 +12,7 @@ import java.time.Instant
 data class SyncHttpResponse(val statusCode: Int, val body: String)
 
 fun interface SyncHttpTransport {
-    suspend fun post(endpoint: URI, bearerToken: String, body: String): SyncHttpResponse
+    suspend fun post(endpoint: URI, bearerToken: String?, body: String): SyncHttpResponse
 }
 
 data class SyncConflict(
@@ -101,8 +101,8 @@ class SyncApiClient(
     }
 }
 
-private class UrlConnectionSyncHttpTransport : SyncHttpTransport {
-    override suspend fun post(endpoint: URI, bearerToken: String, body: String): SyncHttpResponse =
+internal class UrlConnectionSyncHttpTransport : SyncHttpTransport {
+    override suspend fun post(endpoint: URI, bearerToken: String?, body: String): SyncHttpResponse =
         withContext(Dispatchers.IO) {
             require(endpoint.scheme.equals("https", ignoreCase = true)) { "Sync requests require HTTPS" }
             val connection = endpoint.toURL().openConnection() as HttpURLConnection
@@ -114,7 +114,7 @@ private class UrlConnectionSyncHttpTransport : SyncHttpTransport {
                 connection.doOutput = true
                 connection.setRequestProperty("Accept", "application/json")
                 connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                connection.setRequestProperty("Authorization", "Bearer $bearerToken")
+                bearerToken?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
                 connection.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(body) }
                 val status = connection.responseCode
                 val stream = if (status in 200..299) connection.inputStream else connection.errorStream

@@ -43,9 +43,15 @@ class AweroDatabaseMigrationTest {
         assertTrue(migratedDb.query("SELECT id FROM wake_sessions WHERE id='session-1'").use { it.moveToFirst() })
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'").use { it.moveToFirst() })
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='index' AND name='index_wake_events_wakeSessionId'").use { it.moveToFirst() })
+        assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_conflicts'").use { it.moveToFirst() })
 
         migratedDb.execSQL("INSERT INTO wake_events(id, wakeSessionId, eventType, occurredAt, payload) VALUES(?,?,?,?,?)", arrayOf("event-1", "session-1", "TRIGGERED", 123L, "{}"))
         assertEquals("{}", migratedDb.query("SELECT payload FROM wake_events WHERE id='event-1'").use { it.moveToFirst(); it.getString(0) })
+        migratedDb.execSQL(
+            "INSERT INTO sync_conflicts (operationId, operationType, entityType, entityId, clientVersion, localPayload, occurredAt, code, serverVersion, serverEntityJson, detectedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            arrayOf("op-1", "UPDATE_ALARM", "ALARM", "alarm-1", 1, "{}", 123L, "VERSION_MISMATCH", 2, "{}", 124L)
+        )
+        assertEquals("VERSION_MISMATCH", migratedDb.query("SELECT code FROM sync_conflicts WHERE operationId='op-1'").use { it.moveToFirst(); it.getString(0) })
         migrated.close()
     }
 }

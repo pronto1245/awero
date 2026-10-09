@@ -15,6 +15,7 @@ struct AWEROApp: App {
                     try? await AlarmScheduler().requestAuthorization()
                     await AlarmCoordinator(store: alarmStore).repairAll()
                     await wakeFlow.restore()
+                    Task { await OfflineSyncCoordinator.shared.runOnce() }
                 }
         }
     }

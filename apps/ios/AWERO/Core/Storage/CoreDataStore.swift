@@ -134,15 +134,58 @@ final class CoreDataStore: @unchecked Sendable {
         }
     }
 
-    func retrySyncOperation(_ id: UUID, nextAttemptAt: Date) async -> Bool {
+    func retrySyncOperation(_ id: UUID, nextAttemptAt: Date? = nil) async -> Bool {
         await performWrite { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
             if let object = try context.fetch(request).first {
                 let attempts = object.value(forKey: "attempts") as? Int ?? 0
+                let delay = Double(1 << min(max(attempts, 0), 6))
                 object.setValue(attempts + 1, forKey: "attempts")
-                object.setValue(nextAttemptAt, forKey: "nextAttemptAt")
+                object.setValue(nextAttemptAt ?? Date.now.addingTimeInterval(delay), forKey: "nextAttemptAt")
             }
+        }
+    }
+
+    func recordSyncConflict(_ operation: SyncOperation, conflict: SyncConflict) async -> Bool {
+        await performWrite { context in
+            let conflictRequest = NSFetchRequest<NSManagedObject>(entityName: "SyncConflictRecord")
+            conflictRequest.predicate = NSPredicate(format: "operationId == %@", operation.id.uuidString)
+            let object = try context.fetch(conflictRequest).first ?? NSManagedObject(
+                entity: context.persistentStoreCoordinator!.managedObjectModel.entitiesByName["SyncConflictRecord"]!,
+                insertInto: context
+            )
+            object.setValue(operation.id.uuidString, forKey: "operationId")
+            object.setValue(operation.operationType, forKey: "operationType")
+            object.setValue(operation.entityType, forKey: "entityType")
+            object.setValue(operation.entityId, forKey: "entityId")
+            object.setValue(operation.clientVersion, forKey: "clientVersion")
+            object.setValue((try? JSONEncoder().encode(operation.payload)).flatMap { String(data: $0, encoding: .utf8) } ?? "{}", forKey: "localPayload")
+            object.setValue(operation.occurredAt, forKey: "occurredAt")
+            object.setValue(conflict.code, forKey: "code")
+            object.setValue(conflict.serverVersion, forKey: "serverVersion")
+            object.setValue(conflict.serverEntity.flatMap { try? JSONEncoder().encode($0) }.flatMap { String(data: $0, encoding: .utf8) }, forKey: "serverEntityJson")
+            object.setValue(Date.now, forKey: "detectedAt")
+
+            let operationRequest = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
+            operationRequest.predicate = NSPredicate(format: "id == %@", operation.id.uuidString)
+            if let queued = try context.fetch(operationRequest).first { context.delete(queued) }
+        }
+    }
+
+    func fetchSyncConflicts() async -> [SyncConflictRecord] {
+        await performBackground { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncConflictRecord")
+            request.sortDescriptors = [NSSortDescriptor(key: "detectedAt", ascending: true)]
+            return (try? context.fetch(request).compactMap(Self.syncConflict(from:))) ?? []
+        }
+    }
+
+    func deleteSyncConflict(_ operationId: UUID) async -> Bool {
+        await performWrite { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "SyncConflictRecord")
+            request.predicate = NSPredicate(format: "operationId == %@", operationId.uuidString)
+            if let object = try context.fetch(request).first { context.delete(object) }
         }
     }
 
@@ -296,8 +339,28 @@ final class CoreDataStore: @unchecked Sendable {
     private static func syncOperation(from object: NSManagedObject) -> SyncOperation? {
         guard let id = UUID(uuidString: object.value(forKey: "id") as? String ?? "") else { return nil }
         let payloadData = Data((object.value(forKey: "payload") as? String ?? "{}").utf8)
-        let payload = (try? JSONDecoder().decode([String: String].self, from: payloadData)) ?? [:]
+        let payload = (try? JSONDecoder().decode([String: SyncJSONValue].self, from: payloadData)) ?? [:]
         return SyncOperation(id: id, operationType: object.value(forKey: "operationType") as? String ?? "", entityType: object.value(forKey: "entityType") as? String ?? "", entityId: object.value(forKey: "entityId") as? String ?? "", clientVersion: object.value(forKey: "clientVersion") as? Int, payload: payload, occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now)
+    }
+
+    private static func syncConflict(from object: NSManagedObject) -> SyncConflictRecord? {
+        guard let operationId = UUID(uuidString: object.value(forKey: "operationId") as? String ?? "") else { return nil }
+        let decoder = JSONDecoder()
+        let localPayload = (try? decoder.decode([String: SyncJSONValue].self, from: Data((object.value(forKey: "localPayload") as? String ?? "{}").utf8))) ?? [:]
+        let serverEntity = (object.value(forKey: "serverEntityJson") as? String).flatMap { try? decoder.decode(SyncJSONValue.self, from: Data($0.utf8)) }
+        return SyncConflictRecord(
+            operationId: operationId,
+            operationType: object.value(forKey: "operationType") as? String ?? "",
+            entityType: object.value(forKey: "entityType") as? String ?? "",
+            entityId: object.value(forKey: "entityId") as? String ?? "",
+            clientVersion: object.value(forKey: "clientVersion") as? Int,
+            localPayload: localPayload,
+            occurredAt: object.value(forKey: "occurredAt") as? Date ?? .now,
+            code: object.value(forKey: "code") as? String ?? "",
+            serverVersion: object.value(forKey: "serverVersion") as? Int,
+            serverEntity: serverEntity,
+            detectedAt: object.value(forKey: "detectedAt") as? Date ?? .now
+        )
     }
 
     private static func analyticsEvent(from object: NSManagedObject) -> AnalyticsEvent? {
@@ -388,6 +451,9 @@ final class CoreDataStore: @unchecked Sendable {
             ]),
             entity(name: "SyncOperationRecord", attributes: [
                 ("id", .stringAttributeType, false), ("operationType", .stringAttributeType, false), ("entityType", .stringAttributeType, false), ("entityId", .stringAttributeType, false), ("clientVersion", .integer64AttributeType, true), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false), ("attempts", .integer64AttributeType, false), ("nextAttemptAt", .dateAttributeType, false)
+            ]),
+            entity(name: "SyncConflictRecord", attributes: [
+                ("operationId", .stringAttributeType, false), ("operationType", .stringAttributeType, false), ("entityType", .stringAttributeType, false), ("entityId", .stringAttributeType, false), ("clientVersion", .integer64AttributeType, true), ("localPayload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false), ("code", .stringAttributeType, false), ("serverVersion", .integer64AttributeType, true), ("serverEntityJson", .stringAttributeType, true), ("detectedAt", .dateAttributeType, false)
             ]),
             entity(name: "AnalyticsEventRecord", attributes: [
                 ("id", .stringAttributeType, false), ("name", .stringAttributeType, false), ("version", .integer64AttributeType, false), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false)

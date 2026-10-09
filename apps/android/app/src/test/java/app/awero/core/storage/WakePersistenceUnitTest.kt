@@ -6,8 +6,10 @@ import org.junit.Test
 
 class WakePersistenceUnitTest {
     @Test
-    fun migrationEndsAtVersionTwo() {
+    fun migrationsReachVersionThree() {
         assertEquals(2, AweroDatabase.MIGRATION_1_2.endVersion)
         assertTrue(AweroDatabase.MIGRATION_1_2.startVersion == 1)
+        assertEquals(3, AweroDatabase.MIGRATION_2_3.endVersion)
+        assertEquals(2, AweroDatabase.MIGRATION_2_3.startVersion)
     }
 }

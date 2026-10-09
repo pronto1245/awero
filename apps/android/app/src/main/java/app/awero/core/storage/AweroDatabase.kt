@@ -14,9 +14,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         WakeEventEntity::class,
         StatisticsEntity::class,
         SyncOperationEntity::class,
+        SyncConflictEntity::class,
         AnalyticsEventEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class AweroDatabase : RoomDatabase() {
@@ -25,6 +26,7 @@ abstract class AweroDatabase : RoomDatabase() {
     abstract fun wakeEvents(): WakeEventDao
     abstract fun statistics(): StatisticsDao
     abstract fun syncOperations(): SyncOperationDao
+    abstract fun syncConflicts(): SyncConflictDao
     abstract fun analyticsEvents(): AnalyticsEventDao
 
     companion object {
@@ -35,6 +37,14 @@ abstract class AweroDatabase : RoomDatabase() {
                 )
                 database.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_wake_events_wakeSessionId ON wake_events(wakeSessionId)"
+                )
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS sync_conflicts (operationId TEXT NOT NULL, operationType TEXT NOT NULL, entityType TEXT NOT NULL, entityId TEXT NOT NULL, clientVersion INTEGER, localPayload TEXT NOT NULL, occurredAt INTEGER NOT NULL, code TEXT NOT NULL, serverVersion INTEGER, serverEntityJson TEXT, detectedAt INTEGER NOT NULL, PRIMARY KEY(operationId))"
                 )
             }
         }
@@ -55,7 +65,7 @@ abstract class AweroDatabase : RoomDatabase() {
                     context.applicationContext,
                     AweroDatabase::class.java,
                     "awero.db"
-                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
             }
 
         internal fun createForTesting(context: Context, name: String): AweroDatabase =
@@ -63,6 +73,6 @@ abstract class AweroDatabase : RoomDatabase() {
                 context.applicationContext,
                 AweroDatabase::class.java,
                 name
-            ).addMigrations(MIGRATION_1_2).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 }
