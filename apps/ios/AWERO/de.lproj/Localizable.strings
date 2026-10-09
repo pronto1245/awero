@@ -129,3 +129,4 @@
 "home.alarms_load_error_title" = "Wecker konnten nicht geladen werden";
 "home.alarms_load_error_body" = "AWERO konnte deine gespeicherten Wecker nicht lesen. Sie wurden nicht gelöscht. Versuche es erneut.";
 "home.retry_loading_alarms" = "Erneut versuchen";
+"alarm.error.schedule_incomplete" = "iOS konnte nicht alle Weckererinnerungen registrieren. Wähle weniger Tage oder Wecker und versuche es erneut.";

@@ -22,12 +22,13 @@ enum AlarmReadiness: Equatable {
     }
 }
 
-enum AlarmSchedulingError: LocalizedError {
+enum AlarmSchedulingError: LocalizedError, Equatable {
     case invalidTimezone
     case alarmAuthorizationDenied
     case noWeekdaysSelected
     case invalidAlarmTime
     case invalidWeekday
+    case notificationScheduleIncomplete
 
     var errorDescription: String? {
         switch self {
@@ -41,6 +42,8 @@ enum AlarmSchedulingError: LocalizedError {
             return String(localized: "alarm.error.invalid_time")
         case .invalidWeekday:
             return String(localized: "alarm.error.invalid_weekday")
+        case .notificationScheduleIncomplete:
+            return String(localized: "alarm.error.schedule_incomplete")
         }
     }
 }
@@ -235,36 +238,55 @@ final class AlarmScheduler {
     }
 
     private func scheduleNotifications(for alarm: Alarm) async throws {
+        let alarmPrefix = "awero:alarm:\(alarm.id.uuidString):"
+        let pendingBeforeScheduling = await center.pendingNotificationRequests()
+        let previousAlarmRequests = pendingBeforeScheduling.filter {
+            $0.identifier.hasPrefix("awero:alarm:") && !$0.identifier.hasPrefix(alarmPrefix)
+        }
+
         do {
             for day in alarm.weekdays.sorted() {
-            var components = DateComponents()
-            components.calendar = Calendar(identifier: .gregorian)
-            components.weekday = day
-            components.hour = alarm.hour
-            components.minute = alarm.minute
-            if alarm.timezoneMode == .fixed {
-                guard let timezone = TimeZone(identifier: alarm.fixedTimezone ?? "") else {
-                    throw AlarmSchedulingError.invalidTimezone
+                var components = DateComponents()
+                components.calendar = Calendar(identifier: .gregorian)
+                components.weekday = day
+                components.hour = alarm.hour
+                components.minute = alarm.minute
+                if alarm.timezoneMode == .fixed {
+                    guard let timezone = TimeZone(identifier: alarm.fixedTimezone ?? "") else {
+                        throw AlarmSchedulingError.invalidTimezone
+                    }
+                    components.timeZone = timezone
                 }
-                components.timeZone = timezone
+
+                let content = UNMutableNotificationContent()
+                content.title = String(localized: "notification.alarm_title")
+                content.body = String(localized: "notification.alarm_body")
+                content.sound = .default
+
+                let id = "awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\(day)"
+                try await center.add(
+                    UNNotificationRequest(
+                        identifier: id,
+                        content: content,
+                        trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+                    )
+                )
             }
 
-            let content = UNMutableNotificationContent()
-            content.title = String(localized: "notification.alarm_title")
-            content.body = String(localized: "notification.alarm_body")
-            content.sound = .default
-
-            let id = "awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\(day)"
-            try await center.add(
-                UNNotificationRequest(
-                    identifier: id,
-                    content: content,
-                    trigger: UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
-                )
-            )
+            let pendingIDs = Set((await center.pendingNotificationRequests()).map(\.identifier))
+            let expectedIDs = alarm.weekdays.map {
+                "awero:alarm:\(alarm.id.uuidString):v\(alarm.version):w\($0)"
+            }
+            let previouslyScheduledIDs = previousAlarmRequests.map(\.identifier)
+            guard (expectedIDs + previouslyScheduledIDs).allSatisfy(pendingIDs.contains) else {
+                throw AlarmSchedulingError.notificationScheduleIncomplete
             }
         } catch {
             await removeNotifications(for: alarm)
+            let pendingIDs = Set((await center.pendingNotificationRequests()).map(\.identifier))
+            for request in previousAlarmRequests where !pendingIDs.contains(request.identifier) {
+                try? await center.add(request)
+            }
             throw error
         }
     }

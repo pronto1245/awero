@@ -129,3 +129,4 @@
 "home.alarms_load_error_title" = "Não foi possível carregar os alarmes";
 "home.alarms_load_error_body" = "O AWERO não conseguiu ler seus alarmes salvos. Eles não foram apagados. Tente novamente.";
 "home.retry_loading_alarms" = "Tentar novamente";
+"alarm.error.schedule_incomplete" = "O iOS não conseguiu registrar todos os lembretes. Selecione menos dias ou alarmes e tente novamente.";

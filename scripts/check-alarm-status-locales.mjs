@@ -262,6 +262,7 @@ const expectedIOS = new Set([
   "alarm.error.weekdays_required",
   "alarm.error.invalid_time",
   "alarm.error.invalid_weekday",
+  "alarm.error.schedule_incomplete",
   "alarm.error.permission_exact",
   "alarm.error.permission_notifications",
   "alarm.error.permission_fullscreen",

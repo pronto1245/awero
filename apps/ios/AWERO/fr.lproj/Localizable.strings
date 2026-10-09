@@ -129,3 +129,4 @@
 "home.alarms_load_error_title" = "Impossible de charger les réveils";
 "home.alarms_load_error_body" = "AWERO n’a pas pu lire vos réveils enregistrés. Ils n’ont pas été supprimés. Réessayez.";
 "home.retry_loading_alarms" = "Réessayer";
+"alarm.error.schedule_incomplete" = "iOS n’a pas pu enregistrer tous les rappels. Choisissez moins de jours ou d’alarmes, puis réessayez.";
