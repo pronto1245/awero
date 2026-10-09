@@ -295,15 +295,35 @@ final class CoreDataStore: @unchecked Sendable {
             object.setValue(session.snoozeCount, forKey: "snoozeCount")
             object.setValue(session.fallbackUsed, forKey: "fallbackUsed")
             object.setValue(session.emergencyStop, forKey: "emergencyStop")
+            object.setValue(session.isTest, forKey: "isTest")
         }
     }
 
-    func fetchActiveWakeSession() async -> WakeSession? {
+    func fetchActiveWakeSession(alarmID: UUID? = nil, isTest: Bool? = nil) async -> WakeSession? {
         await performBackground(onFailure: nil) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
-            request.predicate = NSPredicate(format: "completedAt == nil")
+            var predicates = [NSPredicate(format: "completedAt == nil")]
+            if let alarmID {
+                predicates.append(NSPredicate(format: "alarmId == %@", alarmID.uuidString))
+            }
+            if let isTest {
+                predicates.append(NSPredicate(format: "isTest == %@", NSNumber(value: isTest)))
+            }
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
             request.sortDescriptors = [NSSortDescriptor(key: "scheduledAt", ascending: false)]
             return try? context.fetch(request).first.flatMap(Self.wakeSession(from:))
+        }
+    }
+
+    func fetchWakeSessions(includeTestAlarms: Bool = false, limit: Int = 200) async -> [WakeSession] {
+        await performBackground(onFailure: []) { context in
+            let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
+            if !includeTestAlarms {
+                request.predicate = NSPredicate(format: "isTest == NO")
+            }
+            request.sortDescriptors = [NSSortDescriptor(key: "scheduledAt", ascending: false)]
+            request.fetchLimit = max(1, limit)
+            return (try? context.fetch(request).compactMap(Self.wakeSession(from:))) ?? []
         }
     }
 
@@ -412,7 +432,8 @@ final class CoreDataStore: @unchecked Sendable {
             completionTimeSeconds: object.value(forKey: "completionTimeSeconds") as? Int,
             snoozeCount: object.value(forKey: "snoozeCount") as? Int ?? 0,
             fallbackUsed: object.value(forKey: "fallbackUsed") as? Bool ?? false,
-            emergencyStop: object.value(forKey: "emergencyStop") as? Bool ?? false
+            emergencyStop: object.value(forKey: "emergencyStop") as? Bool ?? false,
+            isTest: object.value(forKey: "isTest") as? Bool ?? false
         )
     }
 
@@ -455,6 +476,23 @@ final class CoreDataStore: @unchecked Sendable {
 
     private static func makeModel() -> NSManagedObjectModel {
         let model = NSManagedObjectModel()
+        let wakeSessionEntity = entity(name: "WakeSessionRecord", attributes: [
+            ("id", .stringAttributeType, false),
+            ("alarmId", .stringAttributeType, false),
+            ("alarmVersion", .integer64AttributeType, false),
+            ("scheduledAt", .dateAttributeType, false),
+            ("triggeredAt", .dateAttributeType, true),
+            ("missionStartedAt", .dateAttributeType, true),
+            ("completedAt", .dateAttributeType, true),
+            ("result", .stringAttributeType, true),
+            ("missionType", .stringAttributeType, false),
+            ("completionTimeSeconds", .integer64AttributeType, true),
+            ("snoozeCount", .integer64AttributeType, false),
+            ("fallbackUsed", .booleanAttributeType, false),
+            ("emergencyStop", .booleanAttributeType, false),
+            ("isTest", .booleanAttributeType, false)
+        ])
+        wakeSessionEntity.attributesByName["isTest"]?.defaultValue = false
         model.entities = [
             entity(name: "AlarmRecord", attributes: [
                 ("id", .stringAttributeType, false),
@@ -489,21 +527,7 @@ final class CoreDataStore: @unchecked Sendable {
                 ("emergencyStops", .integer64AttributeType, false),
                 ("totalCompletionSeconds", .integer64AttributeType, false)
             ]),
-            entity(name: "WakeSessionRecord", attributes: [
-                ("id", .stringAttributeType, false),
-                ("alarmId", .stringAttributeType, false),
-                ("alarmVersion", .integer64AttributeType, false),
-                ("scheduledAt", .dateAttributeType, false),
-                ("triggeredAt", .dateAttributeType, true),
-                ("missionStartedAt", .dateAttributeType, true),
-                ("completedAt", .dateAttributeType, true),
-                ("result", .stringAttributeType, true),
-                ("missionType", .stringAttributeType, false),
-                ("completionTimeSeconds", .integer64AttributeType, true),
-                ("snoozeCount", .integer64AttributeType, false),
-                ("fallbackUsed", .booleanAttributeType, false),
-                ("emergencyStop", .booleanAttributeType, false)
-            ])
+            wakeSessionEntity
         ]
         return model
     }

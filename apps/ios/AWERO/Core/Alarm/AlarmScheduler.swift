@@ -157,13 +157,13 @@ final class AlarmScheduler {
         )
     }
 
-    func scheduleSnooze(for alarm: Alarm) async throws {
+    func scheduleSnooze(for alarm: Alarm, isTestAlarm: Bool = false) async throws {
 #if canImport(AlarmKit) && canImport(AppIntents)
         if #available(iOS 26.0, *),
            usesSystemAlarmKit,
            alarm.timezoneMode == .deviceLocal {
-            try await SystemAlarmKitScheduler.scheduleSnooze(for: alarm)
-            await removeNotifications(for: alarm, kind: "snooze")
+            try await SystemAlarmKitScheduler.scheduleSnooze(for: alarm, isTestAlarm: isTestAlarm)
+            await removeNotifications(for: alarm, kind: "snooze", isTestAlarm: isTestAlarm)
             return
         }
 #endif
@@ -174,7 +174,7 @@ final class AlarmScheduler {
         content.sound = .default
         try await center.add(
             UNNotificationRequest(
-                identifier: "awero:snooze:\(alarm.id.uuidString):v\(alarm.version):\(UUID().uuidString)",
+                identifier: "awero:snooze:\(alarm.id.uuidString):v\(alarm.version):\(isTestAlarm ? "test" : "real"):\(UUID().uuidString)",
                 content: content,
                 trigger: UNTimeIntervalNotificationTrigger(
                     timeInterval: TimeInterval(max(1, alarm.snoozeMinutes) * 60),
@@ -184,15 +184,15 @@ final class AlarmScheduler {
         )
     }
 
-    func cancelSnooze(for alarm: Alarm) async {
+    func cancelSnooze(for alarm: Alarm, isTestAlarm: Bool = false) async {
 #if canImport(AlarmKit) && canImport(AppIntents)
         if #available(iOS 26.0, *),
            usesSystemAlarmKit,
            alarm.timezoneMode == .deviceLocal {
-            SystemAlarmKitScheduler.cancelSnooze(for: alarm)
+            SystemAlarmKitScheduler.cancelSnooze(for: alarm, isTestAlarm: isTestAlarm)
         }
 #endif
-        await removeNotifications(for: alarm, kind: "snooze")
+        await removeNotifications(for: alarm, kind: "snooze", isTestAlarm: isTestAlarm)
     }
 
     func cancel(_ alarm: Alarm) async {
@@ -291,7 +291,11 @@ final class AlarmScheduler {
         }
     }
 
-    private func removeNotifications(for alarm: Alarm, kind: String? = nil) async {
+    private func removeNotifications(
+        for alarm: Alarm,
+        kind: String? = nil,
+        isTestAlarm: Bool? = nil
+    ) async {
         let requests = await center.pendingNotificationRequests()
         let prefixes: [String]
         if let kind {
@@ -304,7 +308,11 @@ final class AlarmScheduler {
             ]
         }
         let ids = requests.map(\.identifier).filter { id in
-            prefixes.contains { id.hasPrefix($0) }
+            if let isTestAlarm, kind == "snooze" {
+                let marker = isTestAlarm ? ":test:" : ":real:"
+                return id.hasPrefix("awero:snooze:\(alarm.id.uuidString):") && id.contains(marker)
+            }
+            return prefixes.contains { id.hasPrefix($0) }
         }
         center.removePendingNotificationRequests(withIdentifiers: ids)
     }

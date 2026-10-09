@@ -14,7 +14,8 @@ object WakeSessionMapper {
         result = s.result,
         snoozeCount = s.snoozeCount,
         fallbackUsed = s.fallbackUsed,
-        emergencyStop = s.emergencyStop
+        emergencyStop = s.emergencyStop,
+        isTest = s.isTest
     )
 
     fun fromEntity(e: WakeSessionEntity) = WakeSession(
@@ -28,6 +29,7 @@ object WakeSessionMapper {
         result = e.result,
         snoozeCount = e.snoozeCount,
         fallbackUsed = e.fallbackUsed,
-        emergencyStop = e.emergencyStop
+        emergencyStop = e.emergencyStop,
+        isTest = e.isTest
     )
 }

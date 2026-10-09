@@ -149,12 +149,24 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun scheduleTest(a: Alarm, seconds: Long = 30) =
-        scheduleOneShot(a, ACTION_TEST, testCode(a), seconds * 1000L)
+        scheduleOneShot(a, ACTION_TEST, testCode(a), seconds * 1000L, isTestAlarm = true)
 
-    fun scheduleSnooze(a: Alarm, minutes: Int) =
-        scheduleOneShot(a, ACTION_SNOOZE, snoozeCode(a), minutes.coerceAtLeast(1) * 60_000L)
+    fun scheduleSnooze(a: Alarm, minutes: Int, isTestAlarm: Boolean = false) =
+        scheduleOneShot(
+            a,
+            ACTION_SNOOZE,
+            snoozeCode(a.id, isTestAlarm),
+            minutes.coerceAtLeast(1) * 60_000L,
+            isTestAlarm
+        )
 
-    private fun scheduleOneShot(a: Alarm, action: String, requestCode: Int, delay: Long) {
+    private fun scheduleOneShot(
+        a: Alarm,
+        action: String,
+        requestCode: Int,
+        delay: Long,
+        isTestAlarm: Boolean = false
+    ) {
         requireExactAlarmAccess()
         val at = System.currentTimeMillis() + delay
         val intent = Intent(context, AlarmReceiver::class.java).apply {
@@ -162,6 +174,7 @@ class AlarmScheduler(private val context: Context) {
             putExtra(EXTRA_ID, a.id)
             putExtra(EXTRA_VERSION, a.version)
             putExtra(EXTRA_AT, at)
+            putExtra(EXTRA_TEST, isTestAlarm)
         }
         val pending = PendingIntent.getBroadcast(
             context, requestCode, intent,
@@ -180,14 +193,16 @@ class AlarmScheduler(private val context: Context) {
         }
         cancelPending(testCode(a), ACTION_TEST)
         cancelSnooze(a.id)
+        cancelSnooze(a.id, isTestAlarm = true)
         cancelShowIntent(a)
     }
 
-    fun cancelSnooze(a: Alarm) {
-        cancelSnooze(a.id)
+    fun cancelSnooze(a: Alarm, isTestAlarm: Boolean = false) {
+        cancelSnooze(a.id, isTestAlarm)
     }
 
-    private fun cancelSnooze(id: String) = cancelPending(snoozeCode(id), ACTION_SNOOZE)
+    private fun cancelSnooze(id: String, isTestAlarm: Boolean = false) =
+        cancelPending(snoozeCode(id, isTestAlarm), ACTION_SNOOZE)
 
     private fun cancelPending(requestCode: Int, action: String) {
         val intent = Intent(context, AlarmReceiver::class.java).apply { this.action = action }
@@ -270,11 +285,9 @@ class AlarmScheduler(private val context: Context) {
     private fun code(a: AlarmSchedule, day: Int) = a.id.hashCode() * 31 + day
     private fun showCode(a: AlarmSchedule) = a.id.hashCode() xor 0x5A5A
     private fun testCode(a: Alarm) = a.id.hashCode() xor 0x55AA
-    private fun snoozeCode(a: Alarm) = a.id.hashCode() xor 0xAA55
+    private fun snoozeCode(id: String, isTestAlarm: Boolean = false) = id.hashCode() xor if (isTestAlarm) 0xAA54 else 0xAA55
 
     private fun testCode(a: AlarmSchedule) = a.id.hashCode() xor 0x55AA
-    private fun snoozeCode(id: String) = id.hashCode() xor 0xAA55
-
     companion object {
         const val ACTION_ALARM = "app.awero.ALARM"
         const val ACTION_TEST = "app.awero.TEST_ALARM"

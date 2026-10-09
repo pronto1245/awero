@@ -18,18 +18,16 @@ class WakeSessionStore(
     private val appContext = context.applicationContext
     private val preferences = appContext.getSharedPreferences("awero_wake_sessions", Context.MODE_PRIVATE)
     private val migrationMutex = Mutex()
-    private val stateMutex = Mutex()
     private var active: WakeSession? = null
 
-    suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()): Boolean = stateMutex.withLock {
+    suspend fun start(
+        alarm: Alarm,
+        scheduledAt: Long = System.currentTimeMillis(),
+        isTest: Boolean = false
+    ): Boolean = transitionMutex.withLock {
         migrateLegacyIfNeeded()
-        val existing = database.wakeSessions().active()
-        if (existing != null && existing.alarmId == alarm.id && existing.alarmVersion == alarm.version) {
-            active = WakeSessionMapper.fromEntity(existing)
-            return false
-        }
-
-        if (existing != null && existing.result == null) {
+        val existing = database.wakeSessions().activeForAlarm(alarm.id, isTest)
+        if (existing != null && existing.alarmVersion == alarm.version) {
             active = WakeSessionMapper.fromEntity(existing)
             return false
         }
@@ -39,14 +37,26 @@ class WakeSessionStore(
             alarmId = alarm.id,
             alarmVersion = alarm.version,
             scheduledAt = scheduledAt,
-            triggeredAt = System.currentTimeMillis()
+            triggeredAt = System.currentTimeMillis(),
+            isTest = isTest
         )
-        saveWithEvent(session, "TRIGGERED")
+        val activeForAlarm = existing
+        if (activeForAlarm == null) {
+            saveWithEvent(session, "TRIGGERED")
+        } else {
+            // A changed alarm version leaves the prior event history intact and closes its stale active row.
+            val interrupted = WakeSessionMapper.fromEntity(activeForAlarm).copy(
+                result = "INTERRUPTED",
+                completedAt = System.currentTimeMillis()
+            )
+            saveWithEvent(interrupted, "INTERRUPTED")
+            saveWithEvent(session, "TRIGGERED")
+        }
         active = session
         true
     }
 
-    suspend fun startMission(): Boolean = stateMutex.withLock {
+    suspend fun startMission(): Boolean = transitionMutex.withLock {
         ensureActive()
         val session = active ?: return false
         if (session.result != null || session.missionStartedAt != null) return false
@@ -59,7 +69,7 @@ class WakeSessionStore(
         true
     }
 
-    suspend fun markFallback(): Boolean = stateMutex.withLock {
+    suspend fun markFallback(): Boolean = transitionMutex.withLock {
         ensureActive()
         val session = active ?: return false
         if (session.result != null || session.fallbackUsed) return false
@@ -69,7 +79,7 @@ class WakeSessionStore(
         true
     }
 
-    suspend fun complete(): WakeSession? = stateMutex.withLock {
+    suspend fun complete(): WakeSession? = transitionMutex.withLock {
         ensureActive()
         val session = active ?: return null
         if (session.result != null) return null
@@ -82,7 +92,7 @@ class WakeSessionStore(
         updated
     }
 
-    suspend fun setSnoozeCount(count: Int): Boolean = stateMutex.withLock {
+    suspend fun setSnoozeCount(count: Int): Boolean = transitionMutex.withLock {
         ensureActive()
         val session = active ?: return false
         if (session.result != null || count == session.snoozeCount) return false
@@ -92,7 +102,7 @@ class WakeSessionStore(
         true
     }
 
-    suspend fun emergencyStop(): WakeSession? = stateMutex.withLock {
+    suspend fun emergencyStop(): WakeSession? = transitionMutex.withLock {
         ensureActive()
         val session = active ?: return null
         if (session.result != null) return null
@@ -107,18 +117,29 @@ class WakeSessionStore(
     }
 
     suspend fun save(session: WakeSession) {
-        migrateLegacyIfNeeded()
-        database.wakeSessions().upsert(WakeSessionMapper.toEntity(session))
+        transitionMutex.withLock {
+            migrateLegacyIfNeeded()
+            database.wakeSessions().upsert(WakeSessionMapper.toEntity(session))
+            if (active?.id == session.id) active = session
+        }
     }
 
-    suspend fun loadActive(): WakeSession? {
-        migrateLegacyIfNeeded()
-        return database.wakeSessions().active()?.let(WakeSessionMapper::fromEntity)
-    }
+    suspend fun loadActive(alarmId: String? = null, isTest: Boolean? = null): WakeSession? =
+        transitionMutex.withLock {
+            migrateLegacyIfNeeded()
+            val entity = if (alarmId != null && isTest != null) {
+                database.wakeSessions().activeForAlarm(alarmId, isTest)
+            } else {
+                database.wakeSessions().active()
+            }
+            entity?.let(WakeSessionMapper::fromEntity).also { active = it }
+        }
 
     suspend fun load(): List<WakeSession> {
-        migrateLegacyIfNeeded()
-        return database.wakeSessions().recent().map(WakeSessionMapper::fromEntity)
+        return transitionMutex.withLock {
+            migrateLegacyIfNeeded()
+            database.wakeSessions().recent().map(WakeSessionMapper::fromEntity)
+        }
     }
 
     private suspend fun saveWithEvent(session: WakeSession, type: String, payload: String = "{}") {
@@ -136,9 +157,8 @@ class WakeSessionStore(
     }
 
     private suspend fun ensureActive() {
-        if (active == null) {
-            active = database.wakeSessions().active()?.let(WakeSessionMapper::fromEntity)
-        }
+        active = active?.let { database.wakeSessions().byId(it.id)?.let(WakeSessionMapper::fromEntity) }
+            ?: database.wakeSessions().active()?.let(WakeSessionMapper::fromEntity)
     }
 
     private suspend fun migrateLegacyIfNeeded() {
@@ -172,9 +192,14 @@ class WakeSessionStore(
         result = o.optStringOrNull("result"),
         snoozeCount = o.optInt("snoozeCount", 0),
         fallbackUsed = o.optBoolean("fallbackUsed", false),
-        emergencyStop = o.optBoolean("emergencyStop", false)
+        emergencyStop = o.optBoolean("emergencyStop", false),
+        isTest = o.optBoolean("isTest", false)
     )
 
     private fun JSONObject.optLongOrNull(key: String): Long? = if (isNull(key)) null else optLong(key)
     private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key)) null else optString(key)
+
+    private companion object {
+        val transitionMutex = Mutex()
+    }
 }

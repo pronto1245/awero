@@ -5,7 +5,7 @@ import XCTest
 final class WakeFlowControllerTests: XCTestCase {
     #if canImport(AlarmKit) && canImport(AppIntents)
     @available(iOS 26.0, *)
-    func testAlarmKitIntentDispatchStartsAndStopsPersistedWakeSession() async throws {
+    func testAlarmKitStopIntentStartsMissionOnPersistedWakeSession() async throws {
         let (database, alarm) = try await makeDatabase()
         let saved = await database.saveAlarm(alarm)
         XCTAssertTrue(saved)
@@ -17,17 +17,13 @@ final class WakeFlowControllerTests: XCTestCase {
 
         await StartAweroMissionIntent.trigger(alarmID: alarm.id.uuidString, using: flow)
 
-        XCTAssertEqual(flow.state, .ringing)
+        XCTAssertEqual(flow.state, .mission)
         let activeSession = await database.fetchActiveWakeSession()
         XCTAssertEqual(activeSession?.alarmId, alarm.id)
+        XCTAssertNotNil(activeSession?.missionStartedAt)
 
-        await flow.beginMission()
-        XCTAssertEqual(flow.state, .mission)
-
-        await flow.emergencyStop()
-        XCTAssertEqual(flow.state, .emergencyStopped)
-        let sessionAfterStop = await database.fetchActiveWakeSession()
-        XCTAssertNil(sessionAfterStop)
+        await flow.completeMission()
+        XCTAssertEqual(flow.state, .completed)
     }
     #endif
 
@@ -64,6 +60,88 @@ final class WakeFlowControllerTests: XCTestCase {
         let statistics = await database.fetchStatistics()
         XCTAssertEqual(statistics?.completed, 1)
         XCTAssertEqual(statistics?.fallback, 1)
+    }
+
+    func testRestoredSnoozeCountAndRingingStateSurviveControllerRestart() async throws {
+        let (database, alarm) = try await makeDatabase(maxSnoozes: 2)
+        let saved = await database.saveAlarm(alarm)
+        XCTAssertTrue(saved)
+        let flow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+        await flow.start(alarm: alarm)
+        let snoozed = await flow.snooze(schedule: { _ in }, cancel: { _ in })
+        XCTAssertTrue(snoozed)
+
+        let restored = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+        await restored.restore()
+
+        XCTAssertEqual(restored.state, .ringing)
+        XCTAssertEqual(restored.snoozeCount, 1)
+        let activeSession = await database.fetchActiveWakeSession()
+        XCTAssertEqual(activeSession?.snoozeCount, 1)
+    }
+
+    func testTestAlarmStaysOutOfRealStatisticsAndWakeHistory() async throws {
+        let (database, alarm) = try await makeDatabase()
+        let saved = await database.saveAlarm(alarm)
+        XCTAssertTrue(saved)
+        let flow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+
+        await flow.start(alarm: alarm, isTestAlarm: true)
+        await flow.beginMission()
+        await flow.completeMission()
+
+        let stats = await database.fetchStatistics()
+        XCTAssertEqual(stats?.planned, 0)
+        XCTAssertEqual(stats?.completed, 0)
+        let realHistory = await database.fetchWakeSessions()
+        XCTAssertTrue(realHistory.isEmpty)
+        let savedTest = await database.fetchWakeSessions(includeTestAlarms: true)
+        XCTAssertEqual(savedTest.count, 1)
+        XCTAssertTrue(savedTest[0].isTest)
+    }
+
+    func testTestAlarmSnoozeStateSurvivesRestoreAndRedelivery() async throws {
+        let (database, alarm) = try await makeDatabase(maxSnoozes: 2)
+        let saved = await database.saveAlarm(alarm)
+        XCTAssertTrue(saved)
+        let firstFlow = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+        await firstFlow.start(alarm: alarm, isTestAlarm: true)
+        let snoozed = await firstFlow.snooze(schedule: { _ in }, cancel: { _ in })
+        XCTAssertTrue(snoozed)
+
+        let restored = WakeFlowController(
+            sessionManager: WakeSessionManager(database: database),
+            database: database
+        )
+        await restored.restore()
+        XCTAssertEqual(restored.state, .ringing)
+        XCTAssertEqual(restored.snoozeCount, 1)
+
+        await restored.start(alarm: alarm, isTestAlarm: true)
+        XCTAssertEqual(restored.state, .ringing)
+        XCTAssertEqual(restored.snoozeCount, 1)
+        await restored.beginMission()
+        await restored.completeMission()
+
+        let stats = await database.fetchStatistics()
+        XCTAssertEqual(stats?.planned, 0)
+        XCTAssertEqual(stats?.completed, 0)
+        let realHistory = await database.fetchWakeSessions()
+        let allHistory = await database.fetchWakeSessions(includeTestAlarms: true)
+        XCTAssertTrue(realHistory.isEmpty)
+        XCTAssertEqual(allHistory.count, 1)
     }
 
     func testRepeatedSnoozeWhileSchedulingDoesNotCancelSuccessfulAlarm() async throws {

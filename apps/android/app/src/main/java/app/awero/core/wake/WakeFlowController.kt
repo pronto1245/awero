@@ -15,13 +15,13 @@ class WakeFlowController(
     private val sessions: WakeSessionStore,
     private val context: Context,
     private val statistics: StatisticsStore = StatisticsStore(context),
-    private val testAlarm: Boolean = false,
+    testAlarm: Boolean = false,
     private val alarmStore: AlarmStore = AlarmStore(context),
-    private val scheduleAlarmSnooze: (Alarm, Int) -> Unit = { alarm, minutes ->
-        AlarmScheduler(context).scheduleSnooze(alarm, minutes)
+    private val scheduleAlarmSnooze: (Alarm, Int, Boolean) -> Unit = { alarm, minutes, isTest ->
+        AlarmScheduler(context).scheduleSnooze(alarm, minutes, isTest)
     },
-    private val cancelAlarmSnooze: (Alarm) -> Unit = { alarm ->
-        AlarmScheduler(context).cancelSnooze(alarm)
+    private val cancelAlarmSnooze: (Alarm, Boolean) -> Unit = { alarm, isTest ->
+        AlarmScheduler(context).cancelSnooze(alarm, isTest)
     },
     private val completeSession: suspend () -> WakeSession? = { sessions.complete() }
 ) {
@@ -34,6 +34,7 @@ class WakeFlowController(
     private val _actionError = MutableStateFlow<String?>(null)
     private val _currentAlarm = MutableStateFlow<Alarm?>(null)
     private var snoozeInProgress = false
+    private var activeTestAlarm = testAlarm
 
     val state: StateFlow<State> = _state.asStateFlow()
     val mission: StateFlow<MissionType> = _mission.asStateFlow()
@@ -42,9 +43,10 @@ class WakeFlowController(
     val actionError: StateFlow<String?> = _actionError.asStateFlow()
     val currentAlarm: StateFlow<Alarm?> = _currentAlarm.asStateFlow()
 
-    suspend fun restore() {
-        val session = sessions.loadActive() ?: return
+    suspend fun restore(alarmId: String? = null, testAlarm: Boolean? = null) {
+        val session = sessions.loadActive(alarmId, testAlarm) ?: return
         val alarm = alarmStore.get(session.alarmId) ?: return
+        activeTestAlarm = session.isTest
         _currentAlarm.value = alarm
         _mission.value = if (session.fallbackUsed) MissionType.MATH else alarm.missionType
         _snoozeCount.value = session.snoozeCount
@@ -52,15 +54,16 @@ class WakeFlowController(
     }
 
     suspend fun start(alarm: Alarm, scheduledAt: Long = System.currentTimeMillis()) {
-        val created = sessions.start(alarm, scheduledAt)
+        val created = sessions.start(alarm, scheduledAt, testAlarm)
         if (!created) {
-            restore()
+            restore(alarm.id, testAlarm)
             return
         }
+        activeTestAlarm = testAlarm
         _currentAlarm.value = alarm
         _mission.value = alarm.missionType
         _snoozeCount.value = 0
-        if (!testAlarm) statistics.recordPlanned()
+        if (!activeTestAlarm) statistics.recordPlanned()
         _state.value = State.RINGING
     }
 
@@ -96,7 +99,7 @@ class WakeFlowController(
             _actionError.value = "Could not save completion. Your wake session is still active."
             return false
         }
-        if (!testAlarm) runCatching { statistics.record(session) }
+        if (!session.isTest) runCatching { statistics.record(session) }
         stopCurrentRing()
         _state.value = State.COMPLETED
         return true
@@ -112,14 +115,14 @@ class WakeFlowController(
             val nextCount = previousCount + 1
             _snoozeError.value = null
             try {
-                scheduleAlarmSnooze(alarm, alarm.snoozeMinutes)
+                scheduleAlarmSnooze(alarm, alarm.snoozeMinutes, activeTestAlarm)
                 if (!sessions.setSnoozeCount(nextCount)) {
-                    runCatching { cancelAlarmSnooze(alarm) }
+                    runCatching { cancelAlarmSnooze(alarm, activeTestAlarm) }
                     _snoozeError.value = "Could not save snooze. The alarm is still ringing."
                     return false
                 }
             } catch (error: Exception) {
-                runCatching { cancelAlarmSnooze(alarm) }
+                runCatching { cancelAlarmSnooze(alarm, activeTestAlarm) }
                 _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
                 return false
             }
@@ -139,7 +142,7 @@ class WakeFlowController(
             _actionError.value = "Could not record the stop. The alarm is still active."
             return false
         }
-        if (!testAlarm) runCatching { statistics.record(session) }
+        if (!session.isTest) runCatching { statistics.record(session) }
         stopCurrentRing()
         _state.value = State.EMERGENCY_STOPPED
         return true
@@ -147,7 +150,7 @@ class WakeFlowController(
 
     private fun stopCurrentRing() {
         _currentAlarm.value?.let { alarm ->
-            AlarmRingingService.stop(context, alarm.id, testAlarm)
+            AlarmRingingService.stop(context, alarm.id, activeTestAlarm)
         }
     }
 }

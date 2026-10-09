@@ -41,9 +41,10 @@ final class AWEROAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificatio
 
         if parts[1] == "test" || parts[1] == "snooze" {
             guard let id = UUID(uuidString: String(parts[2])) else { return }
+            let isTestAlarm = parts[1] == "test" || parts.contains("test")
             Task { @MainActor in
                 guard let alarm = await database.fetchAlarm(id: id), alarm.enabled else { return }
-                await wakeFlow.start(alarm: alarm, scheduledAt: .now)
+                await wakeFlow.start(alarm: alarm, scheduledAt: .now, isTestAlarm: isTestAlarm)
             }
             return
         }

@@ -18,10 +18,10 @@ final class WakeSessionManager {
         return current
     }
 
-    func trigger(alarm: Alarm, scheduledAt: Date) async -> Bool {
+    func trigger(alarm: Alarm, scheduledAt: Date, isTest: Bool = false) async -> Bool {
         await acquireTransition()
         defer { releaseTransition() }
-        if let existing = await database.fetchActiveWakeSession() {
+        if let existing = await database.fetchActiveWakeSession(alarmID: alarm.id, isTest: isTest) {
             current = existing
             return false
         }
@@ -39,7 +39,8 @@ final class WakeSessionManager {
             completionTimeSeconds: nil,
             snoozeCount: 0,
             fallbackUsed: false,
-            emergencyStop: false
+            emergencyStop: false,
+            isTest: isTest
         )
         guard await database.saveWakeSession(session) else { return false }
         current = session

@@ -65,7 +65,10 @@ class WakeFlowControllerTest {
         assertTrue(flow.beginMission())
         assertTrue(flow.completeMission())
 
-        assertEquals("SUCCESS", sessions.load().first().result)
+        assertTrue(sessions.load().isEmpty())
+        val storedTest = database.wakeSessions().recent(includeTest = true).single()
+        assertEquals("SUCCESS", storedTest.result)
+        assertTrue(storedTest.isTest)
         assertEquals(0, stats.statistics().planned)
         assertEquals(0, stats.statistics().completed)
     }
@@ -114,8 +117,8 @@ class WakeFlowControllerTest {
             context = context,
             statistics = stats,
             alarmStore = store,
-            scheduleAlarmSnooze = { _, _ -> throw SecurityException("Exact alarm access denied") },
-            cancelAlarmSnooze = { cancelCount += 1 }
+            scheduleAlarmSnooze = { _, _, _ -> throw SecurityException("Exact alarm access denied") },
+            cancelAlarmSnooze = { _, _ -> cancelCount += 1 }
         )
         flow.start(alarm, 1_000L)
 
@@ -141,8 +144,8 @@ class WakeFlowControllerTest {
             context = context,
             statistics = stats,
             alarmStore = store,
-            scheduleAlarmSnooze = { _, _ -> },
-            cancelAlarmSnooze = {}
+            scheduleAlarmSnooze = { _, _, _ -> },
+            cancelAlarmSnooze = { _, _ -> }
         )
         flow.start(alarm, 1_000L)
 
@@ -150,6 +153,11 @@ class WakeFlowControllerTest {
         assertEquals(WakeFlowController.State.IDLE, flow.state.value)
         assertEquals(1, flow.snoozeCount.value)
         assertEquals(1, sessions.loadActive()?.snoozeCount)
+
+        val restored = WakeFlowController(sessions, context, stats, alarmStore = store)
+        restored.restore(alarm.id, testAlarm = false)
+        assertEquals(WakeFlowController.State.RINGING, restored.state.value)
+        assertEquals(1, restored.snoozeCount.value)
     }
 
     @Test
@@ -163,8 +171,8 @@ class WakeFlowControllerTest {
         var cancellations = 0
         val flow = WakeFlowController(
             sessions, context, stats, alarmStore = store,
-            scheduleAlarmSnooze = { _, _ -> schedules += 1 },
-            cancelAlarmSnooze = { cancellations += 1 }
+            scheduleAlarmSnooze = { _, _, _ -> schedules += 1 },
+            cancelAlarmSnooze = { _, _ -> cancellations += 1 }
         )
         flow.start(alarm, 1_000L)
 
@@ -182,6 +190,72 @@ class WakeFlowControllerTest {
         assertEquals(2, schedules)
         assertEquals(0, cancellations)
         assertEquals(2, sessions.loadActive()?.snoozeCount)
+    }
+
+    @Test
+    fun simultaneousAlarmsKeepIndependentActiveWakeSessions() = runBlocking {
+        val alarms = AlarmStore(context, database)
+        val first = alarm("concurrent-first")
+        val second = alarm("concurrent-second")
+        alarms.save(first)
+        alarms.save(second)
+
+        val firstSessions = WakeSessionStore(context, database)
+        val secondSessions = WakeSessionStore(context, database)
+        val statistics = StatisticsStore(context, database)
+        val firstFlow = WakeFlowController(firstSessions, context, statistics, alarmStore = alarms)
+        val secondFlow = WakeFlowController(secondSessions, context, statistics, alarmStore = alarms)
+        firstFlow.start(first, 1_000L)
+        secondFlow.start(second, 2_000L)
+
+        assertEquals(WakeFlowController.State.RINGING, firstFlow.state.value)
+        assertEquals(WakeFlowController.State.RINGING, secondFlow.state.value)
+        assertEquals(first.id, firstSessions.loadActive(first.id, false)?.alarmId)
+        assertEquals(second.id, secondSessions.loadActive(second.id, false)?.alarmId)
+        assertEquals(2, firstSessions.load().size)
+        assertEquals(2, statistics.statistics().planned)
+
+        assertTrue(secondFlow.beginMission())
+        assertEquals(WakeFlowController.State.RINGING, firstFlow.state.value)
+        assertEquals(WakeFlowController.State.MISSION, secondFlow.state.value)
+        assertEquals(first.id, firstSessions.loadActive(first.id, false)?.alarmId)
+        assertEquals(second.id, secondSessions.loadActive(second.id, false)?.alarmId)
+    }
+
+    @Test
+    fun simultaneousTestAndRealWakeForSameAlarmStaySeparate() = runBlocking {
+        val alarms = AlarmStore(context, database)
+        val alarm = alarm("real-and-test")
+        alarms.save(alarm)
+        val statistics = StatisticsStore(context, database)
+        val realSessions = WakeSessionStore(context, database)
+        val testSessions = WakeSessionStore(context, database)
+        val realFlow = WakeFlowController(realSessions, context, statistics, alarmStore = alarms)
+        val testFlow = WakeFlowController(testSessions, context, statistics, testAlarm = true, alarmStore = alarms)
+
+        realFlow.start(alarm, 1_000L)
+        testFlow.start(alarm, 1_000L)
+
+        assertEquals(alarm.id, realSessions.loadActive(alarm.id, false)?.alarmId)
+        assertEquals(alarm.id, testSessions.loadActive(alarm.id, true)?.alarmId)
+        assertEquals(1, realSessions.load().size)
+        assertEquals(1, statistics.statistics().planned)
+    }
+
+    @Test
+    fun concurrentDuplicateTriggerCreatesOnlyOneSession() = runBlocking {
+        val alarm = alarm("racing-trigger")
+        val firstStore = WakeSessionStore(context, database)
+        val secondStore = WakeSessionStore(context, database)
+
+        val first = async { firstStore.start(alarm, 1_000L) }
+        val second = async { secondStore.start(alarm, 1_000L) }
+
+        assertEquals(1, listOf(first.await(), second.await()).count { it })
+        val firstSession = firstStore.loadActive(alarm.id, false)
+        val secondSession = secondStore.loadActive(alarm.id, false)
+        assertEquals(firstSession?.id, secondSession?.id)
+        assertEquals(1, firstStore.load().size)
     }
 
     private fun alarm(id: String, maxSnoozes: Int = 3) = Alarm(

@@ -14,23 +14,27 @@ struct StartAweroMissionIntent: LiveActivityIntent {
     static var openAppWhenRun: Bool = true
 
     @Parameter(title: "Alarm ID") var alarmID: String
+    @Parameter(title: "Test alarm") var isTestAlarm: Bool
 
     init() {
         alarmID = ""
+        isTestAlarm = false
     }
 
-    init(alarmID: String) {
+    init(alarmID: String, isTestAlarm: Bool = false) {
         self.alarmID = alarmID
+        self.isTestAlarm = isTestAlarm
     }
 
     @MainActor
-    static func trigger(alarmID: String, using controller: WakeFlowController) async {
+    static func trigger(alarmID: String, isTestAlarm: Bool = false, using controller: WakeFlowController) async {
         guard let id = UUID(uuidString: alarmID) else { return }
-        await controller.start(alarmID: id)
+        await controller.start(alarmID: id, isTestAlarm: isTestAlarm)
+        await controller.beginMission()
     }
 
     func perform() async throws -> some IntentResult {
-        await Self.trigger(alarmID: alarmID, using: .shared)
+        await Self.trigger(alarmID: alarmID, isTestAlarm: isTestAlarm, using: .shared)
         return .result()
     }
 }
@@ -74,25 +78,25 @@ enum SystemAlarmKitScheduler {
         let schedule = AlarmKit.Alarm.Schedule.fixed(Date(timeIntervalSinceNow: max(5, seconds)))
         try await AlarmManager.shared.schedule(
             id: id,
-            configuration: configuration(schedule: schedule, alarmID: alarm.id)
+            configuration: configuration(schedule: schedule, alarmID: alarm.id, isTestAlarm: true)
         )
     }
 
-    static func scheduleSnooze(for alarm: Alarm) async throws {
+    static func scheduleSnooze(for alarm: Alarm, isTestAlarm: Bool = false) async throws {
         try await ensureAuthorization()
-        let id = identifier(for: "snooze:\(alarm.id.uuidString)")
+        let id = identifier(for: snoozeKey(alarm, isTestAlarm: isTestAlarm))
         try? AlarmManager.shared.cancel(id: id)
         let schedule = AlarmKit.Alarm.Schedule.fixed(
             Date(timeIntervalSinceNow: TimeInterval(max(1, alarm.snoozeMinutes) * 60))
         )
         try await AlarmManager.shared.schedule(
             id: id,
-            configuration: configuration(schedule: schedule, alarmID: alarm.id)
+            configuration: configuration(schedule: schedule, alarmID: alarm.id, isTestAlarm: isTestAlarm)
         )
     }
 
-    static func cancelSnooze(for alarm: Alarm) {
-        try? AlarmManager.shared.cancel(id: identifier(for: "snooze:\(alarm.id.uuidString)"))
+    static func cancelSnooze(for alarm: Alarm, isTestAlarm: Bool = false) {
+        try? AlarmManager.shared.cancel(id: identifier(for: snoozeKey(alarm, isTestAlarm: isTestAlarm)))
     }
 
     static func cancel(_ alarm: Alarm) {
@@ -102,7 +106,8 @@ enum SystemAlarmKitScheduler {
             try? AlarmManager.shared.cancel(id: id)
         }
         try? AlarmManager.shared.cancel(id: identifier(for: "test:\(alarm.id.uuidString)"))
-        try? AlarmManager.shared.cancel(id: identifier(for: "snooze:\(alarm.id.uuidString)"))
+        cancelSnooze(for: alarm)
+        cancelSnooze(for: alarm, isTestAlarm: true)
     }
 
     static func isScheduled(_ alarm: Alarm) -> Bool {
@@ -116,7 +121,8 @@ enum SystemAlarmKitScheduler {
 
     private static func configuration(
         schedule: AlarmKit.Alarm.Schedule,
-        alarmID: UUID
+        alarmID: UUID,
+        isTestAlarm: Bool = false
     ) -> AlarmManager.AlarmConfiguration<AweroAlarmMetadata> {
         let stopButton = AlarmButton(
             text: "Start mission",
@@ -132,10 +138,14 @@ enum SystemAlarmKitScheduler {
         return .alarm(
             schedule: schedule,
             attributes: attributes,
-            stopIntent: StartAweroMissionIntent(alarmID: alarmID.uuidString),
+            stopIntent: StartAweroMissionIntent(alarmID: alarmID.uuidString, isTestAlarm: isTestAlarm),
             secondaryIntent: nil,
             sound: .default
         )
+    }
+
+    private static func snoozeKey(_ alarm: Alarm, isTestAlarm: Bool) -> String {
+        "snooze:\(isTestAlarm ? "test:" : "")\(alarm.id.uuidString)"
     }
 
     private static func ensureAuthorization() async throws {

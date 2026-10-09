@@ -17,6 +17,40 @@ import org.junit.Assert.assertEquals
 class AweroDatabaseMigrationTest {
     @Test
     @Throws(IOException::class)
+    fun migrate3To4PreservesWakeSessionAndDefaultsItToRealAlarm() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val databaseName = "awero-migration-v3-${System.nanoTime()}"
+        val createV3 = object : SupportSQLiteOpenHelper.Callback(3) {
+            override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE wake_sessions (id TEXT NOT NULL PRIMARY KEY, alarmId TEXT NOT NULL, alarmVersion INTEGER NOT NULL, scheduledAt INTEGER NOT NULL, triggeredAt INTEGER, missionStartedAt INTEGER, completedAt INTEGER, result TEXT, snoozeCount INTEGER NOT NULL, fallbackUsed INTEGER NOT NULL, emergencyStop INTEGER NOT NULL)")
+            }
+            override fun onUpgrade(db: androidx.sqlite.db.SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+        }
+        val helper = FrameworkSQLiteOpenHelperFactory().create(
+            SupportSQLiteOpenHelper.Configuration.builder(context).name(databaseName).callback(createV3).build()
+        )
+        val database = helper.writableDatabase
+        database.execSQL("INSERT INTO wake_sessions (id, alarmId, alarmVersion, scheduledAt, triggeredAt, missionStartedAt, completedAt, result, snoozeCount, fallbackUsed, emergencyStop) VALUES ('session-1', 'alarm-1', 2, 1000, 1100, 1200, NULL, NULL, 1, 1, 0)")
+
+        AweroDatabase.MIGRATION_3_4.migrate(database)
+
+        val cursor = database.query("SELECT alarmId, alarmVersion, snoozeCount, fallbackUsed, isTest FROM wake_sessions WHERE id = 'session-1'")
+        cursor.use {
+            assertEquals(1, it.count)
+            it.moveToFirst()
+            assertEquals("alarm-1", it.getString(it.getColumnIndexOrThrow("alarmId")))
+            assertEquals(2, it.getInt(it.getColumnIndexOrThrow("alarmVersion")))
+            assertEquals(1, it.getInt(it.getColumnIndexOrThrow("snoozeCount")))
+            assertEquals(1, it.getInt(it.getColumnIndexOrThrow("fallbackUsed")))
+            assertEquals(0, it.getInt(it.getColumnIndexOrThrow("isTest")))
+        }
+        database.close()
+        helper.close()
+        context.deleteDatabase(databaseName)
+    }
+
+    @Test
+    @Throws(IOException::class)
     fun migrate1To2PreservesOldDataAndCreatesWakeEvents() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val databaseName = "awero-migration-${System.nanoTime()}"

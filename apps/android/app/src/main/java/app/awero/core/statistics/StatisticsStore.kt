@@ -28,6 +28,7 @@ class StatisticsStore(context: Context, private val database: AweroDatabase = Aw
     }
 
     suspend fun record(session: WakeSession) {
+        if (session.isTest) return
         mutex.withLock {
             migrateLegacyIfNeeded()
             val current = database.statistics().get()?.toModel() ?: cached

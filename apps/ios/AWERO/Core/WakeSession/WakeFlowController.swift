@@ -43,13 +43,13 @@ final class WakeFlowController: ObservableObject {
         state = session.missionStartedAt == nil ? .ringing : .mission
     }
 
-    func start(alarmID: UUID, scheduledAt: Date = .now) async {
+    func start(alarmID: UUID, scheduledAt: Date = .now, isTestAlarm: Bool = false) async {
         guard let alarm = await database.fetchAlarm(id: alarmID), alarm.enabled else { return }
-        await start(alarm: alarm, scheduledAt: scheduledAt)
+        await start(alarm: alarm, scheduledAt: scheduledAt, isTestAlarm: isTestAlarm)
     }
 
-    func start(alarm: Alarm, scheduledAt: Date = .now) async {
-        guard await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt) else {
+    func start(alarm: Alarm, scheduledAt: Date = .now, isTestAlarm: Bool = false) async {
+        guard await sessionManager.trigger(alarm: alarm, scheduledAt: scheduledAt, isTest: isTestAlarm) else {
             await restore()
             return
         }
@@ -57,7 +57,7 @@ final class WakeFlowController: ObservableObject {
         currentMission = alarm.missionType
         maxSnoozes = alarm.maxSnoozes
         snoozeCount = 0
-        await statistics.recordPlanned()
+        if !isTestAlarm { await statistics.recordPlanned() }
         state = .ringing
     }
 
@@ -147,7 +147,10 @@ final class WakeFlowController: ObservableObject {
                     self.scheduler = createdScheduler
                     alarmScheduler = createdScheduler
                 }
-                try await alarmScheduler.scheduleSnooze(for: alarm)
+                try await alarmScheduler.scheduleSnooze(
+                    for: alarm,
+                    isTestAlarm: sessionManager.current?.isTest ?? false
+                )
             }
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
                 await cancelScheduledSnooze(for: alarm, using: cancel)
@@ -185,7 +188,10 @@ final class WakeFlowController: ObservableObject {
             self.scheduler = createdScheduler
             alarmScheduler = createdScheduler
         }
-        await alarmScheduler.cancelSnooze(for: alarm)
+        await alarmScheduler.cancelSnooze(
+            for: alarm,
+            isTestAlarm: sessionManager.current?.isTest ?? false
+        )
     }
 
     func emergencyStop() async {

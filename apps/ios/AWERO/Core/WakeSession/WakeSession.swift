@@ -25,4 +25,5 @@ struct WakeSession: Identifiable, Codable {
     var snoozeCount: Int
     var fallbackUsed: Bool
     var emergencyStop: Bool
+    var isTest: Bool = false
 }

@@ -18,6 +18,8 @@ class AlarmReceiver : BroadcastReceiver() {
                 val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return@launch
                 val version = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
                 val at = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
+                val isTestAlarm = intent.action == AlarmScheduler.ACTION_TEST ||
+                    intent.getBooleanExtra(AlarmScheduler.EXTRA_TEST, false)
                 val schedule = if (context.getSystemService(UserManager::class.java).isUserUnlocked) {
                     AlarmStore(context).get(id)?.toSchedule()
                 } else {
@@ -32,7 +34,7 @@ class AlarmReceiver : BroadcastReceiver() {
                         alarmId = id,
                         version = version,
                         scheduledAt = at,
-                        test = intent.action == AlarmScheduler.ACTION_TEST
+                        test = isTestAlarm
                     )
                 }
                 if (intent.action == AlarmScheduler.ACTION_ALARM) {

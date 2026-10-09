@@ -61,6 +61,7 @@ final class StatisticsStore: ObservableObject {
     }
 
     func record(_ session: WakeSession) async {
+        guard !session.isTest else { return }
         await acquireWrite()
         defer { releaseWrite() }
         await ensureLoaded()

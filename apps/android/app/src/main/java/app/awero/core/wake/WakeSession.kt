@@ -15,5 +15,6 @@ data class WakeSession(
     var result: String? = null,
     var snoozeCount: Int = 0,
     var fallbackUsed: Boolean = false,
-    var emergencyStop: Boolean = false
+    var emergencyStop: Boolean = false,
+    var isTest: Boolean = false
 )

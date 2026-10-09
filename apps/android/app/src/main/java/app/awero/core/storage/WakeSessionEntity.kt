@@ -1,5 +1,6 @@
 package app.awero.core.storage
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -15,5 +16,6 @@ data class WakeSessionEntity(
     val result: String?,
     val snoozeCount: Int,
     val fallbackUsed: Boolean,
-    val emergencyStop: Boolean
+    val emergencyStop: Boolean,
+    @ColumnInfo(defaultValue = "0") val isTest: Boolean
 )
