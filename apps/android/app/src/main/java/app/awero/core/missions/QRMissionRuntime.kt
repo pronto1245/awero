@@ -28,7 +28,7 @@ class QRMissionRuntime(private val context: Context) {
     fun start(owner: LifecycleOwner, preview: PreviewView, onCode: (String) -> Unit) {
         closed = false
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            onCode("")
+            preview.post { onCode("") }
             return
         }
         val providerFuture = ProcessCameraProvider.getInstance(context)
@@ -83,7 +83,7 @@ class QRMissionRuntime(private val context: Context) {
                 )
             } catch (_: Exception) {
                 close()
-                onCode("")
+                preview.post { onCode("") }
             }
         }, androidx.core.content.ContextCompat.getMainExecutor(context))
     }
