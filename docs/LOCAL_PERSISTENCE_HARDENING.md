@@ -4,6 +4,8 @@ Scope: the approved ten-point local persistence gate. Backend is excluded.
 
 Status: automated gate verified on 2026-10-08. Physical-device release validation remains separate.
 
+Phase 4 recovery additions passed in [CI run 37999302184](https://github.com/pronto1245/awero/actions/runs/37999302184). This run compiled both platforms, ran Android migration-recovery instrumentation and iOS read-failure/migration-retry XCTest, and preserved the existing offline queue, wake-session, restart, and crash-recovery gates. The ten-point baseline was not separately rerun outside this required CI for changed persistence code.
+
 ## Data-loss boundary
 
 Alarms, wake sessions, statistics, and pending offline operations are stored locally on each device. The current product does not provide a server restore path for this local state. If application data is removed and the operating system does not restore it from a device backup, AWERO cannot recover those records. A successful local migration preserves the records on that device; a failed migration remains retryable and is shown as a storage error rather than as an empty alarm list. Physical backup and reinstall behavior remains part of the Phase 10 release matrix.
