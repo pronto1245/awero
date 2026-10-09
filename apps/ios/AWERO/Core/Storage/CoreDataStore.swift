@@ -10,6 +10,7 @@ final class CoreDataStore: @unchecked Sendable {
     static let shared = CoreDataStore()
 
     private let container: NSPersistentContainer
+    private let persistentStoreReady: Task<Void, Error>
     private let logger = Logger(subsystem: "app.awero", category: "persistence")
 
     init(storeURL: URL? = nil, readOnly: Bool = false) {
@@ -35,15 +36,17 @@ final class CoreDataStore: @unchecked Sendable {
         }
         container.persistentStoreDescriptions = [description]
 
-        var loadError: Error?
-        let semaphore = DispatchSemaphore(value: 0)
-        container.loadPersistentStores { _, error in
-            loadError = error
-            semaphore.signal()
-        }
-        semaphore.wait()
-        if let loadError {
-            fatalError("AWERO Core Data store failed: \(loadError.localizedDescription)")
+        let persistentContainer = container
+        persistentStoreReady = Task {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                persistentContainer.loadPersistentStores { _, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else {
+                        continuation.resume()
+                    }
+                }
+            }
         }
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         container.viewContext.undoManager = nil
@@ -79,7 +82,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchAlarm(id: UUID) async -> Alarm? {
-        await performBackground { context in
+        await performBackground(onFailure: nil) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.predicate = NSPredicate(format: "id == %@", id.uuidString)
             return try? context.fetch(request).first.flatMap(Self.alarm(from:))
@@ -87,7 +90,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchAlarms() async -> [Alarm] {
-        await performBackground { context in
+        await performBackground(onFailure: []) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AlarmRecord")
             request.sortDescriptors = [
                 NSSortDescriptor(key: "hour", ascending: true),
@@ -117,7 +120,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchDueSyncOperations() async -> [SyncOperation] {
-        await performBackground { context in
+        await performBackground(onFailure: []) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncOperationRecord")
             request.predicate = NSPredicate(format: "nextAttemptAt <= %@", Date.now as NSDate)
             request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
@@ -174,7 +177,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchSyncConflicts() async -> [SyncConflictRecord] {
-        await performBackground { context in
+        await performBackground(onFailure: []) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "SyncConflictRecord")
             request.sortDescriptors = [NSSortDescriptor(key: "detectedAt", ascending: true)]
             return (try? context.fetch(request).compactMap(Self.syncConflict(from:))) ?? []
@@ -205,7 +208,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchPendingAnalyticsEvents() async -> [AnalyticsEvent] {
-        await performBackground { context in
+        await performBackground(onFailure: []) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "AnalyticsEventRecord")
             request.sortDescriptors = [NSSortDescriptor(key: "occurredAt", ascending: true)]
             request.fetchLimit = 100
@@ -245,7 +248,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchStatistics() async -> WakeStatistics? {
-        await performBackground { context in
+        await performBackground(onFailure: nil) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "StatisticsRecord")
             request.predicate = NSPredicate(format: "id == %@", "singleton")
             guard let object = try? context.fetch(request).first else { return nil }
@@ -290,7 +293,7 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     func fetchActiveWakeSession() async -> WakeSession? {
-        await performBackground { context in
+        await performBackground(onFailure: nil) { context in
             let request = NSFetchRequest<NSManagedObject>(entityName: "WakeSessionRecord")
             request.predicate = NSPredicate(format: "completedAt == nil")
             request.sortDescriptors = [NSSortDescriptor(key: "scheduledAt", ascending: false)]
@@ -309,7 +312,8 @@ final class CoreDataStore: @unchecked Sendable {
     private func performWrite(
         _ work: @escaping @Sendable (NSManagedObjectContext) throws -> Void
     ) async -> Bool {
-        await container.performBackgroundTask { context in
+        guard await waitForPersistentStore() else { return false }
+        return await container.performBackgroundTask { context in
             do {
                 try work(context)
                 if context.hasChanges {
@@ -329,10 +333,22 @@ final class CoreDataStore: @unchecked Sendable {
     }
 
     private func performBackground<T: Sendable>(
+        onFailure: T,
         _ work: @escaping @Sendable (NSManagedObjectContext) -> T
     ) async -> T {
-        await container.performBackgroundTask { context in
+        guard await waitForPersistentStore() else { return onFailure }
+        return await container.performBackgroundTask { context in
             work(context)
+        }
+    }
+
+    private func waitForPersistentStore() async -> Bool {
+        do {
+            try await persistentStoreReady.value
+            return true
+        } catch {
+            logger.error("Core Data store failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 

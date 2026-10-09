@@ -16,6 +16,8 @@ targets:
       properties:
         NSAlarmKitUsageDescription: AWERO schedules wake-up alarms that can alert while your iPhone is locked or in Focus.
         NSSupportsLiveActivities: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
     scheme:
       testTargets:
         - AWEROTests
