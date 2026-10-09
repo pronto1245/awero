@@ -3,6 +3,7 @@ package app.awero.core.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.UserManager
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,8 +18,13 @@ class AlarmReceiver : BroadcastReceiver() {
                 val id = intent.getStringExtra(AlarmScheduler.EXTRA_ID) ?: return@launch
                 val version = intent.getIntExtra(AlarmScheduler.EXTRA_VERSION, -1)
                 val at = intent.getLongExtra(AlarmScheduler.EXTRA_AT, System.currentTimeMillis())
-                val alarm = AlarmStore(context).get(id) ?: return@launch
-                if (alarm.version != version || !alarm.enabled) return@launch
+                val schedule = if (context.getSystemService(UserManager::class.java).isUserUnlocked) {
+                    AlarmStore(context).get(id)?.toSchedule()
+                } else {
+                    if (intent.action != AlarmScheduler.ACTION_ALARM) return@launch
+                    DeviceProtectedAlarmScheduleStore(context).get(id)
+                } ?: return@launch
+                if (schedule.version != version || !schedule.enabled) return@launch
 
                 val startRinging = {
                     AlarmRingingService.start(
@@ -32,7 +38,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 if (intent.action == AlarmScheduler.ACTION_ALARM) {
                     deliverAlarm(
                         startRinging = startRinging,
-                        reschedule = { AlarmScheduler(context).schedule(alarm) },
+                        reschedule = { AlarmScheduler(context).schedule(schedule) },
                         onFailure = { error ->
                             Log.e(TAG, "Alarm fired, but its next occurrence could not be scheduled: $id", error)
                         }

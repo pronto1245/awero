@@ -37,6 +37,10 @@ internal fun resolveAlarmReadiness(
 }
 
 internal fun validateAlarmSchedule(alarm: Alarm) {
+    validateAlarmSchedule(alarm.toSchedule())
+}
+
+internal fun validateAlarmSchedule(alarm: AlarmSchedule) {
     if (!alarm.enabled) return
     require(alarm.hour in 0..23 && alarm.minute in 0..59) {
         "Enter a valid alarm time."
@@ -51,6 +55,10 @@ internal fun validateAlarmSchedule(alarm: Alarm) {
 }
 
 internal fun resolveAlarmTimeZone(alarm: Alarm): TimeZone {
+    return resolveAlarmTimeZone(alarm.toSchedule())
+}
+
+internal fun resolveAlarmTimeZone(alarm: AlarmSchedule): TimeZone {
     if (alarm.timezoneMode == TimezoneMode.DEVICE_LOCAL) return TimeZone.getDefault()
     val identifier = alarm.fixedTimezone
         ?: throw IllegalArgumentException("A valid fixed timezone is required for this alarm.")
@@ -71,7 +79,20 @@ internal fun isAlarmScheduleRegistered(
     exactAlarmAccessGranted &&
     alarm.weekdays.all(pendingWeekdays::contains)
 
+internal fun isAlarmScheduleRegistered(
+    alarm: AlarmSchedule,
+    exactAlarmAccessGranted: Boolean,
+    pendingWeekdays: Set<Int>
+): Boolean = alarm.enabled &&
+    alarm.weekdays.isNotEmpty() &&
+    exactAlarmAccessGranted &&
+    alarm.weekdays.all(pendingWeekdays::contains)
+
 internal fun nextAlarmOccurrence(alarm: Alarm, day: Int, now: Instant): ZonedDateTime {
+    return nextAlarmOccurrence(alarm.toSchedule(), day, now)
+}
+
+internal fun nextAlarmOccurrence(alarm: AlarmSchedule, day: Int, now: Instant): ZonedDateTime {
     require(alarm.enabled) { "Disabled alarms cannot be scheduled." }
     validateAlarmSchedule(alarm)
     require(day in alarm.weekdays) { "The requested weekday is not enabled for this alarm." }
@@ -100,6 +121,10 @@ class AlarmScheduler(private val context: Context) {
     private val manager = context.getSystemService(AlarmManager::class.java)
 
     fun schedule(a: Alarm) {
+        schedule(a.toSchedule())
+    }
+
+    fun schedule(a: AlarmSchedule) {
         if (!a.enabled) {
             cancel(a)
             return
@@ -146,17 +171,23 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun cancel(a: Alarm) {
+        cancel(a.toSchedule())
+    }
+
+    fun cancel(a: AlarmSchedule) {
         (1..7).forEach { day ->
             cancelPending(code(a, day), ACTION_ALARM)
         }
         cancelPending(testCode(a), ACTION_TEST)
-        cancelSnooze(a)
+        cancelSnooze(a.id)
         cancelShowIntent(a)
     }
 
     fun cancelSnooze(a: Alarm) {
-        cancelPending(snoozeCode(a), ACTION_SNOOZE)
+        cancelSnooze(a.id)
     }
+
+    private fun cancelSnooze(id: String) = cancelPending(snoozeCode(id), ACTION_SNOOZE)
 
     private fun cancelPending(requestCode: Int, action: String) {
         val intent = Intent(context, AlarmReceiver::class.java).apply { this.action = action }
@@ -171,6 +202,10 @@ class AlarmScheduler(private val context: Context) {
     }
 
     fun isScheduled(a: Alarm): Boolean {
+        return isScheduled(a.toSchedule())
+    }
+
+    fun isScheduled(a: AlarmSchedule): Boolean {
         if (!a.enabled || a.weekdays.isEmpty()) return false
         val exactAlarmAccessGranted =
             Build.VERSION.SDK_INT < VERSION_CODES.S || manager.canScheduleExactAlarms()
@@ -192,7 +227,7 @@ class AlarmScheduler(private val context: Context) {
         return resolveAlarmReadiness(a.enabled, valid, permissionsGranted, isScheduled(a))
     }
 
-    private fun setAlarmClock(alarm: Alarm, at: Long, operation: PendingIntent) {
+    private fun setAlarmClock(alarm: AlarmSchedule, at: Long, operation: PendingIntent) {
         val showIntent = PendingIntent.getActivity(
             context,
             showCode(alarm),
@@ -205,7 +240,7 @@ class AlarmScheduler(private val context: Context) {
         manager.setAlarmClock(AlarmManager.AlarmClockInfo(at, showIntent), operation)
     }
 
-    private fun cancelShowIntent(alarm: Alarm) {
+    private fun cancelShowIntent(alarm: AlarmSchedule) {
         val pending = PendingIntent.getActivity(
             context,
             showCode(alarm),
@@ -225,17 +260,20 @@ class AlarmScheduler(private val context: Context) {
         }
     }
 
-    private fun next(a: Alarm, day: Int): Calendar {
+    private fun next(a: AlarmSchedule, day: Int): Calendar {
         val instant = nextAlarmOccurrence(a, day, Instant.now()).toInstant()
         return Calendar.getInstance(resolveAlarmTimeZone(a)).apply {
             timeInMillis = instant.toEpochMilli()
         }
     }
 
-    private fun code(a: Alarm, day: Int) = a.id.hashCode() * 31 + day
-    private fun showCode(a: Alarm) = a.id.hashCode() xor 0x5A5A
+    private fun code(a: AlarmSchedule, day: Int) = a.id.hashCode() * 31 + day
+    private fun showCode(a: AlarmSchedule) = a.id.hashCode() xor 0x5A5A
     private fun testCode(a: Alarm) = a.id.hashCode() xor 0x55AA
     private fun snoozeCode(a: Alarm) = a.id.hashCode() xor 0xAA55
+
+    private fun testCode(a: AlarmSchedule) = a.id.hashCode() xor 0x55AA
+    private fun snoozeCode(id: String) = id.hashCode() xor 0xAA55
 
     companion object {
         const val ACTION_ALARM = "app.awero.ALARM"

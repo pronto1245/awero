@@ -72,8 +72,8 @@ class AlarmCoordinator(
     }
 
     suspend fun delete(alarm: Alarm) {
-        scheduler.cancel(alarm)
         store.delete(alarm.id)
+        scheduler.cancel(alarm)
         enqueueSync("DELETE_ALARM", alarm, alarm.version, JSONObject())
     }
 

@@ -19,3 +19,26 @@ data class Alarm(
     val snoozeMinutes: Int = 10,
     val qrExpectedCode: String? = null
 )
+
+/** The non-sensitive fields required to schedule and restore an alarm before first unlock. */
+data class AlarmSchedule(
+    val id: String,
+    val version: Int,
+    val hour: Int,
+    val minute: Int,
+    val enabled: Boolean,
+    val weekdays: Set<Int>,
+    val timezoneMode: TimezoneMode,
+    val fixedTimezone: String?
+)
+
+fun Alarm.toSchedule() = AlarmSchedule(
+    id = id,
+    version = version,
+    hour = hour,
+    minute = minute,
+    enabled = enabled,
+    weekdays = weekdays,
+    timezoneMode = timezoneMode,
+    fixedTimezone = fixedTimezone
+)

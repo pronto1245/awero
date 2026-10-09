@@ -7,17 +7,39 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
 
-class AlarmStore(
+class AlarmStore private constructor(
     context: Context,
-    private val database: AweroDatabase = AweroDatabase.get(context.applicationContext)
+    private val database: AweroDatabase,
+    private val deviceProtectedSchedules: DeviceProtectedAlarmScheduleStore?
 ) {
+    constructor(context: Context) : this(
+        context.applicationContext,
+        AweroDatabase.get(context.applicationContext),
+        DeviceProtectedAlarmScheduleStore(context.applicationContext)
+    )
+
+    constructor(context: Context, database: AweroDatabase) : this(context, database, null)
+
     private val appContext = context.applicationContext
     private val preferences = appContext.getSharedPreferences("awero_alarms", Context.MODE_PRIVATE)
     private val migrationMutex = Mutex()
 
     suspend fun save(alarm: Alarm) {
         migrateLegacyIfNeeded()
+        val previous = database.alarms().get(alarm.id)?.let(AlarmMapper::fromEntity)
         database.alarms().upsert(AlarmMapper.toEntity(alarm))
+        try {
+            check(deviceProtectedSchedules?.upsert(alarm.toSchedule()) != false) {
+                "Could not update the direct-boot alarm schedule."
+            }
+        } catch (error: Exception) {
+            restore(alarm.id, previous)
+            runCatching {
+                if (previous == null) deviceProtectedSchedules?.remove(alarm.id)
+                else deviceProtectedSchedules?.upsert(previous.toSchedule())
+            }
+            throw error
+        }
     }
 
     suspend fun get(id: String): Alarm? {
@@ -27,12 +49,31 @@ class AlarmStore(
 
     suspend fun all(): List<Alarm> {
         migrateLegacyIfNeeded()
-        return database.alarms().all().map(AlarmMapper::fromEntity)
+        val alarms = database.alarms().all().map(AlarmMapper::fromEntity)
+        check(deviceProtectedSchedules?.replaceAll(alarms.map(Alarm::toSchedule)) != false) {
+            "Could not reconcile the direct-boot alarm schedules."
+        }
+        return alarms
     }
 
     suspend fun delete(id: String) {
         migrateLegacyIfNeeded()
-        database.alarms().get(id)?.let { database.alarms().delete(it) }
+        val previous = database.alarms().get(id)?.let(AlarmMapper::fromEntity) ?: return
+        database.alarms().delete(AlarmMapper.toEntity(previous))
+        try {
+            check(deviceProtectedSchedules?.remove(id) != false) {
+                "Could not remove the direct-boot alarm schedule."
+            }
+        } catch (error: Exception) {
+            restore(id, previous)
+            runCatching { deviceProtectedSchedules?.upsert(previous.toSchedule()) }
+            throw error
+        }
+    }
+
+    private suspend fun restore(id: String, previous: Alarm?) {
+        if (previous == null) database.alarms().get(id)?.let(database.alarms()::delete)
+        else database.alarms().upsert(AlarmMapper.toEntity(previous))
     }
 
     private suspend fun migrateLegacyIfNeeded() {
