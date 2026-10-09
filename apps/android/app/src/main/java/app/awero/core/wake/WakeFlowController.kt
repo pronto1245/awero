@@ -22,7 +22,8 @@ class WakeFlowController(
     },
     private val cancelAlarmSnooze: (Alarm) -> Unit = { alarm ->
         AlarmScheduler(context).cancelSnooze(alarm)
-    }
+    },
+    private val completeSession: suspend () -> WakeSession? = { sessions.complete() }
 ) {
     enum class State { IDLE, RINGING, MISSION, COMPLETED, EMERGENCY_STOPPED }
 
@@ -90,7 +91,7 @@ class WakeFlowController(
     suspend fun completeMission(): Boolean {
         if (_state.value != State.MISSION) return false
         _actionError.value = null
-        val session = runCatching { sessions.complete() }.getOrNull()
+        val session = runCatching { completeSession() }.getOrNull()
         if (session == null) {
             _actionError.value = "Could not save completion. Your wake session is still active."
             return false
