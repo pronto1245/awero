@@ -46,6 +46,7 @@ class WakeSaveRetryEndToEndTest {
         }
         database.close()
         context.deleteDatabase(databaseName)
+        Unit
     }
 
     @Test
