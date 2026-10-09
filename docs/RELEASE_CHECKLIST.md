@@ -1,5 +1,7 @@
 # AWERO Release Checklist
 
+The owner has already confirmed the guided iPhone mission walkthrough and emergency-stop scenario. Preserve that evidence and do not ask to repeat those exact checks unless the related behavior changes. This does not complete the broader Phase 10 signed-build and physical-device release matrix; its remaining checks stay open.
+
 ## Mobile
 - [ ] Generate `apps/ios/AWERO.xcodeproj` with XcodeGen and build the app for iOS Simulator
 - [ ] Install the signed development build on a physical iPhone from Xcode
@@ -25,7 +27,7 @@
 - [ ] Mission retry works
 - [ ] Fallback works
 - [ ] Snooze policy works
-- [ ] Emergency stop works
+- [x] Previously confirmed emergency-stop scenario (retain existing evidence; do not repeat absent a related code change)
 - [ ] Wake session persisted
 - [ ] Statistics updated
 - [ ] Localization verified in all six languages

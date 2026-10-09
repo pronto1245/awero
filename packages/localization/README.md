@@ -9,4 +9,4 @@ Required release locales:
 - de
 - es
 
-The JSON files in this package are the single source of truth for user-visible translation values. Native iOS and Android resources are currently mirrored manually; generation and verification are assigned to Phase 6 and are not yet implemented. Do not add a second maintained translation source or claim generation is active until that phase is complete.
+The JSON files are the intended future source of truth, but they are not yet a complete source for current UI copy: each locale currently has only 11–14 JSON keys, compared with 129 entries in each iOS strings file and 124 in each Android strings file. Native resources are maintained manually. Completing coverage, generating native files, and parity checks belong to Phase 6; do not claim generation is active before then.
