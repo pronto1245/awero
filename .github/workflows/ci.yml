@@ -93,11 +93,7 @@ jobs:
             adb shell appops set app.awero SCHEDULE_EXACT_ALARM allow
             adb shell cmd connectivity airplane-mode enable
             test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = "1"
-            for attempt in $(seq 1 10); do
-              if [ "$(adb get-state 2>/dev/null || true)" = "device" ]; then break; fi
-              adb reconnect offline >/dev/null 2>&1 || true
-              sleep 1
-            done
+            for attempt in $(seq 1 10); do if [ "$(adb get-state 2>/dev/null || true)" = "device" ]; then break; fi; adb reconnect offline >/dev/null 2>&1 || true; sleep 1; done
             test "$(adb get-state)" = "device"
             gradle -p apps/android :app:connectedDebugAndroidTest
             bash apps/android/scripts/persistence-crash-test.sh
