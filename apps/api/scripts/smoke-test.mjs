@@ -92,6 +92,8 @@ async function main() {
     method: 'PATCH', token, body: { qrExpectedCode: 'x'.repeat(2049) },
   });
   assert(oversizedQrCode.status === 400, 'oversized QR expected code was accepted');
+  const deletedQrAlarm = await request(`/alarms/${qrAlarm.data.item.id}`, { method: 'DELETE', token });
+  assert(deletedQrAlarm.status === 200, 'QR smoke-test alarm cleanup failed');
 
   const sessionId = randomUUID();
   const triggerEventId = randomUUID();
