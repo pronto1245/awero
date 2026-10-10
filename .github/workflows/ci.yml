@@ -177,6 +177,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO
           )
           xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROFirstRunUITests test
+          xcrun simctl uninstall "$DEVICE_ID" app.awero
           xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROTests test
 
   ios-persistence-smoke:
