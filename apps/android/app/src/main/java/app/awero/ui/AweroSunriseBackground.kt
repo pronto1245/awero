@@ -1,24 +1,40 @@
 package app.awero.ui
 
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.ColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PixelFormat
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.drawable.Drawable
 
-/** Offline layered sunrise shared by the OS-facing wake activity. */
-class AweroSunriseBackground : Drawable() {
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+/**
+ * Background of the OS-facing wake activity: the illustrated dawn scene across the whole
+ * screen, fading into the ivory mission surface. Without [resources] (or if the photo cannot be
+ * decoded) it draws the offline layered sunrise instead.
+ */
+class AweroSunriseBackground(resources: Resources? = null) : Drawable() {
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     private var opacity = 255
+    private val photo: Bitmap? = resources?.let {
+        runCatching { BitmapFactory.decodeResource(it, AweroScene.wakePortrait) }.getOrNull()
+    }
 
     override fun draw(canvas: Canvas) {
         val width = bounds.width().toFloat()
         val screenHeight = bounds.height().toFloat()
         val height = screenHeight * .52f
         if (width <= 0f || height <= 0f) return
+        photo?.let { image ->
+            drawPhoto(canvas, image, width, screenHeight)
+            return
+        }
         paint.shader = null
         paint.color = AweroDesign.ivoryArgb
         paint.alpha = opacity
@@ -107,6 +123,22 @@ class AweroSunriseBackground : Drawable() {
             intArrayOf(0x00FFF8EF, AweroDesign.ivoryArgb), null, Shader.TileMode.CLAMP)
         canvas.drawRect(0f, height * .90f, width, height + screenHeight * .03f, paint)
         paint.shader = null
+    }
+
+    private fun drawPhoto(canvas: Canvas, image: Bitmap, width: Float, screenHeight: Float) {
+        paint.shader = null
+        paint.color = AweroDesign.ivoryArgb
+        paint.alpha = opacity
+        canvas.drawRect(bounds, paint)
+
+        // Centre-crop the portrait scene over the whole screen; it fades to ivory at the bottom.
+        val scale = maxOf(width / image.width, screenHeight / image.height)
+        val sourceWidth = width / scale
+        val sourceHeight = screenHeight / scale
+        val left = (image.width - sourceWidth) / 2f
+        val top = (image.height - sourceHeight) / 2f
+        val source = Rect(left.toInt(), top.toInt(), (left + sourceWidth).toInt(), (top + sourceHeight).toInt())
+        canvas.drawBitmap(image, source, RectF(bounds), paint)
     }
 
     override fun setAlpha(alpha: Int) { opacity = alpha; invalidateSelf() }

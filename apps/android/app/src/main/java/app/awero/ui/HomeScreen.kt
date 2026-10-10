@@ -16,6 +16,9 @@ import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -103,7 +106,10 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
+        modifier = modifier.fillMaxSize().background(AweroIvory)
+            // Full-screen illustrated scene behind the page; it fades to ivory at the bottom.
+            .paint(painterResource(AweroScene.current().portrait), contentScale = ContentScale.Crop)
+            .padding(horizontal = 20.dp)
     ) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
         Spacer(Modifier.height(12.dp))
@@ -135,7 +141,8 @@ fun HomeScreen(
             Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
             AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
         }
-        ApprovedHomeSunriseArtwork(Modifier.padding(top = 4.dp), height = 100.dp)
+        // Space for the scene's sun and peaks; the next-alarm card overlaps them.
+        Spacer(Modifier.height(150.dp))
         Spacer(Modifier.height(18.dp))
 
         if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {

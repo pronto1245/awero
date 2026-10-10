@@ -4,10 +4,13 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -17,15 +20,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
-import app.awero.R
 
+/**
+ * Full-screen illustrated dawn scene behind the in-app wake screen. The artwork already fades
+ * into the ivory surface at the bottom, so it sits directly under the mission controls.
+ */
 @Composable
-fun ApprovedHomeSunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 100.dp) {
+fun WakeSceneArtwork(modifier: Modifier = Modifier, scene: AweroScene = AweroScene.DAWN) {
     Image(
-        painter = painterResource(R.drawable.awero_sunrise_reference),
+        painter = painterResource(scene.portrait),
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = modifier.fillMaxWidth().height(height)
+        modifier = modifier.fillMaxSize()
     )
 }
 
