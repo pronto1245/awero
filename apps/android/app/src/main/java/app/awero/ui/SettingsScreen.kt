@@ -53,7 +53,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         )
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
             shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(
@@ -74,7 +74,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
             shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(

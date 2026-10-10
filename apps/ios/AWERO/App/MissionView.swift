@@ -48,7 +48,7 @@ private struct MathMissionView: View {
                     .foregroundStyle(AweroDesign.navy)
                     .padding(.vertical, 14)
                     .frame(maxWidth: .infinity)
-                    .background(Color.white.opacity(0.96))
+                    .background(AweroDesign.surface.opacity(0.96))
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .accessibilityIdentifier("mission.math.problem")
             }
@@ -57,13 +57,13 @@ private struct MathMissionView: View {
                     .font(.title2.weight(.medium))
                     .foregroundStyle(answer.isEmpty ? AweroDesign.navy.opacity(0.35) : AweroDesign.navy)
                     .frame(maxWidth: .infinity, minHeight: 52, alignment: .center)
-                    .background(Color.white.opacity(0.98), in: RoundedRectangle(cornerRadius: 12))
+                    .background(AweroDesign.surface.opacity(0.98), in: RoundedRectangle(cornerRadius: 12))
                     .overlay(RoundedRectangle(cornerRadius: 12).stroke(AweroDesign.navy.opacity(0.12), lineWidth: 1))
                     .accessibilityIdentifier("mission.math.answer")
                 if invalid {
                     Text("mission.try_again")
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color(red: 0.93, green: 0.23, blue: 0.25))
+                        .foregroundStyle(AweroDesign.warning)
                         .frame(maxWidth: .infinity, minHeight: 28)
                         .accessibilityIdentifier("mission.math.invalid")
                 }
@@ -267,7 +267,7 @@ private struct WakeMissionButton: ButtonStyle {
             .font(.headline.bold())
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .background(AweroDesign.coralStrong.opacity(configuration.isPressed ? 0.78 : 1))
             .foregroundStyle(.white)
             .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
     }
@@ -282,7 +282,7 @@ private struct MathKeyButton: ButtonStyle {
             .foregroundStyle(primary ? Color.white : AweroDesign.navy)
             .frame(maxWidth: .infinity, minHeight: 52)
             .padding(.vertical, 4)
-            .background(primary ? AweroDesign.coral : Color.white)
+            .background(primary ? AweroDesign.coralStrong : AweroDesign.surface)
             .opacity(configuration.isPressed ? 0.75 : 1)
             .clipShape(RoundedRectangle(cornerRadius: 14))
     }

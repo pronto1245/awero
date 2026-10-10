@@ -29,7 +29,7 @@ struct WakeScreen: View {
                                         .font(.headline.weight(.semibold))
                                         .foregroundStyle(AweroDesign.navy)
                                         .frame(width: 42, height: 42)
-                                        .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
+                                        .background(AweroDesign.surface.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
                                 }
                                 .accessibilityLabel(Text("wake.emergency_stop"))
                                 .accessibilityIdentifier("wake.close")
@@ -56,7 +56,7 @@ struct WakeScreen: View {
                                     .frame(minHeight: 44)
                             }
                             .padding(18)
-                            .background(.white.opacity(0.94))
+                            .background(AweroDesign.surface.opacity(0.94))
                             .clipShape(RoundedRectangle(cornerRadius: 22))
                         } else if flow.state == .mission, let alarm = flow.currentAlarm {
                             if flow.currentMission == .math {
@@ -86,7 +86,7 @@ struct WakeScreen: View {
                                     .buttonStyle(PrimaryWakeButton())
                             }
                             .padding(16)
-                            .background(.white.opacity(0.94))
+                            .background(AweroDesign.surface.opacity(0.94))
                             .clipShape(RoundedRectangle(cornerRadius: 18))
                         }
                     }
@@ -113,10 +113,10 @@ struct WakeScreen: View {
                             Text("wake.emergency_stop_hint").font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.58))
                         }
                     }
-                    .foregroundStyle(Color(red: 0.83, green: 0.19, blue: 0.24))
+                    .foregroundStyle(AweroDesign.warning)
                     .frame(maxWidth: .infinity, minHeight: 62)
-                    .background(Color(red: 1, green: 0.91, blue: 0.89), in: RoundedRectangle(cornerRadius: 22))
-                    .overlay(RoundedRectangle(cornerRadius: 22).stroke(Color(red: 1, green: 0.78, blue: 0.75), lineWidth: 1))
+                    .background(AweroDesign.warningSoft, in: RoundedRectangle(cornerRadius: 22))
+                    .overlay(RoundedRectangle(cornerRadius: 22).stroke(AweroDesign.warningLine, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("wake.emergencyStop")
@@ -161,7 +161,7 @@ struct WakeScreen: View {
         }
         .frame(maxWidth: .infinity)
         .padding(22)
-        .background(.white.opacity(0.94), in: RoundedRectangle(cornerRadius: 22))
+        .background(AweroDesign.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 22))
     }
 
     private func missionAlarm(from alarm: Alarm) -> Alarm {
@@ -174,7 +174,7 @@ struct WakeScreen: View {
 private struct PrimaryWakeButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.headline.bold()).frame(maxWidth: .infinity).padding(.vertical, 16)
-            .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .background(AweroDesign.coralStrong.opacity(configuration.isPressed ? 0.78 : 1))
             .foregroundStyle(.white).clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
     }
 }

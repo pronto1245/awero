@@ -45,7 +45,7 @@ struct CreateAlarmView: View {
                                 .foregroundStyle(AweroDesign.navy)
                                 .padding(.horizontal, 18)
                                 .frame(height: 44)
-                                .background(Color.white.opacity(0.88), in: Capsule())
+                                .background(AweroDesign.surface.opacity(0.88), in: Capsule())
                         }
                         .accessibilityLabel(Text("create.cancel"))
                         .accessibilityIdentifier("alarm.cancel")
@@ -108,7 +108,7 @@ struct CreateAlarmView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(AweroDesign.coral.gradient)
+                    .background(AweroDesign.coralStrong.gradient)
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                     .padding(.horizontal, 20)
@@ -187,7 +187,7 @@ struct CreateAlarmView: View {
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity, minHeight: 44)
                             .foregroundStyle(selectedDays.contains(day) ? Color.white : AweroDesign.navy.opacity(0.68))
-                            .background(selectedDays.contains(day) ? AweroDesign.coral : Color.white.opacity(0.72))
+                            .background(selectedDays.contains(day) ? AweroDesign.coralStrong : AweroDesign.chip)
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)
@@ -258,7 +258,7 @@ struct CreateAlarmView: View {
             .foregroundStyle(AweroDesign.navy)
             .padding(8)
             .frame(maxWidth: .infinity, minHeight: 148)
-            .background(mission == type ? Color(red: 1, green: 0.93, blue: 0.87) : AweroDesign.ivory.opacity(0.58))
+            .background(mission == type ? AweroDesign.coralSoft : AweroDesign.ivory.opacity(0.58))
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(mission == type ? AweroDesign.coral : AweroDesign.navy.opacity(0.10), lineWidth: mission == type ? 1.5 : 1))
         }
@@ -272,7 +272,7 @@ struct CreateAlarmView: View {
         }
         .foregroundStyle(AweroDesign.navy.opacity(0.72))
         .padding(14)
-        .background(Color(red: 1, green: 0.94, blue: 0.86))
+        .background(AweroDesign.surfaceWarm)
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 

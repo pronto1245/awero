@@ -61,7 +61,7 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit, o
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFEEF3E5))
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.successSoft)
         ) {
             Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AweroNavigationIcon("plant", tint = AweroDesign.sage)

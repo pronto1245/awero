@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun WakeSceneArtwork(modifier: Modifier = Modifier, scene: AweroScene = AweroScene.DAWN) {
     Image(
-        painter = painterResource(scene.portrait),
+        painter = painterResource(AweroScene.page(scene).portrait),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = modifier.fillMaxSize()

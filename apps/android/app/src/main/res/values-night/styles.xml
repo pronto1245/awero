@@ -1,0 +1,11 @@
+<resources>
+    <style name="Theme.AWERO" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:statusBarColor">#121624</item>
+        <item name="android:navigationBarColor">#121624</item>
+        <item name="android:windowBackground">#121624</item>
+        <item name="android:colorAccent">#F26A3D</item>
+    </style>
+</resources>

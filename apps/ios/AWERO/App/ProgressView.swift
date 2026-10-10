@@ -46,7 +46,7 @@ struct AweroProgressView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(20)
-                        .background(Color(red: 0.93, green: 0.96, blue: 0.88))
+                        .background(AweroDesign.successSoft)
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                     Button(action: onSetAlarm) {
                         Text("progress.empty_action")
