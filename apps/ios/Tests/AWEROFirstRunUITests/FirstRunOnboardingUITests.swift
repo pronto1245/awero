@@ -18,7 +18,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(saveButton.waitForExistence(timeout: 10))
         saveButton.tap()
 
-        let permissionContinue = app.alerts.buttons["permission.continue"]
+        let permissionContinue = app.alerts.buttons["Continue"].firstMatch
         XCTAssertTrue(permissionContinue.waitForExistence(timeout: 10))
         permissionContinue.tap()
 
