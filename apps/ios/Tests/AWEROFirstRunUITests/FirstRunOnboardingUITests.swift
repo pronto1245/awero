@@ -14,6 +14,14 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertFalse(continueButton.label.isEmpty)
         continueButton.tap()
 
-        XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10))
+        let saveButton = app.buttons["alarm.save"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 10))
+        saveButton.tap()
+
+        let permissionContinue = app.alerts.buttons["permission.continue"]
+        XCTAssertTrue(permissionContinue.waitForExistence(timeout: 10))
+        permissionContinue.tap()
+
+        XCTAssertTrue(app.staticTexts["home.alarm.time"].waitForExistence(timeout: 15))
     }
 }

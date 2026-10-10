@@ -348,6 +348,7 @@ private struct AlarmCard: View {
                     Text(alarmTimeText)
                         .font(.system(size: alarmTimeSize, weight: .bold, design: .rounded))
                         .foregroundStyle(AweroStyle.navy)
+                        .accessibilityIdentifier("home.alarm.time")
                     Text(weekdays)
                         .foregroundStyle(AweroStyle.navy.opacity(0.55))
                 }

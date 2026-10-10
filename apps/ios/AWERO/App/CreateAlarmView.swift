@@ -62,6 +62,7 @@ struct CreateAlarmView: View {
                         }
                     }
                 }
+                .accessibilityIdentifier("permission.continue")
                 Button("create.cancel", role: .cancel) {}
             } message: {
                 Text("permission.ios_alarm_body")
