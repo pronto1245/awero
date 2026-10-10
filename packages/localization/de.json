@@ -152,5 +152,12 @@
   "home.delete_confirm_body": "Dieser Wecker und sein Zeitplan werden entfernt.",
   "home.error_body": "Die Aktion konnte nicht abgeschlossen werden. Prüfe die Weckerberechtigungen und versuche es erneut.",
   "create.error_body": "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.",
-  "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach."
+  "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach.",
+  "nav.home": "Start",
+  "nav.progress": "Fortschritt",
+  "nav.profile": "Profil",
+  "progress.title": "Dein Fortschritt",
+  "progress.empty_title": "Deine erste Woche beginnt hier",
+  "progress.empty_body": "Hier erscheinen abgeschlossene Aufwach-Sitzungen. Alarmtests werden nicht gezählt.",
+  "progress.empty_action": "Wecker erstellen"
 }

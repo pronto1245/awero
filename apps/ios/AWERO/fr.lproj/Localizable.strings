@@ -95,6 +95,9 @@
 "mission.unavailable" = "MISSION INDISPONIBLE";
 "mission.use_fallback" = "Utiliser la solution de secours";
 "mission.use_math" = "Utiliser le calcul de secours";
+"nav.home" = "Accueil";
+"nav.profile" = "Profil";
+"nav.progress" = "Progrès";
 "notification.alarm_body" = "C’est l’heure de se réveiller.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Alertes pour les réveils programmés.";
@@ -120,6 +123,10 @@
 "persistence.read_error" = "AWERO n’a pas pu lire les données enregistrées. Elles ne sont pas considérées comme vides. Réessayez pour restaurer l’état du réveil.";
 "persistence.read_error_title" = "Données de réveil indisponibles";
 "persistence.retry_read" = "Réessayer la lecture";
+"progress.empty_action" = "Créer une alarme";
+"progress.empty_body" = "Vos réveils terminés apparaîtront ici. Les tests d’alarme ne sont pas comptabilisés.";
+"progress.empty_title" = "Votre première semaine commence ici";
+"progress.title" = "Votre progression";
 "settings.alarm_permissions_body" = "Autorisez les notifications et les alarmes AWERO pour recevoir les alertes programmées.";
 "settings.alarm_permissions_title" = "Autorisations de l’alarme";
 "settings.language_body" = "Utilise la langue de votre téléphone";

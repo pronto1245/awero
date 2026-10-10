@@ -152,5 +152,12 @@
   "home.delete_confirm_body": "Se eliminarán esta alarma y su programación.",
   "home.error_body": "No se pudo completar la acción. Comprueba los permisos de la alarma e inténtalo de nuevo.",
   "create.error_body": "No se guardó la alarma. Comprueba los permisos necesarios y el espacio disponible e inténtalo de nuevo.",
-  "onboarding.permissions": "Antes de crear una alarma, AWERO explica y solicita los permisos del sistema necesarios para avisarte a tiempo."
+  "onboarding.permissions": "Antes de crear una alarma, AWERO explica y solicita los permisos del sistema necesarios para avisarte a tiempo.",
+  "nav.home": "Inicio",
+  "nav.progress": "Progreso",
+  "nav.profile": "Perfil",
+  "progress.title": "Tu progreso",
+  "progress.empty_title": "Tu primera semana empieza aquí",
+  "progress.empty_body": "Aquí aparecerán tus despertares completados. Las pruebas de alarma no cuentan.",
+  "progress.empty_action": "Crear alarma"
 }

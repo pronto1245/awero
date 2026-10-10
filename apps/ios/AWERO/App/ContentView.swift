@@ -16,9 +16,9 @@ struct ContentView: View {
                 case .loading:
                     ProgressView()
                 case .failed:
-                    HomeView(showingCreate: $showingFirstAlarm)
+                    AweroMainTabsView(showingCreate: $showingFirstAlarm)
                 case .loaded where didCompleteOnboarding || !alarms.alarms.isEmpty:
-                    HomeView(showingCreate: $showingFirstAlarm)
+                    AweroMainTabsView(showingCreate: $showingFirstAlarm)
                         .onAppear { didCompleteOnboarding = true }
                 case .loaded:
                     OnboardingView {

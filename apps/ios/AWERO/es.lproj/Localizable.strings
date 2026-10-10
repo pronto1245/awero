@@ -95,6 +95,9 @@
 "mission.unavailable" = "MISIÓN NO DISPONIBLE";
 "mission.use_fallback" = "Usar alternativa";
 "mission.use_math" = "Usar alternativa de matemáticas";
+"nav.home" = "Inicio";
+"nav.profile" = "Perfil";
+"nav.progress" = "Progreso";
 "notification.alarm_body" = "Es hora de despertar.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Avisos de alarmas programadas.";
@@ -120,6 +123,10 @@
 "persistence.read_error" = "AWERO no pudo leer los datos guardados. No se consideran vacíos. Vuelve a intentarlo para restaurar el estado de la alarma.";
 "persistence.read_error_title" = "Los datos de alarma no están disponibles";
 "persistence.retry_read" = "Volver a leer";
+"progress.empty_action" = "Crear alarma";
+"progress.empty_body" = "Aquí aparecerán tus despertares completados. Las pruebas de alarma no cuentan.";
+"progress.empty_title" = "Tu primera semana empieza aquí";
+"progress.title" = "Tu progreso";
 "settings.alarm_permissions_body" = "Permite las notificaciones y alarmas de AWERO para recibir los avisos programados.";
 "settings.alarm_permissions_title" = "Permisos de alarma";
 "settings.language_body" = "Usa el idioma de tu teléfono";

@@ -1,6 +1,12 @@
 package app.awero.ui
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -86,27 +92,62 @@ fun AweroApp(statusRefreshKey: Int = 0) {
             "wake" -> WakeScreen(flow)
             "settings" -> SettingsScreen(onBack = { screen = "home" })
             else -> {
-                if (state == WakeFlowController.State.RINGING ||
+                if (screen == "home" && (state == WakeFlowController.State.RINGING ||
                     state == WakeFlowController.State.MISSION ||
                     state == WakeFlowController.State.COMPLETED ||
-                    state == WakeFlowController.State.EMERGENCY_STOPPED
+                    state == WakeFlowController.State.EMERGENCY_STOPPED)
                 ) {
                     LaunchedEffect(state) { screen = "wake" }
                 }
-                HomeScreen(
-                    onCreateAlarm = {
-                        editingAlarm = null
-                        editingAlarmId = null
-                        screen = "create"
-                    },
-                    onOpenSettings = { screen = "settings" },
-                    onEditAlarm = {
-                        editingAlarm = it
-                        editingAlarmId = it.id
-                        screen = "edit"
-                    },
-                    statusRefreshKey = statusRefreshKey
-                )
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar(containerColor = Color(0xFFFFF8EF)) {
+                            NavigationBarItem(
+                                selected = screen == "home",
+                                onClick = { screen = "home" },
+                                icon = { Text("⌂") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home)) }
+                            )
+                            NavigationBarItem(
+                                selected = screen == "progress",
+                                onClick = { screen = "progress" },
+                                icon = { Text("▥") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress)) }
+                            )
+                            NavigationBarItem(
+                                selected = screen == "settings",
+                                onClick = { screen = "settings" },
+                                icon = { Text("●") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile)) }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    when (screen) {
+                        "progress" -> AweroProgressScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onSetAlarm = { screen = "create" }
+                        )
+                        "settings" -> Box(Modifier.padding(innerPadding)) {
+                            SettingsScreen(onBack = { screen = "home" })
+                        }
+                        else -> HomeScreen(
+                            onCreateAlarm = {
+                                editingAlarm = null
+                                editingAlarmId = null
+                                screen = "create"
+                            },
+                            onOpenSettings = { screen = "settings" },
+                            onEditAlarm = {
+                                editingAlarm = it
+                                editingAlarmId = it.id
+                                screen = "edit"
+                            },
+                            statusRefreshKey = statusRefreshKey,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
             }
         }
     }

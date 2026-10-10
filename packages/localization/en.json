@@ -152,5 +152,12 @@
   "home.delete_confirm_body": "This alarm and its scheduled wake-up will be removed.",
   "home.error_body": "Your requested change could not be completed. Check the alarm permissions and try again.",
   "create.error_body": "The alarm was not saved. Check required permissions and available storage, then try again.",
-  "onboarding.permissions": "Before creating an alarm, AWERO explains and asks for the system access needed to alert you on time."
+  "onboarding.permissions": "Before creating an alarm, AWERO explains and asks for the system access needed to alert you on time.",
+  "nav.home": "Home",
+  "nav.progress": "Progress",
+  "nav.profile": "Profile",
+  "progress.title": "Your progress",
+  "progress.empty_title": "Your first week starts here",
+  "progress.empty_body": "Completed wake sessions will appear here. Alarm tests are not counted.",
+  "progress.empty_action": "Set an alarm"
 }

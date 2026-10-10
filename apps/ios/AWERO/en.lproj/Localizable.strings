@@ -95,6 +95,9 @@
 "mission.unavailable" = "MISSION UNAVAILABLE";
 "mission.use_fallback" = "Use fallback";
 "mission.use_math" = "Use Math fallback";
+"nav.home" = "Home";
+"nav.profile" = "Profile";
+"nav.progress" = "Progress";
 "notification.alarm_body" = "Wake up. Stay up.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Alerts for scheduled wake-up alarms.";
@@ -120,6 +123,10 @@
 "persistence.read_error" = "AWERO could not read saved data. It has not been treated as empty. Try again to restore your alarm state.";
 "persistence.read_error_title" = "Your saved wake state is unavailable";
 "persistence.retry_read" = "Try reading again";
+"progress.empty_action" = "Set an alarm";
+"progress.empty_body" = "Completed wake sessions will appear here. Alarm tests are not counted.";
+"progress.empty_title" = "Your first week starts here";
+"progress.title" = "Your progress";
 "settings.alarm_permissions_body" = "Allow AWERO notifications and alarm access so scheduled alarms can alert you.";
 "settings.alarm_permissions_title" = "Alarm permissions";
 "settings.language_body" = "Uses your phone language";

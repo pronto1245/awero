@@ -95,6 +95,9 @@
 "mission.unavailable" = "ЗАДАНИЕ НЕДОСТУПНО";
 "mission.use_fallback" = "Запасной вариант";
 "mission.use_math" = "Перейти к математике";
+"nav.home" = "Главная";
+"nav.profile" = "Профиль";
+"nav.progress" = "Прогресс";
 "notification.alarm_body" = "Пора просыпаться.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Оповещения для запланированных будильников.";
@@ -120,6 +123,10 @@
 "persistence.read_error" = "AWERO не удалось прочитать сохранённые данные. Они не считаются пустыми. Повторите попытку восстановления.";
 "persistence.read_error_title" = "Не удалось прочитать данные будильника";
 "persistence.retry_read" = "Повторить чтение";
+"progress.empty_action" = "Создать будильник";
+"progress.empty_body" = "Здесь появятся завершённые пробуждения. Проверки будильника не учитываются.";
+"progress.empty_title" = "Ваша первая неделя начинается здесь";
+"progress.title" = "Ваш прогресс";
 "settings.alarm_permissions_body" = "Разрешите уведомления и работу будильников AWERO, чтобы запланированные сигналы срабатывали.";
 "settings.alarm_permissions_title" = "Разрешения будильника";
 "settings.language_body" = "Используется язык телефона";

@@ -135,6 +135,13 @@
     "home_delete_confirm_body": "home.delete_confirm_body",
     "home_error_body": "home.error_body",
     "create_error_body": "create.error_body",
-    "onboarding_permissions": "onboarding.permissions"
+    "onboarding_permissions": "onboarding.permissions",
+    "nav_home": "nav.home",
+    "nav_progress": "nav.progress",
+    "nav_profile": "nav.profile",
+    "progress_title": "progress.title",
+    "progress_empty_title": "progress.empty_title",
+    "progress_empty_body": "progress.empty_body",
+    "progress_empty_action": "progress.empty_action"
   }
 }

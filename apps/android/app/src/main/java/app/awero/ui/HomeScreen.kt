@@ -49,7 +49,8 @@ fun HomeScreen(
     onCreateAlarm: () -> Unit,
     onEditAlarm: (Alarm) -> Unit,
     onOpenSettings: () -> Unit,
-    statusRefreshKey: Int = 0
+    statusRefreshKey: Int = 0,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
@@ -99,7 +100,7 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
+        modifier = modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
     ) {
         Spacer(Modifier.height(12.dp))
         Row(
