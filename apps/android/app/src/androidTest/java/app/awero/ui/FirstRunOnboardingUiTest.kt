@@ -1,5 +1,10 @@
 package app.awero.ui
 
+import android.Manifest
+import android.app.AlarmManager
+import android.app.NotificationManager
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasClickAction
@@ -16,6 +21,8 @@ import app.awero.R
 import java.io.FileInputStream
 import org.junit.BeforeClass
 import org.junit.AfterClass
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +35,21 @@ class FirstRunOnboardingUiTest {
     @Test
     fun firstRunContinuesFromAccessibleOnboardingToAlarmCreation() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
+        assertEquals(
+            "Notification access must be pregranted for the successful first-run path",
+            PackageManager.PERMISSION_GRANTED,
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+        )
+        assertTrue(
+            "Exact alarm access must be pregranted for the successful first-run path",
+            context.getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
+        )
+        if (Build.VERSION.SDK_INT >= 34) {
+            assertTrue(
+                "Full-screen alarm access must be pregranted for the successful first-run path",
+                context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
+            )
+        }
         val onboardingTitle = context.getString(R.string.onboarding_title)
         val continueLabel = context.getString(R.string.onboarding_create_alarm)
 
