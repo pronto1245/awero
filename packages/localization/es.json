@@ -161,5 +161,13 @@
   "progress.empty_body": "Aquí aparecerán tus despertares completados. Las pruebas de alarma no cuentan.",
   "progress.empty_action": "Crear alarma",
   "mission.delete_digit": "Borrar el último dígito",
-  "mission.change_sign": "Cambiar signo"
+  "mission.change_sign": "Cambiar signo",
+  "create.mission_math_body": "Resuelve una operación",
+  "create.mission_steps_body": "Da unos pasos",
+  "create.mission_qr_body": "Escanea un código en otra habitación",
+  "wake.heading": "Hora de despertar",
+  "wake.instruction": "Resuelve la operación para apagar la alarma.",
+  "wake.emergency_stop_hint": "Solo en caso de emergencia",
+  "home.no_enabled_title": "No hay alarmas activas",
+  "home.no_enabled_body": "Activa una alarma abajo para ver la próxima hora de despertar."
 }

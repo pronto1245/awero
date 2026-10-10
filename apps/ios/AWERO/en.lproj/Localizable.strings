@@ -23,6 +23,9 @@
 "create.error_body" = "The alarm was not saved. Check required permissions and available storage, then try again.";
 "create.error_title" = "Alarm was not scheduled";
 "create.mission" = "Wake-up mission";
+"create.mission_math_body" = "Solve a problem";
+"create.mission_qr_body" = "Scan a code in another room";
+"create.mission_steps_body" = "Walk a few steps";
 "create.no_weekdays" = "Select at least one repeat day.";
 "create.point_camera" = "Point the camera at the QR code or barcode you will scan in the morning.";
 "create.qr_content" = "QR/barcode content";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR code";
 "home.mission.steps" = "Steps";
 "home.next_alarm" = "Next alarm";
+"home.no_enabled_body" = "Turn on an alarm below to see the next wake-up.";
+"home.no_enabled_title" = "No active alarms";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Try again";
 "home.subtitle" = "A new day, new possibilities";
@@ -140,6 +145,9 @@
 "wake.completed_body" = "Wake session completed.";
 "wake.completed_title" = "YOU’RE UP";
 "wake.emergency_stop" = "Emergency stop";
+"wake.emergency_stop_hint" = "Only in an emergency";
+"wake.heading" = "Time to wake up";
+"wake.instruction" = "Solve the problem to turn off the alarm.";
 "wake.retry" = "Retry saving";
 "wake.snooze" = "Snooze";
 "wake.snooze_error_body" = "The alarm is still ringing.";

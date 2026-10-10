@@ -2,7 +2,7 @@
 
 Status: **approved visual direction; visual implementation is partial and is tracked in Phase 7**. See [Stage 7 Visual Implementation Plan](STAGE_7_VISUAL_IMPLEMENTATION_PLAN.md).
 
-The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). It is a visual baseline, not a literal screenshot of the current app. The implemented alarm screens now use warm ivory surfaces, deep navy text, sunrise coral actions, and restrained sage accents on iOS and Android.
+The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). Treat its composition, image treatment, type hierarchy, colors, card shapes, spacing, and button styling as the acceptance reference on both platforms. Native controls may differ only where platform behavior or accessibility requires it; those adaptations must preserve the approved visual hierarchy.
 
 ## User value
 

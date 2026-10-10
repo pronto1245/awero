@@ -96,12 +96,15 @@ class WakeSaveRetryEndToEndTest {
         instrumentation.runOnMainSync {
             val buttons = views(activity!!.window.decorView).filterIsInstance<Button>()
             val visibleBounds = android.graphics.Rect()
-            val critical = buttons.filter { it.text.toString() in listOf("0", "✓", context.getString(R.string.wake_emergency_stop)) }
-            assertEquals("Math control set was not rendered", 3, critical.size)
+            val critical = buttons.filter { it.text.toString() in listOf("0", "✓") }
+            assertEquals("Math control set was not rendered", 2, critical.size)
             for (button in critical) {
                 assertTrue("Critical control was clipped: ${button.text}", button.getGlobalVisibleRect(visibleBounds))
                 assertEquals("Critical control was partly hidden: ${button.text}", button.height, visibleBounds.height())
             }
+            val emergency = views(activity!!.window.decorView).single { it.contentDescription == context.getString(R.string.wake_emergency_stop) + ". " + context.getString(R.string.wake_emergency_stop_hint) }
+            assertTrue("Emergency stop card was not visible", emergency.getGlobalVisibleRect(visibleBounds))
+            assertEquals("Emergency stop card was partly hidden", emergency.height, visibleBounds.height())
         }
         val visualDirectory = java.io.File(context.cacheDir, "awero-visual").apply { mkdirs() }
         java.io.File(visualDirectory, "Math.png").outputStream().use { output ->

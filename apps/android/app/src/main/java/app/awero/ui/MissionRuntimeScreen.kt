@@ -22,10 +22,10 @@ object MissionRuntimeScreen {
     fun create(activity: ComponentActivity, alarm: Alarm, onSuccess: () -> Unit, onFailure: () -> Unit, timeoutMillis: Long = 120_000L): View {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            val padding = (8 * resources.displayMetrics.density).toInt()
-            setPadding(0, padding, 0, padding)
-            setBackgroundColor(AweroDesign.ivoryArgb)
+            gravity = Gravity.TOP
+            val padding = (6 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            setBackgroundColor(Color.TRANSPARENT)
         }
         fun label(value: String, size: Float = 22f) = TextView(activity).apply {
             text = value
@@ -34,7 +34,7 @@ object MissionRuntimeScreen {
             gravity = Gravity.CENTER
             setPadding(0, 8, 0, 8)
         }
-        root.addView(label(activity.getString(R.string.wake_title), 26f), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        root.addView(label(activity.getString(R.string.wake_heading), 28f), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         var finished = false
         var cleanup: () -> Unit = {}
         var deadline: Runnable? = null
@@ -66,8 +66,9 @@ object MissionRuntimeScreen {
                 val mission = MathMission(alarm.difficulty)
                 mission.start()
                 val problem = mission.problem ?: return root
+                root.addView(label(activity.getString(R.string.wake_instruction), 16f))
                 root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f).apply {
-                    background = android.graphics.drawable.GradientDrawable().apply { setColor(0xF2FFFFFF.toInt()); cornerRadius = 20 * resources.displayMetrics.density }
+                    background = android.graphics.drawable.GradientDrawable().apply { setColor(0xF7FFFFFF.toInt()); cornerRadius = 20 * resources.displayMetrics.density }
                 }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 val answer = EditText(activity).apply {
                     inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
@@ -76,11 +77,13 @@ object MissionRuntimeScreen {
                     gravity = Gravity.CENTER
                     hint = activity.getString(R.string.mission_answer)
                     showSoftInputOnFocus = false
+                    background = android.graphics.drawable.GradientDrawable().apply { setColor(Color.WHITE); cornerRadius = 14 * resources.displayMetrics.density }
+                    setPadding((8 * resources.displayMetrics.density).toInt(), 0, (8 * resources.displayMetrics.density).toInt(), 0)
                 }
                 fun keypadKey(value: String, description: String? = null, action: () -> Unit) = Button(activity).apply {
                     text = value
                     description?.let { contentDescription = it }
-                    minHeight = (48 * resources.displayMetrics.density).toInt()
+                    minHeight = (52 * resources.displayMetrics.density).toInt()
                     setTextColor(AweroDesign.navyArgb)
                     textSize = 24f
                     minWidth = 0

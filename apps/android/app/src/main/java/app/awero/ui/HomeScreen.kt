@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -126,35 +127,53 @@ fun HomeScreen(
             }
         }
         Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
-        Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .65f))
-        SunriseArtwork(Modifier.padding(top = 4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
+            Text("☀", color = Color(0xFFFFA429))
+        }
+        SunriseArtwork(Modifier.padding(top = 4.dp), height = 166.dp, rounded = false)
         Spacer(Modifier.height(18.dp))
 
         if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).offset(y = (-28).dp)
+                    .clickable { onEditAlarm(nextAlarm.first) },
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent)
             ) {
                 Box(
                     modifier = Modifier
                         .background(Brush.verticalGradient(listOf(Color(0xFFFFE6C6), Color(0xFFFFFDF7))))
-                        .padding(20.dp)
+                    .padding(horizontal = 18.dp, vertical = 14.dp)
                         .fillMaxWidth()
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        Text("☀  " + stringResource(R.string.home_next_alarm), color = AweroNavy)
-                        Text(
-                            text = nextAlarmTime,
-                            style = MaterialTheme.typography.displaySmall,
-                            color = AweroNavy
-                        )
-                        Text(nextAlarmDescription, color = AweroNavy.copy(alpha = .7f))
-                        Text(missionLabel(nextAlarm.first.missionType), color = AweroNavy.copy(alpha = .8f))
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(stringResource(R.string.home_next_alarm), color = AweroCoral, style = MaterialTheme.typography.titleSmall)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(text = nextAlarmTime, style = MaterialTheme.typography.displaySmall, color = AweroNavy)
+                                Text(nextAlarmDescription, color = AweroNavy.copy(alpha = .7f), maxLines = 1)
+                                Text(missionLabel(nextAlarm.first.missionType), color = AweroNavy.copy(alpha = .8f), style = MaterialTheme.typography.bodySmall)
+                            }
+                            Text("›", color = AweroCoral, style = MaterialTheme.typography.headlineLarge)
+                        }
                     }
                 }
             }
             Spacer(Modifier.height(22.dp))
+        }
+
+        if (alarmLoadState == AlarmLoadState.Loaded && alarms.isNotEmpty() && nextAlarm == null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF2E3)),
+                shape = RoundedCornerShape(18.dp)
+            ) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.home_no_enabled_title), color = AweroNavy, style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.home_no_enabled_body), color = AweroNavy.copy(alpha = .68f), style = MaterialTheme.typography.bodySmall)
+                }
+            }
         }
 
         Text(stringResource(R.string.home_alarms), style = MaterialTheme.typography.titleLarge, color = AweroNavy)
@@ -218,7 +237,14 @@ fun HomeScreen(
                                         style = MaterialTheme.typography.headlineMedium
                                     )
                                     Text(weekdaySummary(alarm), color = AweroNavy.copy(alpha = .55f))
-                                    Text(missionLabel(alarm.missionType), color = AweroNavy.copy(alpha = .65f))
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                        MissionChoiceIcon(when (alarm.missionType) {
+                                            MissionType.MATH -> "math"
+                                            MissionType.STEPS -> "steps"
+                                            else -> "qr"
+                                        }, Modifier.size(18.dp))
+                                        Text(missionLabel(alarm.missionType), color = AweroNavy.copy(alpha = .65f))
+                                    }
                                 }
                                 Switch(
                                     checked = alarm.enabled,

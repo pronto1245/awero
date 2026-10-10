@@ -59,10 +59,18 @@ class FirstRunOnboardingUiTest {
             .assertIsDisplayed()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         val continueButton = compose.onNodeWithText(continueLabel)
-        continueButton.performScrollTo().assertIsDisplayed().assert(hasClickAction())
+        continueButton.assertIsDisplayed().assert(hasClickAction())
         continueButton.performClick()
         compose.onNodeWithText(context.getString(R.string.create_title)).assertIsDisplayed()
+        captureVisual("CreateLargeText")
+        setFontScale(1.0f)
+        compose.waitUntil(timeoutMillis = 5_000) { context.resources.configuration.fontScale < 1.1f }
+        compose.onNodeWithText(context.getString(R.string.create_title)).assertIsDisplayed()
         captureVisual("Create")
+        compose.onNodeWithText(context.getString(R.string.create_mission_math_body)).performScrollTo().assertIsDisplayed()
+        captureVisual("CreateMissions")
+        compose.onNodeWithText(context.getString(R.string.create_mission_qr_body)).performScrollTo().assertIsDisplayed()
+        captureVisual("CreateQR")
         compose.onNodeWithText(context.getString(R.string.create_save))
             .assertIsDisplayed()
             .performClick()
@@ -74,7 +82,13 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.home_next_alarm), substring = true)
             .performScrollTo()
             .assertIsDisplayed()
+        setFontScale(1.8f)
+        compose.waitUntil(timeoutMillis = 5_000) { context.resources.configuration.fontScale > 1.5f }
+        compose.onNodeWithText(context.getString(R.string.home_add_alarm)).assertIsDisplayed()
         captureVisual("HomeLargeText")
+        setFontScale(1.0f)
+        compose.waitUntil(timeoutMillis = 5_000) { context.resources.configuration.fontScale < 1.1f }
+        captureVisual("Home")
         compose.onNodeWithText(context.getString(R.string.nav_progress)).performClick()
         compose.onNodeWithText(context.getString(R.string.progress_empty_title)).assertIsDisplayed()
         captureVisual("Progress")
@@ -104,6 +118,10 @@ class FirstRunOnboardingUiTest {
                     compose.onNodeWithText(localized(R.string.home_add_alarm)).performClick()
                     compose.onNodeWithText(localized(R.string.create_title)).assertIsDisplayed()
                     captureVisual("Create-$language")
+                    compose.onNodeWithText(localized(R.string.create_mission_math_body)).performScrollTo().assertIsDisplayed()
+                    captureVisual("CreateMissions-$language")
+                    compose.onNodeWithText(localized(R.string.create_mission_qr_body)).performScrollTo().assertIsDisplayed()
+                    captureVisual("CreateQR-$language")
                     compose.onNodeWithText(localized(R.string.create_cancel)).performClick()
                 }
             } finally {
@@ -130,6 +148,13 @@ class FirstRunOnboardingUiTest {
             val actual = android.os.ParcelFileDescriptor.AutoCloseInputStream(saved).use { it.readBytes() }
             check(bytes.contentEquals(actual)) { "Screenshot export did not preserve PNG bytes: $name" }
         }
+    }
+
+    private fun setFontScale(scale: Float) {
+        val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand("settings put system font_scale $scale")
+        FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
+        descriptor.close()
     }
 
     companion object {

@@ -31,21 +31,51 @@ object WakeAlarmScreen {
             setPadding(0, 20, 0, 20)
         }
 
-        val title = text(activity.getString(R.string.wake_title), 42f)
+        val title = text(activity.getString(R.string.wake_heading), 32f)
         val status = text("AWERO", 20f).apply {
             gravity = Gravity.START
             setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
         }
         val primary = Button(activity).apply { text = activity.getString(R.string.wake_start); minHeight = (48 * resources.displayMetrics.density).toInt(); backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb); setTextColor(AweroDesign.navyArgb) }
         val snooze = Button(activity).apply { text = activity.getString(R.string.wake_snooze) }
-        val emergency = Button(activity).apply {
-            text = activity.getString(R.string.wake_emergency_stop)
-            setTextColor(0xFFB3261E.toInt())
-            minHeight = (48 * resources.displayMetrics.density).toInt()
+        val emergency = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            isClickable = true
+            isFocusable = true
+            contentDescription = activity.getString(R.string.wake_emergency_stop) + ". " + activity.getString(R.string.wake_emergency_stop_hint)
+            val density = resources.displayMetrics.density
+            setPadding((10 * density).toInt(), (7 * density).toInt(), (10 * density).toInt(), (7 * density).toInt())
+            minimumHeight = (60 * density).toInt()
             background = android.graphics.drawable.GradientDrawable().apply {
                 setColor(0xFFFFE8E2.toInt())
-                cornerRadius = 18 * resources.displayMetrics.density
+                setStroke((1 * density).toInt(), 0xFFFFC5BD.toInt())
+                cornerRadius = 20 * density
             }
+            val headline = LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER
+                addView(TextView(activity).apply {
+                    text = "⚠"
+                    setTextColor(0xFFD3313D.toInt())
+                    textSize = 15f
+                    setPadding(0, 0, (6 * resources.displayMetrics.density).toInt(), 0)
+                })
+                addView(TextView(activity).apply {
+                    text = activity.getString(R.string.wake_emergency_stop)
+                    setTextColor(0xFFD3313D.toInt())
+                    textSize = 15f
+                    gravity = Gravity.CENTER
+                })
+            }
+            addView(headline)
+            addView(TextView(activity).apply {
+                text = activity.getString(R.string.wake_emergency_stop_hint)
+                setTextColor(AweroDesign.navyArgb)
+                alpha = .62f
+                textSize = 12f
+                gravity = Gravity.CENTER
+            })
         }
         val retry = Button(activity).apply { text = activity.getString(R.string.wake_retry) }
 
@@ -60,13 +90,13 @@ object WakeAlarmScreen {
 
         fun showCompleted() {
             root.removeAllViews()
-            root.addView(text(activity.getString(R.string.wake_completed_title), 42f))
+            root.addView(text(activity.getString(R.string.wake_completed_title), 32f))
             root.addView(text(activity.getString(R.string.wake_completed_body), 18f))
         }
 
         fun showStopped() {
             root.removeAllViews()
-            root.addView(text(activity.getString(R.string.wake_emergency_stop), 42f))
+            root.addView(text(activity.getString(R.string.wake_emergency_stop), 32f))
             root.addView(text(activity.getString(R.string.wake_stopped_body), 18f))
         }
 
@@ -91,6 +121,29 @@ object WakeAlarmScreen {
             root.addView(emergency, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         }
 
+        fun addHeader() {
+            val header = LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            header.addView(status, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            val close = Button(activity).apply {
+                text = "×"
+                textSize = 22f
+                setTextColor(AweroDesign.navyArgb)
+                minWidth = (44 * resources.displayMetrics.density).toInt()
+                minHeight = (44 * resources.displayMetrics.density).toInt()
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    setColor(0xCCFFFFFF.toInt())
+                    cornerRadius = 12 * resources.displayMetrics.density
+                }
+                contentDescription = activity.getString(R.string.wake_emergency_stop)
+                setOnClickListener { emergency.performClick() }
+            }
+            header.addView(close)
+            root.addView(header)
+        }
+
         fun showFallback() {
             activity.lifecycleScope.launch {
                 if (!flow.fallbackToMath()) {
@@ -98,8 +151,8 @@ object WakeAlarmScreen {
                     return@launch
                 }
                 root.removeAllViews()
-                status.text = activity.getString(R.string.mission_use_math)
-                root.addView(status, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+                status.text = "AWERO"
+                addHeader()
                 addMission(MissionRuntimeScreen.create(
                     activity,
                     flow.currentAlarm.value!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
@@ -112,7 +165,7 @@ object WakeAlarmScreen {
         fun showMission() {
             root.removeAllViews()
             status.text = "AWERO"
-            root.addView(status, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+            addHeader()
             val missionView = MissionRuntimeScreen.create(
                 activity,
                 flow.currentAlarm.value!!.copy(missionType = flow.mission.value),
@@ -154,7 +207,7 @@ object WakeAlarmScreen {
             }
         }
 
-        root.addView(status, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        addHeader()
         root.addView(title)
         root.addView(primary)
         root.addView(snooze)

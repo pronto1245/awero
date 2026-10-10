@@ -23,6 +23,9 @@
 "create.error_body" = "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.";
 "create.error_title" = "Wecker konnte nicht geplant werden";
 "create.mission" = "Aufgabe zum Aufwachen";
+"create.mission_math_body" = "Löse eine Rechenaufgabe";
+"create.mission_qr_body" = "Scanne einen Code in einem anderen Raum";
+"create.mission_steps_body" = "Gehe ein paar Schritte";
 "create.no_weekdays" = "Wähle mindestens einen Wiederholungstag.";
 "create.point_camera" = "Richte die Kamera auf den QR-Code oder Barcode, den du morgens scannen wirst.";
 "create.qr_content" = "Inhalt des QR-Codes/Barcodes";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR-Code";
 "home.mission.steps" = "Schritte";
 "home.next_alarm" = "Nächster Wecker";
+"home.no_enabled_body" = "Aktiviere unten einen Wecker, um den nächsten Weckzeitpunkt zu sehen.";
+"home.no_enabled_title" = "Keine aktiven Wecker";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Erneut versuchen";
 "home.subtitle" = "Ein neuer Tag, neue Möglichkeiten";
@@ -140,6 +145,9 @@
 "wake.completed_body" = "Die Aufwach-Sitzung ist abgeschlossen.";
 "wake.completed_title" = "DU BIST AUF";
 "wake.emergency_stop" = "Not-Aus";
+"wake.emergency_stop_hint" = "Nur im Notfall";
+"wake.heading" = "Zeit zum Aufwachen";
+"wake.instruction" = "Löse die Aufgabe, um den Wecker auszuschalten.";
 "wake.retry" = "Speichern erneut versuchen";
 "wake.snooze" = "Schlummern";
 "wake.snooze_error_body" = "Der Wecker klingelt weiterhin.";

@@ -1,75 +1,42 @@
-# Stage 7 implementation evidence
+# AWERO Phase 7 visual implementation report
 
-Delivered scope: native visual implementation for currently implemented features. Final acceptance evidence is recorded in PR #1 as CI and screenshot review complete. This file records implementation boundaries; it is not a claim of 100% product completion.
+**Status: visual acceptance is pending on the corrected branch head.** The approved reference is `awero-product-ux-concept.jpg` and the matching four-screen board supplied by the product owner. This report deliberately does not claim completion until current-head CI screenshots have been reviewed on both platforms.
 
-## Repository recovery
+## Scope and source integrity
 
-Commit 291e416 restores the complete tree after an erroneous Git tree creation.
-The comparison with main is checked for deletions before each branch update. Commit b04bf9e contains 58 changed files and no deletions.
-The localization validator now requires the seven navigation/progress keys and two keypad accessibility keys.
-Independent key-parity comparison passed for all 12 native resources:
-151 iOS keys and 145 Android keys across en, ru, pt-BR, fr, de, es.
+- Work continues on `codex/stage-7-visual-design`, based on PR #1; `main` has not been changed and the PR has not been merged.
+- The branch compared with current `main` has no deleted paths. Its changes are confined to the Phase 7 visual implementation, localization, screenshot/acceptance coverage, and the CI steps needed to export that evidence.
+- Native alarm scheduling, persisted alarm/session models, and the existing wake-flow architecture remain the integration boundary.
+- The four approved screens are Home, Create/Edit, active Wake/Math, and Progress. Onboarding, Settings, mission variants, and recovery states use the same visual system without inventing unsupported product data.
 
-## Implemented UI slices
+## Corrections in the current working change
 
-- Localized Home, Progress and Profile tabs on both platforms.
-- Honest Progress empty state and working create-alarm action.
-- Offline native sunrise illustration on Home.
-- Shared native ivory/navy/coral/sage palette, applied to home, setup, onboarding, settings, progress and wake.
-- Android Material color scheme follows the approved palette.
-- iOS wheel time selection, adaptive repeat-day buttons and mission selection cards.
-- Home content scrolls independently of a pinned Add alarm button on both platforms; Android first-run regression checks large text (font scale 1.8) and both alarm sections.
-- Android repeat/difficulty chips wrap on narrow screens; native time picker respects device 12/24-hour preference.
-- Android active system-alarm path remains WakeAlarmActivity → WakeAlarmScreen → MissionRuntimeScreen.
-- WakeAlarmScreen uses existing localized resources and the light palette; scheduling and wake handlers are unchanged.
-- Math keypad: digits, delete, sign and real runtime validation on both platforms; Android completion/retry E2E now enters through keypad controls.
-- Android mission content scrolls independently of the emergency stop; camera preview has a bounded viewport.
-- Primary coral buttons use navy text: calculated contrast 5.06:1 (white was 2.86:1).
+- Rework Home and the create/edit composition around the approved wordmark, sunrise treatment, upcoming-alarm card, weekday selector, mission cards, and pinned primary action.
+- Replace the previous Wake composition with the approved localized heading/instruction, scenic top area, visible close/emergency action, expression card, and keypad.
+- Keep Progress honest and empty until Phase 9 provides real dated history; its create-alarm action remains functional.
+- Add matching mission descriptions and wake/no-enabled-alarm strings for en, ru, pt-BR, fr, de, and es, then regenerate native resources and require the keys in the locale parity validator.
+- Add screenshot/UI coverage for mission variants, six locales, and large text; keep alarm data and scheduling paths unchanged.
 
-## Architectural verification
+## Checks completed locally
 
-Compare the final branch with main before accepting: no deletion and no changes to native core alarm/storage/session models, API or database are expected.
-All writes use the existing full base tree and verify its complete file inventory before updating the branch.
-Do not merge until the final head CI passes.
+- Native locale resources are generated and in sync.
+- Locale parity passes for en, ru, pt-BR, fr, de, es.
+- Swift source and iOS UI-test syntax parsing passes.
+- iOS app build and `build-for-testing` succeed for the simulator target.
+- `git diff --check` passes.
+- No local iOS simulator runtime or Android Gradle installation is available in this workspace. Therefore local checks do not replace current-head simulator/emulator tests or screenshot review.
 
-## Remaining acceptance work
+## Still required before acceptance
 
-- Final screenshot comparison of each screen/state on iOS and Android. Six iOS screenshots from run 687 were captured and reviewed; the Math screenshot exposed excess vertical space and a clipped final keypad row. Commit b04bf9e removes the separate artwork block, reduces Math spacing, and fixes the sign-button test selector.
-- Full-size layout review of the active Android View runtime, including QR and large text.
-- Final small-screen/large-text and six-locale visual review.
-- Screenshot review of the new Math keypad and wake composition against the approved board.
-- Progress charts/streaks require dated real wake history (Phase 9); no fabricated values.
-- Profile currently exposes implemented Settings only; account/billing features remain separate.
-- Final-head CI and targeted navigation/selection regressions. Run 685 passed all four CI jobs; later heads require their own successful checks. Run 687 passed Android compilation/unit/instrumentation checks but failed screenshot export (fixed with a Bash helper) and an iOS test locator (fixed with a stable accessibility identifier).
+1. Commit and push this correction set to the existing PR branch.
+2. Require all current-head CI jobs to pass; inspect the Android and iOS screenshot artifacts from that same head, including the long German create screen, Math invalid state, large text, and all six locales.
+3. Compare those captures with the approved board, fix any remaining material mismatch, and rerun CI on the resulting head.
+4. Record the exact current-head CI run and screenshot artifact in the PR and final report.
 
-## Visual adaptations and dependencies
+The prior `Create-de.png` and `MathInvalid.png` examples are not accepted: they show the old clipped/oversized create screen and the old English/flat-background Math layout. A green historical CI run does not change that verdict.
 
-| Mockup element | Current implementation | Acceptance boundary |
-| --- | --- | --- |
-| Home, coral action and three tabs | Working native screens, pinned action, shared palette | Final six-locale images still need review |
-| Landscape artwork | Offline native illustration | Simplified artwork, not a pixel-identical reproduction |
-| Time, weekdays, missions | Existing real alarm settings with native controls | Retains timezone/permission controls beyond the board; localized short weekday labels and mission cards with an accessibility-size vertical fallback |
-| Math keypad | Real answer validation, sign, delete and check | Existing addition/subtraction core retained; the multiplication example is not an implemented operation |
-| Emergency stop | Existing real stop action, independently accessible | Layout and action tests required on final head |
-| Progress chart, streak and score | Designed empty state with functional create action | Depends on Phase 9 real dated history; not complete and never populated with fake values |
-| Profile | Existing language/permission settings | Accounts, billing and subscription UI belong to Phase 8 |
+## Product boundaries
 
-The iOS header places Settings next to the wordmark; create uses a compact wheel and inline title. Full weekday names remain available to accessibility.
-
-Six-locale UI capture is added to test real native language selection and navigation/create cancellation without changing production alarm or storage architecture. Settings display the app resource language rather than assuming it always equals the system language.
-
-This report does not claim 100% completion or physical alarm-delivery acceptance.
-
-## Captured evidence and corrective review
-
-Run 688 passed all four jobs, including 32 Android instrumentation tests and 3 iOS UI / 35 iOS application tests.
-Run 689 passed the iOS six-locale navigation/create UI test; Android behavior tests passed but PNG export failed, correctly blocking visual acceptance.
-Run 691 generated and signature-checked 29 Android PNGs (four screens in each of six locales, four large-text first-run screens and Math). Native tests compare exported bytes with the source screenshot; the archive is downloadable through GitHub Actions artifacts.
-
-Review of the real Android Math capture found cumulative outer/inner pixel padding, a narrow keypad and an incomplete final row. The corrective implementation uses density-aware outer padding, full-width mission content, the sign control beside the answer, a compact readable card and a separate full-width emergency stop. A focused small-emulator regression checks that zero, check and emergency controls are completely inside the visible bounds.
-
-Six-locale Android screenshots also exposed broken navigation words and default purple container colors. The corrective theme defines the missing primary/secondary container roles; navigation uses compact single-line labels with full localized accessibility text. The shared light native window theme uses dark system icons on ivory.
-
-Original PNGs are uploaded for both platforms. iOS prints small JPEG previews only, keeping log retrieval usable. Final review and current-head CI URLs belong in PR #1; a historical green run is not substituted for current-head checks.
-
-Android create/edit keeps Cancel/title and Save outside the scrolling form. Save remains visible at font scale 1.8; the first-run regression asserts visibility before clicking it.
+- Progress charts/streak metrics remain intentionally empty until Phase 9 supplies persisted dated history and metric rules.
+- This phase's CI screenshot evidence is not a new physical-device test of audible alarm delivery, store readiness, VoiceOver/TalkBack, or the Phase 11 device matrix.
+- Do not mark Phase 7 complete until the remaining acceptance steps above pass. Do not merge PR #1 or update `main` without the owner's separate approval.

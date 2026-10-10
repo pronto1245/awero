@@ -137,7 +137,8 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                     when (screen) {
                         "progress" -> AweroProgressScreen(
                             modifier = Modifier.padding(innerPadding),
-                            onSetAlarm = { screen = "create" }
+                            onSetAlarm = { screen = "create" },
+                            onOpenSettings = { screen = "settings" }
                         )
                         "settings" -> Box(Modifier.padding(innerPadding)) {
                             SettingsScreen(onBack = { screen = "home" })

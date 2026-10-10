@@ -161,5 +161,13 @@
   "progress.empty_body": "Vos réveils terminés apparaîtront ici. Les tests d’alarme ne sont pas comptabilisés.",
   "progress.empty_action": "Créer une alarme",
   "mission.delete_digit": "Effacer le dernier chiffre",
-  "mission.change_sign": "Changer le signe"
+  "mission.change_sign": "Changer le signe",
+  "create.mission_math_body": "Résolvez un calcul",
+  "create.mission_steps_body": "Faites quelques pas",
+  "create.mission_qr_body": "Scannez un code dans une autre pièce",
+  "wake.heading": "C’est l’heure de se réveiller",
+  "wake.instruction": "Résolvez le calcul pour arrêter le réveil.",
+  "wake.emergency_stop_hint": "Uniquement en cas d’urgence",
+  "home.no_enabled_title": "Aucune alarme active",
+  "home.no_enabled_body": "Activez une alarme ci-dessous pour voir le prochain réveil."
 }

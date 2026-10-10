@@ -42,7 +42,6 @@ private struct MathMissionView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("wake.title").font(.title.bold()).foregroundStyle(AweroDesign.navy)
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
                     .font(.system(size: problemSize, weight: .black, design: .rounded))
@@ -53,20 +52,33 @@ private struct MathMissionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .accessibilityIdentifier("mission.math.problem")
             }
-            TextField("mission.answer", text: $answer)
-                .keyboardType(.numbersAndPunctuation)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.center)
-                .accessibilityIdentifier("mission.math.answer")
-            if invalid { Text("mission.try_again").foregroundStyle(.red).accessibilityIdentifier("mission.math.invalid") }
-            Button("±") {
-                answer = answer.hasPrefix("-") ? String(answer.dropFirst()) : "-" + answer
-                invalid = false
+            HStack(spacing: 8) {
+                Text(answer.isEmpty ? NSLocalizedString("mission.answer", comment: "Answer field placeholder") : answer)
+                    .font(.title2.weight(.medium))
+                    .foregroundStyle(answer.isEmpty ? AweroDesign.navy.opacity(0.35) : AweroDesign.navy)
+                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .center)
+                    .accessibilityIdentifier("mission.math.answer")
+                Button("±") {
+                    answer = answer.hasPrefix("-") ? String(answer.dropFirst()) : "-" + answer
+                    invalid = false
+                }
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(AweroDesign.navy)
+                .frame(width: 48, height: 48)
+                .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 14))
+                .accessibilityLabel(Text("mission.change_sign"))
+                .accessibilityIdentifier("mission.math.sign")
             }
-            .foregroundStyle(AweroDesign.navy)
-            .frame(minHeight: 44)
-            .accessibilityLabel(Text("mission.change_sign"))
-            .accessibilityIdentifier("mission.math.sign")
+            if invalid {
+                Text("mission.try_again")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color(red: 0.78, green: 0.18, blue: 0.22))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color(red: 1, green: 0.91, blue: 0.89), in: RoundedRectangle(cornerRadius: 12))
+                    .accessibilityIdentifier("mission.math.invalid")
+            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                 ForEach(1...9, id: \.self) { digit in
                     Button(String(digit)) {

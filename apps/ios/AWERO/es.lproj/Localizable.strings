@@ -23,6 +23,9 @@
 "create.error_body" = "No se guardó la alarma. Comprueba los permisos necesarios y el espacio disponible e inténtalo de nuevo.";
 "create.error_title" = "No se pudo programar la alarma";
 "create.mission" = "Misión para despertar";
+"create.mission_math_body" = "Resuelve una operación";
+"create.mission_qr_body" = "Escanea un código en otra habitación";
+"create.mission_steps_body" = "Da unos pasos";
 "create.no_weekdays" = "Selecciona al menos un día de repetición.";
 "create.point_camera" = "Apunta la cámara al QR o código de barras que escanearás por la mañana.";
 "create.qr_content" = "Contenido del QR/código de barras";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "Código QR";
 "home.mission.steps" = "Pasos";
 "home.next_alarm" = "Próxima alarma";
+"home.no_enabled_body" = "Activa una alarma abajo para ver la próxima hora de despertar.";
+"home.no_enabled_title" = "No hay alarmas activas";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Intentar de nuevo";
 "home.subtitle" = "Un nuevo día, nuevas posibilidades";
@@ -140,6 +145,9 @@
 "wake.completed_body" = "La sesión para despertar ha terminado.";
 "wake.completed_title" = "YA ESTÁS EN PIE";
 "wake.emergency_stop" = "Parada de emergencia";
+"wake.emergency_stop_hint" = "Solo en caso de emergencia";
+"wake.heading" = "Hora de despertar";
+"wake.instruction" = "Resuelve la operación para apagar la alarma.";
 "wake.retry" = "Reintentar guardado";
 "wake.snooze" = "Posponer";
 "wake.snooze_error_body" = "La alarma sigue sonando.";

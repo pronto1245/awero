@@ -27,7 +27,11 @@ struct AWEROApp: App {
                     await wakeFlow.restore()
                     #if DEBUG
                     if ProcessInfo.processInfo.arguments.contains("-awero.uiTestWake") {
-                        let alarm = alarmStore.alarms.first ?? Alarm(hour: 7, minute: 0, weekdays: Set(1...7), missionType: .math)
+                        let requestedMission = ProcessInfo.processInfo.arguments.firstIndex(of: "-awero.uiTestMission")
+                            .flatMap { ProcessInfo.processInfo.arguments.indices.contains($0 + 1) ? ProcessInfo.processInfo.arguments[$0 + 1] : nil }
+                            .flatMap { MissionType(rawValue: $0.uppercased()) }
+                        var alarm = alarmStore.alarms.first ?? Alarm(hour: 7, minute: 0, weekdays: Set(1...7), missionType: requestedMission ?? .math)
+                        if let requestedMission { alarm.missionType = requestedMission }
                         await wakeFlow.start(alarm: alarm, isTestAlarm: true)
                         await wakeFlow.beginMission()
                     }

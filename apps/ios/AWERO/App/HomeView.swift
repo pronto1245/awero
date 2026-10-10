@@ -45,39 +45,76 @@ struct HomeView: View {
                             .accessibilityLabel(Text("settings.title"))
                             .accessibilityIdentifier("home.settings")
                         }
-                        Text("home.greeting")
-                            .font(.system(size: greetingSize, weight: .bold, design: .rounded))
-                            .foregroundStyle(AweroDesign.navy)
-                        Text("home.subtitle")
-                            .font(.subheadline)
-                            .foregroundStyle(AweroDesign.navy.opacity(0.65))
-                        SunriseArtwork().padding(.top, 4)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("home.greeting")
+                                .font(.system(size: greetingSize, weight: .bold, design: .rounded))
+                                .foregroundStyle(AweroDesign.navy)
+                            HStack(spacing: 5) {
+                                Text("home.subtitle")
+                                    .font(.subheadline)
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.68))
+                                Image(systemName: "sun.max.fill")
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color(red: 1, green: 0.64, blue: 0.19))
+                                    .accessibilityHidden(true)
+                            }
+                        }
+                        .padding(.top, 4)
+
+                        SunriseArtwork(height: 166, cornerRadius: 0)
+                            .padding(.horizontal, -20)
 
                         if let next = upcomingAlarms.first {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Label("home.next_alarm", systemImage: "sun.max.fill")
-                                    .font(.headline)
-                                    .foregroundStyle(AweroDesign.coral)
-                                Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
-                                    .font(.system(size: nextAlarmSize, weight: .bold, design: .rounded))
+                            Button { editingAlarm = next.alarm } label: {
+                                VStack(alignment: .leading, spacing: 7) {
+                                    Label("home.next_alarm", systemImage: "sun.max.fill")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(AweroDesign.coral)
+                                    HStack(alignment: .center) {
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
+                                                .font(.system(size: nextAlarmSize, weight: .bold, design: .rounded))
+                                                .foregroundStyle(AweroDesign.navy)
+                                            Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .none) + " · " + missionName(next.alarm.missionType))
+                                                .font(.subheadline)
+                                                .foregroundStyle(AweroDesign.navy.opacity(0.68))
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.75)
+                                        }
+                                        Spacer(minLength: 8)
+                                        Image(systemName: "chevron.right")
+                                            .font(.headline.weight(.semibold))
+                                            .foregroundStyle(AweroDesign.coral)
+                                            .frame(width: 40, height: 40)
+                                            .background(AweroDesign.coral.opacity(0.12), in: Circle())
+                                    }
+                                    .accessibilityElement(children: .combine)
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(18)
+                                .background(LinearGradient(colors: [.white, Color(red: 1, green: 0.95, blue: 0.88)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .clipShape(RoundedRectangle(cornerRadius: 22))
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal, 12)
+                            .padding(.top, -28)
+                            .accessibilityIdentifier("home.nextAlarm")
+                        } else {
+                            Spacer().frame(height: 4)
+                        }
+
+                        if alarms.loadState == .loaded, !alarms.alarms.isEmpty, upcomingAlarms.isEmpty {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Label("home.no_enabled_title", systemImage: "alarm")
+                                    .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(AweroDesign.navy)
-                                Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .short))
-                                    .font(.subheadline)
-                                    .foregroundStyle(AweroDesign.navy.opacity(0.65))
-                                Text(missionKey(next.alarm.missionType))
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(AweroDesign.navy.opacity(0.8))
+                                Text("home.no_enabled_body")
+                                    .font(.caption)
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.68))
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(20)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color(red: 1, green: 0.90, blue: 0.77), Color.white],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 24))
+                            .padding(14)
+                            .background(AweroDesign.surfaceWarm, in: RoundedRectangle(cornerRadius: 18))
                         }
 
                         Text("home.alarms")
@@ -290,6 +327,18 @@ struct HomeView: View {
         }
     }
 
+    private func missionName(_ type: MissionType) -> String {
+        let key: String
+        switch type {
+        case .math: key = "home.mission.math"
+        case .steps: key = "home.mission.steps"
+        case .qr: key = "home.mission.qr"
+        case .photo: key = "home.mission.photo"
+        case .mixed: key = "home.mission.mixed"
+        }
+        return NSLocalizedString(key, comment: "Alarm mission name")
+    }
+
     @MainActor
     private func refreshReadiness() async {
         let scheduler = AlarmScheduler()
@@ -369,9 +418,14 @@ private struct AlarmCard: View {
                 )
                 .accessibilityValue(alarm.enabled ? Text("home.enabled") : Text("home.disabled"))
             }
-            Text(missionKey(alarm.missionType))
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(AweroDesign.navy.opacity(0.72))
+            HStack(spacing: 6) {
+                Image(systemName: missionIcon(alarm.missionType))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(AweroDesign.coral)
+                Text(missionKey(alarm.missionType))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.72))
+            }
             if alarm.enabled, let readiness, readiness != .disabled {
                 Text(LocalizedStringKey(readiness.localizationKey))
                     .font(.caption)
@@ -402,6 +456,16 @@ private struct AlarmCard: View {
         case .qr: "home.mission.qr"
         case .photo: "home.mission.photo"
         case .mixed: "home.mission.mixed"
+        }
+    }
+
+    private func missionIcon(_ type: MissionType) -> String {
+        switch type {
+        case .math: "calculator"
+        case .steps: "figure.walk"
+        case .qr: "qrcode"
+        case .photo: "camera"
+        case .mixed: "square.grid.2x2"
         }
     }
 }

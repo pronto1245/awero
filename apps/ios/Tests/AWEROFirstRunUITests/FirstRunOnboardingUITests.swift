@@ -18,6 +18,9 @@ final class FirstRunOnboardingUITests: XCTestCase {
         let saveButton = app.buttons["alarm.save"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 10))
         capture("Create")
+        app.scrollViews.firstMatch.swipeUp()
+        XCTAssertTrue(app.staticTexts["create.mission_math_body"].waitForExistence(timeout: 5))
+        capture("CreateMissions")
         saveButton.tap()
 
         let permissionContinue = app.alerts.buttons["Continue"].firstMatch
@@ -89,6 +92,45 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["wake.stopped"].waitForExistence(timeout: 5))
     }
 
+    func testStepsAndQRWakeStatesUseTheSameVisualSystem() {
+        let steps = XCUIApplication()
+        steps.launchArguments += ["-awero.uiTestWake", "YES", "-awero.uiTestMission", "STEPS"]
+        steps.launch()
+        XCTAssertTrue(steps.staticTexts["mission.steps_title"].waitForExistence(timeout: 15))
+        XCTAssertTrue(steps.buttons["wake.emergencyStop"].exists)
+        capture("Steps")
+        steps.buttons["wake.emergencyStop"].tap()
+        steps.terminate()
+
+        let qr = XCUIApplication()
+        qr.launchArguments += ["-awero.uiTestWake", "YES", "-awero.uiTestMission", "QR"]
+        qr.launch()
+        XCTAssertTrue(qr.staticTexts["mission.qr_unconfigured"].waitForExistence(timeout: 15))
+        XCTAssertTrue(qr.buttons["wake.emergencyStop"].exists)
+        capture("QR")
+        qr.buttons["wake.emergencyStop"].tap()
+    }
+
+    func testLargeTextKeepsCreateActionAndMissionChoicesReachable() {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-awero.didCompleteOnboarding.v1", "YES",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        let create = app.buttons["home.createAlarm"]
+        XCTAssertTrue(create.waitForExistence(timeout: 15))
+        capture("HomeLargeText")
+        create.tap()
+        XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10))
+        let missionDescription = app.staticTexts["create.mission_math_body"]
+        XCTAssertTrue(missionDescription.waitForExistence(timeout: 10))
+        app.scrollViews.firstMatch.swipeUp()
+        XCTAssertTrue(missionDescription.isHittable)
+        capture("CreateLargeText")
+        app.buttons["alarm.cancel"].tap()
+    }
+
     func testAllSupportedLocalesKeepNavigationAndCreationAccessible() {
         for language in ["en", "ru", "pt-BR", "fr", "de", "es"] {
             let app = XCUIApplication()
@@ -105,6 +147,9 @@ final class FirstRunOnboardingUITests: XCTestCase {
             create.tap()
             XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10), language)
             capture("Create-\(language)")
+            app.scrollViews.firstMatch.swipeUp()
+            XCTAssertTrue(app.staticTexts["create.mission_math_body"].waitForExistence(timeout: 5), language)
+            capture("CreateMissions-\(language)")
             app.buttons["alarm.cancel"].tap()
             XCTAssertTrue(create.waitForExistence(timeout: 5), language)
             app.buttons["home.settings"].tap()

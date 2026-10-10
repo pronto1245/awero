@@ -161,5 +161,13 @@
   "progress.empty_body": "Seus despertares concluídos aparecerão aqui. Testes do alarme não são contabilizados.",
   "progress.empty_action": "Criar alarme",
   "mission.delete_digit": "Apagar último dígito",
-  "mission.change_sign": "Alterar sinal"
+  "mission.change_sign": "Alterar sinal",
+  "create.mission_math_body": "Resolva uma conta",
+  "create.mission_steps_body": "Dê alguns passos",
+  "create.mission_qr_body": "Escaneie um código em outro cômodo",
+  "wake.heading": "Hora de acordar",
+  "wake.instruction": "Resolva a conta para desligar o alarme.",
+  "wake.emergency_stop_hint": "Somente em caso de emergência",
+  "home.no_enabled_title": "Nenhum alarme ativo",
+  "home.no_enabled_body": "Ative um alarme abaixo para ver o próximo horário de despertar."
 }

@@ -161,5 +161,13 @@
   "progress.empty_body": "Здесь появятся завершённые пробуждения. Проверки будильника не учитываются.",
   "progress.empty_action": "Создать будильник",
   "mission.delete_digit": "Удалить последнюю цифру",
-  "mission.change_sign": "Изменить знак"
+  "mission.change_sign": "Изменить знак",
+  "create.mission_math_body": "Решите пример",
+  "create.mission_steps_body": "Пройдите несколько шагов",
+  "create.mission_qr_body": "Отсканируйте код в другой комнате",
+  "wake.heading": "Пора просыпаться",
+  "wake.instruction": "Решите пример, чтобы выключить будильник.",
+  "wake.emergency_stop_hint": "Только в крайнем случае",
+  "home.no_enabled_title": "Нет включённых будильников",
+  "home.no_enabled_body": "Включите будильник ниже, чтобы увидеть время следующего пробуждения."
 }

@@ -13,6 +13,8 @@ struct AweroMainTabsView: View {
             AweroProgressView(onSetAlarm: {
                 selectedTab = 0
                 showingCreate = true
+            }, onOpenSettings: {
+                selectedTab = 2
             })
             .tabItem { Label("nav.progress", systemImage: "chart.bar.fill") }
             .tag(1)

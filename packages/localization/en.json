@@ -161,5 +161,13 @@
   "progress.empty_body": "Completed wake sessions will appear here. Alarm tests are not counted.",
   "progress.empty_action": "Set an alarm",
   "mission.delete_digit": "Delete last digit",
-  "mission.change_sign": "Change sign"
+  "mission.change_sign": "Change sign",
+  "create.mission_math_body": "Solve a problem",
+  "create.mission_steps_body": "Walk a few steps",
+  "create.mission_qr_body": "Scan a code in another room",
+  "wake.heading": "Time to wake up",
+  "wake.instruction": "Solve the problem to turn off the alarm.",
+  "wake.emergency_stop_hint": "Only in an emergency",
+  "home.no_enabled_title": "No active alarms",
+  "home.no_enabled_body": "Turn on an alarm below to see the next wake-up."
 }

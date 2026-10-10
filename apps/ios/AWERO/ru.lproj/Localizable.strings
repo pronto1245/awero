@@ -23,6 +23,9 @@
 "create.error_body" = "Будильник не сохранён. Проверьте необходимые разрешения и свободное место, затем повторите попытку.";
 "create.error_title" = "Не удалось запланировать будильник";
 "create.mission" = "Задание для пробуждения";
+"create.mission_math_body" = "Решите пример";
+"create.mission_qr_body" = "Отсканируйте код в другой комнате";
+"create.mission_steps_body" = "Пройдите несколько шагов";
 "create.no_weekdays" = "Выберите хотя бы один день повтора.";
 "create.point_camera" = "Наведите камеру на QR-код или штрихкод, который нужно сканировать утром.";
 "create.qr_content" = "Содержимое QR-кода или штрихкода";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR-код";
 "home.mission.steps" = "Шаги";
 "home.next_alarm" = "Следующий будильник";
+"home.no_enabled_body" = "Включите будильник ниже, чтобы увидеть время следующего пробуждения.";
+"home.no_enabled_title" = "Нет включённых будильников";
 "home.ok" = "ОК";
 "home.retry_loading_alarms" = "Повторить";
 "home.subtitle" = "Новый день — новые возможности";
@@ -140,6 +145,9 @@
 "wake.completed_body" = "Пробуждение завершено.";
 "wake.completed_title" = "ВЫ УЖЕ ВСТАЛИ";
 "wake.emergency_stop" = "Экстренно выключить";
+"wake.emergency_stop_hint" = "Только в крайнем случае";
+"wake.heading" = "Пора просыпаться";
+"wake.instruction" = "Решите пример, чтобы выключить будильник.";
 "wake.retry" = "Повторить сохранение";
 "wake.snooze" = "Отложить";
 "wake.snooze_error_body" = "Будильник продолжает звонить.";

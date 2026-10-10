@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AweroProgressView: View {
     let onSetAlarm: () -> Void
+    let onOpenSettings: () -> Void
 
     private let ivory = AweroDesign.ivory
     private let navy = AweroDesign.navy
@@ -11,19 +12,42 @@ struct AweroProgressView: View {
         NavigationStack {
             ZStack {
                 ivory.ignoresSafeArea()
-                VStack(spacing: 22) {
-                    Image(systemName: "chart.bar.xaxis")
-                        .font(.system(size: 42, weight: .semibold))
-                        .foregroundStyle(coral)
-                        .accessibilityHidden(true)
-                    Text("progress.empty_title")
-                        .font(.title2.bold())
-                        .foregroundStyle(navy)
-                        .multilineTextAlignment(.center)
-                    Text("progress.empty_body")
-                        .font(.body)
-                        .foregroundStyle(navy.opacity(0.68))
-                        .multilineTextAlignment(.center)
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack {
+                            Text("AWERO")
+                                .font(.system(size: 26, weight: .black))
+                                .foregroundStyle(navy)
+                            Spacer()
+                            Button(action: onOpenSettings) {
+                                Image(systemName: "gearshape")
+                                    .font(.title3)
+                                    .foregroundStyle(navy)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .accessibilityLabel(Text("settings.title"))
+                        }
+                        Text("progress.title")
+                            .font(.system(size: 34, weight: .bold, design: .rounded))
+                            .foregroundStyle(navy)
+                            .accessibilityAddTraits(.isHeader)
+                        VStack(alignment: .leading, spacing: 14) {
+                            Image(systemName: "chart.bar.xaxis")
+                                .font(.system(size: 38, weight: .semibold))
+                                .foregroundStyle(coral)
+                                .accessibilityHidden(true)
+                            Text("progress.empty_title")
+                                .font(.title2.bold())
+                                .foregroundStyle(navy)
+                                .multilineTextAlignment(.leading)
+                            Text("progress.empty_body")
+                                .font(.body)
+                                .foregroundStyle(navy.opacity(0.68))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(22)
+                        .background(LinearGradient(colors: [.white, Color(red: 1, green: 0.95, blue: 0.88)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
                     Button(action: onSetAlarm) {
                         Text("progress.empty_action")
                             .font(.headline)
@@ -34,13 +58,14 @@ struct AweroProgressView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 18))
                     }
                     .accessibilityIdentifier("progress.createAlarm")
-                    .padding(.top, 8)
+                    .padding(.top, 2)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 12)
+                    .padding(.bottom, 24)
                 }
-                .padding(24)
-                .frame(maxWidth: 420)
             }
-            .navigationTitle("progress.title")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
         }
         .tint(coral)
     }

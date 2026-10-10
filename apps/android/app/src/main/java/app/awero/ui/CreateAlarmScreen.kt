@@ -13,19 +13,25 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import android.text.format.DateFormat
+import java.text.DateFormatSymbols
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -51,11 +57,11 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
     val coordinator = remember { AlarmCoordinator(context) }
     val scope = rememberCoroutineScope()
     val now = Calendar.getInstance()
-    var hour by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
-    var minute by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
+    var hour by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.hour ?: 7) }
+    var minute by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.minute ?: 0) }
     var mission by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
     var difficulty by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
-    var weekdays by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.weekdays ?: (1..7).toSet()) }
+    var weekdays by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.weekdays ?: (2..6).toSet()) }
     var followsDeviceTimezone by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.timezoneMode != TimezoneMode.FIXED) }
     var fixedTimezone by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.fixedTimezone ?: TimeZone.getDefault().id) }
     var qrExpectedCode by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.qrExpectedCode.orEmpty()) }
@@ -64,6 +70,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
     var saveError by remember { mutableStateOf<String?>(null) }
     var saveNeedsSettings by remember { mutableStateOf(false) }
     val owner = context as? ComponentActivity
+    val compactLayout = LocalConfiguration.current.screenWidthDp < 380 || LocalConfiguration.current.fontScale >= 1.35f
     val requestCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) showCodeScanner = true
         else scannerError = context.getString(R.string.permission_camera_denied)
@@ -76,25 +83,32 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextButton(onClick = onCancel, modifier = Modifier.heightIn(min = 48.dp)) {
-            Text(stringResource(R.string.create_cancel), color = FormNavy)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            TextButton(onClick = onCancel, modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)) {
+                Text("‹", color = FormNavy, style = MaterialTheme.typography.headlineLarge)
+            }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                Text(
+                    stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
+                    color = FormNavy,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1
+                )
+            }
+            Spacer(Modifier.width(48.dp))
         }
-        Text(
-            stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
-            color = FormNavy,
-            style = MaterialTheme.typography.headlineMedium
-        )
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
+        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF9)), shape = RoundedCornerShape(22.dp)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.create_time), color = FormNavy)
+                Text(stringResource(R.string.create_time), color = FormNavy, style = MaterialTheme.typography.titleMedium)
                 OutlinedButton(
                     onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, DateFormat.is24HourFormat(context)).show() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(DateFormat.getTimeFormat(context).format(Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, hour); set(Calendar.MINUTE, minute) }.time), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
                 }
-                Text(stringResource(R.string.create_timezone), color = FormNavy)
+                HorizontalDivider(color = FormNavy.copy(alpha = .10f), modifier = Modifier.padding(vertical = 4.dp))
+                Text(stringResource(R.string.create_timezone), color = FormNavy, style = MaterialTheme.typography.titleSmall)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     FilterChip(
                         selected = followsDeviceTimezone,
@@ -119,12 +133,21 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(stringResource(R.string.create_repeat), color = FormNavy)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                HorizontalDivider(color = FormNavy.copy(alpha = .10f), modifier = Modifier.padding(vertical = 4.dp))
+                Text(stringResource(R.string.create_repeat), color = FormNavy, style = MaterialTheme.typography.titleMedium)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                     listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
                         FilterChip(
                             selected = day in weekdays,
                             onClick = { weekdays = if (day in weekdays) weekdays - day else weekdays + day },
-                            label = { Text(stringResource(weekdayResource(day))) }
+                            label = { Text(DateFormatSymbols.getInstance().shortWeekdays[day]) },
+                            shape = CircleShape,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = FormCoral,
+                                selectedLabelColor = Color.White,
+                                containerColor = Color(0xFFF5F0E9),
+                                labelColor = FormNavy
+                            )
                         )
                     }
                 }
@@ -132,20 +155,25 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             }
         }
 
-        Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
+        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF9)), shape = RoundedCornerShape(22.dp)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_mission), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
-                        FilterChip(
-                            selected = mission == type,
-                            onClick = { mission = type },
-                            label = { Text(missionLabel(type)) }
-                        )
+                if (compactLayout) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
+                            MissionOptionCard(type, mission == type, Modifier.fillMaxWidth(), onClick = { mission = type })
+                        }
+                    }
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
+                            MissionOptionCard(type, mission == type, Modifier.weight(1f), onClick = { mission = type })
+                        }
                     }
                 }
                 if (mission == MissionType.MATH) {
-                    Text(stringResource(R.string.create_difficulty), color = FormNavy)
+                    HorizontalDivider(color = FormNavy.copy(alpha = .10f), modifier = Modifier.padding(top = 4.dp))
+                    Text(stringResource(R.string.create_difficulty), color = FormNavy, style = MaterialTheme.typography.titleSmall)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Difficulty.entries.forEach { level ->
                             FilterChip(
@@ -300,4 +328,34 @@ private fun weekdayResource(day: Int): Int = when (day) {
     Calendar.THURSDAY -> R.string.day_thursday
     Calendar.FRIDAY -> R.string.day_friday
     else -> R.string.day_saturday
+}
+
+@Composable
+private fun MissionOptionCard(type: MissionType, selected: Boolean, modifier: Modifier, onClick: () -> Unit) {
+    val title = missionLabel(type)
+    val description = stringResource(when (type) {
+        MissionType.MATH -> R.string.create_mission_math_body
+        MissionType.STEPS -> R.string.create_mission_steps_body
+        else -> R.string.create_mission_qr_body
+    })
+    Column(
+        modifier = modifier
+            .heightIn(min = 142.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (selected) Color(0xFFFFEEE4) else Color(0xFFFFF8EF))
+            .border(if (selected) 1.5.dp else 1.dp, if (selected) FormCoral else FormNavy.copy(alpha = .10f), RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        MissionChoiceIcon(when (type) {
+            MissionType.MATH -> "math"
+            MissionType.STEPS -> "steps"
+            else -> "qr"
+        })
+        Text(title, color = FormNavy, style = MaterialTheme.typography.titleSmall, maxLines = 2)
+        Text(description, color = FormNavy.copy(alpha = .65f), style = MaterialTheme.typography.bodySmall, maxLines = 3)
+        if (selected) Text("✓", color = FormCoral, style = MaterialTheme.typography.labelLarge)
+    }
 }

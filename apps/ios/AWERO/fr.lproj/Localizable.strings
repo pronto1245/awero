@@ -23,6 +23,9 @@
 "create.error_body" = "Le réveil n’a pas été enregistré. Vérifiez les autorisations requises et l’espace disponible, puis réessayez.";
 "create.error_title" = "Impossible de programmer le réveil";
 "create.mission" = "Mission de réveil";
+"create.mission_math_body" = "Résolvez un calcul";
+"create.mission_qr_body" = "Scannez un code dans une autre pièce";
+"create.mission_steps_body" = "Faites quelques pas";
 "create.no_weekdays" = "Sélectionnez au moins un jour de répétition.";
 "create.point_camera" = "Pointez la caméra vers le QR code ou le code-barres à scanner le matin.";
 "create.qr_content" = "Contenu du QR code/code-barres";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "Code QR";
 "home.mission.steps" = "Pas";
 "home.next_alarm" = "Prochain réveil";
+"home.no_enabled_body" = "Activez une alarme ci-dessous pour voir le prochain réveil.";
+"home.no_enabled_title" = "Aucune alarme active";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Réessayer";
 "home.subtitle" = "Un nouveau jour, de nouvelles possibilités";
@@ -140,6 +145,9 @@
 "wake.completed_body" = "La session de réveil est terminée.";
 "wake.completed_title" = "VOUS ÊTES DEBOUT";
 "wake.emergency_stop" = "Arrêt d’urgence";
+"wake.emergency_stop_hint" = "Uniquement en cas d’urgence";
+"wake.heading" = "C’est l’heure de se réveiller";
+"wake.instruction" = "Résolvez le calcul pour arrêter le réveil.";
 "wake.retry" = "Réessayer l’enregistrement";
 "wake.snooze" = "Répéter";
 "wake.snooze_error_body" = "Le réveil sonne toujours.";

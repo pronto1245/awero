@@ -161,5 +161,13 @@
   "progress.empty_body": "Hier erscheinen abgeschlossene Aufwach-Sitzungen. Alarmtests werden nicht gezählt.",
   "progress.empty_action": "Wecker erstellen",
   "mission.delete_digit": "Letzte Ziffer löschen",
-  "mission.change_sign": "Vorzeichen ändern"
+  "mission.change_sign": "Vorzeichen ändern",
+  "create.mission_math_body": "Löse eine Rechenaufgabe",
+  "create.mission_steps_body": "Gehe ein paar Schritte",
+  "create.mission_qr_body": "Scanne einen Code in einem anderen Raum",
+  "wake.heading": "Zeit zum Aufwachen",
+  "wake.instruction": "Löse die Aufgabe, um den Wecker auszuschalten.",
+  "wake.emergency_stop_hint": "Nur im Notfall",
+  "home.no_enabled_title": "Keine aktiven Wecker",
+  "home.no_enabled_body": "Aktiviere unten einen Wecker, um den nächsten Weckzeitpunkt zu sehen."
 }
