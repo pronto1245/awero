@@ -11,6 +11,8 @@ import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import app.awero.core.storage.AweroDatabase
 import app.awero.core.statistics.StatisticsStore
 import app.awero.core.wake.WakeFlowController
@@ -115,6 +117,7 @@ class WakeSaveRetryEndToEndTest {
         }
 
         setFontScale(1.8f)
+        activity = adoptWakeActivityAfterConfigurationChange(activity!!)
         instrumentation.runOnMainSync {
             activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
         }
@@ -146,6 +149,7 @@ class WakeSaveRetryEndToEndTest {
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
         setFontScale(1.0f)
+        activity = adoptWakeActivityAfterConfigurationChange(activity!!)
         instrumentation.runOnMainSync {
             activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
         }
@@ -219,6 +223,45 @@ class WakeSaveRetryEndToEndTest {
             Thread.sleep(50)
         }
         assertTrue(message, condition())
+    }
+
+    /**
+     * Changing the system font scale recreates [WakeAlarmActivity]. The old instance is destroyed
+     * and its views are detached, so the test must continue on the new instance. Wait until the
+     * recreated activity has rendered its own wake content (so it cannot overwrite ours later);
+     * if no recreation happens, keep the current instance.
+     */
+    private fun adoptWakeActivityAfterConfigurationChange(previous: WakeAlarmActivity): WakeAlarmActivity {
+        val deadline = System.currentTimeMillis() + 8_000L
+        var adopted: WakeAlarmActivity = previous
+        while (System.currentTimeMillis() < deadline) {
+            instrumentation.waitForIdleSync()
+            var resumed: WakeAlarmActivity? = null
+            instrumentation.runOnMainSync {
+                resumed = ActivityLifecycleMonitorRegistry.getInstance()
+                    .getActivitiesInStage(Stage.RESUMED)
+                    .filterIsInstance<WakeAlarmActivity>()
+                    .firstOrNull()
+            }
+            val candidate = resumed
+            if (candidate != null && candidate !== previous) {
+                var rendered = false
+                instrumentation.runOnMainSync {
+                    rendered = views(candidate.window.decorView).any { it is Button }
+                }
+                if (rendered) {
+                    adopted = candidate
+                    break
+                }
+            } else if (candidate === previous && !previous.isDestroyed &&
+                System.currentTimeMillis() > deadline - 6_000L
+            ) {
+                break
+            }
+            Thread.sleep(100)
+        }
+        instrumentation.waitForIdleSync()
+        return adopted
     }
 
     private fun setFontScale(scale: Float) {

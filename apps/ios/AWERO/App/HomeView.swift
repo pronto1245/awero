@@ -29,22 +29,26 @@ struct HomeView: View {
     var body: some View {
         ZStack {
                 AweroDesign.ivory.ignoresSafeArea()
+                VStack(spacing: 0) {
+                // Header stays pinned so Settings is always reachable, whatever the scroll position.
+                HStack {
+                    Text("AWERO")
+                        .font(.system(size: wordmarkSize, weight: .black))
+                        .foregroundStyle(AweroDesign.navy)
+                    Spacer()
+                    Button(action: onOpenSettings) {
+                        Image(systemName: "gearshape")
+                            .font(.title3)
+                            .foregroundStyle(AweroDesign.navy)
+                            .frame(minWidth: 44, minHeight: 44)
+                    }
+                    .accessibilityLabel(Text("settings.title"))
+                    .accessibilityIdentifier("home.settings")
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        HStack {
-                            Text("AWERO")
-                                .font(.system(size: wordmarkSize, weight: .black))
-                                .foregroundStyle(AweroDesign.navy)
-                            Spacer()
-                            Button(action: onOpenSettings) {
-                                Image(systemName: "gearshape")
-                                    .font(.title3)
-                                    .foregroundStyle(AweroDesign.navy)
-                                    .frame(minWidth: 44, minHeight: 44)
-                            }
-                            .accessibilityLabel(Text("settings.title"))
-                            .accessibilityIdentifier("home.settings")
-                        }
                         VStack(alignment: .leading, spacing: 4) {
                             Text("home.greeting")
                                 .font(.system(size: greetingSize, weight: .bold))
@@ -193,7 +197,9 @@ struct HomeView: View {
 
                     }
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 18)
+                    .padding(.top, 8)
+                    .padding(.bottom, 18)
+                }
                 }
             }
             .safeAreaInset(edge: .bottom) {
