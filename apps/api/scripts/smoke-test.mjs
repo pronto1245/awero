@@ -328,6 +328,10 @@ async function main() {
       batchWithOneInvalidOperation.data.rejected.length === 1,
     'one invalid sync operation blocked valid operations in the same batch',
   );
+  for (const id of [independentSyncAlarmA, independentSyncAlarmB]) {
+    const cleanup = await request(`/alarms/${id}`, { method: 'DELETE', token });
+    assert(cleanup.status === 200, 'independent sync test alarm cleanup failed');
+  }
   const rejectedRetry = await request('/sync', {
     method: 'POST', token, body: { operations: [invalidSyncOperation] },
   });

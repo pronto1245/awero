@@ -191,6 +191,9 @@ jobs:
             apps/ios/AWERO/Core/Sync/SyncAPIClient.swift \
             apps/ios/AWERO/Core/Sync/AnonymousAuthAPIClient.swift \
             apps/ios/AWERO/Core/Sync/AnonymousAuthSessionStore.swift \
+            apps/ios/AWERO/Core/Sync/AlarmSnapshotSyncClient.swift \
+            apps/ios/AWERO/Core/Sync/WakeSessionSyncClient.swift \
+            apps/ios/AWERO/Core/Sync/SupportDiagnosticsAPIClient.swift \
             apps/ios/AWERO/Core/Sync/SyncQueueStore.swift \
             apps/ios/AWERO/Core/Sync/OfflineSyncCoordinator.swift \
             apps/ios/AWERO/Core/WakeSession/WakeSession.swift \

@@ -1,6 +1,7 @@
 package app.awero.core.storage
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "alarms")
