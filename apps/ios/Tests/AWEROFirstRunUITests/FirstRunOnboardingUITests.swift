@@ -22,6 +22,9 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(permissionContinue.waitForExistence(timeout: 10))
         permissionContinue.tap()
 
-        XCTAssertTrue(app.staticTexts["home.alarm.time"].waitForExistence(timeout: 15))
+        let homeAlarm = app.staticTexts["home.alarm.time"]
+        if !homeAlarm.waitForExistence(timeout: 15) {
+            XCTFail("The first alarm did not appear after saving. Current UI: \(app.debugDescription)")
+        }
     }
 }
