@@ -103,6 +103,9 @@ jobs:
             bash apps/android/scripts/export-visual-screenshots.sh
             bash apps/android/scripts/persistence-crash-test.sh
 
+      - name: Report Android test failures
+        if: failure()
+        run: python3 scripts/ci/report-test-failures.py --junit apps/android/app/build/outputs/androidTest-results
       - name: Collect Android emulator diagnostics
         if: always()
         run: timeout 20s adb logcat -d > android-logcat.txt 2>&1 || true
@@ -178,8 +181,11 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/AWERO-Test-DerivedData" \
             CODE_SIGNING_ALLOWED=NO
           )
-          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROFirstRunUITests test
-          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROTests test
+          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROFirstRunUITests test 2>&1 | tee "$RUNNER_TEMP/ios-xctest.log"
+          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROTests test 2>&1 | tee -a "$RUNNER_TEMP/ios-xctest.log"
+      - name: Report iOS test failures
+        if: failure()
+        run: python3 scripts/ci/report-test-failures.py --log "$RUNNER_TEMP/ios-xctest.log"
       - name: Collect original iOS visual captures
         if: always()
         shell: bash
