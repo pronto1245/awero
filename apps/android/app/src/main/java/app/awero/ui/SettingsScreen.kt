@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.dp
 import app.awero.R
 import java.util.Locale
 
-private val SettingsIvory = Color(0xFFFFF8EF)
-private val SettingsNavy = Color(0xFF14294B)
-private val SettingsCoral = Color(0xFFFF684B)
+private val SettingsIvory = AweroDesign.ivory
+private val SettingsNavy = AweroDesign.navy
+private val SettingsCoral = AweroDesign.coral
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
@@ -104,7 +104,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                     colors = ButtonDefaults.buttonColors(containerColor = SettingsCoral),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text(stringResource(R.string.settings_open_system_settings), color = Color.White)
+                    Text(stringResource(R.string.settings_open_system_settings), color = AweroDesign.navy)
                 }
             }
         }

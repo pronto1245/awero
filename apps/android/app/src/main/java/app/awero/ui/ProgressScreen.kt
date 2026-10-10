@@ -24,9 +24,9 @@ import app.awero.R
 
 @Composable
 fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit) {
-    val ivory = Color(0xFFFFF8EF)
-    val navy = Color(0xFF14294B)
-    val coral = Color(0xFFFF684B)
+    val ivory = AweroDesign.ivory
+    val navy = AweroDesign.navy
+    val coral = AweroDesign.coral
 
     Column(
         modifier = modifier.fillMaxSize().background(ivory).padding(24.dp),
@@ -58,7 +58,7 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit) {
             colors = ButtonDefaults.buttonColors(containerColor = coral),
             shape = RoundedCornerShape(18.dp)
         ) {
-            Text(stringResource(R.string.progress_empty_action), color = Color.White)
+            Text(stringResource(R.string.progress_empty_action), color = AweroDesign.navy)
         }
     }
 }

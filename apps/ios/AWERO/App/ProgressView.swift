@@ -3,9 +3,9 @@ import SwiftUI
 struct AweroProgressView: View {
     let onSetAlarm: () -> Void
 
-    private let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    private let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    private let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
+    private let ivory = AweroDesign.ivory
+    private let navy = AweroDesign.navy
+    private let coral = AweroDesign.coral
 
     var body: some View {
         NavigationStack {
@@ -29,7 +29,7 @@ struct AweroProgressView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AweroDesign.navy)
                             .background(coral)
                             .clipShape(RoundedRectangle(cornerRadius: 18))
                     }

@@ -24,12 +24,12 @@ object MissionRuntimeScreen {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(40, 40, 40, 40)
-            setBackgroundColor(Color.rgb(255, 248, 239))
+            setBackgroundColor(AweroDesign.ivoryArgb)
         }
         fun label(value: String, size: Float = 22f) = TextView(activity).apply {
             text = value
             textSize = size
-            setTextColor(Color.rgb(20, 41, 75))
+            setTextColor(AweroDesign.navyArgb)
             gravity = Gravity.CENTER
             setPadding(0, 16, 0, 16)
         }
@@ -67,15 +67,15 @@ object MissionRuntimeScreen {
                 root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f))
                 val answer = EditText(activity).apply {
                     inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
-                    setTextColor(Color.rgb(20, 41, 75))
+                    setTextColor(AweroDesign.navyArgb)
                     setTextSize(28f)
                     gravity = Gravity.CENTER
                     hint = activity.getString(R.string.mission_answer)
                 }
                 root.addView(answer)
                 root.addView(Button(activity).apply {
-                    setTextColor(Color.WHITE)
-                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    setTextColor(AweroDesign.navyArgb)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                     text = activity.getString(R.string.mission_check)
                     setOnClickListener {
                         val value = answer.text.toString().toIntOrNull()
@@ -91,8 +91,8 @@ object MissionRuntimeScreen {
                 val status = label(if (motionStarted) activity.getString(R.string.mission_steps_title) else activity.getString(R.string.mission_motion_unavailable), 30f)
                 root.addView(status)
                 root.addView(Button(activity).apply {
-                    setTextColor(Color.WHITE)
-                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    setTextColor(AweroDesign.navyArgb)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                     text = activity.getString(R.string.mission_check)
                     setOnClickListener {
                         status.text = activity.getString(R.string.mission_steps_progress, mission.steps)
@@ -100,8 +100,8 @@ object MissionRuntimeScreen {
                     }
                 })
                 root.addView(Button(activity).apply {
-                    setTextColor(Color.WHITE)
-                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    setTextColor(AweroDesign.navyArgb)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                     text = activity.getString(R.string.mission_use_math)
                     setOnClickListener { finish(false) }
                 })
@@ -111,8 +111,8 @@ object MissionRuntimeScreen {
                 if (expected.isNullOrBlank()) {
                     root.addView(label(activity.getString(R.string.mission_qr_unconfigured), 22f))
                     root.addView(Button(activity).apply {
-                        setTextColor(Color.WHITE)
-                        backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                        setTextColor(AweroDesign.navyArgb)
+                        backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                         text = activity.getString(R.string.mission_use_fallback)
                         setOnClickListener { finish(false) }
                     })
@@ -143,8 +143,8 @@ object MissionRuntimeScreen {
                         }
                     }
                     root.addView(Button(activity).apply {
-                        setTextColor(Color.WHITE)
-                        backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                        setTextColor(AweroDesign.navyArgb)
+                        backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                         text = activity.getString(R.string.mission_use_math)
                         setOnClickListener { finish(false) }
                     })
@@ -153,8 +153,8 @@ object MissionRuntimeScreen {
             else -> {
                 root.addView(label(activity.getString(R.string.mission_unavailable), 22f))
                 root.addView(Button(activity).apply {
-                    setTextColor(Color.WHITE)
-                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.rgb(255, 104, 75))
+                    setTextColor(AweroDesign.navyArgb)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                     text = activity.getString(R.string.mission_use_fallback)
                     setOnClickListener { finish(false) }
                 })

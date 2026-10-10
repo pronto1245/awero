@@ -25,9 +25,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.awero.R
 
-private val OnboardingIvory = Color(0xFFFFF8EF)
-private val OnboardingNavy = Color(0xFF14294B)
-private val OnboardingCoral = Color(0xFFFF684B)
+private val OnboardingIvory = AweroDesign.ivory
+private val OnboardingNavy = AweroDesign.navy
+private val OnboardingCoral = AweroDesign.coral
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
@@ -53,7 +53,7 @@ fun OnboardingScreen(onContinue: () -> Unit) {
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = OnboardingCoral)
         ) {
-            Text(stringResource(R.string.onboarding_create_alarm), color = Color.White)
+            Text(stringResource(R.string.onboarding_create_alarm), color = AweroDesign.navy)
         }
     }
 }

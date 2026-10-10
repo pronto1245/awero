@@ -69,8 +69,9 @@ class FirstRunOnboardingUiTest {
             compose.onAllNodesWithText(context.getString(R.string.home_alarms))
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(context.getString(R.string.home_alarms)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.home_alarms)).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.home_next_alarm), substring = true)
+            .performScrollTo()
             .assertIsDisplayed()
     }
 

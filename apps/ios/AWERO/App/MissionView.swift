@@ -1,11 +1,6 @@
 import SwiftUI
 import AVFoundation
 
-enum WakePalette {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-}
 
 struct MissionView: View {
     let alarm: Alarm
@@ -47,11 +42,11 @@ private struct MathMissionView: View {
 
     var body: some View {
         VStack(spacing: 22) {
-            Text("mission.title").font(.caption.bold()).foregroundStyle(WakePalette.navy.opacity(0.5))
+            Text("mission.title").font(.caption.bold()).foregroundStyle(AweroDesign.navy.opacity(0.5))
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
                     .font(.system(size: problemSize, weight: .black, design: .rounded))
-                    .foregroundStyle(WakePalette.navy)
+                    .foregroundStyle(AweroDesign.navy)
             }
             TextField("mission.answer", text: $answer)
                 .keyboardType(.numbersAndPunctuation)
@@ -84,24 +79,24 @@ private struct StepsMissionView: View {
         VStack(spacing: 22) {
             Text("mission.steps_title")
                 .font(.system(size: titleSize, weight: .black, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .foregroundStyle(AweroDesign.navy)
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
                 .font(.system(size: stepCountSize, weight: .bold, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .foregroundStyle(AweroDesign.navy)
             if runtime.unavailable {
                 Text("mission.motion_unavailable")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
             } else if runtime.completed {
                 Button("mission.continue", action: onSuccess)
                     .buttonStyle(WakeMissionButton())
             } else {
                 Text("mission.keep_walking")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
             }
             Button("mission.use_math", action: onFailure)
                 .buttonStyle(WakeMissionButton())
             Text("mission.timeout")
-                .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
+                .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
         }
         .padding(28)
         .onAppear { runtime.start(target: 30) }
@@ -131,21 +126,21 @@ private struct QRMissionView: View {
         VStack(spacing: 18) {
             Text("mission.qr_title")
                 .font(.system(size: qrTitleSize, weight: .black, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .foregroundStyle(AweroDesign.navy)
 
             if expected == nil || expected?.isEmpty == true {
                 Text("mission.qr_unconfigured")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if runtime.cameraUnavailable {
                 Text("mission.camera_unavailable")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if let scannedCode = runtime.scannedCode, mission?.validate(payload: scannedCode) == false {
                 Text("mission.qr_mismatch")
-                    .foregroundStyle(WakePalette.navy.opacity(0.7))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.7))
             } else {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
@@ -160,9 +155,9 @@ private struct QRMissionView: View {
                         Text("mission.qr_detected")
                     }
                 }
-                .foregroundStyle(WakePalette.navy.opacity(0.7))
+                .foregroundStyle(AweroDesign.navy.opacity(0.7))
                 Text("mission.timeout")
-                    .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -205,7 +200,7 @@ private struct FallbackMissionView: View {
     let onFailure: () -> Void
     var body: some View {
         VStack(spacing: 20) {
-            Text("mission.unavailable").foregroundStyle(WakePalette.navy)
+            Text("mission.unavailable").foregroundStyle(AweroDesign.navy)
             Button("mission.use_fallback", action: onFailure).buttonStyle(WakeMissionButton())
         }
     }
@@ -232,8 +227,8 @@ private struct WakeMissionButton: ButtonStyle {
             .font(.headline.bold())
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(WakePalette.coral.opacity(configuration.isPressed ? 0.78 : 1))
-            .foregroundStyle(.white)
+            .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .foregroundStyle(AweroDesign.navy)
             .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

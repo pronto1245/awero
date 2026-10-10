@@ -66,7 +66,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
         }
     }
 
-    MaterialTheme {
+    MaterialTheme(colorScheme = AweroDesign.colors) {
         when (screen) {
             "loading" -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -100,7 +100,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 }
                 Scaffold(
                     bottomBar = {
-                        NavigationBar(containerColor = Color(0xFFFFF8EF)) {
+                        NavigationBar(containerColor = AweroDesign.ivory) {
                             NavigationBarItem(
                                 selected = screen == "home",
                                 onClick = { screen = "home" },

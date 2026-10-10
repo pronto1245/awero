@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import android.text.format.DateFormat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,11 +40,12 @@ import app.awero.core.missions.QRMissionRuntime
 import java.util.Calendar
 import java.util.TimeZone
 
-private val FormIvory = Color(0xFFFFF8EF)
-private val FormNavy = Color(0xFF14294B)
-private val FormCoral = Color(0xFFFF684B)
+private val FormIvory = AweroDesign.ivory
+private val FormNavy = AweroDesign.navy
+private val FormCoral = AweroDesign.coral
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
@@ -86,10 +88,10 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.create_time), color = FormNavy)
                 OutlinedButton(
-                    onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, true).show() },
+                    onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, DateFormat.is24HourFormat(context)).show() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("%02d:%02d".format(hour, minute), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
+                    Text(app.awero.core.alarm.AlarmTimeFormatter.format(hour, minute), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
                 }
                 Text(stringResource(R.string.create_timezone), color = FormNavy)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -116,7 +118,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(stringResource(R.string.create_repeat), color = FormNavy)
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
                         FilterChip(
                             selected = day in weekdays,
@@ -143,7 +145,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                 }
                 if (mission == MissionType.MATH) {
                     Text(stringResource(R.string.create_difficulty), color = FormNavy)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Difficulty.entries.forEach { level ->
                             FilterChip(
                                 selected = difficulty == level,
@@ -181,7 +183,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             Text(stringResource(R.string.permission_alarm_body), color = FormNavy, modifier = Modifier.padding(16.dp))
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(8.dp))
         Button(
             onClick = {
                 scope.launch {
@@ -206,11 +208,11 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                 }
             },
             enabled = weekdays.isNotEmpty() && (mission != MissionType.QR || qrExpectedCode.isNotBlank()),
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = FormCoral),
             shape = RoundedCornerShape(18.dp)
         ) {
-            Text(stringResource(if (alarm == null) R.string.create_save else R.string.create_save_changes), color = Color.White)
+            Text(stringResource(if (alarm == null) R.string.create_save else R.string.create_save_changes), color = AweroDesign.navy)
         }
     }
 

@@ -1,11 +1,6 @@
 import SwiftUI
 import AVFoundation
 
-private enum CreateAweroStyle {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-}
 
 struct CreateAlarmView: View {
     let alarm: Alarm?
@@ -47,8 +42,8 @@ struct CreateAlarmView: View {
                 permissionSection
             }
             .scrollContentBackground(.hidden)
-            .background(CreateAweroStyle.ivory)
-            .tint(CreateAweroStyle.coral)
+            .background(AweroDesign.ivory)
+            .tint(AweroDesign.coral)
             .navigationTitle(alarm == nil ? "create.title" : "create.edit_title")
             .alert("permission.ios_alarm_title", isPresented: $showingPermissionIntro) {
                 Button("permission.continue") {
@@ -87,12 +82,12 @@ struct CreateAlarmView: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(CreateAweroStyle.coral)
-                    .foregroundStyle(.white)
+                    .background(AweroDesign.coral)
+                    .foregroundStyle(AweroDesign.navy)
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
-                    .background(CreateAweroStyle.ivory.opacity(0.96))
+                    .background(AweroDesign.ivory.opacity(0.96))
                     .accessibilityIdentifier("alarm.save")
             }
         }
@@ -107,6 +102,9 @@ struct CreateAlarmView: View {
     private var wakeTimeSection: some View {
         Section {
             DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .accessibilityLabel(Text("create.time"))
         }
         .listRowBackground(Color.white)
     }
@@ -122,7 +120,7 @@ struct CreateAlarmView: View {
             if followsDeviceTimezone {
                 Text("create.timezone_device_hint")
                     .font(.footnote)
-                    .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.65))
             } else {
                 Text(
                     String.localizedStringWithFormat(
@@ -131,7 +129,7 @@ struct CreateAlarmView: View {
                     )
                 )
                 .font(.footnote)
-                .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+                .foregroundStyle(AweroDesign.navy.opacity(0.65))
             }
         } header: {
             Text("create.timezone")
@@ -141,20 +139,25 @@ struct CreateAlarmView: View {
 
     private var daysSection: some View {
         Section {
-            ForEach(1...7, id: \.self) { day in
-                Toggle(
-                    weekdayKey(day),
-                    isOn: Binding(
-                        get: { selectedDays.contains(day) },
-                        set: { enabled in
-                            if enabled { selectedDays.insert(day) }
-                            else { selectedDays.remove(day) }
-                        }
-                    )
-                )
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 92))], spacing: 8) {
+                ForEach([2, 3, 4, 5, 6, 7, 1], id: \.self) { day in
+                    Button {
+                        if selectedDays.contains(day) { selectedDays.remove(day) }
+                        else { selectedDays.insert(day) }
+                    } label: {
+                        Text(weekdayKey(day))
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .foregroundStyle(AweroDesign.navy)
+                            .background(selectedDays.contains(day) ? AweroDesign.coral.opacity(0.25) : AweroDesign.ivory)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedDays.contains(day) ? .isSelected : [])
+                }
             }
             if selectedDays.isEmpty {
-                Text("create.no_weekdays").font(.footnote).foregroundStyle(CreateAweroStyle.coral)
+                Text("create.no_weekdays").font(.footnote).foregroundStyle(AweroDesign.coral)
             }
         } header: {
             Text("create.repeat")
@@ -164,10 +167,30 @@ struct CreateAlarmView: View {
 
     private var missionSection: some View {
         Section {
-            Picker("create.mission", selection: $mission) {
-                Text("home.mission.math").tag(MissionType.math)
-                Text("home.mission.steps").tag(MissionType.steps)
-                Text("home.mission.qr").tag(MissionType.qr)
+            ForEach([MissionType.math, .steps, .qr], id: \.self) { type in
+                Button {
+                    mission = type
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: type == .math ? "plus.forwardslash.minus" : type == .steps ? "figure.walk" : "qrcode")
+                            .frame(width: 28)
+                            .accessibilityHidden(true)
+                        Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
+                        Spacer()
+                        if mission == type {
+                            Image(systemName: "checkmark.circle.fill")
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .font(.headline)
+                    .foregroundStyle(AweroDesign.navy)
+                    .padding(12)
+                    .frame(minHeight: 48)
+                    .background(mission == type ? AweroDesign.coral.opacity(0.25) : AweroDesign.ivory)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(mission == type ? .isSelected : [])
             }
             if mission == .math {
                 Picker("create.difficulty", selection: $difficulty) {

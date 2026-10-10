@@ -1,6 +1,7 @@
 package app.awero.ui
 
 import android.graphics.Color
+import app.awero.R
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
@@ -17,23 +18,23 @@ object WakeAlarmScreen {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(48, 48, 48, 48)
-            setBackgroundColor(Color.BLACK)
+            setBackgroundColor(AweroDesign.ivoryArgb)
         }
 
         fun text(value: String, size: Float) = TextView(activity).apply {
             text = value
             textSize = size
-            setTextColor(Color.WHITE)
+            setTextColor(AweroDesign.navyArgb)
             gravity = Gravity.CENTER
             setPadding(0, 20, 0, 20)
         }
 
-        val title = text("GET UP", 42f)
+        val title = text(activity.getString(R.string.wake_title), 42f)
         val status = text("AWERO", 14f)
-        val primary = Button(activity).apply { text = "Start mission" }
-        val snooze = Button(activity).apply { text = "Snooze" }
-        val emergency = Button(activity).apply { text = "Emergency stop" }
-        val retry = Button(activity).apply { text = "Retry saving" }
+        val primary = Button(activity).apply { text = activity.getString(R.string.wake_start); minHeight = (48 * resources.displayMetrics.density).toInt(); backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb); setTextColor(AweroDesign.navyArgb) }
+        val snooze = Button(activity).apply { text = activity.getString(R.string.wake_snooze) }
+        val emergency = Button(activity).apply { text = activity.getString(R.string.wake_emergency_stop) }
+        val retry = Button(activity).apply { text = activity.getString(R.string.wake_retry) }
 
         fun showError(message: String, retryAction: (() -> Unit)? = null) {
             status.text = message
@@ -46,31 +47,31 @@ object WakeAlarmScreen {
 
         fun showCompleted() {
             root.removeAllViews()
-            root.addView(text("YOU'RE UP", 42f))
-            root.addView(text("Wake session completed", 18f))
+            root.addView(text(activity.getString(R.string.wake_completed_title), 42f))
+            root.addView(text(activity.getString(R.string.wake_completed_body), 18f))
         }
 
         fun showStopped() {
             root.removeAllViews()
-            root.addView(text("STOPPED", 42f))
-            root.addView(text("Session recorded", 18f))
+            root.addView(text(activity.getString(R.string.wake_emergency_stop), 42f))
+            root.addView(text(activity.getString(R.string.wake_stopped_body), 18f))
         }
 
         fun completeMission() {
             activity.lifecycleScope.launch {
                 if (flow.completeMission()) showCompleted()
-                else showError(flow.actionError.value ?: "Could not save completion. Your session is still active.", ::completeMission)
+                else showError(flow.actionError.value ?: activity.getString(R.string.alarm_error_persistence), ::completeMission)
             }
         }
 
         fun showFallback() {
             activity.lifecycleScope.launch {
                 if (!flow.fallbackToMath()) {
-                    showError(flow.actionError.value ?: "Could not save the fallback. Your session is still active.", ::showFallback)
+                    showError(flow.actionError.value ?: activity.getString(R.string.alarm_error_persistence), ::showFallback)
                     return@launch
                 }
                 root.removeAllViews()
-                status.text = "FALLBACK"
+                status.text = activity.getString(R.string.mission_use_math)
                 root.addView(status)
                 root.addView(MissionRuntimeScreen.create(
                     activity,
@@ -100,7 +101,7 @@ object WakeAlarmScreen {
             activity.lifecycleScope.launch {
                 if (flow.state.value == WakeFlowController.State.RINGING) {
                     if (flow.beginMission()) showMission()
-                    else showError(flow.actionError.value ?: "Could not save mission progress. The alarm is still active.")
+                    else showError(flow.actionError.value ?: activity.getString(R.string.alarm_error_persistence))
                 }
             }
         }
@@ -108,12 +109,12 @@ object WakeAlarmScreen {
         snooze.setOnClickListener {
             activity.lifecycleScope.launch {
                 if (flow.snooze()) {
-                    title.text = "SNOOZED"
-                    status.text = "Alarm scheduled again"
+                    title.text = activity.getString(R.string.wake_snoozed_title)
+                    status.text = activity.getString(R.string.wake_snoozed_body)
                     primary.isEnabled = false
                     snooze.isEnabled = false
                 } else {
-                    status.text = flow.snoozeError.value ?: "Snooze failed. The alarm is still ringing."
+                    status.text = flow.snoozeError.value ?: activity.getString(R.string.wake_snooze_error_body)
                 }
             }
         }
@@ -123,7 +124,7 @@ object WakeAlarmScreen {
                 if (flow.emergencyStop()) {
                     showStopped()
                 } else {
-                    showError(flow.actionError.value ?: "Could not record the stop. The alarm is still active.")
+                    showError(flow.actionError.value ?: activity.getString(R.string.alarm_error_persistence))
                 }
             }
         }

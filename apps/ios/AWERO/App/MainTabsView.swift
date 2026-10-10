@@ -23,6 +23,6 @@ struct AweroMainTabsView: View {
             .tabItem { Label("nav.profile", systemImage: "person.fill") }
             .tag(2)
         }
-        .tint(Color(red: 1.0, green: 0.408, blue: 0.294))
+        .tint(AweroDesign.coral)
     }
 }

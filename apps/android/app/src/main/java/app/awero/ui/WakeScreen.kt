@@ -27,28 +27,28 @@ fun WakeScreen(flow: WakeFlowController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFFFF8EF))
+            .background(AweroDesign.ivory)
             .padding(28.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        Text("AWERO", color = Color(0xFF14294B).copy(alpha = .45f))
-        Text(stringResource(R.string.wake_title), style = MaterialTheme.typography.displayLarge, color = Color(0xFF14294B))
+        Text("AWERO", color = AweroDesign.navy.copy(alpha = .45f))
+        Text(stringResource(R.string.wake_title), style = MaterialTheme.typography.displayLarge, color = AweroDesign.navy)
         actionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         when (state) {
             WakeFlowController.State.RINGING -> {
-                Text(stringResource(R.string.wake_active), color = Color(0xFF14294B).copy(alpha = .65f))
+                Text(stringResource(R.string.wake_active), color = AweroDesign.navy.copy(alpha = .65f))
                 snoozeError?.let {
                     Text(it, color = MaterialTheme.colorScheme.error)
                 }
                 Button(
                     onClick = { scope.launch { flow.beginMission() } },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF684B))
+                    colors = ButtonDefaults.buttonColors(containerColor = AweroDesign.coral)
                 ) {
                     Text(stringResource(R.string.wake_start))
                 }
-                TextButton(onClick = { scope.launch { flow.snooze() } }, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF14294B))) {
+                TextButton(onClick = { scope.launch { flow.snooze() } }, colors = ButtonDefaults.textButtonColors(contentColor = AweroDesign.navy)) {
                     Text(stringResource(R.string.wake_snooze))
                 }
                 TextButton(onClick = { scope.launch { flow.emergencyStop() } }, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE74B4B))) {
@@ -57,11 +57,11 @@ fun WakeScreen(flow: WakeFlowController) {
             }
 
             WakeFlowController.State.MISSION -> {
-                Text(stringResource(missionLabel(mission)), color = Color(0xFF14294B).copy(alpha = .7f))
+                Text(stringResource(missionLabel(mission)), color = AweroDesign.navy.copy(alpha = .7f))
                 Button(
                     onClick = { scope.launch { flow.completeMission() } },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF684B))
+                    colors = ButtonDefaults.buttonColors(containerColor = AweroDesign.coral)
                 ) {
                     Text(stringResource(R.string.wake_complete))
                 }
@@ -71,13 +71,13 @@ fun WakeScreen(flow: WakeFlowController) {
             }
 
             WakeFlowController.State.COMPLETED -> {
-                Text(stringResource(R.string.wake_completed_title), color = Color(0xFF14294B))
-                Text(stringResource(R.string.wake_completed_body), color = Color(0xFF14294B).copy(alpha = .6f))
+                Text(stringResource(R.string.wake_completed_title), color = AweroDesign.navy)
+                Text(stringResource(R.string.wake_completed_body), color = AweroDesign.navy.copy(alpha = .6f))
             }
 
             WakeFlowController.State.EMERGENCY_STOPPED -> {
-                Text(stringResource(R.string.wake_emergency_stop), color = Color(0xFF14294B))
-                Text(stringResource(R.string.wake_stopped_body), color = Color(0xFF14294B).copy(alpha = .6f))
+                Text(stringResource(R.string.wake_emergency_stop), color = AweroDesign.navy)
+                Text(stringResource(R.string.wake_stopped_body), color = AweroDesign.navy.copy(alpha = .6f))
             }
 
             WakeFlowController.State.IDLE -> Unit

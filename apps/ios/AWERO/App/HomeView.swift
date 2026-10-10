@@ -1,11 +1,5 @@
 import SwiftUI
 
-private enum AweroStyle {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-    static let sage = Color(red: 0.31, green: 0.545, blue: 0.40)
-}
 
 struct HomeView: View {
     @Binding var showingCreate: Bool
@@ -34,34 +28,34 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AweroStyle.ivory.ignoresSafeArea()
+                AweroDesign.ivory.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         Text("AWERO")
                             .font(.system(size: wordmarkSize, weight: .black))
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                         Text("home.greeting")
                             .font(.system(size: greetingSize, weight: .bold, design: .rounded))
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                         Text("home.subtitle")
                             .font(.subheadline)
-                            .foregroundStyle(AweroStyle.navy.opacity(0.65))
+                            .foregroundStyle(AweroDesign.navy.opacity(0.65))
                         SunriseArtwork().padding(.top, 4)
 
                         if let next = upcomingAlarms.first {
                             VStack(alignment: .leading, spacing: 6) {
                                 Label("home.next_alarm", systemImage: "sun.max.fill")
                                     .font(.headline)
-                                    .foregroundStyle(AweroStyle.coral)
+                                    .foregroundStyle(AweroDesign.coral)
                                 Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
                                     .font(.system(size: nextAlarmSize, weight: .bold, design: .rounded))
-                                    .foregroundStyle(AweroStyle.navy)
+                                    .foregroundStyle(AweroDesign.navy)
                                 Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .short))
                                     .font(.subheadline)
-                                    .foregroundStyle(AweroStyle.navy.opacity(0.65))
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.65))
                                 Text(missionKey(next.alarm.missionType))
                                     .font(.caption.weight(.semibold))
-                                    .foregroundStyle(AweroStyle.navy.opacity(0.8))
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.8))
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(20)
@@ -77,7 +71,7 @@ struct HomeView: View {
 
                         Text("home.alarms")
                             .font(.title3.bold())
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
 
                         if alarms.loadState == .loading {
                             ProgressView("home.loading_alarms")
@@ -89,14 +83,14 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("home.alarms_load_error_title").font(.title3.bold())
                                 Text("home.alarms_load_error_body")
-                                    .foregroundStyle(AweroStyle.navy.opacity(0.7))
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.7))
                                 Button("home.retry_loading_alarms") {
                                     Task { await alarms.load() }
                                 }
                                 .font(.headline)
-                                .foregroundStyle(AweroStyle.coral)
+                                .foregroundStyle(AweroDesign.coral)
                             }
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(22)
                             .background(.white)
@@ -104,9 +98,9 @@ struct HomeView: View {
                         } else if alarms.alarms.isEmpty {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("home.empty_title").font(.title3.bold())
-                                Text("home.empty_body").foregroundStyle(AweroStyle.navy.opacity(0.7))
+                                Text("home.empty_body").foregroundStyle(AweroDesign.navy.opacity(0.7))
                             }
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(22)
                             .background(.white)
@@ -155,8 +149,8 @@ struct HomeView: View {
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .background(AweroStyle.coral)
-                                .foregroundStyle(.white)
+                                .background(AweroDesign.coral)
+                                .foregroundStyle(AweroDesign.navy)
                                 .clipShape(RoundedRectangle(cornerRadius: 18))
                         }
                     }
@@ -212,7 +206,7 @@ struct HomeView: View {
                         SettingsView()
                     } label: {
                         Image(systemName: "gearshape")
-                            .foregroundStyle(AweroStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                     }
                     .accessibilityLabel(Text("settings.title"))
                 }
@@ -348,17 +342,17 @@ private struct AlarmCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(alarmTimeText)
                         .font(.system(size: alarmTimeSize, weight: .bold, design: .rounded))
-                        .foregroundStyle(AweroStyle.navy)
+                        .foregroundStyle(AweroDesign.navy)
                         .accessibilityIdentifier("home.alarm.time")
                     Text(weekdays)
-                        .foregroundStyle(AweroStyle.navy.opacity(0.55))
+                        .foregroundStyle(AweroDesign.navy.opacity(0.55))
                 }
                 Spacer()
                 Toggle(isOn: Binding(get: { alarm.enabled }, set: onToggle)) {
                     Text(alarm.enabled ? "home.enabled" : "home.disabled")
                 }
                 .labelsHidden()
-                .tint(AweroStyle.coral)
+                .tint(AweroDesign.coral)
                 .accessibilityLabel(
                     Text(
                         String.localizedStringWithFormat(
@@ -371,11 +365,11 @@ private struct AlarmCard: View {
             }
             Text(missionKey(alarm.missionType))
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(AweroStyle.navy.opacity(0.72))
+                .foregroundStyle(AweroDesign.navy.opacity(0.72))
             if alarm.enabled, let readiness, readiness != .disabled {
                 Text(LocalizedStringKey(readiness.localizationKey))
                     .font(.caption)
-                    .foregroundStyle(readiness == .scheduled ? AweroStyle.sage : AweroStyle.coral)
+                    .foregroundStyle(readiness == .scheduled ? AweroDesign.sage : AweroDesign.coral)
                 if readiness == .notScheduled {
                     Button("alarm.retry", action: onRetry)
                 } else if readiness == .actionRequired {
@@ -386,7 +380,7 @@ private struct AlarmCard: View {
             HStack {
                 Button("home.test", action: onTest)
                 Button("home.edit", action: onEdit)
-                Button("home.delete", action: onDelete).foregroundStyle(AweroStyle.coral)
+                Button("home.delete", action: onDelete).foregroundStyle(AweroDesign.coral)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

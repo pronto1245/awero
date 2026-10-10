@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,10 +36,10 @@ import java.time.Instant
 import java.util.Date
 import java.util.TimeZone
 
-private val AweroIvory = Color(0xFFFFF8EF)
-private val AweroNavy = Color(0xFF14294B)
-private val AweroCoral = Color(0xFFFF684B)
-private val AweroSage = Color(0xFF4F8B66)
+private val AweroIvory = AweroDesign.ivory
+private val AweroNavy = AweroDesign.navy
+private val AweroCoral = AweroDesign.coral
+private val AweroSage = AweroDesign.sage
 
 private enum class AlarmLoadState { Loading, Loaded, Failed }
 
@@ -100,7 +102,7 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
+        modifier = modifier.fillMaxSize().background(AweroIvory).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
     ) {
         Spacer(Modifier.height(12.dp))
         Row(
@@ -159,7 +161,7 @@ fun HomeScreen(
 
         if (alarmLoadState == AlarmLoadState.Loading) {
             Card(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(22.dp)
             ) {
@@ -169,7 +171,7 @@ fun HomeScreen(
             }
         } else if (alarmLoadState == AlarmLoadState.Failed) {
             Card(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(22.dp)
             ) {
@@ -183,7 +185,7 @@ fun HomeScreen(
             }
         } else if (alarms.isEmpty()) {
             Card(
-                modifier = Modifier.fillMaxWidth().weight(1f),
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(22.dp)
             ) {
@@ -196,11 +198,11 @@ fun HomeScreen(
                 }
             }
         } else {
-            LazyColumn(
+            Column(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxWidth()
             ) {
-                items(alarms, key = { it.id }) { alarm ->
+                alarms.forEach { alarm ->
                     val state = readiness[alarm.id]
                     Card(
                         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -295,12 +297,12 @@ fun HomeScreen(
         Spacer(Modifier.height(12.dp))
         Button(
             onClick = onCreateAlarm,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AweroCoral),
             shape = RoundedCornerShape(18.dp),
             enabled = alarmLoadState == AlarmLoadState.Loaded
         ) {
-            Text(stringResource(R.string.home_add_alarm), color = Color.White)
+            Text(stringResource(R.string.home_add_alarm), color = AweroDesign.navy)
         }
         Spacer(Modifier.height(10.dp))
     }
