@@ -11,7 +11,7 @@ struct WakeScreen: View {
     var body: some View {
         ZStack(alignment: .top) {
             AweroDesign.ivory.ignoresSafeArea()
-            WakeSceneBackground()
+            AweroSceneBackground(scene: .dawn)
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 

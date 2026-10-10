@@ -5,25 +5,23 @@ import app.awero.R
 import java.util.Calendar
 
 /**
- * Mountain-lake photo scenes used as AWERO backgrounds. The Home band follows the time of day;
- * the wake screen always uses the dawn scene from the approved design.
+ * Illustrated mountain-lake scenes used as AWERO page backgrounds. Home follows the time of day;
+ * the wake screen always uses dawn. The night scene arrives with the dark theme.
  */
-enum class AweroScene(@DrawableRes val band: Int) {
-    DAWN(R.drawable.scene_dawn_band),
-    DAY(R.drawable.scene_day_band),
-    SUNSET(R.drawable.scene_sunset_band),
-    NIGHT(R.drawable.scene_night_band);
+enum class AweroScene(@DrawableRes val portrait: Int) {
+    DAWN(R.drawable.scene_dawn_portrait),
+    DAY(R.drawable.scene_day_portrait),
+    SUNSET(R.drawable.scene_sunset_portrait);
 
     companion object {
         @DrawableRes
-        val wakePortrait: Int = R.drawable.scene_dawn_portrait
+        val wakePortrait: Int = DAWN.portrait
 
-        /** Dawn 05–11, day 11–18, sunset 18–23, night 23–05 (device local time). */
+        /** Dawn 05–11, day 11–18, sunset 18–05 (device local time). */
         fun current(hour: Int = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)): AweroScene = when (hour) {
             in 5..10 -> DAWN
             in 11..17 -> DAY
-            in 18..22 -> SUNSET
-            else -> NIGHT
+            else -> SUNSET
         }
     }
 }

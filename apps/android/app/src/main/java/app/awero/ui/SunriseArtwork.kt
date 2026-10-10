@@ -21,38 +21,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 
-@Composable
-fun ApprovedHomeSunriseArtwork(
-    modifier: Modifier = Modifier,
-    height: androidx.compose.ui.unit.Dp = 160.dp,
-    scene: AweroScene = AweroScene.current()
-) {
-    Box(modifier.fillMaxWidth().height(height)) {
-        Image(
-            painter = painterResource(scene.band),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().height(height)
-        )
-        Box(
-            Modifier.align(Alignment.TopCenter).fillMaxWidth().height(height * 0.18f)
-                .background(Brush.verticalGradient(listOf(AweroDesign.ivory, AweroDesign.ivory.copy(alpha = 0f))))
-        )
-        Box(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(height * 0.30f)
-                .background(Brush.verticalGradient(listOf(AweroDesign.ivory.copy(alpha = 0f), AweroDesign.ivory)))
-        )
-    }
-}
-
 /**
  * Full-screen illustrated dawn scene behind the in-app wake screen. The artwork already fades
  * into the ivory surface at the bottom, so it sits directly under the mission controls.
  */
 @Composable
-fun WakeSceneArtwork(modifier: Modifier = Modifier) {
+fun WakeSceneArtwork(modifier: Modifier = Modifier, scene: AweroScene = AweroScene.DAWN) {
     Image(
-        painter = painterResource(AweroScene.wakePortrait),
+        painter = painterResource(scene.portrait),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = modifier.fillMaxSize()

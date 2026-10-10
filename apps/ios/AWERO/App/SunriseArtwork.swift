@@ -1,36 +1,6 @@
 import SwiftUI
 import UIKit
 
-struct ApprovedHomeSunriseArtwork: View {
-    var height: CGFloat = 160
-    /// Defaults to the scene for the current time of day.
-    var scene: AweroScene = .current()
-
-    var body: some View {
-        Group {
-            if let image = scene.bandImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-            } else {
-                SunriseArtwork(height: height)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: height)
-        .clipped()
-        .overlay(alignment: .top) {
-            LinearGradient(colors: [AweroDesign.ivory, AweroDesign.ivory.opacity(0)], startPoint: .top, endPoint: .bottom)
-                .frame(height: height * 0.18)
-        }
-        .overlay(alignment: .bottom) {
-            LinearGradient(colors: [AweroDesign.ivory.opacity(0), AweroDesign.ivory], startPoint: .top, endPoint: .bottom)
-                .frame(height: height * 0.30)
-        }
-        .accessibilityHidden(true)
-    }
-}
-
 struct SunriseArtwork: View {
     var height: CGFloat = 148
     var cornerRadius: CGFloat = 0

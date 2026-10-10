@@ -25,6 +25,8 @@ Where these differ from the concept board, these win:
 
 The binding per-screen targets are in [`screens/`](screens): [Home](screens/home.png), [New alarm](screens/create-alarm.png), [Wake — Math](screens/wake-math.png), [Wake — Steps](screens/wake-steps.png), [Wake — QR](screens/wake-qr.png), [Progress](screens/progress.png) and [Profile](screens/profile.png).
 
+Dark-theme counterparts are in [`screens/dark/`](screens/dark): [Home](screens/dark/home.png), [New alarm](screens/dark/create-alarm.png), [Wake — Math](screens/dark/wake-math.png), [Wake — Steps](screens/dark/wake-steps.png), [Progress](screens/dark/progress.png) and [Profile](screens/dark/profile.png). The dark theme follows the system appearance across the whole app and uses the night scene; it replaces the narrower "dim wake variant" of correction 3.
+
 They are taken literally except for these owner-approved points:
 
 - **Steps:** the hint "tap the circle to simulate steps" is a prototype aid; real steps come from the motion sensor.
@@ -37,7 +39,7 @@ They are taken literally except for these owner-approved points:
 
 ## Scene illustrations
 
-Backgrounds use one illustrated mountain-lake scene at four times of day, supplied by the owner (853×1844 portraits; `apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). The Home header band is a crop around the sun or moon and follows device local time: dawn 05–11, day 11–18, sunset 18–23, night 23–05. The wake and mission screens show the full portrait dawn scene; its bottom already fades into the ivory surface behind the mission controls. The night portrait is reserved for the dim wake variant (correction 3), which also has to switch mission text colors and ships separately.
+Pages use one illustrated mountain-lake scene at several times of day, supplied by the owner (853×1844 portraits; `apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). As in the reference screens, the scene is a full-screen background behind the page: the sun and peaks sit behind the greeting and the next-alarm card overlaps them, and the artwork fades into the ivory surface at the bottom. In the light theme Home follows device local time — dawn 05–11, day 11–18, sunset 18–05 — and the wake and mission screens always use dawn. The night scene belongs to the dark theme and ships with it.
 
 ## Screens and implementation status
 

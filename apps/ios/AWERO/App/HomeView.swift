@@ -29,6 +29,9 @@ struct HomeView: View {
     var body: some View {
         ZStack {
                 AweroDesign.ivory.ignoresSafeArea()
+                AweroSceneBackground(scene: .current(at: now))
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
                 VStack(spacing: 0) {
                 // Header stays pinned so Settings is always reachable, whatever the scroll position.
                 HStack {
@@ -65,7 +68,8 @@ struct HomeView: View {
                         }
                         .padding(.top, 4)
 
-                        ApprovedHomeSunriseArtwork(height: 160, scene: .current(at: now))
+                        // Space for the scene's sun and peaks; the next-alarm card overlaps them.
+                        Color.clear.frame(height: 150)
                             .padding(.horizontal, -20)
 
                         if let next = upcomingAlarms.first {
