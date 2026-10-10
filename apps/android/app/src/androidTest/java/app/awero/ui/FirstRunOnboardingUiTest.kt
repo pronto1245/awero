@@ -1,7 +1,6 @@
 package app.awero.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -42,7 +41,8 @@ class FirstRunOnboardingUiTest {
             .performScrollTo()
             .performClick()
         compose.onNodeWithText(context.getString(R.string.home_alarms)).assertIsDisplayed()
-        compose.onNodeWithText(context.getString(R.string.home_empty_title)).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.home_next_alarm), substring = true)
+            .assertIsDisplayed()
     }
 
     companion object {
