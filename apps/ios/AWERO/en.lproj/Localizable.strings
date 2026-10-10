@@ -102,7 +102,7 @@
 "mission.flashlight" = "Flashlight";
 "mission.keep_walking" = "Keep walking until the target is reached.";
 "mission.motion_unavailable" = "Motion data is unavailable.";
-"mission.qr_cant_scan" = "Code won't scan?";
+"mission.qr_cant_scan" = "Code won’t scan?";
 "mission.qr_detected" = "Code detected.";
 "mission.qr_heading" = "Find your code";
 "mission.qr_instructions" = "Point the camera at your saved QR or barcode.";
