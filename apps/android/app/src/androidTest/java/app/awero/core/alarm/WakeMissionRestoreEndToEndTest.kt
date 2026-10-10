@@ -1,6 +1,7 @@
 package app.awero.core.alarm
 
 import android.content.Context
+import app.awero.R
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
@@ -57,7 +58,7 @@ class WakeMissionRestoreEndToEndTest {
         awaitCondition("Restored mission was not rendered") {
             var ready = false
             instrumentation.runOnMainSync {
-                ready = views(activity!!.window.decorView).any { it is TextView && it.text.toString() == "CHECK" }
+                ready = views(activity!!.window.decorView).any { it is TextView && it.text.toString() == context.getString(R.string.mission_check) }
             }
             ready
         }
@@ -66,7 +67,7 @@ class WakeMissionRestoreEndToEndTest {
 
         instrumentation.runOnMainSync {
             val children = views(activity!!.window.decorView)
-            assertFalse(children.any { it is TextView && it.text.toString() == "Start mission" })
+            assertFalse(children.any { it is TextView && it.text.toString() == context.getString(R.string.wake_start) })
             val pattern = Regex("(\\d+) ([+-]) (\\d+) = \\?")
             val problem = children.filterIsInstance<TextView>()
                 .mapNotNull { pattern.matchEntire(it.text.toString()) }.single()
@@ -74,13 +75,13 @@ class WakeMissionRestoreEndToEndTest {
             val right = problem.groupValues[3].toInt()
             val answer = if (problem.groupValues[2] == "+") left + right else left - right
             children.filterIsInstance<EditText>().single().setText(answer.toString())
-            children.filterIsInstance<TextView>().single { it.text.toString() == "CHECK" }.performClick()
+            children.filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
         }
         awaitCondition("Restored mission could not complete") { runBlocking { sessions.loadActive() == null } }
         awaitCondition("Completion result was not rendered") {
             var completed = false
             instrumentation.runOnMainSync {
-                completed = views(activity!!.window.decorView).any { it is TextView && it.text.toString() == "YOU'RE UP" }
+                completed = views(activity!!.window.decorView).any { it is TextView && it.text.toString() == context.getString(R.string.wake_completed_title) }
             }
             completed
         }
