@@ -45,13 +45,13 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit, o
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text("AWERO", color = navy, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+            Text("AWERO", color = navy, style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black), modifier = Modifier.weight(1f))
             TextButton(
                 onClick = onOpenSettings,
                 modifier = Modifier.sizeIn(minWidth = 44.dp, minHeight = 44.dp).semantics {
                     contentDescription = context.getString(R.string.settings_title)
                 }
-            ) { Text("⚙", color = navy, style = MaterialTheme.typography.titleLarge) }
+            ) { AweroNavigationIcon("settings") }
         }
         Text(
             stringResource(R.string.progress_title), color = navy,
@@ -61,7 +61,7 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit, o
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFDF9))
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 AweroNavigationIcon("progress")
@@ -73,9 +73,9 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit, o
             onClick = onSetAlarm,
             modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AweroDesign.coral),
-            shape = RoundedCornerShape(18.dp)
+            shape = RoundedCornerShape(AweroDesign.controlCorner)
         ) {
-            Text(stringResource(R.string.progress_empty_action), color = navy)
+            Text(stringResource(R.string.progress_empty_action), color = Color.White)
         }
         Spacer(Modifier.height(8.dp))
     }

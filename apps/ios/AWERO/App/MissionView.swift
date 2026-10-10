@@ -129,6 +129,7 @@ private struct StepsMissionView: View {
             Text("mission.steps_title")
                 .font(.system(size: titleSize, weight: .black, design: .rounded))
                 .foregroundStyle(AweroDesign.navy)
+                .accessibilityIdentifier("mission.steps.title")
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
                 .font(.system(size: stepCountSize, weight: .bold, design: .rounded))
                 .foregroundStyle(AweroDesign.navy)
@@ -180,6 +181,7 @@ private struct QRMissionView: View {
             if expected == nil || expected?.isEmpty == true {
                 Text("mission.qr_unconfigured")
                     .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .accessibilityIdentifier("mission.qr.unconfigured")
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if runtime.cameraUnavailable {
@@ -277,8 +279,8 @@ private struct WakeMissionButton: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
             .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
-            .foregroundStyle(AweroDesign.navy)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .foregroundStyle(.white)
+            .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
     }
 }
 
@@ -288,7 +290,7 @@ private struct MathKeyButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.title2.weight(.semibold))
-            .foregroundStyle(AweroDesign.navy)
+            .foregroundStyle(primary ? Color.white : AweroDesign.navy)
             .frame(maxWidth: .infinity, minHeight: 52)
             .padding(.vertical, 4)
             .background(primary ? AweroDesign.coral : Color.white)

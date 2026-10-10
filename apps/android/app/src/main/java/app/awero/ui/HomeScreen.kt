@@ -113,7 +113,7 @@ fun HomeScreen(
         ) {
             Text(
                 "AWERO",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
                 color = AweroNavy,
                 modifier = Modifier.weight(1f)
             )
@@ -123,13 +123,13 @@ fun HomeScreen(
                     .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                     .semantics { contentDescription = context.getString(R.string.settings_title) }
             ) {
-                Text("⚙", color = AweroNavy, style = MaterialTheme.typography.titleLarge)
+                AweroNavigationIcon("settings")
             }
         }
         Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
-            Text("☀", color = Color(0xFFFFA429))
+            AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
         }
         SunriseArtwork(Modifier.padding(top = 4.dp), height = 166.dp, rounded = false)
         Spacer(Modifier.height(18.dp))
@@ -143,12 +143,15 @@ fun HomeScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .background(Brush.verticalGradient(listOf(Color(0xFFFFE6C6), Color(0xFFFFFDF7))))
+                    .background(Color.White)
                     .padding(horizontal = 18.dp, vertical = 14.dp)
                         .fillMaxWidth()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(stringResource(R.string.home_next_alarm), color = AweroCoral, style = MaterialTheme.typography.titleSmall)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
+                            Text(stringResource(R.string.home_next_alarm), color = AweroCoral, style = MaterialTheme.typography.titleSmall)
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text(text = nextAlarmTime, style = MaterialTheme.typography.displaySmall, color = AweroNavy)
@@ -327,10 +330,10 @@ fun HomeScreen(
             onClick = onCreateAlarm,
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AweroCoral),
-            shape = RoundedCornerShape(18.dp),
+            shape = RoundedCornerShape(AweroDesign.controlCorner),
             enabled = alarmLoadState == AlarmLoadState.Loaded
         ) {
-            Text(stringResource(R.string.home_add_alarm), color = AweroDesign.navy)
+            Text(stringResource(R.string.home_add_alarm), color = Color.White)
         }
         Spacer(Modifier.height(10.dp))
     }

@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 148.dp, rounded: Boolean = false) {
+fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 148.dp, rounded: Boolean = false, showsForest: Boolean = false) {
     val shape = if (rounded) RoundedCornerShape(22.dp) else RoundedCornerShape(0.dp)
     Canvas(modifier.fillMaxWidth().height(height).background(Color(0xFFFFE9B8), shape)) {
         val clip = Path().apply {
@@ -33,7 +33,17 @@ fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.un
             fun ridge(points: List<Pair<Float, Float>>, color: Color) {
                 val path = Path().apply {
                     moveTo(size.width * points.first().first, size.height * points.first().second)
-                    points.drop(1).forEach { lineTo(size.width * it.first, size.height * it.second) }
+                    for (index in 1 until points.lastIndex) {
+                        val current = points[index]
+                        val next = points[index + 1]
+                        quadraticBezierTo(
+                            size.width * current.first,
+                            size.height * current.second,
+                            size.width * (current.first + next.first) / 2f,
+                            size.height * (current.second + next.second) / 2f
+                        )
+                    }
+                    lineTo(size.width * points.last().first, size.height * points.last().second)
                     lineTo(size.width, size.height)
                     lineTo(0f, size.height)
                     close()
@@ -41,8 +51,10 @@ fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.un
                 drawPath(path, color)
             }
 
-            ridge(listOf(0f to .74f, .13f to .56f, .24f to .67f, .40f to .47f, .53f to .68f, .70f to .51f, .86f to .69f, 1f to .53f), Color(0xFFE8A89A))
-            ridge(listOf(0f to .82f, .17f to .63f, .32f to .82f, .48f to .55f, .66f to .79f, .83f to .61f, 1f to .78f), Color(0xFF899BAB))
+            drawOval(Color.White.copy(alpha = .20f), Offset(size.width * .12f, size.height * .31f), androidx.compose.ui.geometry.Size(size.width * .25f, size.height * .055f))
+            drawOval(Color.White.copy(alpha = .16f), Offset(size.width * .72f, size.height * .27f), androidx.compose.ui.geometry.Size(size.width * .30f, size.height * .055f))
+            ridge(listOf(0f to .74f, .13f to .61f, .24f to .68f, .40f to .53f, .53f to .69f, .70f to .57f, .86f to .69f, 1f to .56f), Color(0xFFE8A89A))
+            ridge(listOf(0f to .82f, .17f to .68f, .32f to .82f, .48f to .60f, .66f to .80f, .83f to .65f, 1f to .80f), Color(0xFF899BAB))
 
             val lake = Path().apply {
                 moveTo(0f, size.height * .82f)
@@ -52,6 +64,25 @@ fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.un
                 close()
             }
             drawPath(lake, Brush.verticalGradient(listOf(Color(0xFF577A76), Color(0xFF9BA79A)), size.height * .80f, size.height))
+            if (showsForest) {
+                val treeColor = Color(0xFF1F454A)
+                listOf(Triple(.02f, .78f, .18f), Triple(.08f, .80f, .13f), Triple(.14f, .79f, .10f), Triple(.84f, .80f, .11f), Triple(.91f, .78f, .16f), Triple(.98f, .79f, .19f)).forEach { (x, base, treeHeight) ->
+                    val centerX = size.width * x
+                    val baseY = size.height * base
+                    val topY = baseY - size.height * treeHeight
+                    val pine = Path().apply {
+                        moveTo(centerX, topY)
+                        lineTo(centerX - size.width * treeHeight * .20f, baseY - size.height * treeHeight * .25f)
+                        lineTo(centerX - size.width * treeHeight * .09f, baseY - size.height * treeHeight * .25f)
+                        lineTo(centerX - size.width * treeHeight * .27f, baseY - size.height * treeHeight * .03f)
+                        lineTo(centerX + size.width * treeHeight * .27f, baseY - size.height * treeHeight * .03f)
+                        lineTo(centerX + size.width * treeHeight * .09f, baseY - size.height * treeHeight * .25f)
+                        lineTo(centerX + size.width * treeHeight * .20f, baseY - size.height * treeHeight * .25f)
+                        close()
+                    }
+                    drawPath(pine, treeColor)
+                }
+            }
             repeat(5) { index ->
                 val y = size.height * (.86f + index * .025f)
                 drawLine(Color.White.copy(alpha = .22f - index * .025f), Offset(size.width * .43f, y), Offset(size.width * .63f, y), 1.dp.toPx())

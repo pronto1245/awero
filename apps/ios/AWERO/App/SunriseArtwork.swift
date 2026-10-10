@@ -3,6 +3,7 @@ import SwiftUI
 struct SunriseArtwork: View {
     var height: CGFloat = 148
     var cornerRadius: CGFloat = 0
+    var showsForest = false
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -27,8 +28,17 @@ struct SunriseArtwork: View {
                         var path = Path()
                         guard let first = points.first else { return }
                         path.move(to: CGPoint(x: size.width * first.0, y: size.height * first.1))
-                        for point in points.dropFirst() {
-                            path.addLine(to: CGPoint(x: size.width * point.0, y: size.height * point.1))
+                        if points.count > 2 {
+                            for index in 1..<(points.count - 1) {
+                                let control = CGPoint(x: size.width * points[index].0, y: size.height * points[index].1)
+                                let next = points[index + 1]
+                                let midpoint = CGPoint(x: size.width * (points[index].0 + next.0) / 2,
+                                                       y: size.height * (points[index].1 + next.1) / 2)
+                                path.addQuadCurve(to: midpoint, control: control)
+                            }
+                        }
+                        if let last = points.last {
+                            path.addLine(to: CGPoint(x: size.width * last.0, y: size.height * last.1))
                         }
                         path.addLine(to: CGPoint(x: size.width, y: size.height))
                         path.addLine(to: CGPoint(x: 0, y: size.height))
@@ -36,10 +46,16 @@ struct SunriseArtwork: View {
                         context.fill(path, with: .color(color))
                     }
 
-                    ridge([(0, 0.74), (0.13, 0.56), (0.24, 0.67), (0.40, 0.47), (0.53, 0.68),
-                           (0.70, 0.51), (0.86, 0.69), (1, 0.53)], color: Color(red: 0.91, green: 0.65, blue: 0.57))
-                    ridge([(0, 0.82), (0.17, 0.63), (0.32, 0.82), (0.48, 0.55), (0.66, 0.79),
-                           (0.83, 0.61), (1, 0.78)], color: Color(red: 0.55, green: 0.62, blue: 0.68))
+                    let clouds: [(CGFloat, CGFloat, CGFloat, Double)] = [(0.12, 0.31, 0.25, 0.20), (0.72, 0.27, 0.30, 0.16)]
+                    for (x, y, width, opacity) in clouds {
+                        let cloud = CGRect(x: size.width * x, y: size.height * y,
+                                           width: size.width * width, height: size.height * 0.055)
+                        context.fill(Path(ellipseIn: cloud), with: .color(Color.white.opacity(opacity)))
+                    }
+                    ridge([(0, 0.74), (0.13, 0.61), (0.24, 0.68), (0.40, 0.53), (0.53, 0.69),
+                           (0.70, 0.57), (0.86, 0.69), (1, 0.56)], color: Color(red: 0.91, green: 0.65, blue: 0.57))
+                    ridge([(0, 0.82), (0.17, 0.68), (0.32, 0.82), (0.48, 0.60), (0.66, 0.80),
+                           (0.83, 0.65), (1, 0.80)], color: Color(red: 0.55, green: 0.62, blue: 0.68))
 
                     var lake = Path()
                     lake.move(to: CGPoint(x: 0, y: size.height * 0.82))
@@ -54,6 +70,25 @@ struct SunriseArtwork: View {
                         startPoint: CGPoint(x: 0, y: size.height * 0.80),
                         endPoint: CGPoint(x: 0, y: size.height)
                     ))
+                    if showsForest {
+                        let treeColor = Color(red: 0.12, green: 0.27, blue: 0.29)
+                        let trees: [(CGFloat, CGFloat, CGFloat)] = [(0.02, 0.78, 0.18), (0.08, 0.80, 0.13), (0.14, 0.79, 0.10), (0.84, 0.80, 0.11), (0.91, 0.78, 0.16), (0.98, 0.79, 0.19)]
+                        for (x, base, treeHeight) in trees {
+                            let centerX = size.width * x
+                            let baseY = size.height * base
+                            let topY = baseY - size.height * treeHeight
+                            var pine = Path()
+                            pine.move(to: CGPoint(x: centerX, y: topY))
+                            pine.addLine(to: CGPoint(x: centerX - size.width * treeHeight * 0.20, y: baseY - size.height * treeHeight * 0.25))
+                            pine.addLine(to: CGPoint(x: centerX - size.width * treeHeight * 0.09, y: baseY - size.height * treeHeight * 0.25))
+                            pine.addLine(to: CGPoint(x: centerX - size.width * treeHeight * 0.27, y: baseY - size.height * treeHeight * 0.03))
+                            pine.addLine(to: CGPoint(x: centerX + size.width * treeHeight * 0.27, y: baseY - size.height * treeHeight * 0.03))
+                            pine.addLine(to: CGPoint(x: centerX + size.width * treeHeight * 0.09, y: baseY - size.height * treeHeight * 0.25))
+                            pine.addLine(to: CGPoint(x: centerX + size.width * treeHeight * 0.20, y: baseY - size.height * treeHeight * 0.25))
+                            pine.closeSubpath()
+                            context.fill(pine, with: .color(treeColor))
+                        }
+                    }
                     for index in 0..<5 {
                         let y = size.height * (0.86 + CGFloat(index) * 0.025)
                         var shimmer = Path()

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct HomeView: View {
     @Binding var showingCreate: Bool
+    let onOpenSettings: () -> Void
     @EnvironmentObject private var alarms: AlarmStore
     @Environment(\.scenePhase) private var scenePhase
     @State private var editingAlarm: Alarm?
@@ -10,9 +11,9 @@ struct HomeView: View {
     @State private var deleteCandidate: Alarm?
     @State private var readiness: [UUID: AlarmReadiness] = [:]
     @State private var now = Date()
-    @ScaledMetric(relativeTo: .largeTitle) private var wordmarkSize: CGFloat = 28
-    @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 34
-    @ScaledMetric(relativeTo: .largeTitle) private var nextAlarmSize: CGFloat = 46
+    @ScaledMetric(relativeTo: .largeTitle) private var wordmarkSize: CGFloat = 24
+    @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 30
+    @ScaledMetric(relativeTo: .largeTitle) private var nextAlarmSize: CGFloat = 40
 
     private var refreshKey: String {
         alarms.alarms.map { "\($0.id.uuidString):\($0.version):\($0.enabled)" }.joined(separator: "|")
@@ -26,8 +27,7 @@ struct HomeView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 AweroDesign.ivory.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
@@ -36,7 +36,7 @@ struct HomeView: View {
                                 .font(.system(size: wordmarkSize, weight: .black))
                                 .foregroundStyle(AweroDesign.navy)
                             Spacer()
-                            NavigationLink { SettingsView() } label: {
+                            Button(action: onOpenSettings) {
                                 Image(systemName: "gearshape")
                                     .font(.title3)
                                     .foregroundStyle(AweroDesign.navy)
@@ -92,7 +92,7 @@ struct HomeView: View {
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(18)
-                                .background(LinearGradient(colors: [.white, Color(red: 1, green: 0.95, blue: 0.88)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .background(AweroDesign.surface.opacity(0.96))
                                 .clipShape(RoundedRectangle(cornerRadius: 22))
                             }
                             .buttonStyle(.plain)
@@ -202,9 +202,9 @@ struct HomeView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .foregroundStyle(AweroDesign.navy)
+                        .foregroundStyle(.white)
                         .background(AweroDesign.coral)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                        .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                 }
                 .accessibilityIdentifier("home.createAlarm")
                 .padding(.horizontal, 20)
@@ -252,8 +252,6 @@ struct HomeView: View {
                     now = Date()
                     Task { await refreshReadiness() }
                 }
-            }
-            .toolbar(.hidden, for: .navigationBar)
         }
     }
 

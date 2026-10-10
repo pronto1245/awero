@@ -11,7 +11,18 @@ struct SettingsView: View {
         ZStack {
             AweroDesign.ivory.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("AWERO")
+                        .font(.system(size: 22, weight: .black))
+                        .foregroundStyle(AweroDesign.navy)
+                        .padding(.top, 10)
+
+                    Text("settings.title")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .foregroundStyle(AweroDesign.navy)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("settings.title")
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("settings.language_title")
                             .font(.headline)
@@ -24,11 +35,10 @@ struct SettingsView: View {
                             .foregroundStyle(AweroDesign.navy.opacity(0.68))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(16)
+                    .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("settings.alarm_permissions_title")
                             .font(.headline)
                             .foregroundStyle(AweroDesign.navy)
@@ -42,24 +52,19 @@ struct SettingsView: View {
                             Text("settings.open_system_settings")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
+                                .padding(.vertical, 13)
                                 .background(AweroDesign.coral)
-                                .foregroundStyle(AweroDesign.navy)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .foregroundStyle(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(16)
+                    .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
                 }
-                .padding(20)
+                .padding(.horizontal, AweroDesign.Space.page)
+                .padding(.bottom, 16)
             }
         }
-        .navigationTitle("settings.title")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.visible, for: .navigationBar)
-        .toolbarBackground(AweroDesign.ivory, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
     }
 }

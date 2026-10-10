@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
@@ -102,11 +103,11 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 }
                 Scaffold(
                     bottomBar = {
-                        NavigationBar(containerColor = AweroDesign.ivory) {
+                        NavigationBar(containerColor = AweroDesign.ivory, tonalElevation = 0.dp) {
                             val itemColors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AweroDesign.coral,
                                 selectedTextColor = AweroDesign.navy,
-                                indicatorColor = AweroDesign.coral.copy(alpha = .15f),
+                                indicatorColor = Color.Transparent,
                                 unselectedIconColor = AweroDesign.navy.copy(alpha = .65f),
                                 unselectedTextColor = AweroDesign.navy.copy(alpha = .65f)
                             )
@@ -141,7 +142,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                             onOpenSettings = { screen = "settings" }
                         )
                         "settings" -> Box(Modifier.padding(innerPadding)) {
-                            SettingsScreen(onBack = { screen = "home" })
+                            SettingsScreen()
                         }
                         else -> HomeScreen(
                             onCreateAlarm = {

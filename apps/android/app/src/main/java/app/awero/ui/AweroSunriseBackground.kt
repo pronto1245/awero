@@ -40,7 +40,17 @@ class AweroSunriseBackground : Drawable() {
         fun ridge(points: List<Pair<Float, Float>>, color: Int) {
             val path = Path().apply {
                 moveTo(width * points.first().first, height * points.first().second)
-                points.drop(1).forEach { lineTo(width * it.first, height * it.second) }
+                for (index in 1 until points.lastIndex) {
+                    val current = points[index]
+                    val next = points[index + 1]
+                    quadTo(
+                        width * current.first,
+                        height * current.second,
+                        width * (current.first + next.first) / 2f,
+                        height * (current.second + next.second) / 2f
+                    )
+                }
+                lineTo(width * points.last().first, height * points.last().second)
                 lineTo(width, height)
                 lineTo(0f, height)
                 close()
@@ -56,16 +66,34 @@ class AweroSunriseBackground : Drawable() {
         paint.alpha = opacity
         canvas.drawOval(width * .04f, height * .57f, width * .34f, height * .67f, paint)
         canvas.drawOval(width * .63f, height * .55f, width * .96f, height * .66f, paint)
-        ridge(listOf(0f to .78f, .12f to .62f, .22f to .69f, .37f to .53f, .50f to .71f,
-            .68f to .56f, .82f to .70f, 1f to .52f), 0xFFE8AA9A.toInt())
-        ridge(listOf(0f to .86f, .16f to .68f, .31f to .83f, .48f to .60f, .66f to .82f,
-            .84f to .64f, 1f to .79f), 0xFF8799A8.toInt())
+        ridge(listOf(0f to .78f, .12f to .65f, .22f to .69f, .37f to .55f, .50f to .71f,
+            .68f to .58f, .82f to .70f, 1f to .54f), 0xFFE8AA9A.toInt())
+        ridge(listOf(0f to .86f, .16f to .70f, .31f to .83f, .48f to .62f, .66f to .82f,
+            .84f to .66f, 1f to .79f), 0xFF8799A8.toInt())
 
         val lakeTop = height * .80f
         paint.shader = LinearGradient(0f, lakeTop, 0f, height,
             intArrayOf(0xFF597B78.toInt(), 0xFF9BA796.toInt()), null, Shader.TileMode.CLAMP)
         canvas.drawRect(0f, lakeTop, width, height, paint)
         paint.shader = null
+        val treeColor = 0xFF1F454A.toInt()
+        listOf(Triple(.02f, .81f, .18f), Triple(.08f, .82f, .13f), Triple(.14f, .82f, .10f), Triple(.84f, .82f, .11f), Triple(.91f, .81f, .16f), Triple(.98f, .81f, .19f)).forEach { (x, base, treeHeight) ->
+            val centerX = width * x
+            val baseY = height * base
+            val topY = baseY - height * treeHeight
+            val pine = Path().apply {
+                moveTo(centerX, topY)
+                lineTo(centerX - width * treeHeight * .20f, baseY - height * treeHeight * .25f)
+                lineTo(centerX - width * treeHeight * .09f, baseY - height * treeHeight * .25f)
+                lineTo(centerX - width * treeHeight * .27f, baseY - height * treeHeight * .03f)
+                lineTo(centerX + width * treeHeight * .27f, baseY - height * treeHeight * .03f)
+                lineTo(centerX + width * treeHeight * .09f, baseY - height * treeHeight * .25f)
+                lineTo(centerX + width * treeHeight * .20f, baseY - height * treeHeight * .25f)
+                close()
+            }
+            paint.color = treeColor
+            canvas.drawPath(pine, paint)
+        }
         for (index in 0..5) {
             val y = lakeTop + height * (.035f + index * .023f)
             paint.color = 0x40FFFFFF

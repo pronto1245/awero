@@ -43,9 +43,9 @@ final class FirstRunOnboardingUITests: XCTestCase {
             XCTFail("The first alarm did not appear after saving. Current UI: \(app.debugDescription)")
         }
         capture("Home")
-        app.tabBars.buttons.element(boundBy: 1).tap()
+        app.buttons["tab.1"].tap()
         capture("Progress")
-        app.tabBars.buttons.element(boundBy: 2).tap()
+        app.buttons["tab.2"].tap()
         capture("Profile")
     }
 
@@ -96,7 +96,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
         let steps = XCUIApplication()
         steps.launchArguments += ["-awero.uiTestWake", "YES", "-awero.uiTestMission", "STEPS"]
         steps.launch()
-        XCTAssertTrue(steps.staticTexts["mission.steps_title"].waitForExistence(timeout: 15))
+        XCTAssertTrue(steps.staticTexts["mission.steps.title"].waitForExistence(timeout: 15))
         XCTAssertTrue(steps.buttons["wake.emergencyStop"].exists)
         capture("Steps")
         steps.buttons["wake.emergencyStop"].tap()
@@ -105,7 +105,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
         let qr = XCUIApplication()
         qr.launchArguments += ["-awero.uiTestWake", "YES", "-awero.uiTestMission", "QR"]
         qr.launch()
-        XCTAssertTrue(qr.staticTexts["mission.qr_unconfigured"].waitForExistence(timeout: 15))
+        XCTAssertTrue(qr.staticTexts["mission.qr.unconfigured"].waitForExistence(timeout: 15))
         XCTAssertTrue(qr.buttons["wake.emergencyStop"].exists)
         capture("QR")
         qr.buttons["wake.emergencyStop"].tap()
@@ -139,11 +139,11 @@ final class FirstRunOnboardingUITests: XCTestCase {
             let create = app.buttons["home.createAlarm"]
             XCTAssertTrue(create.waitForExistence(timeout: 15), language)
             capture("Home-\(language)")
-            app.tabBars.buttons.element(boundBy: 1).tap()
+            app.buttons["tab.1"].tap()
             capture("Progress-\(language)")
-            app.tabBars.buttons.element(boundBy: 2).tap()
+            app.buttons["tab.2"].tap()
             capture("Profile-\(language)")
-            app.tabBars.buttons.element(boundBy: 0).tap()
+            app.buttons["tab.0"].tap()
             create.tap()
             XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10), language)
             capture("Create-\(language)")
@@ -153,8 +153,8 @@ final class FirstRunOnboardingUITests: XCTestCase {
             app.buttons["alarm.cancel"].tap()
             XCTAssertTrue(create.waitForExistence(timeout: 5), language)
             app.buttons["home.settings"].tap()
-            XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 5), language)
-            app.navigationBars.buttons.element(boundBy: 0).tap()
+            XCTAssertTrue(app.staticTexts["settings.title"].waitForExistence(timeout: 5), language)
+            app.buttons["tab.0"].tap()
             XCTAssertTrue(create.waitForExistence(timeout: 5), language)
             app.terminate()
         }

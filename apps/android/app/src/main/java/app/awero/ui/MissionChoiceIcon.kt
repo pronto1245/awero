@@ -7,15 +7,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MissionChoiceIcon(kind: String, modifier: Modifier = Modifier) {
+fun MissionChoiceIcon(kind: String, modifier: Modifier = Modifier, tint: Color = AweroDesign.navy) {
     Canvas(modifier.size(34.dp)) {
         val stroke = 2.dp.toPx()
-        val navy = AweroDesign.navy
+        val navy = tint
         when (kind) {
             "math" -> {
                 drawRoundRect(navy, Offset(size.width * .19f, size.height * .08f), Size(size.width * .62f, size.height * .84f), CornerRadius(3.dp.toPx()), style = Stroke(stroke))

@@ -9,14 +9,13 @@ struct AweroProgressView: View {
     private let coral = AweroDesign.coral
 
     var body: some View {
-        NavigationStack {
-            ZStack {
+        ZStack {
                 ivory.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         HStack {
                             Text("AWERO")
-                                .font(.system(size: 26, weight: .black))
+                                .font(.system(size: 24, weight: .black))
                                 .foregroundStyle(navy)
                             Spacer()
                             Button(action: onOpenSettings) {
@@ -46,16 +45,16 @@ struct AweroProgressView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(22)
-                        .background(LinearGradient(colors: [.white, Color(red: 1, green: 0.95, blue: 0.88)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .background(AweroDesign.surface)
                         .clipShape(RoundedRectangle(cornerRadius: 24))
                     Button(action: onSetAlarm) {
                         Text("progress.empty_action")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
-                            .foregroundStyle(AweroDesign.navy)
+                            .foregroundStyle(.white)
                             .background(coral)
-                            .clipShape(RoundedRectangle(cornerRadius: 18))
+                            .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                     }
                     .accessibilityIdentifier("progress.createAlarm")
                     .padding(.top, 2)
@@ -65,8 +64,6 @@ struct AweroProgressView: View {
                     .padding(.bottom, 24)
                 }
             }
-            .toolbar(.hidden, for: .navigationBar)
-        }
         .tint(coral)
     }
 }

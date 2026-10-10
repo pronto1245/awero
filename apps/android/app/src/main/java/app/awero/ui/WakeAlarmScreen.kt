@@ -36,7 +36,7 @@ object WakeAlarmScreen {
             gravity = Gravity.START
             setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
         }
-        val primary = Button(activity).apply { text = activity.getString(R.string.wake_start); minHeight = (48 * resources.displayMetrics.density).toInt(); backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb); setTextColor(AweroDesign.navyArgb) }
+        val primary = Button(activity).apply { text = activity.getString(R.string.wake_start); minHeight = (48 * resources.displayMetrics.density).toInt(); backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb); setTextColor(android.graphics.Color.WHITE) }
         val snooze = Button(activity).apply { text = activity.getString(R.string.wake_snooze) }
         val emergency = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL

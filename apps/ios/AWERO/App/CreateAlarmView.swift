@@ -107,8 +107,8 @@ struct CreateAlarmView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(AweroDesign.coral.gradient)
-                    .foregroundStyle(AweroDesign.navy)
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .foregroundStyle(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
                     .background(AweroDesign.ivory.opacity(0.96))
@@ -134,13 +134,11 @@ struct CreateAlarmView: View {
                 .labelsHidden()
                 .accessibilityLabel(Text("create.time"))
                 .frame(maxWidth: .infinity)
+                .background(AweroDesign.surfaceWarm.opacity(0.48), in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
                 .clipped()
         }
-        .padding(.horizontal, 14)
-        .padding(.top, 12)
-        .padding(.bottom, 4)
-        .background(Color.white.opacity(0.60))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .padding(.top, 4)
+        .padding(.bottom, 2)
     }
 
     private var timezoneSection: some View {
@@ -169,9 +167,7 @@ struct CreateAlarmView: View {
                 .foregroundStyle(AweroDesign.navy.opacity(0.65))
             }
         }
-        .padding(14)
-        .background(Color.white.opacity(0.70))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .padding(.vertical, 2)
     }
 
     private var daysSection: some View {
@@ -201,9 +197,7 @@ struct CreateAlarmView: View {
                 Text("create.no_weekdays").font(.footnote).foregroundStyle(AweroDesign.coral)
             }
         }
-        .padding(14)
-        .background(Color.white.opacity(0.70))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .padding(.vertical, 2)
     }
 
     private var missionSection: some View {
@@ -220,22 +214,6 @@ struct CreateAlarmView: View {
                     ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
                 }
             }
-            if mission == .math {
-                HStack {
-                    Text("create.difficulty")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(AweroDesign.navy)
-                    Spacer()
-                    Picker("create.difficulty", selection: $difficulty) {
-                        Text("difficulty.easy").tag(Difficulty.easy)
-                        Text("difficulty.medium").tag(Difficulty.medium)
-                        Text("difficulty.hard").tag(Difficulty.hard)
-                    }
-                    .tint(AweroDesign.coral)
-                }
-                .padding(.top, 8)
-                .overlay(alignment: .top) { Rectangle().fill(AweroDesign.navy.opacity(0.10)).frame(height: 1) }
-            }
             if mission == .qr {
                 Text("permission.camera_body").font(.caption)
                 Button("create.scan") { showCodeScanner = true }
@@ -245,9 +223,7 @@ struct CreateAlarmView: View {
                 Text("create.qr_instructions").font(.caption)
             }
         }
-        .padding(14)
-        .background(Color.white.opacity(0.72))
-        .clipShape(RoundedRectangle(cornerRadius: 22))
+        .padding(.vertical, 2)
     }
 
     private func missionOption(_ type: MissionType) -> some View {
@@ -255,19 +231,19 @@ struct CreateAlarmView: View {
             VStack(spacing: 8) {
                 Image(systemName: type == .math ? "calculator" : type == .steps ? "shoe.fill" : "qrcode")
                     .font(.system(size: 27, weight: .semibold))
+                    .foregroundStyle(mission == type ? AweroDesign.coral : AweroDesign.navy)
                     .accessibilityHidden(true)
                 Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 Text(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
-                    .font(.caption)
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
                     .foregroundStyle(AweroDesign.navy.opacity(0.64))
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
                     .accessibilityIdentifier(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
-                if mission == type { Image(systemName: "checkmark.circle.fill").foregroundStyle(AweroDesign.coral).accessibilityHidden(true) }
             }
             .foregroundStyle(AweroDesign.navy)
             .padding(8)

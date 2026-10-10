@@ -23,7 +23,7 @@ object AweroDesign {
     val cardCorner = 22.dp
     val minimumTouchTarget = 44.dp
     val colors = lightColorScheme(
-        primary = coral, onPrimary = navy,
+        primary = coral, onPrimary = Color.White,
         primaryContainer = coral.copy(alpha = .18f), onPrimaryContainer = navy,
         secondary = sage, onSecondary = Color.White,
         secondaryContainer = coral.copy(alpha = .15f), onSecondaryContainer = navy,
