@@ -29,7 +29,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
     var screen by rememberSaveable { mutableStateOf("loading") }
     var editingAlarm by remember { mutableStateOf<Alarm?>(null) }
     var editingAlarmId by rememberSaveable { mutableStateOf<String?>(null) }
-    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings") {
+    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings" || screen == "progress") {
         editingAlarm = null
         editingAlarmId = null
         screen = "home"
@@ -90,7 +90,6 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 CircularProgressIndicator()
             }
             "wake" -> WakeScreen(flow)
-            "settings" -> SettingsScreen(onBack = { screen = "home" })
             else -> {
                 if (state == WakeFlowController.State.RINGING ||
                     state == WakeFlowController.State.MISSION ||
