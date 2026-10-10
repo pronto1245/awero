@@ -2,6 +2,9 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var wakeFlow: WakeFlowController
+    @EnvironmentObject private var alarms: AlarmStore
+    @AppStorage("awero.didCompleteOnboarding.v1") private var didCompleteOnboarding = false
+    @State private var showingFirstAlarm = false
 
     var body: some View {
         Group {
@@ -9,7 +12,20 @@ struct ContentView: View {
             case .ringing, .mission, .completed, .emergencyStopped, .storageError:
                 WakeScreen(flow: wakeFlow)
             case .idle:
-                HomeView()
+                switch alarms.loadState {
+                case .loading:
+                    ProgressView()
+                case .failed:
+                    HomeView(showingCreate: $showingFirstAlarm)
+                case .loaded where didCompleteOnboarding || !alarms.alarms.isEmpty:
+                    HomeView(showingCreate: $showingFirstAlarm)
+                        .onAppear { didCompleteOnboarding = true }
+                case .loaded:
+                    OnboardingView {
+                        didCompleteOnboarding = true
+                        showingFirstAlarm = true
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package app.awero
 
-import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Intent
@@ -22,7 +21,6 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var statusRefreshKey by mutableIntStateOf(0)
-    private var exactAlarmSettingsOpened = false
     private var fullScreenSettingsOpened = false
 
     private val requestNotifications =
@@ -33,15 +31,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { AweroApp(statusRefreshKey) }
-
-        if (Build.VERSION.SDK_INT >= 33 &&
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
-        ) {
-            requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            requestExactAlarmAccess()
-        }
-
         lifecycleScope.launch { runCatching { AlarmCoordinator(this@MainActivity).repair() } }
     }
 
@@ -49,10 +38,15 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         lifecycleScope.launch { OfflineSyncCoordinator(this@MainActivity).runOnce() }
         statusRefreshKey++
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            getSystemService(AlarmManager::class.java).canScheduleExactAlarms()
+    }
+
+    fun requestAlarmAccessAfterEducation() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            requestFullScreenAlarmAccess()
+            requestNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            requestExactAlarmAccess()
         }
     }
 
@@ -62,12 +56,11 @@ class MainActivity : ComponentActivity() {
             return
         }
         val manager = getSystemService(AlarmManager::class.java)
-        if (manager.canScheduleExactAlarms() || exactAlarmSettingsOpened) {
-            if (manager.canScheduleExactAlarms()) requestFullScreenAlarmAccess()
+        if (manager.canScheduleExactAlarms()) {
+            requestFullScreenAlarmAccess()
             return
         }
 
-        exactAlarmSettingsOpened = true
         runCatching {
             startActivity(
                 Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {

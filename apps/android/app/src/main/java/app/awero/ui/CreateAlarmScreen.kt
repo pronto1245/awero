@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
@@ -17,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,19 +43,19 @@ private val FormNavy = Color(0xFF14294B)
 private val FormCoral = Color(0xFFFF684B)
 
 @Composable
-fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
+fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () -> Unit) {
     val context = LocalContext.current
     val coordinator = remember { AlarmCoordinator(context) }
     val scope = rememberCoroutineScope()
     val now = Calendar.getInstance()
-    var hour by remember { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
-    var minute by remember { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
-    var mission by remember { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
-    var difficulty by remember { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
-    var weekdays by remember { mutableStateOf(alarm?.weekdays ?: (1..7).toSet()) }
-    var followsDeviceTimezone by remember { mutableStateOf(alarm?.timezoneMode != TimezoneMode.FIXED) }
-    var fixedTimezone by remember { mutableStateOf(alarm?.fixedTimezone ?: TimeZone.getDefault().id) }
-    var qrExpectedCode by remember { mutableStateOf(alarm?.qrExpectedCode.orEmpty()) }
+    var hour by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.hour ?: now.get(Calendar.HOUR_OF_DAY)) }
+    var minute by rememberSaveable(alarm?.id) { mutableIntStateOf(alarm?.minute ?: now.get(Calendar.MINUTE)) }
+    var mission by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.missionType ?: MissionType.MATH) }
+    var difficulty by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.difficulty ?: Difficulty.MEDIUM) }
+    var weekdays by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.weekdays ?: (1..7).toSet()) }
+    var followsDeviceTimezone by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.timezoneMode != TimezoneMode.FIXED) }
+    var fixedTimezone by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.fixedTimezone ?: TimeZone.getDefault().id) }
+    var qrExpectedCode by rememberSaveable(alarm?.id) { mutableStateOf(alarm?.qrExpectedCode.orEmpty()) }
     var showCodeScanner by remember { mutableStateOf(false) }
     var scannerError by remember { mutableStateOf<String?>(null) }
     var saveError by remember { mutableStateOf<String?>(null) }
@@ -64,11 +66,16 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
         else scannerError = context.getString(R.string.permission_camera_denied)
     }
 
+    BackHandler(enabled = true) { onCancel() }
+
     Column(
         modifier = Modifier.fillMaxSize().background(FormIvory).imePadding()
             .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        TextButton(onClick = onCancel, modifier = Modifier.heightIn(min = 48.dp)) {
+            Text(stringResource(R.string.create_cancel), color = FormNavy)
+        }
         Text(
             stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
             color = FormNavy,
@@ -192,7 +199,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit) {
                         onSaved()
                     } catch (error: Exception) {
                         saveNeedsSettings = error is IllegalStateException
-                        saveError = error.localizedMessage ?: context.getString(R.string.create_error_title)
+                        saveError = context.getString(R.string.create_error_body)
                     }
                 }
             },

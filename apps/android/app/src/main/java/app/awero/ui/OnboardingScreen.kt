@@ -1,27 +1,56 @@
 package app.awero.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.awero.R
+
+private val OnboardingIvory = Color(0xFFFFF8EF)
+private val OnboardingNavy = Color(0xFF14294B)
+private val OnboardingCoral = Color(0xFFFF684B)
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().background(Color.Black).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(OnboardingIvory).padding(24.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            Text("AWERO", style = MaterialTheme.typography.displaySmall, color = Color.White)
-            Text("Wake up. Stay up.", style = MaterialTheme.typography.headlineSmall, color = Color.White)
-            Text("AWERO uses wake-up missions to get you out of bed. Your first alarm works without an account or internet.", color = Color.White.copy(alpha = .7f))
-            Text("You can test the alarm before relying on it.", color = Color.White.copy(alpha = .7f))
+            Text("AWERO", style = MaterialTheme.typography.headlineMedium, color = OnboardingNavy)
+            Text(
+                stringResource(R.string.onboarding_title),
+                style = MaterialTheme.typography.headlineLarge,
+                color = OnboardingNavy,
+                modifier = Modifier.semantics { heading() }
+            )
+            Text(stringResource(R.string.onboarding_body), color = OnboardingNavy.copy(alpha = .72f))
+            Text(stringResource(R.string.onboarding_privacy), color = OnboardingNavy.copy(alpha = .72f))
+            Text(stringResource(R.string.onboarding_permissions), color = OnboardingNavy.copy(alpha = .72f))
         }
-        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-            Text("Continue")
+        Spacer(Modifier.weight(1f))
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = OnboardingCoral)
+        ) {
+            Text(stringResource(R.string.onboarding_create_alarm), color = Color.White)
         }
     }
 }

@@ -58,6 +58,7 @@ fun HomeScreen(
     var readiness by remember { mutableStateOf<Map<String, AlarmReadiness>>(emptyMap()) }
     var refreshKey by remember { mutableIntStateOf(0) }
     var actionError by remember { mutableStateOf<String?>(null) }
+    var deleteCandidate by remember { mutableStateOf<Alarm?>(null) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(refreshKey) {
@@ -222,8 +223,7 @@ fun HomeScreen(
                                                 coordinator.update(alarm.copy(enabled = enabled))
                                                 alarms = coordinator.all()
                                             } catch (error: Exception) {
-                                                actionError = error.localizedMessage
-                                                    ?: context.getString(R.string.home_error_title)
+                                                actionError = context.getString(R.string.home_error_body)
                                             }
                                         }
                                     },
@@ -275,17 +275,14 @@ fun HomeScreen(
                                 TextButton(onClick = {
                                     scope.launch {
                                         try { coordinator.test(alarm) } catch (error: Exception) {
-                                            actionError = error.localizedMessage ?: context.getString(R.string.home_error_title)
+                                            actionError = context.getString(R.string.home_error_body)
                                         }
                                     }
                                 }) { Text(stringResource(R.string.home_test)) }
                                 TextButton(onClick = { onEditAlarm(alarm) }) { Text(stringResource(R.string.home_edit)) }
-                                TextButton(onClick = {
-                                    scope.launch {
-                                        coordinator.delete(alarm)
-                                        alarms = coordinator.all()
-                                    }
-                                }) { Text(stringResource(R.string.home_delete), color = AweroCoral) }
+                                TextButton(onClick = { deleteCandidate = alarm }) {
+                                    Text(stringResource(R.string.home_delete), color = AweroCoral)
+                                }
                             }
                         }
                     }
@@ -314,6 +311,31 @@ fun HomeScreen(
             confirmButton = {
                 TextButton(onClick = { actionError = null }) {
                     Text(stringResource(R.string.home_ok))
+                }
+            }
+        )
+    }
+    deleteCandidate?.let { alarm ->
+        AlertDialog(
+            onDismissRequest = { deleteCandidate = null },
+            title = { Text(stringResource(R.string.home_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.home_delete_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    deleteCandidate = null
+                    scope.launch {
+                        try {
+                            coordinator.delete(alarm)
+                            alarms = coordinator.all()
+                        } catch (error: Exception) {
+                            actionError = context.getString(R.string.home_error_body)
+                        }
+                    }
+                }) { Text(stringResource(R.string.home_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteCandidate = null }) {
+                    Text(stringResource(R.string.create_cancel))
                 }
             }
         )

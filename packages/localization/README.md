@@ -1,12 +1,11 @@
-# AWERO Localization Source
+# AWERO localization
 
-Required release locales:
+The six locale JSON dictionaries in this package are the single maintained translation source for English (`en`), Russian (`ru`), Brazilian Portuguese (`pt-BR`), French (`fr`), German (`de`), and Spanish (`es`). Each locale has the same canonical key set. `native-key-map.json` maps Android resource identifiers to canonical keys; iOS keys use the canonical identifiers directly.
 
-- en
-- ru
-- pt-BR
-- fr
-- de
-- es
+Generate Android XML and iOS `.strings` resources with:
 
-The JSON files are the intended future source of truth, but they are not yet a complete source for current UI copy: each locale currently has only 11–14 JSON keys, compared with 129 entries in each iOS strings file and 124 in each Android strings file. Native resources are maintained manually. Completing coverage, generating native files, and parity checks belong to Phase 6; do not claim generation is active before then.
+```sh
+python3 scripts/localization/generate-native-locales.py
+```
+
+CI runs the same generator in `--check` mode and fails if either platform's checked-in resources are stale, a locale has missing/extra keys, or a JSON file contains duplicate keys. Edit translations in the locale JSON files, then regenerate native resources. Do not edit generated native strings directly.

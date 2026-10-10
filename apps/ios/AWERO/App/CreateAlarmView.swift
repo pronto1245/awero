@@ -58,7 +58,7 @@ struct CreateAlarmView: View {
                             _ = try await AlarmScheduler().requestAuthorization()
                             saveAlarmNow()
                         } catch {
-                            saveError = error.localizedDescription
+                            saveError = NSLocalizedString("create.error_body", comment: "Alarm save error")
                         }
                     }
                 }
@@ -224,7 +224,7 @@ struct CreateAlarmView: View {
                 else { try await coordinator.update(next) }
                 dismiss()
             } catch {
-                saveError = error.localizedDescription
+                saveError = NSLocalizedString("create.error_body", comment: "Alarm save error")
             }
         }
     }

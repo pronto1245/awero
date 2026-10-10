@@ -8,11 +8,12 @@ private enum AweroStyle {
 }
 
 struct HomeView: View {
+    @Binding var showingCreate: Bool
     @EnvironmentObject private var alarms: AlarmStore
     @Environment(\.scenePhase) private var scenePhase
-    @State private var showingCreate = false
     @State private var editingAlarm: Alarm?
     @State private var testAlarmError: String?
+    @State private var deleteCandidate: Alarm?
     @State private var readiness: [UUID: AlarmReadiness] = [:]
     @State private var now = Date()
     @ScaledMetric(relativeTo: .largeTitle) private var wordmarkSize: CGFloat = 28
@@ -122,7 +123,7 @@ struct HomeView: View {
                                             do {
                                                 try await AlarmCoordinator(store: alarms).test(alarm)
                                             } catch {
-                                                testAlarmError = error.localizedDescription
+                                                testAlarmError = NSLocalizedString("home.error_body", comment: "Alarm action error")
                                             }
                                         }
                                     },
@@ -132,7 +133,7 @@ struct HomeView: View {
                                                 try await AlarmScheduler().repair(alarm)
                                                 readiness[alarm.id] = await AlarmScheduler().readiness(for: alarm)
                                             } catch {
-                                                testAlarmError = error.localizedDescription
+                                                testAlarmError = NSLocalizedString("home.error_body", comment: "Alarm action error")
                                                 readiness[alarm.id] = await AlarmScheduler().readiness(for: alarm)
                                             }
                                         }
@@ -141,7 +142,7 @@ struct HomeView: View {
                                         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                                         UIApplication.shared.open(url)
                                     },
-                                    onDelete: { Task { await AlarmCoordinator(store: alarms).delete(alarm) } }
+                                    onDelete: { deleteCandidate = alarm }
                                 )
                             }
                         }
@@ -164,6 +165,29 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingCreate) { CreateAlarmView() }
             .sheet(item: $editingAlarm) { alarm in CreateAlarmView(alarm: alarm) }
+            .confirmationDialog(
+                "home.delete_confirm_title",
+                isPresented: Binding(
+                    get: { deleteCandidate != nil },
+                    set: { if !$0 { deleteCandidate = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("home.delete", role: .destructive) {
+                    guard let alarm = deleteCandidate else { return }
+                    deleteCandidate = nil
+                    Task {
+                        do {
+                            try await AlarmCoordinator(store: alarms).delete(alarm)
+                        } catch {
+                            testAlarmError = NSLocalizedString("home.error_body", comment: "Alarm action error")
+                        }
+                    }
+                }
+                Button("create.cancel", role: .cancel) { deleteCandidate = nil }
+            } message: {
+                Text("home.delete_confirm_body")
+            }
             .alert("alarm.status.errorTitle", isPresented: Binding(
                 get: { testAlarmError != nil },
                 set: { if !$0 { testAlarmError = nil } }
@@ -205,7 +229,7 @@ struct HomeView: View {
                 now = Date()
                 await refreshReadiness()
             } catch {
-                testAlarmError = error.localizedDescription
+                testAlarmError = NSLocalizedString("home.error_body", comment: "Alarm action error")
             }
         }
     }
