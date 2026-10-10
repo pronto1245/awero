@@ -44,6 +44,10 @@ class WakeFlowController(
     val actionError: StateFlow<String?> = _actionError.asStateFlow()
     val currentAlarm: StateFlow<Alarm?> = _currentAlarm.asStateFlow()
 
+    fun clearActionError() {
+        _actionError.value = null
+    }
+
     suspend fun restore(alarmId: String? = null, testAlarm: Boolean? = null) {
         val session = sessions.loadActive(alarmId, testAlarm) ?: return
         val alarm = alarmStore.get(session.alarmId) ?: return

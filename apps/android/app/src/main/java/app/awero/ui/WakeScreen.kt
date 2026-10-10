@@ -123,7 +123,7 @@ fun WakeScreen(flow: WakeFlowController) {
                             Surface(color = Color.White.copy(alpha = .94f), shape = RoundedCornerShape(16.dp)) {
                                 Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text(it, color = AweroDesign.navy)
-                                    Button(onClick = { scope.launch { flow.retryPendingAction() } }) {
+                                    Button(onClick = { flow.clearActionError() }) {
                                         Text(stringResource(R.string.wake_retry))
                                     }
                                 }
@@ -131,7 +131,7 @@ fun WakeScreen(flow: WakeFlowController) {
                         }
                         val current = alarm
                         if (current != null && activity != null) {
-                            key(mission) {
+                            key(mission, actionError) {
                                 AndroidView(
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 430.dp),
                                     factory = { _ ->

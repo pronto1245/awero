@@ -246,7 +246,7 @@ object WakeAlarmScreen {
         startContent.addView(title)
         startContent.addView(text(activity.getString(R.string.wake_instruction), 17f))
         startContent.addView(primary, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-            val gap = (8 * resources.displayMetrics.density).toInt()
+            val gap = (8 * activity.resources.displayMetrics.density).toInt()
             setMargins(0, gap, 0, gap)
         })
         startContent.addView(snooze, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))

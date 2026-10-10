@@ -157,5 +157,3 @@
 "wake.start" = "Aufgabe starten";
 "wake.stopped_body" = "Die Sitzung wurde gespeichert.";
 "wake.title" = "STEH AUF";
-
-"profile.settings_hint" = "Verwalte App-Einstellungen und Weckerberechtigungen.";

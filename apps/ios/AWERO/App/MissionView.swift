@@ -67,6 +67,7 @@ private struct MathMissionView: View {
                         .frame(maxWidth: .infinity, minHeight: 28)
                         .accessibilityIdentifier("mission.math.invalid")
                 }
+            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                 ForEach(1...9, id: \.self) { digit in
                     Button(String(digit)) {

@@ -154,7 +154,7 @@
   "create.error_body": "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.",
   "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach.",
   "nav.home": "Start",
-  "nav.progress": "Fortschritt",
+  "nav.progress": "Verlauf",
   "nav.profile": "Profil",
   "progress.title": "Dein Fortschritt",
   "progress.empty_title": "Deine erste Woche beginnt hier",
