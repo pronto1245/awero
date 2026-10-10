@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -74,7 +75,9 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
     var saveError by remember { mutableStateOf<String?>(null) }
     var saveNeedsSettings by remember { mutableStateOf(false) }
     val owner = context as? ComponentActivity
-    val compactLayout = LocalConfiguration.current.fontScale >= 1.35f
+    val configuration = LocalConfiguration.current
+    // Stack mission choices on narrow phones too: three columns leave ~70dp per card there.
+    val compactLayout = configuration.fontScale >= 1.35f || configuration.screenWidthDp < 360
     val requestCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) showCodeScanner = true
         else scannerError = context.getString(R.string.permission_camera_denied)
@@ -88,23 +91,26 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Box(Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            // Board: a back chevron on the left and the title centred. The chevron keeps the
+            // localized "Cancel" as its accessibility label.
+            val cancelLabel = stringResource(R.string.create_cancel)
             TextButton(
                 onClick = onCancel,
                 modifier = Modifier.align(Alignment.CenterStart)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = .90f))
-                    .defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
-                    .padding(horizontal = 8.dp),
+                    .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+                    .semantics { contentDescription = cancelLabel },
+                contentPadding = PaddingValues(0.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = FormNavy)
             ) {
-                Text(stringResource(R.string.create_cancel), maxLines = 1)
+                Text("‹", style = MaterialTheme.typography.headlineMedium, maxLines = 1)
             }
             Text(
                 stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
                 color = FormNavy,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
-                maxLines = 1,
-                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 100.dp)
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                maxLines = 2,
+                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 52.dp)
             )
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -362,7 +368,28 @@ private fun MissionOptionCard(type: MissionType, selected: Boolean, modifier: Mo
             MissionType.STEPS -> "steps"
             else -> "qr"
         }, tint = if (selected) FormCoral else FormNavy)
-        Text(title, color = if (selected) FormCoral else FormNavy, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
+        FitOneLineText(title, color = if (selected) FormCoral else FormNavy, style = MaterialTheme.typography.bodyMedium)
         Text(description, color = FormNavy.copy(alpha = .65f), style = MaterialTheme.typography.labelSmall, maxLines = 3)
     }
+}
+
+/**
+ * Single-line text that shrinks (down to 70%) instead of breaking a word in the middle,
+ * e.g. "Математика" or "Mathématiques" in a narrow mission card.
+ */
+@Composable
+private fun FitOneLineText(text: String, color: Color, style: androidx.compose.ui.text.TextStyle) {
+    var scale by remember(text, style) { mutableFloatStateOf(1f) }
+    var ready by remember(text, style) { mutableStateOf(false) }
+    Text(
+        text,
+        color = color,
+        style = style.copy(fontSize = style.fontSize * scale),
+        maxLines = 1,
+        softWrap = false,
+        modifier = Modifier.drawWithContent { if (ready) drawContent() },
+        onTextLayout = { layout ->
+            if (layout.didOverflowWidth && scale > 0.7f) scale -= 0.05f else ready = true
+        }
+    )
 }

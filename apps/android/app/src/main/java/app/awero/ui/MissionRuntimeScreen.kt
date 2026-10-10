@@ -163,7 +163,7 @@ object MissionRuntimeScreen {
                 val mission = StepsMission(activity)
                 cleanup = { mission.stop() }
                 val motionStarted = runCatching { mission.start() }.isSuccess && mission.available
-                val status = label(if (motionStarted) activity.getString(R.string.mission_steps_title) else activity.getString(R.string.mission_motion_unavailable), 30f)
+                val status = label(if (motionStarted) activity.getString(R.string.mission_steps_title) else activity.getString(R.string.mission_motion_unavailable), 22f)
                 root.addView(status)
                 root.addView(Button(activity).apply {
                     setTextColor(android.graphics.Color.WHITE)

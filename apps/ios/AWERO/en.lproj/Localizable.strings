@@ -84,7 +84,7 @@
 "mission.camera_denied" = "Camera access is unavailable. Use the Math fallback.";
 "mission.camera_unavailable" = "Camera is unavailable.";
 "mission.change_sign" = "Change sign";
-"mission.check" = "CHECK";
+"mission.check" = "Check";
 "mission.continue" = "Continue";
 "mission.delete_digit" = "Delete last digit";
 "mission.keep_walking" = "Keep walking until the target is reached.";
@@ -92,14 +92,14 @@
 "mission.qr_detected" = "Code detected.";
 "mission.qr_instructions" = "Point the camera at your saved QR or barcode.";
 "mission.qr_mismatch" = "QR code does not match. Switching to the safe fallback.";
-"mission.qr_title" = "SCAN YOUR CODE";
+"mission.qr_title" = "Scan your code";
 "mission.qr_unconfigured" = "QR mission is not configured.";
 "mission.steps_progress" = "Steps: %1$d / 30";
-"mission.steps_title" = "WALK 30 STEPS";
+"mission.steps_title" = "Walk 30 steps";
 "mission.timeout" = "After 2 minutes, this task switches to Math.";
-"mission.title" = "WAKE MISSION";
+"mission.title" = "Wake mission";
 "mission.try_again" = "Try again";
-"mission.unavailable" = "MISSION UNAVAILABLE";
+"mission.unavailable" = "Mission unavailable";
 "mission.use_fallback" = "Use fallback";
 "mission.use_math" = "Use Math fallback";
 "nav.home" = "Home";
@@ -144,7 +144,7 @@
 "wake.active" = "The alarm is active.";
 "wake.complete" = "Complete mission";
 "wake.completed_body" = "Wake session completed.";
-"wake.completed_title" = "YOU’RE UP";
+"wake.completed_title" = "You’re up";
 "wake.emergency_stop" = "Emergency stop";
 "wake.emergency_stop_hint" = "Only in an emergency";
 "wake.error_completion_save" = "Could not save completion. Your wake session is still active.";
@@ -160,7 +160,7 @@
 "wake.snooze_error_body" = "The alarm is still ringing.";
 "wake.snooze_error_title" = "Snooze unavailable";
 "wake.snoozed_body" = "Your next wake-up is scheduled.";
-"wake.snoozed_title" = "SNOOZED";
+"wake.snoozed_title" = "Snoozed";
 "wake.start" = "Start mission";
 "wake.stopped_body" = "The session was recorded.";
-"wake.title" = "GET UP";
+"wake.title" = "Get up";

@@ -84,7 +84,7 @@
 "mission.camera_denied" = "L’accès à la caméra est indisponible. Utilisez le calcul de secours.";
 "mission.camera_unavailable" = "Caméra indisponible.";
 "mission.change_sign" = "Changer le signe";
-"mission.check" = "VÉRIFIER";
+"mission.check" = "Vérifier";
 "mission.continue" = "Continuer";
 "mission.delete_digit" = "Effacer le dernier chiffre";
 "mission.keep_walking" = "Continuez à marcher jusqu’à atteindre l’objectif.";
@@ -92,14 +92,14 @@
 "mission.qr_detected" = "Code détecté.";
 "mission.qr_instructions" = "Pointez la caméra vers votre QR code ou code-barres enregistré.";
 "mission.qr_mismatch" = "Le QR code ne correspond pas. Passage à la solution de secours.";
-"mission.qr_title" = "SCANNER VOTRE CODE";
+"mission.qr_title" = "Scannez votre code";
 "mission.qr_unconfigured" = "La mission QR n’est pas configurée.";
 "mission.steps_progress" = "Pas : %1$d / 30";
-"mission.steps_title" = "MARCHEZ 30 PAS";
+"mission.steps_title" = "Marchez 30 pas";
 "mission.timeout" = "Après 2 minutes, cette tâche passe au calcul.";
-"mission.title" = "MISSION DE RÉVEIL";
+"mission.title" = "Mission de réveil";
 "mission.try_again" = "Réessayez";
-"mission.unavailable" = "MISSION INDISPONIBLE";
+"mission.unavailable" = "Mission indisponible";
 "mission.use_fallback" = "Utiliser la solution de secours";
 "mission.use_math" = "Utiliser le calcul de secours";
 "nav.home" = "Accueil";
@@ -144,7 +144,7 @@
 "wake.active" = "Le réveil est actif.";
 "wake.complete" = "Terminer la mission";
 "wake.completed_body" = "La session de réveil est terminée.";
-"wake.completed_title" = "VOUS ÊTES DEBOUT";
+"wake.completed_title" = "Vous êtes debout";
 "wake.emergency_stop" = "Arrêt d’urgence";
 "wake.emergency_stop_hint" = "Uniquement en cas d’urgence";
 "wake.error_completion_save" = "Impossible d’enregistrer la fin de la mission. Votre réveil est toujours actif.";
@@ -160,7 +160,7 @@
 "wake.snooze_error_body" = "Le réveil sonne toujours.";
 "wake.snooze_error_title" = "Répétition indisponible";
 "wake.snoozed_body" = "Votre prochain réveil est programmé.";
-"wake.snoozed_title" = "RÉPÉTÉ";
+"wake.snoozed_title" = "Répété";
 "wake.start" = "Commencer la mission";
 "wake.stopped_body" = "La session a été enregistrée.";
-"wake.title" = "LEVEZ-VOUS";
+"wake.title" = "Levez-vous";

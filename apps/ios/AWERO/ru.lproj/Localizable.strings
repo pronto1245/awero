@@ -84,7 +84,7 @@
 "mission.camera_denied" = "Нет доступа к камере. Перейдите к математическому заданию.";
 "mission.camera_unavailable" = "Камера недоступна.";
 "mission.change_sign" = "Изменить знак";
-"mission.check" = "ПРОВЕРИТЬ";
+"mission.check" = "Проверить";
 "mission.continue" = "Продолжить";
 "mission.delete_digit" = "Удалить последнюю цифру";
 "mission.keep_walking" = "Продолжайте идти, пока не достигнете цели.";
@@ -92,14 +92,14 @@
 "mission.qr_detected" = "Код распознан.";
 "mission.qr_instructions" = "Наведите камеру на сохранённый QR-код или штрихкод.";
 "mission.qr_mismatch" = "QR-код не совпадает. Переключаемся на безопасный запасной вариант.";
-"mission.qr_title" = "ОТСКАНИРУЙТЕ СВОЙ КОД";
+"mission.qr_title" = "Отсканируйте свой код";
 "mission.qr_unconfigured" = "QR-задание не настроено.";
 "mission.steps_progress" = "Шаги: %1$d / 30";
-"mission.steps_title" = "СДЕЛАЙТЕ 30 ШАГОВ";
+"mission.steps_title" = "Сделайте 30 шагов";
 "mission.timeout" = "Через 2 минуты это задание сменится математикой.";
-"mission.title" = "ЗАДАНИЕ ДЛЯ ПРОБУЖДЕНИЯ";
+"mission.title" = "Задание для пробуждения";
 "mission.try_again" = "Попробуйте ещё раз";
-"mission.unavailable" = "ЗАДАНИЕ НЕДОСТУПНО";
+"mission.unavailable" = "Задание недоступно";
 "mission.use_fallback" = "Запасной вариант";
 "mission.use_math" = "Перейти к математике";
 "nav.home" = "Главная";
@@ -144,7 +144,7 @@
 "wake.active" = "Будильник включён.";
 "wake.complete" = "Завершить задание";
 "wake.completed_body" = "Пробуждение завершено.";
-"wake.completed_title" = "ВЫ УЖЕ ВСТАЛИ";
+"wake.completed_title" = "Вы уже встали";
 "wake.emergency_stop" = "Экстренно выключить";
 "wake.emergency_stop_hint" = "Только в крайнем случае";
 "wake.error_completion_save" = "Не удалось сохранить завершение. Сессия пробуждения всё ещё активна.";
@@ -160,7 +160,7 @@
 "wake.snooze_error_body" = "Будильник продолжает звонить.";
 "wake.snooze_error_title" = "Не удалось отложить будильник";
 "wake.snoozed_body" = "Следующее пробуждение запланировано.";
-"wake.snoozed_title" = "ОТЛОЖЕНО";
+"wake.snoozed_title" = "Отложено";
 "wake.start" = "Начать задание";
 "wake.stopped_body" = "Сессия записана.";
-"wake.title" = "ВСТАНЬТЕ";
+"wake.title" = "Вставайте";

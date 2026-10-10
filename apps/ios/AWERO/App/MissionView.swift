@@ -110,13 +110,13 @@ private struct StepsMissionView: View {
     let onSuccess: () -> Void
     let onFailure: () -> Void
     let timeout: Duration
-    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 34
-    @ScaledMetric(relativeTo: .largeTitle) private var stepCountSize: CGFloat = 50
+    @ScaledMetric(relativeTo: .title) private var titleSize: CGFloat = 24
+    @ScaledMetric(relativeTo: .largeTitle) private var stepCountSize: CGFloat = 40
 
     var body: some View {
         VStack(spacing: 22) {
             Text("mission.steps_title")
-                .font(.system(size: titleSize, weight: .black))
+                .font(.system(size: titleSize, weight: .bold))
                 .foregroundStyle(AweroDesign.navy)
                 .accessibilityIdentifier("mission.steps.title")
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
