@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 
 final class FirstRunOnboardingUITests: XCTestCase {
     func testFirstRunOnboardingOpensAlarmCreation() {
@@ -115,7 +116,20 @@ final class FirstRunOnboardingUITests: XCTestCase {
     }
 
     private func capture(_ name: String) {
-        let bytes = Array(XCUIScreen.main.screenshot().pngRepresentation.base64EncodedString().utf8)
+        let screenshot = XCUIScreen.main.screenshot()
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("awero-visual")
+        try! FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try! screenshot.pngRepresentation.write(to: directory.appendingPathComponent(name + ".png"))
+        let image = screenshot.image
+        let width: CGFloat = 390
+        let size = CGSize(width: width, height: image.size.height * width / image.size.width)
+        let renderer = UIGraphicsImageRenderer(size: size, format: {
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 1
+            return format
+        }())
+        let preview = renderer.image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
+        let bytes = Array(preview.jpegData(compressionQuality: 0.65)!.base64EncodedString().utf8)
         for start in stride(from: 0, to: bytes.count, by: 3000) {
             let chunk = String(decoding: bytes[start..<min(start + 3000, bytes.count)], as: UTF8.self)
             print("AWERO_VISUAL|ios|\(name)|\(start / 3000)|\(chunk)")

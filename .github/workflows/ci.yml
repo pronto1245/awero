@@ -117,6 +117,7 @@ jobs:
             apps/android/app/build/outputs/androidTest-results/
             apps/android/app/build/outputs/process-crash/
             android-logcat.txt
+            apps/android/app/build/outputs/visual/
           if-no-files-found: warn
 
   ios-syntax:
@@ -179,6 +180,19 @@ jobs:
           )
           xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROFirstRunUITests test
           xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROTests test
+      - name: Collect original iOS visual captures
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/awero-visual-ios"
+          find "$HOME/Library/Developer/CoreSimulator/Devices" -path '*/tmp/awero-visual/*.png' -exec cp {} "$RUNNER_TEMP/awero-visual-ios/" \;
+      - name: Upload original iOS visual captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-visual-captures
+          path: ${{ runner.temp }}/awero-visual-ios/
+          if-no-files-found: error
 
   ios-persistence-smoke:
     runs-on: macos-15
