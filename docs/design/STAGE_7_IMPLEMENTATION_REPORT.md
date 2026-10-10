@@ -5,7 +5,7 @@ Status: in progress; visual acceptance is not complete.
 ## Repository recovery
 
 Commit 291e416 restores the complete tree after an erroneous Git tree creation.
-The comparison with main contains 33 files and no deletions.
+The comparison with main is checked for deletions before each branch update. Commit b04bf9e contains 58 changed files and no deletions.
 The localization validator now requires the seven navigation/progress keys and two keypad accessibility keys.
 Independent key-parity comparison passed for all 12 native resources:
 151 iOS keys and 145 Android keys across en, ru, pt-BR, fr, de, es.
@@ -18,7 +18,7 @@ Independent key-parity comparison passed for all 12 native resources:
 - Shared native ivory/navy/coral/sage palette, applied to home, setup, onboarding, settings, progress and wake.
 - Android Material color scheme follows the approved palette.
 - iOS wheel time selection, adaptive repeat-day buttons and mission selection cards.
-- Android Home is fully scrollable at large font sizes; first-run regression checks scroll to both alarm sections.
+- Home content scrolls independently of a pinned Add alarm button on both platforms; Android first-run regression checks large text (font scale 1.8) and both alarm sections.
 - Android repeat/difficulty chips wrap on narrow screens; native time picker respects device 12/24-hour preference.
 - Android active system-alarm path remains WakeAlarmActivity → WakeAlarmScreen → MissionRuntimeScreen.
 - WakeAlarmScreen uses existing localized resources and the light palette; scheduling and wake handlers are unchanged.
@@ -34,12 +34,28 @@ Do not merge until the final head CI passes.
 
 ## Remaining acceptance work
 
-- Screenshot comparison of each screen/state on iOS and Android.
+- Final screenshot comparison of each screen/state on iOS and Android. Six iOS screenshots from run 687 were captured and reviewed; the Math screenshot exposed excess vertical space and a clipped final keypad row. Commit b04bf9e removes the separate artwork block, reduces Math spacing, and fixes the sign-button test selector.
 - Full-size layout review of the active Android View runtime, including QR and large text.
 - Final small-screen/large-text and six-locale visual review.
 - Screenshot review of the new Math keypad and wake composition against the approved board.
 - Progress charts/streaks require dated real wake history (Phase 9); no fabricated values.
 - Profile currently exposes implemented Settings only; account/billing features remain separate.
-- Final-head CI and targeted navigation/selection regressions.
+- Final-head CI and targeted navigation/selection regressions. Run 685 passed all four CI jobs; later heads require their own successful checks. Run 687 passed Android compilation/unit/instrumentation checks but failed screenshot export (fixed with a Bash helper) and an iOS test locator (fixed with a stable accessibility identifier).
+
+## Visual adaptations and dependencies
+
+| Mockup element | Current implementation | Acceptance boundary |
+| --- | --- | --- |
+| Home, coral action and three tabs | Working native screens, pinned action, shared palette | Final six-locale images still need review |
+| Landscape artwork | Offline native illustration | Simplified artwork, not a pixel-identical reproduction |
+| Time, weekdays, missions | Existing real alarm settings with native controls | Retains timezone/permission controls beyond the board; localized short weekday labels and mission cards with an accessibility-size vertical fallback |
+| Math keypad | Real answer validation, sign, delete and check | Existing addition/subtraction core retained; the multiplication example is not an implemented operation |
+| Emergency stop | Existing real stop action, independently accessible | Layout and action tests required on final head |
+| Progress chart, streak and score | Designed empty state with functional create action | Depends on Phase 9 real dated history; not complete and never populated with fake values |
+| Profile | Existing language/permission settings | Accounts, billing and subscription UI belong to Phase 8 |
+
+The iOS header places Settings next to the wordmark; create uses a compact wheel and inline title. Full weekday names remain available to accessibility.
+
+Six-locale UI capture is added to test real native language selection and navigation/create cancellation without changing production alarm or storage architecture. Settings display the app resource language rather than assuming it always equals the system language.
 
 This report does not claim 100% completion or physical alarm-delivery acceptance.

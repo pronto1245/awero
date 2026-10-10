@@ -97,6 +97,13 @@ class WakeSaveRetryEndToEndTest {
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
 
+        val visualDescriptor = instrumentation.uiAutomation.executeShellCommand(
+            "sh -c 'run-as app.awero cat cache/awero-visual/Math.png > /data/local/tmp/awero-visual-Math.png'"
+        )
+        val visualResult = java.io.FileInputStream(visualDescriptor.fileDescriptor).bufferedReader().use { it.readText() }
+        visualDescriptor.close()
+        check(visualResult.isBlank()) { "Screenshot export failed: $visualResult" }
+
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView
             val pattern = Regex("(\\d+) ([+-]) (\\d+) = \\?")

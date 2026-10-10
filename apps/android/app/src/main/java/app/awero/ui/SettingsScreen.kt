@@ -28,7 +28,8 @@ private val SettingsCoral = AweroDesign.coral
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val deviceLanguage = Locale.getDefault().getDisplayName(Locale.getDefault())
+    val appLocale = context.resources.configuration.locales[0]
+    val deviceLanguage = appLocale.getDisplayName(appLocale)
 
     Column(
         modifier = Modifier

@@ -6,6 +6,7 @@ struct CreateAlarmView: View {
     let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @AppStorage("awero.didExplainAlarmPermission.v1") private var didExplainAlarmPermission = false
 
     @State private var wakeDate: Date
@@ -45,6 +46,7 @@ struct CreateAlarmView: View {
             .background(AweroDesign.ivory)
             .tint(AweroDesign.coral)
             .navigationTitle(alarm == nil ? "create.title" : "create.edit_title")
+            .navigationBarTitleDisplayMode(.inline)
             .alert("permission.ios_alarm_title", isPresented: $showingPermissionIntro) {
                 Button("permission.continue") {
                     didExplainAlarmPermission = true
@@ -73,7 +75,7 @@ struct CreateAlarmView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("create.cancel") { dismiss() }
+                    Button("create.cancel") { dismiss() }.accessibilityIdentifier("alarm.cancel")
                 }
             }
             .safeAreaInset(edge: .bottom) {
@@ -103,6 +105,7 @@ struct CreateAlarmView: View {
         Section {
             DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
                 .datePickerStyle(.wheel)
+                .frame(height: dynamicTypeSize.isAccessibilitySize ? 216 : 150)
                 .labelsHidden()
                 .accessibilityLabel(Text("create.time"))
         }
@@ -139,13 +142,13 @@ struct CreateAlarmView: View {
 
     private var daysSection: some View {
         Section {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 92))], spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 80 : 36))], spacing: 6) {
                 ForEach([2, 3, 4, 5, 6, 7, 1], id: \.self) { day in
                     Button {
                         if selectedDays.contains(day) { selectedDays.remove(day) }
                         else { selectedDays.insert(day) }
                     } label: {
-                        Text(weekdayKey(day))
+                        Text(Calendar.current.shortWeekdaySymbols[day - 1])
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .foregroundStyle(AweroDesign.navy)
@@ -153,6 +156,7 @@ struct CreateAlarmView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(Text(weekdayKey(day)))
                     .accessibilityAddTraits(selectedDays.contains(day) ? .isSelected : [])
                 }
             }
@@ -167,30 +171,14 @@ struct CreateAlarmView: View {
 
     private var missionSection: some View {
         Section {
-            ForEach([MissionType.math, .steps, .qr], id: \.self) { type in
-                Button {
-                    mission = type
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: type == .math ? "plus.forwardslash.minus" : type == .steps ? "figure.walk" : "qrcode")
-                            .frame(width: 28)
-                            .accessibilityHidden(true)
-                        Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
-                        Spacer()
-                        if mission == type {
-                            Image(systemName: "checkmark.circle.fill")
-                                .accessibilityHidden(true)
-                        }
-                    }
-                    .font(.headline)
-                    .foregroundStyle(AweroDesign.navy)
-                    .padding(12)
-                    .frame(minHeight: 48)
-                    .background(mission == type ? AweroDesign.coral.opacity(0.25) : AweroDesign.ivory)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(spacing: 8) {
+                    ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
                 }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(mission == type ? .isSelected : [])
+            } else {
+                HStack(alignment: .top, spacing: 8) {
+                    ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+                }
             }
             if mission == .math {
                 Picker("create.difficulty", selection: $difficulty) {
@@ -211,6 +199,29 @@ struct CreateAlarmView: View {
             Text("create.mission")
         }
         .listRowBackground(Color.white)
+    }
+
+    private func missionOption(_ type: MissionType) -> some View {
+        Button { mission = type } label: {
+            VStack(spacing: 10) {
+                Image(systemName: type == .math ? "plus.forwardslash.minus" : type == .steps ? "figure.walk" : "qrcode")
+                    .font(.title)
+                    .accessibilityHidden(true)
+                Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
+                    .font(.subheadline.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                if mission == type {
+                    Image(systemName: "checkmark.circle.fill").accessibilityHidden(true)
+                }
+            }
+            .foregroundStyle(AweroDesign.navy)
+            .padding(10)
+            .frame(maxWidth: .infinity, minHeight: 100)
+            .background(mission == type ? AweroDesign.coral.opacity(0.25) : AweroDesign.ivory)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(mission == type ? .isSelected : [])
     }
 
     private var permissionSection: some View {

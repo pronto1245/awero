@@ -81,6 +81,35 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.nav_profile)).performClick()
         compose.onNodeWithText(context.getString(R.string.settings_title)).assertIsDisplayed()
         captureVisual("Profile")
+        if (Build.VERSION.SDK_INT >= 33) {
+            val manager = context.getSystemService(android.app.LocaleManager::class.java)
+            val previous = manager.applicationLocales
+            try {
+                for (language in listOf("en", "ru", "pt-BR", "fr", "de", "es")) {
+                    manager.applicationLocales = android.os.LocaleList.forLanguageTags(language)
+                    compose.waitUntil(timeoutMillis = 10_000) {
+                        compose.activity.resources.configuration.locales[0].toLanguageTag() == language
+                    }
+                    fun localized(id: Int) = compose.activity.getString(id)
+                    compose.onNodeWithText(localized(R.string.nav_home)).performClick()
+                    compose.onNodeWithText(localized(R.string.home_add_alarm)).assertIsDisplayed()
+                    captureVisual("Home-$language")
+                    compose.onNodeWithText(localized(R.string.nav_progress)).performClick()
+                    compose.onNodeWithText(localized(R.string.progress_empty_title)).assertIsDisplayed()
+                    captureVisual("Progress-$language")
+                    compose.onNodeWithText(localized(R.string.nav_profile)).performClick()
+                    compose.onNodeWithText(localized(R.string.settings_title)).assertIsDisplayed()
+                    captureVisual("Profile-$language")
+                    compose.onNodeWithText(localized(R.string.nav_home)).performClick()
+                    compose.onNodeWithText(localized(R.string.home_add_alarm)).performClick()
+                    compose.onNodeWithText(localized(R.string.create_title)).assertIsDisplayed()
+                    captureVisual("Create-$language")
+                    compose.onNodeWithText(localized(R.string.create_cancel)).performClick()
+                }
+            } finally {
+                manager.applicationLocales = previous
+            }
+        }
     }
 
     private fun captureVisual(name: String) {
@@ -90,6 +119,12 @@ class FirstRunOnboardingUiTest {
         java.io.File(directory, "$name.png").outputStream().use { output ->
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
+        val descriptor = instrumentation.uiAutomation.executeShellCommand(
+            "sh -c 'run-as app.awero cat cache/awero-visual/$name.png > /data/local/tmp/awero-visual-$name.png'"
+        )
+        val result = FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
+        descriptor.close()
+        check(result.isBlank()) { "Screenshot export failed: $result" }
     }
 
     companion object {

@@ -3,8 +3,8 @@ import SwiftUI
 
 struct SettingsView: View {
     private var deviceLanguage: String {
-        Locale.current.localizedString(forIdentifier: Locale.current.identifier)
-            ?? Locale.current.identifier
+        Locale.current.localizedString(forIdentifier: Bundle.main.preferredLocalizations.first ?? "en")
+            ?? Bundle.main.preferredLocalizations.first ?? "en"
     }
 
     var body: some View {

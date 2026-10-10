@@ -88,6 +88,28 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["wake.stopped"].waitForExistence(timeout: 5))
     }
 
+    func testAllSupportedLocalesKeepNavigationAndCreationAccessible() {
+        for language in ["en", "ru", "pt-BR", "fr", "de", "es"] {
+            let app = XCUIApplication()
+            app.launchArguments += ["-AppleLanguages", "(\(language))", "-AppleLocale", language.replacingOccurrences(of: "-", with: "_"), "-awero.didCompleteOnboarding.v1", "YES"]
+            app.launch()
+            let create = app.buttons["home.createAlarm"]
+            XCTAssertTrue(create.waitForExistence(timeout: 15), language)
+            capture("Home-\(language)")
+            app.tabBars.buttons.element(boundBy: 1).tap()
+            capture("Progress-\(language)")
+            app.tabBars.buttons.element(boundBy: 2).tap()
+            capture("Profile-\(language)")
+            app.tabBars.buttons.element(boundBy: 0).tap()
+            create.tap()
+            XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10), language)
+            capture("Create-\(language)")
+            app.buttons["alarm.cancel"].tap()
+            XCTAssertTrue(create.waitForExistence(timeout: 5), language)
+            app.terminate()
+        }
+    }
+
     private func capture(_ name: String) {
         let bytes = Array(XCUIScreen.main.screenshot().pngRepresentation.base64EncodedString().utf8)
         for start in stride(from: 0, to: bytes.count, by: 3000) {

@@ -31,9 +31,19 @@ struct HomeView: View {
                 AweroDesign.ivory.ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
-                        Text("AWERO")
-                            .font(.system(size: wordmarkSize, weight: .black))
-                            .foregroundStyle(AweroDesign.navy)
+                        HStack {
+                            Text("AWERO")
+                                .font(.system(size: wordmarkSize, weight: .black))
+                                .foregroundStyle(AweroDesign.navy)
+                            Spacer()
+                            NavigationLink { SettingsView() } label: {
+                                Image(systemName: "gearshape")
+                                    .font(.title3)
+                                    .foregroundStyle(AweroDesign.navy)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .accessibilityLabel(Text("settings.title"))
+                        }
                         Text("home.greeting")
                             .font(.system(size: greetingSize, weight: .bold, design: .rounded))
                             .foregroundStyle(AweroDesign.navy)
@@ -158,6 +168,7 @@ struct HomeView: View {
                         .background(AweroDesign.coral)
                         .clipShape(RoundedRectangle(cornerRadius: 18))
                 }
+                .accessibilityIdentifier("home.createAlarm")
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
                 .background(AweroDesign.ivory)
@@ -204,17 +215,7 @@ struct HomeView: View {
                     Task { await refreshReadiness() }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .foregroundStyle(AweroDesign.navy)
-                    }
-                    .accessibilityLabel(Text("settings.title"))
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
