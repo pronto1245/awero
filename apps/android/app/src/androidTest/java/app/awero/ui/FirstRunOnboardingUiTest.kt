@@ -31,6 +31,7 @@ class FirstRunOnboardingUiTest {
         val continueLabel = context.getString(R.string.onboarding_create_alarm)
 
         compose.onNodeWithText(onboardingTitle)
+            .performScrollTo()
             .assertIsDisplayed()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         val continueButton = compose.onNodeWithText(continueLabel)
