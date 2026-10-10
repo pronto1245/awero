@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Button
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -55,6 +56,7 @@ class WakeSaveRetryEndToEndTest {
 
     @Test
     fun validatedMathMissionCanRetryAfterCompletionWriteFails() = runBlocking {
+        setFontScale(1.0f)
         val currentAlarm = Alarm(
             id = UUID.randomUUID().toString(), version = 1, hour = 7, minute = 30,
             enabled = true, missionType = MissionType.MATH, difficulty = Difficulty.EASY
@@ -116,6 +118,7 @@ class WakeSaveRetryEndToEndTest {
         setFontScale(1.8f)
         instrumentation.runOnMainSync {
             activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
+            views(activity!!.window.decorView).filterIsInstance<ScrollView>().single().fullScroll(View.FOCUS_DOWN)
         }
         instrumentation.waitForIdleSync()
         instrumentation.uiAutomation.waitForIdle(500, 5_000)

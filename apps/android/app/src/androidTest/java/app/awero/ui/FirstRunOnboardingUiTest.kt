@@ -98,7 +98,7 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithTag("profile.title").assertIsDisplayed()
         compose.onNodeWithContentDescription(context.getString(R.string.profile_settings_hint)).performClick()
         compose.onNodeWithText(context.getString(R.string.settings_title)).assertIsDisplayed()
-        compose.onNodeWithText(context.getString(R.string.settings_back)).performClick()
+        compose.onNodeWithText(context.getString(R.string.settings_back), substring = true).performClick()
         captureVisual("Profile")
         if (Build.VERSION.SDK_INT >= 33) {
             val manager = context.getSystemService(android.app.LocaleManager::class.java)
@@ -121,7 +121,7 @@ class FirstRunOnboardingUiTest {
                     compose.onNodeWithContentDescription(localized(R.string.profile_settings_hint)).performClick()
                     compose.onNodeWithText(localized(R.string.settings_title)).assertIsDisplayed()
                     captureVisual("Settings-$language")
-                    compose.onNodeWithText(localized(R.string.settings_back)).performClick()
+                    compose.onNodeWithText(localized(R.string.settings_back), substring = true).performClick()
                     captureVisual("Profile-$language")
                     compose.onNodeWithText(localized(R.string.nav_home)).performClick()
                     compose.onNodeWithText(localized(R.string.home_add_alarm)).performClick()
