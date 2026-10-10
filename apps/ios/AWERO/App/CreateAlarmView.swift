@@ -55,10 +55,11 @@ struct CreateAlarmView: View {
                     didExplainAlarmPermission = true
                     Task {
                         do {
-                            _ = try await AlarmScheduler().requestAuthorization()
+                            let timezoneMode: AlarmTimezoneMode = followsDeviceTimezone ? .deviceLocal : .fixed
+                            try await AlarmScheduler().requestAuthorization(for: timezoneMode)
                             saveAlarmNow()
                         } catch {
-                            saveError = NSLocalizedString("create.error_body", comment: "Alarm save error")
+                            saveError = error.localizedDescription
                         }
                     }
                 }
@@ -226,7 +227,7 @@ struct CreateAlarmView: View {
                 else { try await coordinator.update(next) }
                 dismiss()
             } catch {
-                saveError = NSLocalizedString("create.error_body", comment: "Alarm save error")
+                saveError = error.localizedDescription
             }
         }
     }

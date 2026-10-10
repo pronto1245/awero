@@ -108,8 +108,17 @@ final class AlarmScheduler {
         }
     }
 
-    func requestAuthorization() async throws {
-        try await center.requestAuthorization(options: [.alert, .sound, .badge])
+    func requestAuthorization(for timezoneMode: AlarmTimezoneMode) async throws {
+#if canImport(AlarmKit) && canImport(AppIntents)
+        if #available(iOS 26.0, *),
+           usesSystemAlarmKit,
+           timezoneMode == .deviceLocal {
+            try await SystemAlarmKitScheduler.requestAuthorization()
+            return
+        }
+#endif
+        let authorized = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+        guard authorized else { throw AlarmSchedulingError.alarmAuthorizationDenied }
     }
 
     func schedule(_ alarm: Alarm) async throws {

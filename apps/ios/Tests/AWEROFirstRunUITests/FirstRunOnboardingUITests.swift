@@ -22,6 +22,17 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(permissionContinue.waitForExistence(timeout: 10))
         permissionContinue.tap()
 
+        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        for _ in 0..<2 {
+            let systemAlert = springboard.alerts.firstMatch
+            guard systemAlert.waitForExistence(timeout: 3) else { break }
+            let allowButton = systemAlert.buttons.matching(
+                NSPredicate(format: "label CONTAINS[c] %@", "Allow")
+            ).firstMatch
+            guard allowButton.exists else { break }
+            allowButton.tap()
+        }
+
         let homeAlarm = app.staticTexts["home.alarm.time"]
         if !homeAlarm.waitForExistence(timeout: 15) {
             XCTFail("The first alarm did not appear after saving. Current UI: \(app.debugDescription)")

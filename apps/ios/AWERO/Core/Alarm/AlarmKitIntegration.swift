@@ -148,7 +148,7 @@ enum SystemAlarmKitScheduler {
         "snooze:\(isTestAlarm ? "test:" : "")\(alarm.id.uuidString)"
     }
 
-    private static func ensureAuthorization() async throws {
+    static func requestAuthorization() async throws {
         switch AlarmManager.shared.authorizationState {
         case .authorized:
             return
@@ -162,6 +162,10 @@ enum SystemAlarmKitScheduler {
         @unknown default:
             throw AlarmSchedulingError.alarmAuthorizationDenied
         }
+    }
+
+    private static func ensureAuthorization() async throws {
+        try await requestAuthorization()
     }
 
     private static func localeWeekday(_ day: Int) -> Locale.Weekday? {
