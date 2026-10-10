@@ -52,11 +52,9 @@ fun WakeScreen(flow: WakeFlowController) {
     val active = state == WakeFlowController.State.RINGING || state == WakeFlowController.State.MISSION
 
     Box(Modifier.fillMaxSize().background(AweroDesign.ivory)) {
-        SunriseArtwork(
+        WakeSceneArtwork(
             modifier = Modifier.align(Alignment.TopCenter),
-            height = 390.dp,
-            showsForest = true,
-            showsLake = true
+            height = 390.dp
         )
 
         Column(Modifier.fillMaxSize()) {

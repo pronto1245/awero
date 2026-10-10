@@ -21,7 +21,7 @@ object WakeAlarmScreen {
             gravity = Gravity.CENTER
             val density = resources.displayMetrics.density
             setPadding((20 * density).toInt(), (12 * density).toInt(), (20 * density).toInt(), (12 * density).toInt())
-            background = AweroSunriseBackground()
+            background = AweroSunriseBackground(resources)
         }
 
         fun text(value: String, size: Float) = TextView(activity).apply {

@@ -2,17 +2,13 @@ import SwiftUI
 import UIKit
 
 struct ApprovedHomeSunriseArtwork: View {
-    var height: CGFloat = 100
-
-    // The artwork ships as a loose JPEG. `Image(_ name:)` only resolves asset-catalog images and
-    // loose PNGs, so it rendered nothing; load the file by path and fall back to the drawn sunrise.
-    private static let bundledImage: UIImage? = Bundle.main
-        .path(forResource: "approved-sunrise-reference", ofType: "jpg")
-        .flatMap(UIImage.init(contentsOfFile:))
+    var height: CGFloat = 160
+    /// Defaults to the scene for the current time of day.
+    var scene: AweroScene = .current()
 
     var body: some View {
         Group {
-            if let image = Self.bundledImage {
+            if let image = scene.bandImage {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
@@ -23,6 +19,14 @@ struct ApprovedHomeSunriseArtwork: View {
         .frame(maxWidth: .infinity)
         .frame(height: height)
         .clipped()
+        .overlay(alignment: .top) {
+            LinearGradient(colors: [AweroDesign.ivory, AweroDesign.ivory.opacity(0)], startPoint: .top, endPoint: .bottom)
+                .frame(height: height * 0.18)
+        }
+        .overlay(alignment: .bottom) {
+            LinearGradient(colors: [AweroDesign.ivory.opacity(0), AweroDesign.ivory], startPoint: .top, endPoint: .bottom)
+                .frame(height: height * 0.30)
+        }
         .accessibilityHidden(true)
     }
 }

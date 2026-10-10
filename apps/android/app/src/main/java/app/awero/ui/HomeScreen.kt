@@ -135,7 +135,7 @@ fun HomeScreen(
             Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
             AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
         }
-        ApprovedHomeSunriseArtwork(Modifier.padding(top = 4.dp), height = 100.dp)
+        ApprovedHomeSunriseArtwork(Modifier.padding(top = 4.dp), height = 160.dp)
         Spacer(Modifier.height(18.dp))
 
         if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {

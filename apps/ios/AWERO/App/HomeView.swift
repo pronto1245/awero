@@ -65,7 +65,7 @@ struct HomeView: View {
                         }
                         .padding(.top, 4)
 
-                        ApprovedHomeSunriseArtwork(height: 100)
+                        ApprovedHomeSunriseArtwork(height: 160, scene: .current(at: now))
                             .padding(.horizontal, -20)
 
                         if let next = upcomingAlarms.first {

@@ -11,7 +11,7 @@ struct WakeScreen: View {
     var body: some View {
         ZStack(alignment: .top) {
             AweroDesign.ivory.ignoresSafeArea()
-            SunriseArtwork(height: 365, showsForest: true, showsLake: true)
+            WakeSceneBackground(height: 365)
                 .ignoresSafeArea(edges: .top)
                 .overlay(alignment: .bottom) {
                     LinearGradient(colors: [.clear, AweroDesign.ivory.opacity(0.92)], startPoint: .top, endPoint: .bottom)

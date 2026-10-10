@@ -2,7 +2,7 @@
 
 Status: **approved visual direction; visual implementation is partial and is tracked in Phase 7**. See [Stage 7 Visual Implementation Plan](STAGE_7_VISUAL_IMPLEMENTATION_PLAN.md).
 
-The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). Treat its composition, image treatment, type hierarchy, colors, card shapes, spacing, and button styling as the acceptance reference on both platforms. Native controls may differ only where platform behavior or accessibility requires it; those adaptations must preserve the approved visual hierarchy.
+The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg) and, per screen, on the owner's detailed reference screens below, which take precedence over the board. Treat its composition, image treatment, type hierarchy, colors, card shapes, spacing, and button styling as the acceptance reference on both platforms. Native controls may differ only where platform behavior or accessibility requires it; those adaptations must preserve the approved visual hierarchy.
 
 ## User value
 
@@ -18,7 +18,26 @@ Where these differ from the concept board, these win:
 4. **Alarm readiness.** Every alarm card shows whether it is scheduled or needs action/permissions.
 5. **Edit and delete.** Tapping an alarm card edits it; swipe deletes with confirmation.
 6. **Progress copy.** Average time reads as minutes to get up (e.g. «4,8 мин — среднее время подъёма»), not a star rating; the second tile shows the successful-wake percentage instead of repeating the streak; Russian uses a decimal comma.
-7. **Open owner decisions:** whether snooze stays on the wake screen, and what Profile contains beyond Settings.
+7. **Snooze.** None of the reference wake screens shows snooze; it is removed from the wake screen when that screen is rebuilt.
+8. **Imagery.** Photographic mountain-lake scenes replace the flat drawn sunrise (see Scene photos). Icons, cards and controls stay flat.
+
+## Reference screens (owner, 2026-10-10)
+
+The binding per-screen targets are in [`screens/`](screens): [Home](screens/home.png), [New alarm](screens/create-alarm.png), [Wake — Math](screens/wake-math.png), [Wake — Steps](screens/wake-steps.png), [Wake — QR](screens/wake-qr.png), [Progress](screens/progress.png) and [Profile](screens/profile.png).
+
+They are taken literally except for these owner-approved points:
+
+- **Steps:** the hint "tap the circle to simulate steps" is a prototype aid; real steps come from the motion sensor.
+- **QR:** "camera feed" is a placeholder for the live camera preview.
+- **Profile identity:** the app has no account name. Show initials and a name only if the person entered one; otherwise a neutral "My profile".
+- **Weather chips** (Home, Math) need a real provider and location consent (Phase 9). Until then they are hidden, never filled with sample values.
+- **Progress copy** follows correction 6 above, not the star rating.
+- **New alarm actions:** "Проверить будильник" saves the alarm and immediately starts a test ring; a "Готово" action in the header saves without a test.
+- Profile settings (melody, gradual volume, vibration, saved QR codes, sleep reminder) are product features, implemented in their own slices; they are not mocked in the UI before they work.
+
+## Scene photos
+
+Backgrounds use one mountain-lake scene photographed at four times of day (`apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). The Home header band follows device local time: dawn 05–11, day 11–18, sunset 18–23, night 23–05. The wake and mission screens use the portrait dawn scene, with a light top scrim behind the navy title and a fade into the ivory surface. The night portrait is reserved for the dim wake variant (correction 3), which also has to switch mission text colors and ships separately.
 
 ## Screens and implementation status
 
