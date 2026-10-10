@@ -131,7 +131,7 @@ class FirstRunOnboardingUiTest {
                     captureVisual("CreateMissions-$language")
                     compose.onNodeWithText(localized(R.string.create_mission_qr_body)).performScrollTo().assertIsDisplayed()
                     captureVisual("CreateQR-$language")
-                    compose.onNodeWithText(localized(R.string.create_cancel)).performClick()
+                    compose.onNodeWithContentDescription(localized(R.string.create_cancel)).performClick()
                 }
             } finally {
                 manager.applicationLocales = previous

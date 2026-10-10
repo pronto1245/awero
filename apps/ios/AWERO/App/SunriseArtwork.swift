@@ -1,16 +1,29 @@
 import SwiftUI
+import UIKit
 
 struct ApprovedHomeSunriseArtwork: View {
     var height: CGFloat = 100
 
+    // The artwork ships as a loose JPEG. `Image(_ name:)` only resolves asset-catalog images and
+    // loose PNGs, so it rendered nothing; load the file by path and fall back to the drawn sunrise.
+    private static let bundledImage: UIImage? = Bundle.main
+        .path(forResource: "approved-sunrise-reference", ofType: "jpg")
+        .flatMap(UIImage.init(contentsOfFile:))
+
     var body: some View {
-        Image("approved-sunrise-reference")
-            .resizable()
-            .scaledToFill()
-            .frame(maxWidth: .infinity)
-            .frame(height: height)
-            .clipped()
-            .accessibilityHidden(true)
+        Group {
+            if let image = Self.bundledImage {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+            } else {
+                SunriseArtwork(height: height)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: height)
+        .clipped()
+        .accessibilityHidden(true)
     }
 }
 

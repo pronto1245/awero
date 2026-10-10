@@ -84,7 +84,7 @@
 "mission.camera_denied" = "El acceso a la cámara no está disponible. Usa la alternativa de matemáticas.";
 "mission.camera_unavailable" = "Cámara no disponible.";
 "mission.change_sign" = "Cambiar signo";
-"mission.check" = "COMPROBAR";
+"mission.check" = "Comprobar";
 "mission.continue" = "Continuar";
 "mission.delete_digit" = "Borrar el último dígito";
 "mission.keep_walking" = "Sigue caminando hasta alcanzar el objetivo.";
@@ -92,14 +92,14 @@
 "mission.qr_detected" = "Código detectado.";
 "mission.qr_instructions" = "Apunta la cámara al QR o código de barras guardado.";
 "mission.qr_mismatch" = "El código QR no coincide. Se usará una alternativa segura.";
-"mission.qr_title" = "ESCANEA TU CÓDIGO";
+"mission.qr_title" = "Escanea tu código";
 "mission.qr_unconfigured" = "La misión QR no está configurada.";
 "mission.steps_progress" = "Pasos: %1$d / 30";
-"mission.steps_title" = "CAMINA 30 PASOS";
+"mission.steps_title" = "Camina 30 pasos";
 "mission.timeout" = "Después de 2 minutos, esta tarea cambia a matemáticas.";
-"mission.title" = "MISIÓN PARA DESPERTAR";
+"mission.title" = "Misión para despertar";
 "mission.try_again" = "Inténtalo de nuevo";
-"mission.unavailable" = "MISIÓN NO DISPONIBLE";
+"mission.unavailable" = "Misión no disponible";
 "mission.use_fallback" = "Usar alternativa";
 "mission.use_math" = "Usar alternativa de matemáticas";
 "nav.home" = "Inicio";
@@ -144,7 +144,7 @@
 "wake.active" = "La alarma está activa.";
 "wake.complete" = "Completar misión";
 "wake.completed_body" = "La sesión para despertar ha terminado.";
-"wake.completed_title" = "YA ESTÁS EN PIE";
+"wake.completed_title" = "Ya estás en pie";
 "wake.emergency_stop" = "Parada de emergencia";
 "wake.emergency_stop_hint" = "Solo en caso de emergencia";
 "wake.error_completion_save" = "No se pudo guardar la finalización. Tu sesión de despertar sigue activa.";
@@ -160,7 +160,7 @@
 "wake.snooze_error_body" = "La alarma sigue sonando.";
 "wake.snooze_error_title" = "Posponer no disponible";
 "wake.snoozed_body" = "El próximo despertar está programado.";
-"wake.snoozed_title" = "POSPUESTA";
+"wake.snoozed_title" = "Pospuesta";
 "wake.start" = "Iniciar misión";
 "wake.stopped_body" = "La sesión quedó registrada.";
-"wake.title" = "LEVÁNTATE";
+"wake.title" = "Levántate";

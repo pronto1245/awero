@@ -84,7 +84,7 @@
 "mission.camera_denied" = "Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.";
 "mission.camera_unavailable" = "Kamera nicht verfügbar.";
 "mission.change_sign" = "Vorzeichen ändern";
-"mission.check" = "PRÜFEN";
+"mission.check" = "Prüfen";
 "mission.continue" = "Weiter";
 "mission.delete_digit" = "Letzte Ziffer löschen";
 "mission.keep_walking" = "Gehe weiter, bis du das Ziel erreichst.";
@@ -92,14 +92,14 @@
 "mission.qr_detected" = "Code erkannt.";
 "mission.qr_instructions" = "Richte die Kamera auf deinen gespeicherten QR-Code oder Barcode.";
 "mission.qr_mismatch" = "Der QR-Code stimmt nicht überein. Sichere Ersatzaufgabe wird gestartet.";
-"mission.qr_title" = "SCANNE DEINEN CODE";
+"mission.qr_title" = "Scanne deinen Code";
 "mission.qr_unconfigured" = "Die QR-Aufgabe ist nicht eingerichtet.";
 "mission.steps_progress" = "Schritte: %1$d / 30";
-"mission.steps_title" = "GEHE 30 SCHRITTE";
+"mission.steps_title" = "Gehe 30 Schritte";
 "mission.timeout" = "Nach 2 Minuten wechselt diese Aufgabe zu Mathe.";
-"mission.title" = "AUFWACHAUFGABE";
+"mission.title" = "Aufwachaufgabe";
 "mission.try_again" = "Versuche es erneut";
-"mission.unavailable" = "AUFGABE NICHT VERFÜGBAR";
+"mission.unavailable" = "Aufgabe nicht verfügbar";
 "mission.use_fallback" = "Ersatzaufgabe verwenden";
 "mission.use_math" = "Mathe-Ersatzaufgabe verwenden";
 "nav.home" = "Start";
@@ -144,7 +144,7 @@
 "wake.active" = "Der Wecker ist aktiv.";
 "wake.complete" = "Aufgabe abschließen";
 "wake.completed_body" = "Die Aufwach-Sitzung ist abgeschlossen.";
-"wake.completed_title" = "DU BIST AUF";
+"wake.completed_title" = "Du bist auf";
 "wake.emergency_stop" = "Not-Aus";
 "wake.emergency_stop_hint" = "Nur im Notfall";
 "wake.error_completion_save" = "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.";
@@ -160,7 +160,7 @@
 "wake.snooze_error_body" = "Der Wecker klingelt weiterhin.";
 "wake.snooze_error_title" = "Schlummern nicht verfügbar";
 "wake.snoozed_body" = "Dein nächstes Aufwachen ist geplant.";
-"wake.snoozed_title" = "GESCHLUMMERT";
+"wake.snoozed_title" = "Geschlummert";
 "wake.start" = "Aufgabe starten";
 "wake.stopped_body" = "Die Sitzung wurde gespeichert.";
-"wake.title" = "STEH AUF";
+"wake.title" = "Steh auf";
