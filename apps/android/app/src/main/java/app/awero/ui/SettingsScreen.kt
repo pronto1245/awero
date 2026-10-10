@@ -20,9 +20,9 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.unit.dp
 import app.awero.R
 
-private val SettingsIvory = AweroDesign.ivory
-private val SettingsNavy = AweroDesign.navy
-private val SettingsCoral = AweroDesign.coral
+private val SettingsIvory get() = AweroDesign.ivory
+private val SettingsNavy get() = AweroDesign.navy
+private val SettingsCoral get() = AweroDesign.coralStrong
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
@@ -53,7 +53,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         )
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
             shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(
@@ -74,7 +74,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
             shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(

@@ -37,9 +37,32 @@ They are taken literally except for these owner-approved points:
 - **New alarm actions:** "Проверить будильник" saves the alarm and immediately starts a test ring; a "Готово" action in the header saves without a test.
 - Profile settings (melody, gradual volume, vibration, saved QR codes, sleep reminder) are product features, implemented in their own slices; they are not mocked in the UI before they work.
 
+## Design tokens and themes
+
+Measured from the reference screens. The app follows the system appearance (light or dark) on both platforms; screens use these tokens, never literal colors. Code: `apps/ios/AWERO/App/AweroDesign.swift`, `apps/android/app/src/main/java/app/awero/ui/AweroDesign.kt`.
+
+| Token | Role | Light | Dark |
+|---|---|---|---|
+| `ivory` | Page background | `#FBF6EF` | `#121624` |
+| `navy` | Primary text | `#1D2433` | `#F2EDE6` |
+| `textSecondary` | Secondary text | `#6E6B6B` | `#A39D97` |
+| `surface` | Cards, lists, keypad keys | `#FFFFFF` | `#1E2335` |
+| `surfaceMuted` | Time wheel, stat tiles | `#F4ECE2` | `#1E2335` |
+| `surfaceStrong` | Time wheel selection band | `#ECE2D6` | `#2B3247` |
+| `chip` | Unselected chips, switch tracks | `#EFE8DF` | `#262C40` |
+| `coral` | Accent: icons, outlines, selected tab | `#F26A3D` | `#F26A3D` |
+| `coralStrong` | Fills with white text: buttons, day chips, ✓ | `#E0502F` | `#E0502F` |
+| `coralSoft` | Selected mission card | `#FDEEE6` | `#2E2326` |
+| `sage` / `successSoft` / `successText` | Completed days, stability card | `#6AA84F` / `#E9F0DF` / `#3F8A3A` | `#6AA84F` / `#1F2E24` / `#7FC36A` |
+| `surfaceWarm` | Tip cards | `#FDF0DC` | `#2E2A1F` |
+| `warning` / `warningSoft` / `warningLine` | Emergency stop, destructive | `#B5241D` / `#FBE9E5` / `#F2C9C2` | `#F0645A` / `#2E1F22` / `#5A2C2C` |
+| `sun` | Sun glyphs | `#F5A623` | `#F5A623` |
+
+White on `coral` is about 3.0:1, enough only for large bold labels; white on `coralStrong` is about 3.9:1, so every filled control with a white label uses `coralStrong`.
+
 ## Scene illustrations
 
-Pages use one illustrated mountain-lake scene at several times of day, supplied by the owner (853×1844 portraits; `apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). As in the reference screens, the scene is a full-screen background behind the page: the sun and peaks sit behind the greeting and the next-alarm card overlaps them, and the artwork fades into the ivory surface at the bottom. In the light theme Home follows device local time — dawn 05–11, day 11–18, sunset 18–05 — and the wake and mission screens always use dawn. The night scene belongs to the dark theme and ships with it.
+Pages use one illustrated mountain-lake scene at several times of day, supplied by the owner (853×1844 portraits; `apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). As in the reference screens, the scene is a full-screen background behind the page: the sun and peaks sit behind the greeting and the next-alarm card overlaps them, and the artwork fades into the ivory surface at the bottom. In the light theme Home follows device local time — dawn 05–11, day 11–18, sunset 18–05 — and the wake and mission screens always use dawn. The dark theme uses the night scene on every page; its lower part is recolored to fade into the dark page background instead of ivory.
 
 ## Screens and implementation status
 

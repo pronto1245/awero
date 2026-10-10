@@ -62,7 +62,7 @@ struct HomeView: View {
                                     .foregroundStyle(AweroDesign.navy.opacity(0.68))
                                 Image(systemName: "sun.max.fill")
                                     .font(.subheadline)
-                                    .foregroundStyle(Color(red: 1, green: 0.64, blue: 0.19))
+                                    .foregroundStyle(AweroDesign.sun)
                                     .accessibilityHidden(true)
                             }
                         }
@@ -133,7 +133,7 @@ struct HomeView: View {
                             ProgressView("home.loading_alarms")
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(22)
-                                .background(.white)
+                                .background(AweroDesign.surface)
                                 .clipShape(RoundedRectangle(cornerRadius: 22))
                         } else if alarms.loadState == .failed {
                             VStack(alignment: .leading, spacing: 10) {
@@ -149,7 +149,7 @@ struct HomeView: View {
                             .foregroundStyle(AweroDesign.navy)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(22)
-                            .background(.white)
+                            .background(AweroDesign.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 22))
                         } else if alarms.alarms.isEmpty {
                             VStack(alignment: .leading, spacing: 10) {
@@ -159,7 +159,7 @@ struct HomeView: View {
                             .foregroundStyle(AweroDesign.navy)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(22)
-                            .background(.white)
+                            .background(AweroDesign.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 22))
                             .frame(maxHeight: .infinity, alignment: .top)
                         } else {
@@ -213,7 +213,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .foregroundStyle(.white)
-                        .background(AweroDesign.coral)
+                        .background(AweroDesign.coralStrong)
                         .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                 }
                 .accessibilityIdentifier("home.createAlarm")
@@ -453,7 +453,7 @@ private struct AlarmCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .background(.white)
+        .background(AweroDesign.surface)
         .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 

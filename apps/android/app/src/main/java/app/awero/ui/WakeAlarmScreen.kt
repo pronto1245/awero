@@ -40,7 +40,7 @@ object WakeAlarmScreen {
             minHeight = (54 * resources.displayMetrics.density).toInt()
             setTextColor(if (primaryAction) android.graphics.Color.WHITE else AweroDesign.navyArgb)
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(if (primaryAction) AweroDesign.coralArgb else android.graphics.Color.WHITE)
+                setColor(if (primaryAction) AweroDesign.coralArgb else AweroDesign.surfaceArgb)
                 cornerRadius = 18 * resources.displayMetrics.density
             }
         }
@@ -64,8 +64,8 @@ object WakeAlarmScreen {
             setPadding((10 * density).toInt(), (7 * density).toInt(), (10 * density).toInt(), (7 * density).toInt())
             minimumHeight = (60 * density).toInt()
             background = android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFFFFE8E2.toInt())
-                setStroke((1 * density).toInt(), 0xFFFFC5BD.toInt())
+                setColor(AweroDesign.warningSoftArgb)
+                setStroke((1 * density).toInt(), AweroDesign.warningLineArgb)
                 cornerRadius = 20 * density
             }
             val headline = LinearLayout(activity).apply {
@@ -74,7 +74,7 @@ object WakeAlarmScreen {
                 val warningIcon = FrameLayout(activity)
                 warningIcon.addView(TextView(activity).apply {
                     text = "▲"
-                    setTextColor(0xFFD3313D.toInt())
+                    setTextColor(AweroDesign.warningArgb)
                     textSize = 21f
                     gravity = Gravity.CENTER
                     includeFontPadding = false
@@ -93,7 +93,7 @@ object WakeAlarmScreen {
                 })
                 addView(TextView(activity).apply {
                     text = activity.getString(R.string.wake_emergency_stop)
-                    setTextColor(0xFFD3313D.toInt())
+                    setTextColor(AweroDesign.warningArgb)
                     textSize = 15f
                     gravity = Gravity.CENTER
                 })
@@ -180,7 +180,7 @@ object WakeAlarmScreen {
                 minWidth = (44 * resources.displayMetrics.density).toInt()
                 minHeight = (44 * resources.displayMetrics.density).toInt()
                 background = android.graphics.drawable.GradientDrawable().apply {
-                    setColor(0xCCFFFFFF.toInt())
+                    setColor((AweroDesign.surfaceArgb and 0x00FFFFFF) or (0xCC shl 24))
                     cornerRadius = 12 * resources.displayMetrics.density
                 }
                 contentDescription = activity.getString(R.string.wake_emergency_stop)

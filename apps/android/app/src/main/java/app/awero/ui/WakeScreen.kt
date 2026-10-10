@@ -91,7 +91,7 @@ fun WakeScreen(flow: WakeFlowController) {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(AweroDesign.cardCorner),
-                            color = Color.White.copy(alpha = .94f)
+                            color = AweroDesign.surface.copy(alpha = .94f)
                         ) {
                             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Text(stringResource(R.string.wake_instruction), color = AweroDesign.navy, style = MaterialTheme.typography.bodyLarge)
@@ -115,7 +115,7 @@ fun WakeScreen(flow: WakeFlowController) {
 
                     WakeFlowController.State.MISSION -> {
                         actionError?.let {
-                            Surface(color = Color.White.copy(alpha = .94f), shape = RoundedCornerShape(16.dp)) {
+                            Surface(color = AweroDesign.surface.copy(alpha = .94f), shape = RoundedCornerShape(16.dp)) {
                                 Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text(it, color = AweroDesign.navy)
                                     Button(onClick = { flow.clearActionError() }) {
@@ -169,13 +169,13 @@ fun WakeScreen(flow: WakeFlowController) {
                     onClick = { scope.launch { flow.emergencyStop() } },
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = if (state == WakeFlowController.State.MISSION) 4.dp else 8.dp).heightIn(min = 62.dp)
                         .semantics { contentDescription = context.getString(R.string.wake_emergency_stop) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE8E2)),
+                    colors = ButtonDefaults.buttonColors(containerColor = AweroDesign.warningSoft),
                     shape = RoundedCornerShape(AweroDesign.cardCorner)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        AweroNavigationIcon("warning", tint = Color(0xFFD3313D))
+                        AweroNavigationIcon("warning", tint = AweroDesign.warning)
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(stringResource(R.string.wake_emergency_stop), color = Color(0xFFD3313D), style = MaterialTheme.typography.titleSmall)
+                            Text(stringResource(R.string.wake_emergency_stop), color = AweroDesign.warning, style = MaterialTheme.typography.titleSmall)
                             Text(stringResource(R.string.wake_emergency_stop_hint), color = AweroDesign.navy.copy(alpha = .58f), style = MaterialTheme.typography.bodySmall)
                         }
                     }
@@ -187,7 +187,7 @@ fun WakeScreen(flow: WakeFlowController) {
 
 @Composable
 private fun terminalState(title: Int, body: Int, iconColor: Color) {
-    Surface(color = Color.White.copy(alpha = .94f), shape = RoundedCornerShape(AweroDesign.cardCorner)) {
+    Surface(color = AweroDesign.surface.copy(alpha = .94f), shape = RoundedCornerShape(AweroDesign.cardCorner)) {
         Column(
             Modifier.fillMaxWidth().padding(22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

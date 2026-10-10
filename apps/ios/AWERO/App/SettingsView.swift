@@ -69,7 +69,7 @@ struct SettingsView: View {
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 13)
-                                .background(AweroDesign.coral)
+                                .background(AweroDesign.coralStrong)
                                 .foregroundStyle(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                         }

@@ -28,9 +28,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.awero.R
 
-private val OnboardingIvory = AweroDesign.ivory
-private val OnboardingNavy = AweroDesign.navy
-private val OnboardingCoral = AweroDesign.coral
+private val OnboardingIvory get() = AweroDesign.ivory
+private val OnboardingNavy get() = AweroDesign.navy
+private val OnboardingCoral get() = AweroDesign.coralStrong
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
@@ -44,7 +44,7 @@ fun OnboardingScreen(onContinue: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("AWERO", style = MaterialTheme.typography.headlineSmall, color = OnboardingNavy, modifier = Modifier.weight(1f))
-                Text("☀", color = Color(0xFFFFA429), style = MaterialTheme.typography.titleLarge)
+                Text("☀", color = AweroDesign.sun, style = MaterialTheme.typography.titleLarge)
             }
             SunriseArtwork(height = 174.dp, rounded = true)
             Text(
@@ -54,7 +54,7 @@ fun OnboardingScreen(onContinue: () -> Unit) {
                 modifier = Modifier.semantics { heading() }
             )
             Text(stringResource(R.string.onboarding_body), color = OnboardingNavy.copy(alpha = .72f))
-            Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)) {
+            Card(colors = CardDefaults.cardColors(containerColor = AweroDesign.surface), shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)) {
                 Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(stringResource(R.string.onboarding_privacy), color = OnboardingNavy.copy(alpha = .78f))
                     Text(stringResource(R.string.onboarding_permissions), color = OnboardingNavy.copy(alpha = .72f))

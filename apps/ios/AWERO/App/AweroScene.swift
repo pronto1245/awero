@@ -1,10 +1,10 @@
 import SwiftUI
 import UIKit
 
-/// Illustrated mountain-lake scenes used as AWERO page backgrounds. Home follows the time of
-/// day; the wake screen always uses dawn. The night scene arrives with the dark theme.
+/// Illustrated mountain-lake scenes used as AWERO page backgrounds. In the light theme Home
+/// follows the time of day and the wake screen uses dawn; the dark theme always uses night.
 enum AweroScene: String, CaseIterable {
-    case dawn, day, sunset
+    case dawn, day, sunset, night
 
     /// Dawn 05–11, day 11–18, sunset 18–05 (device local time).
     static func current(at date: Date = .now, calendar: Calendar = .current) -> AweroScene {
@@ -15,7 +15,7 @@ enum AweroScene: String, CaseIterable {
         }
     }
 
-    /// Full-screen portrait artwork; its bottom fades into the ivory surface.
+    /// Full-screen portrait artwork; its bottom fades into the page background of its theme.
     var image: UIImage? { Self.images[self] ?? nil }
 
     // The scenes ship as loose JPEGs, which `Image(_ name:)` cannot resolve, so they are loaded by
@@ -31,11 +31,13 @@ enum AweroScene: String, CaseIterable {
 /// Full-screen illustrated scene behind a page (Home, wake and mission screens). The artwork
 /// fades into the ivory surface at the bottom, so it sits directly under the page content.
 struct AweroSceneBackground: View {
+    /// The light-theme scene. The dark theme always shows the night scene.
     var scene: AweroScene = .dawn
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Group {
-            if let image = scene.image {
+            if let image = (colorScheme == .dark ? .night : scene).image {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()

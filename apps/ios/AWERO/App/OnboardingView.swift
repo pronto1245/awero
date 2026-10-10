@@ -16,7 +16,7 @@ struct OnboardingView: View {
                             .foregroundStyle(AweroDesign.navy)
                         Spacer()
                         Image(systemName: "sun.max.fill")
-                            .foregroundStyle(Color(red: 1, green: 0.64, blue: 0.19))
+                            .foregroundStyle(AweroDesign.sun)
                     }
                     SunriseArtwork(height: 174, cornerRadius: 20)
                     Text("onboarding.title")
@@ -37,7 +37,7 @@ struct OnboardingView: View {
                     }
                     .padding(18)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.white.opacity(0.86), in: RoundedRectangle(cornerRadius: 20))
+                    .background(AweroDesign.surface.opacity(0.86), in: RoundedRectangle(cornerRadius: 20))
                 }
                 .padding(.horizontal, 22)
                 .padding(.top, 16)
@@ -49,7 +49,7 @@ struct OnboardingView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(AweroDesign.coral)
+                        .background(AweroDesign.coralStrong)
                         .foregroundStyle(AweroDesign.navy)
                         .clipShape(RoundedRectangle(cornerRadius: 18))
                 }

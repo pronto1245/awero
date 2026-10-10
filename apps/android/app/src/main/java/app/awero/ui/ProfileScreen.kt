@@ -46,7 +46,7 @@ fun ProfileScreen(modifier: Modifier = Modifier, onOpenSettings: () -> Unit) {
                 contentDescription = context.getString(R.string.profile_settings_hint)
             },
             shape = RoundedCornerShape(AweroDesign.cardCorner),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = AweroDesign.surface)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(18.dp),

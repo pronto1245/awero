@@ -1,5 +1,6 @@
 package app.awero.ui
 
+import androidx.compose.ui.graphics.toArgb
 import androidx.activity.ComponentActivity
 import android.graphics.Color
 import app.awero.R
@@ -73,7 +74,7 @@ object MissionRuntimeScreen {
                 root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 40f).apply {
                     setTypeface(typeface, android.graphics.Typeface.BOLD)
                     setPadding(0, (16 * resources.displayMetrics.density).toInt(), 0, (16 * resources.displayMetrics.density).toInt())
-                    background = android.graphics.drawable.GradientDrawable().apply { setColor(0xF7FFFFFF.toInt()); cornerRadius = 20 * resources.displayMetrics.density }
+                    background = android.graphics.drawable.GradientDrawable().apply { setColor((AweroDesign.surfaceArgb and 0x00FFFFFF) or (0xF7 shl 24)); cornerRadius = 20 * resources.displayMetrics.density }
                 }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
                     val gap = (6 * activity.resources.displayMetrics.density).toInt()
                     setMargins(0, gap, 0, gap)
@@ -87,14 +88,14 @@ object MissionRuntimeScreen {
                     hint = activity.getString(R.string.mission_answer)
                     showSoftInputOnFocus = false
                     background = android.graphics.drawable.GradientDrawable().apply {
-                        setColor(Color.WHITE)
-                        setStroke((1 * resources.displayMetrics.density).toInt(), 0xFFDCD8D2.toInt())
+                        setColor(AweroDesign.surfaceArgb)
+                        setStroke((1 * resources.displayMetrics.density).toInt(), AweroDesign.border.toArgb())
                         cornerRadius = 12 * resources.displayMetrics.density
                     }
                     setPadding((8 * resources.displayMetrics.density).toInt(), 0, (8 * resources.displayMetrics.density).toInt(), 0)
                 }
                 val invalidMessage = label(activity.getString(R.string.mission_try_again), 16f).apply {
-                    setTextColor(0xFFED3B40.toInt())
+                    setTextColor(AweroDesign.warningArgb)
                     visibility = View.GONE
                     minHeight = (32 * resources.displayMetrics.density).toInt()
                 }
@@ -108,7 +109,7 @@ object MissionRuntimeScreen {
                     val padding = (8 * resources.displayMetrics.density).toInt()
                     setPadding(padding, padding, padding, padding)
                     background = android.graphics.drawable.GradientDrawable().apply {
-                        setColor(Color.WHITE)
+                        setColor(AweroDesign.surfaceArgb)
                         cornerRadius = 14 * resources.displayMetrics.density
                     }
                     setOnClickListener { action() }

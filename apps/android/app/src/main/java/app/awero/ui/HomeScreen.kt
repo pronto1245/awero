@@ -40,10 +40,10 @@ import java.time.Instant
 import java.util.Date
 import java.util.TimeZone
 
-private val AweroIvory = AweroDesign.ivory
-private val AweroNavy = AweroDesign.navy
-private val AweroCoral = AweroDesign.coral
-private val AweroSage = AweroDesign.sage
+private val AweroIvory get() = AweroDesign.ivory
+private val AweroNavy get() = AweroDesign.navy
+private val AweroCoral get() = AweroDesign.coralStrong
+private val AweroSage get() = AweroDesign.sage
 
 private enum class AlarmLoadState { Loading, Loaded, Failed }
 
@@ -108,7 +108,7 @@ fun HomeScreen(
     Column(
         modifier = modifier.fillMaxSize().background(AweroIvory)
             // Full-screen illustrated scene behind the page; it fades to ivory at the bottom.
-            .paint(painterResource(AweroScene.current().portrait), contentScale = ContentScale.Crop)
+            .paint(painterResource(AweroScene.page(AweroScene.current()).portrait), contentScale = ContentScale.Crop)
             .padding(horizontal = 20.dp)
     ) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
@@ -139,7 +139,7 @@ fun HomeScreen(
         )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
-            AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
+            AweroNavigationIcon("sun", tint = AweroDesign.sun)
         }
         // Space for the scene's sun and peaks; the next-alarm card overlaps them.
         Spacer(Modifier.height(150.dp))
@@ -154,13 +154,13 @@ fun HomeScreen(
             ) {
                 Box(
                     modifier = Modifier
-                    .background(Color.White)
+                    .background(AweroDesign.surface)
                     .padding(horizontal = 18.dp, vertical = 14.dp)
                         .fillMaxWidth()
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
+                            AweroNavigationIcon("sun", tint = AweroDesign.sun)
                             Text(stringResource(R.string.home_next_alarm), color = AweroCoral, style = MaterialTheme.typography.titleSmall)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -180,7 +180,7 @@ fun HomeScreen(
         if (alarmLoadState == AlarmLoadState.Loaded && alarms.isNotEmpty() && nextAlarm == null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF2E3)),
+                colors = CardDefaults.cardColors(containerColor = AweroDesign.surfaceWarm),
                 shape = RoundedCornerShape(18.dp)
             ) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -196,7 +196,7 @@ fun HomeScreen(
         if (alarmLoadState == AlarmLoadState.Loading) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
@@ -206,7 +206,7 @@ fun HomeScreen(
         } else if (alarmLoadState == AlarmLoadState.Failed) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Column(Modifier.fillMaxWidth().padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -220,7 +220,7 @@ fun HomeScreen(
         } else if (alarms.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
                 shape = RoundedCornerShape(22.dp)
             ) {
                 Column(
@@ -239,7 +239,7 @@ fun HomeScreen(
                 alarms.forEach { alarm ->
                     val state = readiness[alarm.id]
                     Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = AweroDesign.surface),
                         shape = RoundedCornerShape(20.dp)
                     ) {
                         Column(Modifier.fillMaxWidth().padding(16.dp)) {

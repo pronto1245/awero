@@ -51,9 +51,9 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
 
-private val FormIvory = AweroDesign.ivory
-private val FormNavy = AweroDesign.navy
-private val FormCoral = AweroDesign.coral
+private val FormIvory get() = AweroDesign.ivory
+private val FormNavy get() = AweroDesign.navy
+private val FormCoral get() = AweroDesign.coralStrong
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
@@ -131,7 +131,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                                 Text(String.format(Locale.ROOT, "%02d", previous), color = FormNavy.copy(alpha = .36f), style = MaterialTheme.typography.titleMedium)
                                 Box(
                                     Modifier.fillMaxWidth().height(48.dp).padding(horizontal = 3.dp)
-                                        .clip(RoundedCornerShape(AweroDesign.cardCorner)).background(Color.White.copy(alpha = .60f)),
+                                        .clip(RoundedCornerShape(AweroDesign.cardCorner)).background(AweroDesign.surface.copy(alpha = .60f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(String.format(Locale.ROOT, "%02d", value), color = FormNavy, style = MaterialTheme.typography.headlineMedium)
@@ -145,7 +145,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_repeat), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = Color.White) {
+                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = AweroDesign.surface) {
                     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp)) {
                         listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
                             val selected = day in weekdays
@@ -171,7 +171,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_mission), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = Color.White) {
+                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = AweroDesign.surface) {
                     if (compactLayout) {
                         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
@@ -231,7 +231,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             )
         }
 
-        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEFDB)), shape = RoundedCornerShape(18.dp)) {
+        Card(colors = CardDefaults.cardColors(containerColor = AweroDesign.surfaceWarm), shape = RoundedCornerShape(18.dp)) {
             Text(stringResource(R.string.permission_alarm_body), color = FormNavy, modifier = Modifier.padding(16.dp))
         }
 
@@ -356,7 +356,7 @@ private fun MissionOptionCard(type: MissionType, selected: Boolean, modifier: Mo
         modifier = modifier
             .heightIn(min = 142.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) Color(0xFFFFEEE4) else Color(0xFFFFF8EF))
+            .background(if (selected) AweroDesign.coralSoft else AweroDesign.surface)
             .border(if (selected) 1.5.dp else 1.dp, if (selected) FormCoral else FormNavy.copy(alpha = .10f), RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 8.dp, vertical = 10.dp),
