@@ -16,5 +16,6 @@ data class WakeSession(
     var snoozeCount: Int = 0,
     var fallbackUsed: Boolean = false,
     var emergencyStop: Boolean = false,
-    var isTest: Boolean = false
+    var isTest: Boolean = false,
+    val missionType: String? = null
 )

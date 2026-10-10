@@ -14,6 +14,11 @@ class AnonymousAuthCoordinator(private val context: Context) {
 
             val store = AnonymousAuthSessionStore(context)
             val existing = store.loadSession()
+            val installationSecret = store.installationSecret()
+            if (existing != null && !store.installationSecretIsBound()) {
+                AnonymousAuthApiClient(configuration).bindInstallation(installationSecret, existing.accessToken)
+                store.markInstallationSecretBound()
+            }
             if (existing != null && existing.expiresAtEpochMillis - nowMillis > REFRESH_BEFORE_EXPIRY_MILLIS) {
                 return@runCatching
             }
@@ -21,6 +26,7 @@ class AnonymousAuthCoordinator(private val context: Context) {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
             val registration = AnonymousRegistrationRequest(
                 deviceId = store.installationId(),
+                installationSecret = installationSecret,
                 platform = "ANDROID",
                 appVersion = packageInfo.versionName?.takeIf(String::isNotBlank) ?: "0.1.0",
                 osVersion = Build.VERSION.RELEASE?.take(64),
@@ -35,6 +41,7 @@ class AnonymousAuthCoordinator(private val context: Context) {
                     expiresAtEpochMillis = nowMillis + response.expiresInDays * MILLIS_PER_DAY
                 )
             )
+            store.markInstallationSecretBound()
         }
     }
 

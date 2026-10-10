@@ -30,13 +30,14 @@ class AnonymousAuthApiClientTest {
         )
 
         val result = client.register(
-            AnonymousRegistrationRequest("device-installation-1234", "ANDROID", "0.1.0", "16", "Europe/Moscow")
+            AnonymousRegistrationRequest("device-installation-1234", "a".repeat(43), "ANDROID", "0.1.0", "16", "Europe/Moscow")
         )
 
         assertEquals("https://api.example.test/api/v1/auth/anonymous", endpoint)
         assertNull(bearerToken)
         val body = JSONObject(requestBody)
         assertEquals("device-installation-1234", body.getString("deviceId"))
+        assertEquals("a".repeat(43), body.getString("installationSecret"))
         assertEquals("ANDROID", body.getString("platform"))
         assertEquals("16", body.getString("osVersion"))
         assertEquals("Europe/Moscow", body.getString("timezone"))
@@ -49,7 +50,7 @@ class AnonymousAuthApiClientTest {
     @Test
     fun registrationRejectsInvalidDeviceIdAndRetainsHttpErrors() = runBlocking {
         assertThrows(IllegalArgumentException::class.java) {
-            AnonymousRegistrationRequest("short", "ANDROID", "0.1.0", null, "UTC")
+            AnonymousRegistrationRequest("short", "b".repeat(43), "ANDROID", "0.1.0", null, "UTC")
         }
         val client = AnonymousAuthApiClient(
             SyncApiConfiguration.fromValue("https://api.example.test/api/v1"),
@@ -61,7 +62,7 @@ class AnonymousAuthApiClientTest {
 
         val error = assertThrows(SyncApiException::class.java) {
             runBlocking {
-                client.register(AnonymousRegistrationRequest("device-installation-1234", "ANDROID", "0.1.0", null, "UTC"))
+                client.register(AnonymousRegistrationRequest("device-installation-1234", "c".repeat(43), "ANDROID", "0.1.0", null, "UTC"))
             }
         }
         assertEquals(400, error.statusCode)
@@ -78,7 +79,7 @@ class AnonymousAuthApiClientTest {
                 SyncHttpResponse(201, "{}")
             }
         )
-        val registration = AnonymousRegistrationRequest("device-installation-1234", "ANDROID", "0.1.0", null, "UTC")
+        val registration = AnonymousRegistrationRequest("device-installation-1234", "d".repeat(43), "ANDROID", "0.1.0", null, "UTC")
 
         assertThrows(IllegalStateException::class.java) {
             runBlocking { client.register(registration) }

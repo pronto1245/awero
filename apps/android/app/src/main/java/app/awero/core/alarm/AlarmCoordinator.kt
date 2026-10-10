@@ -101,14 +101,14 @@ class AlarmCoordinator(
     }
 
     private fun alarmSyncPayload(alarm: Alarm) = JSONObject()
-        .put("label", "Alarm")
+        .put("label", alarm.label)
         .put("hour", alarm.hour)
         .put("minute", alarm.minute)
         .put("enabled", alarm.enabled)
         .put("weekdays", JSONArray(alarm.weekdays.sorted()))
         .put("timezoneMode", alarm.timezoneMode.name)
         .put("fixedTimezone", alarm.fixedTimezone ?: JSONObject.NULL)
-        .put("snoozeEnabled", true)
+        .put("snoozeEnabled", alarm.snoozeEnabled)
         .put("maxSnoozes", alarm.maxSnoozes)
         .put("snoozeMinutes", alarm.snoozeMinutes)
         .put("missionType", alarm.missionType.name)

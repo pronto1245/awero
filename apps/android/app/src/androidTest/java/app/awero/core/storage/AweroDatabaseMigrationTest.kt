@@ -41,8 +41,19 @@ class AweroDatabaseMigrationTest {
         }
         assertEquals(7, alarm.first)
         assertEquals(30, alarm.second)
+        val newAlarmFields = migratedDb.query("SELECT label, snoozeEnabled FROM alarms WHERE id='alarm-1'").use {
+            assertTrue(it.moveToFirst())
+            it.getString(0) to it.getInt(1)
+        }
+        assertEquals("Alarm", newAlarmFields.first)
+        assertEquals(1, newAlarmFields.second)
 
-        assertTrue(migratedDb.query("SELECT id FROM wake_sessions WHERE id='session-1'").use { it.moveToFirst() })
+        val legacySession = migratedDb.query("SELECT id, missionType FROM wake_sessions WHERE id='session-1'").use {
+            assertTrue(it.moveToFirst())
+            it.getString(0) to it.isNull(1)
+        }
+        assertEquals("session-1", legacySession.first)
+        assertTrue("old sessions without a recorded mission must remain explicitly unknown", legacySession.second)
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='table' AND name='wake_events'").use { it.moveToFirst() })
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='index' AND name='index_wake_events_wakeSessionId'").use { it.moveToFirst() })
         assertTrue(migratedDb.query("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_conflicts'").use { it.moveToFirst() })

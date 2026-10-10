@@ -17,7 +17,7 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
             transport: transport
         )
         let registration = try AnonymousRegistrationRequest(
-            deviceId: "device-installation-1234", platform: "IOS", appVersion: "0.1.0",
+            deviceId: "device-installation-1234", installationSecret: String(repeating: "a", count: 43), platform: "IOS", appVersion: "0.1.0",
             osVersion: "18.0", timezone: "Europe/Moscow"
         )
 
@@ -29,6 +29,7 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
         XCTAssertEqual(request.url.absoluteString, "https://api.example.test/api/v1/auth/anonymous")
         XCTAssertNil(request.bearerToken)
         XCTAssertEqual(body["deviceId"], "device-installation-1234")
+        XCTAssertEqual(body["installationSecret"], String(repeating: "a", count: 43))
         XCTAssertEqual(body["platform"], "IOS")
         XCTAssertEqual(body["osVersion"], "18.0")
         XCTAssertEqual(body["timezone"], "Europe/Moscow")
@@ -41,7 +42,7 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
 
     func testRejectsInvalidRegistrationAndReportsHTTPFailure() async throws {
         XCTAssertThrowsError(try AnonymousRegistrationRequest(
-            deviceId: "short", platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
+            deviceId: "short", installationSecret: "invalid", platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
         ))
         let client = AnonymousAuthAPIClient(
             configuration: SyncAPIConfiguration(value: "https://api.example.test/api/v1"),
@@ -50,7 +51,7 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
             ))
         )
         let registration = try AnonymousRegistrationRequest(
-            deviceId: "device-installation-1234", platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
+            deviceId: "device-installation-1234", installationSecret: String(repeating: "b", count: 43), platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
         )
 
         do {
@@ -65,7 +66,7 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
         let transport = AnonymousAuthStubTransport(response: SyncHTTPResponse(statusCode: 201, body: Data("{}".utf8)))
         let client = AnonymousAuthAPIClient(configuration: SyncAPIConfiguration(value: nil), transport: transport)
         let registration = try AnonymousRegistrationRequest(
-            deviceId: "device-installation-1234", platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
+            deviceId: "device-installation-1234", installationSecret: String(repeating: "c", count: 43), platform: "IOS", appVersion: "0.1.0", timezone: "UTC"
         )
 
         do {
@@ -76,6 +77,18 @@ final class AnonymousAuthAPIClientTests: XCTestCase {
         }
         let request = await transport.request()
         XCTAssertNil(request)
+    }
+
+    func testBindsInstallationSecretWithExistingBearer() async throws {
+        let transport = AnonymousAuthStubTransport(response: SyncHTTPResponse(statusCode: 201, body: Data("{\"bound\":true}".utf8)))
+        let client = AnonymousAuthAPIClient(
+            configuration: SyncAPIConfiguration(value: "https://api.example.test/api/v1"), transport: transport
+        )
+        try await client.bindInstallation(String(repeating: "d", count: 43), bearerToken: "existing-token")
+        let capturedRequest = await transport.request()
+        let request = try XCTUnwrap(capturedRequest)
+        XCTAssertEqual(request.url.absoluteString, "https://api.example.test/api/v1/auth/anonymous/credentials")
+        XCTAssertEqual(request.bearerToken, "existing-token")
     }
 }
 

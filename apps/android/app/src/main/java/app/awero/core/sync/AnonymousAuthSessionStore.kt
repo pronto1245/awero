@@ -7,6 +7,7 @@ import android.util.Base64
 import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.security.KeyStore
+import java.security.SecureRandom
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -32,19 +33,35 @@ class AnonymousAuthSessionStore(context: Context) {
     }
 
     @Synchronized
+    fun installationSecret(): String {
+        preferences.getString(INSTALLATION_SECRET_KEY, null)?.let { encoded ->
+            runCatching { decrypt(encoded) }.getOrNull()?.let { secret ->
+                if (secret.matches(INSTALLATION_SECRET_PATTERN)) return secret
+            }
+        }
+        val bytes = ByteArray(32).also(SecureRandom()::nextBytes)
+        val secret = Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        check(preferences.edit().putString(INSTALLATION_SECRET_KEY, encrypt(secret)).commit()) {
+            "Could not save installation secret"
+        }
+        return secret
+    }
+
+    @Synchronized
+    fun installationSecretIsBound(): Boolean = preferences.getBoolean(INSTALLATION_SECRET_BOUND_KEY, false)
+
+    @Synchronized
+    fun markInstallationSecretBound() {
+        check(preferences.edit().putBoolean(INSTALLATION_SECRET_BOUND_KEY, true).commit()) {
+            "Could not persist installation credential state"
+        }
+    }
+
+    @Synchronized
     fun loadSession(): AnonymousAuthSession? {
         val encoded = preferences.getString(SESSION_KEY, null) ?: return null
         return runCatching {
-            val encrypted = Base64.decode(encoded, Base64.NO_WRAP)
-            require(encrypted.size > GCM_IV_BYTES) { "Stored session is incomplete" }
-            val buffer = ByteBuffer.wrap(encrypted)
-            val iv = ByteArray(GCM_IV_BYTES).also(buffer::get)
-            val ciphertext = ByteArray(buffer.remaining()).also(buffer::get)
-            val plaintext = Cipher.getInstance(CIPHER_TRANSFORMATION).run {
-                init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
-                doFinal(ciphertext)
-            }
-            val json = JSONObject(String(plaintext, Charsets.UTF_8))
+            val json = JSONObject(decrypt(encoded))
             AnonymousAuthSession(
                 anonymousUserId = json.getString("anonymousUserId"),
                 serverDeviceId = json.getString("serverDeviceId"),
@@ -66,14 +83,7 @@ class AnonymousAuthSessionStore(context: Context) {
             .put("expiresAtEpochMillis", session.expiresAtEpochMillis)
             .toString()
             .toByteArray(Charsets.UTF_8)
-        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey())
-        val ciphertext = cipher.doFinal(plaintext)
-        val encrypted = ByteBuffer.allocate(cipher.iv.size + ciphertext.size)
-            .put(cipher.iv)
-            .put(ciphertext)
-            .array()
-        val encoded = Base64.encodeToString(encrypted, Base64.NO_WRAP)
+        val encoded = encrypt(String(plaintext, Charsets.UTF_8))
         check(preferences.edit().putString(SESSION_KEY, encoded).commit()) { "Could not save auth session" }
     }
 
@@ -99,9 +109,35 @@ class AnonymousAuthSessionStore(context: Context) {
         return generator.generateKey()
     }
 
+    private fun encrypt(value: String): String {
+        val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
+        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey())
+        val ciphertext = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
+        val encrypted = ByteBuffer.allocate(cipher.iv.size + ciphertext.size)
+            .put(cipher.iv)
+            .put(ciphertext)
+            .array()
+        return Base64.encodeToString(encrypted, Base64.NO_WRAP)
+    }
+
+    private fun decrypt(encoded: String): String {
+        val encrypted = Base64.decode(encoded, Base64.NO_WRAP)
+        require(encrypted.size > GCM_IV_BYTES) { "Stored secret is incomplete" }
+        val buffer = ByteBuffer.wrap(encrypted)
+        val iv = ByteArray(GCM_IV_BYTES).also(buffer::get)
+        val ciphertext = ByteArray(buffer.remaining()).also(buffer::get)
+        return Cipher.getInstance(CIPHER_TRANSFORMATION).run {
+            init(Cipher.DECRYPT_MODE, encryptionKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
+            String(doFinal(ciphertext), Charsets.UTF_8)
+        }
+    }
+
     private companion object {
         const val PREFERENCES_NAME = "awero_sync_session"
         const val INSTALLATION_ID_KEY = "installation_id"
+        const val INSTALLATION_SECRET_KEY = "encrypted_installation_secret"
+        const val INSTALLATION_SECRET_BOUND_KEY = "installation_secret_bound"
+        val INSTALLATION_SECRET_PATTERN = Regex("^[A-Za-z0-9_-]{43}$")
         const val SESSION_KEY = "encrypted_session"
         const val KEY_ALIAS = "awero_anonymous_auth_session"
         const val ANDROID_KEYSTORE = "AndroidKeyStore"

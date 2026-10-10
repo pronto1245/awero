@@ -22,8 +22,30 @@ class OfflineSyncCoordinator(private val context: Context) {
         val queue = SyncQueueStore(context, AweroDatabase.get(context.applicationContext))
         val database = AweroDatabase.get(context.applicationContext)
         val conflictsStore = SyncConflictStore(database)
+        val analyticsQueue = AnalyticsQueueStore(context)
+        val analyticsEvents = analyticsQueue.pending()
+        if (analyticsEvents.isNotEmpty()) {
+            runCatching {
+                SyncApiClient(configuration).sendAnalytics(session.accessToken, analyticsEvents)
+            }.onSuccess { response ->
+                val completed = response.acceptedIds + response.rejected.map { it.id }
+                completed.forEach { analyticsQueue.acknowledge(it) }
+            }.onFailure { error ->
+                if (error is SyncApiException && error.statusCode >= 500) {
+                    SupportDiagnosticsApiClient(context, configuration).reportSyncServerFailure(
+                        error.statusCode, session.accessToken, sessionStore.installationId()
+                    )
+                }
+            }
+        }
         val operations = queue.due(nowMillis)
-        if (operations.isEmpty()) return@withContext
+        if (operations.isEmpty()) {
+            sessionStore.loadSession()?.accessToken?.let { token ->
+                pullServerState(token, configuration, database)
+                WakeSessionSyncClient(context, configuration).uploadRecent(token, nowMillis)
+            }
+            return@withContext
+        }
 
         try {
             val response = try {
@@ -39,16 +61,56 @@ class OfflineSyncCoordinator(private val context: Context) {
             }
             val accepted = response.acceptedIds
             val conflictsById = response.conflicts.associateBy { it.id }
+            val rejectionsById = response.rejected.associateBy { it.id }
             operations.forEach { operation ->
                 when {
                     operation.id in accepted -> queue.acknowledge(operation.id)
                     conflictsById[operation.id] != null -> conflictsStore.record(operation, conflictsById.getValue(operation.id))
+                    rejectionsById[operation.id] != null -> {
+                        val rejected = rejectionsById.getValue(operation.id)
+                        conflictsStore.record(
+                            operation,
+                            SyncConflict(rejected.id, rejected.code, null, null)
+                        )
+                        queue.acknowledge(operation.id)
+                    }
                     else -> queue.retry(operation.id, operation.attempts + 1)
                 }
             }
-        } catch (_: Exception) {
+            sessionStore.loadSession()?.accessToken?.let { token ->
+                pullServerState(token, configuration, database)
+                WakeSessionSyncClient(context, configuration).uploadRecent(token, nowMillis)
+            }
+        } catch (error: Exception) {
+            if (error is SyncApiException && error.statusCode >= 500) {
+                sessionStore.loadSession()?.let { activeSession ->
+                    SupportDiagnosticsApiClient(context, configuration).reportSyncServerFailure(
+                        error.statusCode, activeSession.accessToken, sessionStore.installationId()
+                    )
+                }
+            }
             operations.forEach { operation -> queue.retry(operation.id, operation.attempts + 1) }
         }
+        }
+    }
+
+    private suspend fun pullServerState(
+        bearerToken: String,
+        configuration: SyncApiConfiguration,
+        database: AweroDatabase
+    ) {
+        val conflicts = database.syncConflicts().all().mapTo(mutableSetOf()) { it.entityId }
+        val snapshots = runCatching { SyncApiClient(configuration).fetchServerAlarms(bearerToken) }.getOrNull() ?: return
+        val store = AlarmStore(context)
+        for (snapshot in snapshots) {
+            val alarm = snapshot.alarm
+            if (alarm.id in conflicts) continue
+            val local = database.alarms().get(alarm.id)
+            if (snapshot.status == "DELETED") {
+                if (local != null && local.version <= alarm.version) runCatching { store.delete(alarm.id) }
+            } else if (local == null || local.version < alarm.version) {
+                runCatching { store.save(alarm) }
+            }
         }
     }
 

@@ -30,6 +30,8 @@ struct AWEROApp: App {
                     recoveryTrigger.appDidBecomeActive()
                     Task {
                         await OfflineSyncCoordinator.shared.runOnce()
+                        await alarmStore.load()
+                        recoveryTrigger.appDidBecomeActive()
                     }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.significantTimeChangeNotification)) { _ in

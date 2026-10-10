@@ -18,6 +18,8 @@ struct Alarm: Identifiable, Codable {
     var maxSnoozes: Int
     var snoozeMinutes: Int
     var qrExpectedCode: String?
+    var label: String
+    var snoozeEnabled: Bool
 
     init(
         id: UUID = UUID(),
@@ -32,7 +34,9 @@ struct Alarm: Identifiable, Codable {
         difficulty: Difficulty = .medium,
         maxSnoozes: Int = 3,
         snoozeMinutes: Int = 10,
-        qrExpectedCode: String? = nil
+        qrExpectedCode: String? = nil,
+        label: String = "Alarm",
+        snoozeEnabled: Bool = true
     ) {
         self.id = id
         self.version = version
@@ -47,5 +51,33 @@ struct Alarm: Identifiable, Codable {
         self.maxSnoozes = max(0, maxSnoozes)
         self.snoozeMinutes = max(1, snoozeMinutes)
         self.qrExpectedCode = qrExpectedCode
+        self.label = label
+        self.snoozeEnabled = snoozeEnabled
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, version, hour, minute, enabled, weekdays, timezoneMode, fixedTimezone
+        case missionType, difficulty, maxSnoozes, snoozeMinutes, qrExpectedCode, label, snoozeEnabled
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try values.decode(UUID.self, forKey: .id),
+            version: try values.decodeIfPresent(Int.self, forKey: .version) ?? 1,
+            hour: try values.decode(Int.self, forKey: .hour),
+            minute: try values.decode(Int.self, forKey: .minute),
+            enabled: try values.decodeIfPresent(Bool.self, forKey: .enabled) ?? true,
+            weekdays: try values.decodeIfPresent(Set<Int>.self, forKey: .weekdays) ?? Set(1...7),
+            timezoneMode: try values.decodeIfPresent(AlarmTimezoneMode.self, forKey: .timezoneMode) ?? .deviceLocal,
+            fixedTimezone: try values.decodeIfPresent(String.self, forKey: .fixedTimezone),
+            missionType: try values.decodeIfPresent(MissionType.self, forKey: .missionType) ?? .math,
+            difficulty: try values.decodeIfPresent(Difficulty.self, forKey: .difficulty) ?? .medium,
+            maxSnoozes: try values.decodeIfPresent(Int.self, forKey: .maxSnoozes) ?? 3,
+            snoozeMinutes: try values.decodeIfPresent(Int.self, forKey: .snoozeMinutes) ?? 10,
+            qrExpectedCode: try values.decodeIfPresent(String.self, forKey: .qrExpectedCode),
+            label: try values.decodeIfPresent(String.self, forKey: .label) ?? "Alarm",
+            snoozeEnabled: try values.decodeIfPresent(Bool.self, forKey: .snoozeEnabled) ?? true
+        )
     }
 }

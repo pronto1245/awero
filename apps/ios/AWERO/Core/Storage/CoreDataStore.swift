@@ -79,6 +79,8 @@ final class CoreDataStore: @unchecked Sendable {
             object.setValue(alarm.difficulty.rawValue, forKey: "difficulty")
             object.setValue(alarm.maxSnoozes, forKey: "maxSnoozes")
             object.setValue(alarm.snoozeMinutes, forKey: "snoozeMinutes")
+            object.setValue(alarm.label, forKey: "label")
+            object.setValue(alarm.snoozeEnabled, forKey: "snoozeEnabled")
             object.setValue(alarm.qrExpectedCode, forKey: "qrExpectedCode")
         }
     }
@@ -524,7 +526,9 @@ final class CoreDataStore: @unchecked Sendable {
             difficulty: difficulty,
             maxSnoozes: maxSnoozes,
             snoozeMinutes: snoozeMinutes,
-            qrExpectedCode: object.value(forKey: "qrExpectedCode") as? String
+            qrExpectedCode: object.value(forKey: "qrExpectedCode") as? String,
+            label: object.value(forKey: "label") as? String ?? "Alarm",
+            snoozeEnabled: object.value(forKey: "snoozeEnabled") as? Bool ?? true
         )
     }
 
@@ -565,7 +569,9 @@ final class CoreDataStore: @unchecked Sendable {
                 ("difficulty", .stringAttributeType, false),
                 ("maxSnoozes", .integer64AttributeType, false),
                 ("snoozeMinutes", .integer64AttributeType, false),
-                ("qrExpectedCode", .stringAttributeType, true)
+                ("qrExpectedCode", .stringAttributeType, true),
+                ("label", .stringAttributeType, false),
+                ("snoozeEnabled", .booleanAttributeType, false)
             ]),
             entity(name: "SyncOperationRecord", attributes: [
                 ("id", .stringAttributeType, false), ("operationType", .stringAttributeType, false), ("entityType", .stringAttributeType, false), ("entityId", .stringAttributeType, false), ("clientVersion", .integer64AttributeType, true), ("payload", .stringAttributeType, false), ("occurredAt", .dateAttributeType, false), ("attempts", .integer64AttributeType, false), ("nextAttemptAt", .dateAttributeType, false)
@@ -587,6 +593,8 @@ final class CoreDataStore: @unchecked Sendable {
             ]),
             wakeSessionEntity
         ]
+        model.entities.first(where: { $0.name == "AlarmRecord" })?.attributesByName["label"]?.defaultValue = "Alarm"
+        model.entities.first(where: { $0.name == "AlarmRecord" })?.attributesByName["snoozeEnabled"]?.defaultValue = true
         return model
     }
 

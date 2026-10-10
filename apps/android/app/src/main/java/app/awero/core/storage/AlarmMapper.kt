@@ -19,7 +19,9 @@ object AlarmMapper {
         difficulty = a.difficulty.name,
         maxSnoozes = a.maxSnoozes,
         snoozeMinutes = a.snoozeMinutes,
-        qrExpectedCode = a.qrExpectedCode
+        qrExpectedCode = a.qrExpectedCode,
+        label = a.label,
+        snoozeEnabled = a.snoozeEnabled
     )
 
     fun fromEntity(e: AlarmEntity) = Alarm(
@@ -35,6 +37,8 @@ object AlarmMapper {
         difficulty = Difficulty.valueOf(e.difficulty),
         maxSnoozes = e.maxSnoozes,
         snoozeMinutes = e.snoozeMinutes,
-        qrExpectedCode = e.qrExpectedCode
+        qrExpectedCode = e.qrExpectedCode,
+        label = e.label,
+        snoozeEnabled = e.snoozeEnabled
     )
 }

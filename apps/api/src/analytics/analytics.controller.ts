@@ -1,112 +1,12 @@
-import {
-  Allow,
-  ArrayMaxSize,
-  IsArray,
-  IsInt,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  Max,
-  MaxLength,
-  Min,
-  ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { BadRequestException, Body, ConflictException, Controller, Headers, Post } from '@nestjs/common';
-import { AnonymousAuthService } from '../auth/anonymous-auth.service';
-import { DatabaseService } from '../database/database.service';
-
-class AnalyticsEventDto {
-  @IsUUID()
-  id!: string;
-
-  @IsString()
-  @Matches(/^[a-zA-Z][a-zA-Z0-9_.-]*$/)
-  @MaxLength(100)
-  eventName!: string;
-
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  eventVersion!: number;
-
-  @IsOptional()
-  @IsObject()
-  properties?: Record<string, unknown>;
-
-  @Allow()
-  occurredAt?: unknown;
-}
-
-class AnalyticsBatchDto {
-  @IsArray()
-  @ArrayMaxSize(100)
-  @ValidateNested({ each: true })
-  @Type(() => AnalyticsEventDto)
-  events!: AnalyticsEventDto[];
-}
+import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { AnalyticsService, AnalyticsBatchDto } from './analytics.service';
 
 @Controller('analytics')
 export class AnalyticsController {
-  constructor(private readonly db: DatabaseService, private readonly auth: AnonymousAuthService) {}
+  constructor(private readonly analytics: AnalyticsService) {}
 
   @Post('events')
-  async ingest(@Headers('authorization') authorization: string | undefined, @Body() body: AnalyticsBatchDto) {
-    const owner = await this.auth.resolve(authorization);
-    const acceptedIds = await this.db.transaction(async (client) => {
-      const result: string[] = [];
-      for (const event of body.events) {
-        const properties = event.properties ?? {};
-        if (Buffer.byteLength(JSON.stringify(properties), 'utf8') > 16_384) {
-          throw new BadRequestException('ANALYTICS_PROPERTIES_TOO_LARGE');
-        }
-        const occurredAt = this.parseOccurredAt(event.occurredAt);
-        const retryOccurredAt = event.occurredAt === undefined || event.occurredAt === null
-          ? null
-          : occurredAt;
-        const inserted = await client.query(
-          `INSERT INTO analytics_events(id,anonymous_user_id,device_id,event_name,event_version,occurred_at,properties)
-           VALUES ($1,$2,(SELECT id FROM devices WHERE anonymous_user_id=$2 ORDER BY updated_at DESC LIMIT 1),$3,$4,$5,$6::jsonb)
-           ON CONFLICT (id) DO NOTHING RETURNING id`,
-          [event.id, owner.anonymousUserId, event.eventName, event.eventVersion, occurredAt, JSON.stringify(properties)],
-        );
-        if (inserted.rows[0]) {
-          result.push(event.id);
-          continue;
-        }
-        const existing = await client.query(
-          `SELECT anonymous_user_id AS "anonymousUserId",event_name AS "eventName",event_version AS "eventVersion",
-             ($2::timestamptz IS NULL OR occurred_at=$2::timestamptz) AS "sameTime",properties=$3::jsonb AS "sameProperties"
-           FROM analytics_events WHERE id=$1`,
-          [event.id, retryOccurredAt, JSON.stringify(properties)],
-        );
-        const row = existing.rows[0];
-        if (
-          !row || row.anonymousUserId !== owner.anonymousUserId || row.eventName !== event.eventName ||
-          row.eventVersion !== event.eventVersion || !row.sameTime || !row.sameProperties
-        ) throw new ConflictException('ANALYTICS_EVENT_ID_CONFLICT');
-        result.push(event.id);
-      }
-      return result;
-    });
-    return { acceptedIds, accepted: acceptedIds.length, serverTime: new Date().toISOString() };
-  }
-
-  private parseOccurredAt(value: unknown): Date {
-    if (value === undefined || value === null) return new Date();
-    let date: Date;
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      if (value >= 1_000_000_000_000) date = new Date(value);
-      else if (value >= 1_000_000_000) date = new Date(value * 1000);
-      else date = new Date((value + 978_307_200) * 1000);
-    } else if (typeof value === 'string') {
-      date = new Date(value);
-    } else {
-      throw new BadRequestException('INVALID_ANALYTICS_OCCURRED_AT');
-    }
-    if (!Number.isFinite(date.getTime())) throw new BadRequestException('INVALID_ANALYTICS_OCCURRED_AT');
-    return date;
+  ingest(@Headers('authorization') authorization: string | undefined, @Body() body: AnalyticsBatchDto) {
+    return this.analytics.ingest(authorization, body);
   }
 }

@@ -10,13 +10,16 @@ final class MissionSettingsTests: XCTestCase {
         let url = directory.appendingPathComponent("AWERO.sqlite")
         let store = CoreDataStore(storeURL: url)
         let originalCode = "awero://wake/bedroom?code=one+two"
-        var alarm = Alarm(hour: 7, minute: 30, missionType: .qr, difficulty: .hard, qrExpectedCode: originalCode)
+        var alarm = Alarm(hour: 7, minute: 30, missionType: .qr, difficulty: .hard,
+                          qrExpectedCode: originalCode, label: "Bedroom", snoozeEnabled: false)
         let saved = await store.saveAlarm(alarm)
         XCTAssertTrue(saved)
         let restarted = CoreDataStore(storeURL: url)
         let restored = try await restarted.fetchAlarm(id: alarm.id).get()
         XCTAssertEqual(restored?.difficulty, .hard)
         XCTAssertEqual(restored?.qrExpectedCode, originalCode)
+        XCTAssertEqual(restored?.label, "Bedroom")
+        XCTAssertEqual(restored?.snoozeEnabled, false)
 
         alarm.qrExpectedCode = "0123456789012"
         alarm.version += 1

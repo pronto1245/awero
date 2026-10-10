@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SyncConflictEntity::class,
         AnalyticsEventEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = true
 )
 abstract class AweroDatabase : RoomDatabase() {
@@ -55,6 +55,19 @@ abstract class AweroDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE alarms ADD COLUMN label TEXT NOT NULL DEFAULT 'Alarm'")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN snoozeEnabled INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE wake_sessions ADD COLUMN missionType TEXT")
+            }
+        }
+
         @Volatile
         private var instance: AweroDatabase? = null
 
@@ -71,7 +84,7 @@ abstract class AweroDatabase : RoomDatabase() {
                     context.applicationContext,
                     AweroDatabase::class.java,
                     "awero.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { instance = it }
             }
 
         internal fun createForTesting(context: Context, name: String): AweroDatabase =
@@ -79,6 +92,6 @@ abstract class AweroDatabase : RoomDatabase() {
                 context.applicationContext,
                 AweroDatabase::class.java,
                 name
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build()
     }
 }

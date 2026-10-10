@@ -17,5 +17,6 @@ data class WakeSessionEntity(
     val snoozeCount: Int,
     val fallbackUsed: Boolean,
     val emergencyStop: Boolean,
-    @ColumnInfo(defaultValue = "0") val isTest: Boolean = false
+    @ColumnInfo(defaultValue = "0") val isTest: Boolean = false,
+    val missionType: String? = null
 )

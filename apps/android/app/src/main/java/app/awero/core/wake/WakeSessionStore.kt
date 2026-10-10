@@ -38,7 +38,8 @@ class WakeSessionStore(
             alarmVersion = alarm.version,
             scheduledAt = scheduledAt,
             triggeredAt = System.currentTimeMillis(),
-            isTest = isTest
+            isTest = isTest,
+            missionType = alarm.missionType.name
         )
         val activeForAlarm = existing
         if (activeForAlarm == null) {
@@ -190,7 +191,8 @@ class WakeSessionStore(
         snoozeCount = o.optInt("snoozeCount", 0),
         fallbackUsed = o.optBoolean("fallbackUsed", false),
         emergencyStop = o.optBoolean("emergencyStop", false),
-        isTest = o.optBoolean("isTest", false)
+        isTest = o.optBoolean("isTest", false),
+        missionType = o.optStringOrNull("missionType")
     )
 
     private fun JSONObject.optLongOrNull(key: String): Long? = if (isNull(key)) null else optLong(key)

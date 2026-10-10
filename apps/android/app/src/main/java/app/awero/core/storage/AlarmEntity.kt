@@ -17,5 +17,7 @@ data class AlarmEntity(
     val difficulty: String,
     val maxSnoozes: Int,
     val snoozeMinutes: Int,
-    val qrExpectedCode: String?
+    val qrExpectedCode: String?,
+    @ColumnInfo(defaultValue = "'Alarm'") val label: String = "Alarm",
+    @ColumnInfo(defaultValue = "1") val snoozeEnabled: Boolean = true
 )

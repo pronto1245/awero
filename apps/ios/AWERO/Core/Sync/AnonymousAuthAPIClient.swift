@@ -2,14 +2,18 @@ import Foundation
 
 struct AnonymousRegistrationRequest: Encodable, Sendable {
     let deviceId: String
+    let installationSecret: String
     let platform: String
     let appVersion: String
     let osVersion: String?
     let timezone: String
 
-    init(deviceId: String, platform: String, appVersion: String, osVersion: String? = nil, timezone: String) throws {
+    init(deviceId: String, installationSecret: String, platform: String, appVersion: String, osVersion: String? = nil, timezone: String) throws {
         guard (16...128).contains(deviceId.count) else {
             throw SyncAPIError.invalidRequest("Device ID must contain 16 to 128 characters")
+        }
+        guard installationSecret.range(of: "^[A-Za-z0-9_-]{43}$", options: .regularExpression) != nil else {
+            throw SyncAPIError.invalidRequest("Installation secret is invalid")
         }
         guard platform == "IOS" || platform == "ANDROID" else {
             throw SyncAPIError.invalidRequest("Unsupported platform")
@@ -19,6 +23,7 @@ struct AnonymousRegistrationRequest: Encodable, Sendable {
             throw SyncAPIError.invalidRequest("Registration fields are outside the supported lengths")
         }
         self.deviceId = deviceId
+        self.installationSecret = installationSecret
         self.platform = platform
         self.appVersion = appVersion
         self.osVersion = osVersion
@@ -65,5 +70,15 @@ struct AnonymousAuthAPIClient {
             throw SyncAPIError.invalidResponse
         }
         return result
+    }
+
+    func bindInstallation(_ installationSecret: String, bearerToken: String) async throws {
+        guard let url = configuration.endpoint("auth/anonymous/credentials") else { throw SyncAPIError.notConfigured }
+        let body = try JSONSerialization.data(withJSONObject: ["installationSecret": installationSecret])
+        let response = try await transport.post(url: url, bearerToken: bearerToken, body: body)
+        guard (200..<300).contains(response.statusCode) else {
+            let message = (try? JSONDecoder().decode(SyncErrorBody.self, from: response.body).message)
+            throw SyncAPIError.httpStatus(response.statusCode, message)
+        }
     }
 }

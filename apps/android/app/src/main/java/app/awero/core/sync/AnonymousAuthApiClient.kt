@@ -4,6 +4,7 @@ import org.json.JSONObject
 
 data class AnonymousRegistrationRequest(
     val deviceId: String,
+    val installationSecret: String,
     val platform: String,
     val appVersion: String,
     val osVersion: String?,
@@ -11,6 +12,7 @@ data class AnonymousRegistrationRequest(
 ) {
     init {
         require(deviceId.length in 16..128) { "Device ID must contain 16 to 128 characters" }
+        require(installationSecret.matches(Regex("^[A-Za-z0-9_-]{43}$"))) { "Installation secret is invalid" }
         require(platform == "IOS" || platform == "ANDROID") { "Unsupported platform" }
         require(appVersion.length in 1..64) { "App version must contain 1 to 64 characters" }
         require(osVersion == null || osVersion.length <= 64) { "OS version must contain at most 64 characters" }
@@ -37,6 +39,7 @@ class AnonymousAuthApiClient(
             ?: throw IllegalStateException("Sync API is not configured")
         val body = JSONObject()
             .put("deviceId", request.deviceId)
+            .put("installationSecret", request.installationSecret)
             .put("platform", request.platform)
             .put("appVersion", request.appVersion)
             .put("timezone", request.timezone)
@@ -67,5 +70,19 @@ class AnonymousAuthApiClient(
             "Anonymous auth API returned an invalid token"
         }
         return result
+    }
+
+    suspend fun bindInstallation(installationSecret: String, bearerToken: String) {
+        val endpoint = configuration.endpoint("auth/anonymous/credentials")
+            ?: throw IllegalStateException("Sync API is not configured")
+        val response = transport.post(
+            endpoint,
+            bearerToken,
+            JSONObject().put("installationSecret", installationSecret).toString()
+        )
+        if (response.statusCode !in 200..299) {
+            val message = runCatching { JSONObject(response.body).optString("message") }.getOrNull()
+            throw SyncApiException(response.statusCode, message)
+        }
     }
 }

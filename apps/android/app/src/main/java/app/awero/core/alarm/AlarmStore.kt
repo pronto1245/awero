@@ -112,7 +112,9 @@ class AlarmStore private constructor(
             Difficulty.valueOf(o.getString("difficulty")),
             o.optInt("maxSnoozes", 3),
             o.optInt("snoozeMinutes", 10),
-            o.optString("qrExpectedCode", null)
+            o.optString("qrExpectedCode", null),
+            o.optString("label", "Alarm"),
+            o.optBoolean("snoozeEnabled", true)
         )
     }
 }

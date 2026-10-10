@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 
 const baseUrl = process.env.API_BASE_URL ?? 'http://127.0.0.1:3000/api/v1';
 
@@ -22,11 +22,26 @@ function assert(condition, message) {
 async function main() {
   const health = await request('/health');
   assert(health.status === 200 && health.data.status === 'ok', 'health endpoint failed');
+  const securityHeaders = await fetch(`${baseUrl}/health`);
+  assert(securityHeaders.headers.get('x-content-type-options') === 'nosniff', 'security headers were not applied');
+  assert(securityHeaders.headers.get('x-frame-options') === 'DENY', 'frame policy was not applied');
+  assert(
+    securityHeaders.headers.get('access-control-allow-origin') === null,
+    'an unconfigured browser origin was allowed by CORS',
+  );
+  const deniedOrigin = await fetch(`${baseUrl}/health`, { headers: { origin: 'https://untrusted.example' } });
+  assert(
+    deniedOrigin.headers.get('access-control-allow-origin') === null,
+    'an untrusted browser origin was allowed by CORS',
+  );
+
+  const installationSecret = randomBytes(32).toString('base64url');
 
   const registration = await request('/auth/anonymous', {
     method: 'POST',
     body: {
       deviceId: 'awero-ci-device-one-0001',
+      installationSecret,
       platform: 'IOS',
       appVersion: '0.1.0',
       timezone: 'Europe/Moscow',
@@ -34,7 +49,52 @@ async function main() {
   });
   assert(registration.status === 201, 'anonymous registration failed');
   assert(typeof registration.data.accessToken === 'string', 'registration returned no bearer token');
+  assert(
+    !('trial' in registration.data) && !('entitlement' in registration.data),
+    'anonymous registration must never create or reset a trial entitlement',
+  );
   const token = registration.data.accessToken;
+
+  const sameInstallation = await request('/auth/anonymous', {
+    method: 'POST',
+    body: {
+      deviceId: 'awero-ci-device-one-0001', installationSecret, platform: 'IOS',
+      appVersion: '0.1.0', timezone: 'Europe/Moscow',
+    },
+  });
+  assert(
+    sameInstallation.status === 201 && sameInstallation.data.anonymousUserId === registration.data.anonymousUserId,
+    'the same secure installation was issued a second anonymous identity',
+  );
+  const originalSessionStillWorks = await request('/alarms', { token });
+  assert(originalSessionStillWorks.status === 200, 'registration revoked a valid account session');
+
+  const unrelatedInstallationSecret = randomBytes(32).toString('base64url');
+  const unrelatedInstallation = await request('/auth/anonymous', {
+    method: 'POST',
+    body: {
+      deviceId: 'awero-ci-device-one-0001', installationSecret: unrelatedInstallationSecret,
+      platform: 'ANDROID', appVersion: '0.1.0', timezone: 'Europe/Moscow',
+    },
+  });
+  assert(
+    unrelatedInstallation.status === 201 &&
+      unrelatedInstallation.data.anonymousUserId !== registration.data.anonymousUserId,
+    'a reported device ID was incorrectly treated as account ownership proof',
+  );
+  assert(
+    !('trial' in unrelatedInstallation.data) && !('entitlement' in unrelatedInstallation.data),
+    'a new anonymous identity for the same reported device must not mint trial entitlement',
+  );
+  const unrelatedToken = unrelatedInstallation.data.accessToken;
+  const binding = await request('/auth/anonymous/credentials', {
+    method: 'POST', token: unrelatedToken, body: { installationSecret: unrelatedInstallationSecret },
+  });
+  assert(binding.status === 201 && binding.data.bound, 'installation secret could not be bound to the authenticated legacy account');
+  const alreadyBound = await request('/auth/anonymous/credentials', {
+    method: 'POST', token, body: { installationSecret: unrelatedInstallationSecret },
+  });
+  assert(alreadyBound.status === 409, 'an installation secret was bound to a different account');
 
   const unauthorized = await request('/alarms');
   assert(unauthorized.status === 401, 'private route accepted a missing token');
@@ -94,6 +154,13 @@ async function main() {
   assert(oversizedQrCode.status === 400, 'oversized QR expected code was accepted');
   const deletedQrAlarm = await request(`/alarms/${qrAlarm.data.item.id}`, { method: 'DELETE', token });
   assert(deletedQrAlarm.status === 200, 'QR smoke-test alarm cleanup failed');
+  const serverAlarmSnapshot = await request('/sync/alarms', { token });
+  assert(
+    serverAlarmSnapshot.status === 200 &&
+      serverAlarmSnapshot.data.items.some((item) => item.id === alarmId && item.version === 2) &&
+      serverAlarmSnapshot.data.items.some((item) => item.id === qrAlarm.data.item.id && item.status === 'DELETED'),
+    'inbound alarm sync did not include current versions and deletion tombstones',
+  );
 
   const sessionId = randomUUID();
   const triggerEventId = randomUUID();
@@ -108,6 +175,15 @@ async function main() {
     missionType: 'MATH',
     eventId: triggerEventId,
   };
+  const futureSchedule = await request('/wake-sessions', {
+    method: 'POST', token,
+    body: {
+      ...sessionBody,
+      id: randomUUID(), eventId: randomUUID(),
+      scheduledAt: new Date(Date.now() + 49 * 60 * 60 * 1000).toISOString(),
+    },
+  });
+  assert(futureSchedule.status === 400, 'wake session accepted a schedule more than 48 hours in the future');
   const sessionCreated = await request('/wake-sessions', { method: 'POST', token, body: sessionBody });
   assert(sessionCreated.status === 201, 'wake session create failed');
   assert(sessionCreated.data.item.id === sessionId, 'wake session id was not retained');
@@ -129,6 +205,11 @@ async function main() {
     },
   });
   const awakeBody = { id: randomUUID(), eventType: 'AWAKE' };
+  const futureWakeEvent = await request(`/wake-sessions/${sessionId}/events`, {
+    method: 'POST', token,
+    body: { id: randomUUID(), eventType: 'AWAKE', occurredAt: new Date(Date.now() + 6 * 60 * 1000).toISOString() },
+  });
+  assert(futureWakeEvent.status === 400, 'wake event accepted a timestamp more than 5 minutes in the future');
   const awake = await request(`/wake-sessions/${sessionId}/events`, { method: 'POST', token, body: awakeBody });
   assert(awake.status === 201 && !awake.data.item.duplicate, 'wake event without a timestamp failed');
   const awakeRetry = await request(`/wake-sessions/${sessionId}/events`, { method: 'POST', token, body: awakeBody });
@@ -222,7 +303,61 @@ async function main() {
   const conflictingSync = await request('/sync', {
     method: 'POST', token, body: { operations: [{ ...syncOperation, payload: { minute: 5 } }] },
   });
-  assert(conflictingSync.status === 409, 'reused sync operation ID accepted different content');
+  assert(
+    conflictingSync.status === 201 && conflictingSync.data.rejected[0].code === 'SYNC_OPERATION_ID_CONFLICT',
+    'reused sync operation ID accepted different content or blocked its batch',
+  );
+
+  const independentSyncAlarmA = randomUUID();
+  const independentSyncAlarmB = randomUUID();
+  const invalidSyncOperation = {
+    id: randomUUID(), operationType: 'UPSERT', entityType: 'ALARM', entityId: randomUUID(),
+    clientVersion: 1, payload: { hour: 88, minute: 0 }, occurredAt: Date.now(),
+  };
+  const batchWithOneInvalidOperation = await request('/sync', {
+    method: 'POST', token, body: { operations: [
+      { id: randomUUID(), operationType: 'CREATE_ALARM', entityType: 'ALARM', entityId: independentSyncAlarmA,
+        clientVersion: 1, payload: { hour: 6, minute: 10 }, occurredAt: Date.now() },
+      invalidSyncOperation,
+      { id: randomUUID(), operationType: 'CREATE_ALARM', entityType: 'ALARM', entityId: independentSyncAlarmB,
+        clientVersion: 1, payload: { hour: 6, minute: 20 }, occurredAt: Date.now() },
+    ] },
+  });
+  assert(
+    batchWithOneInvalidOperation.status === 201 && batchWithOneInvalidOperation.data.accepted === 2 &&
+      batchWithOneInvalidOperation.data.rejected.length === 1,
+    'one invalid sync operation blocked valid operations in the same batch',
+  );
+  const rejectedRetry = await request('/sync', {
+    method: 'POST', token, body: { operations: [invalidSyncOperation] },
+  });
+  assert(
+    rejectedRetry.status === 201 && rejectedRetry.data.rejected[0].code === batchWithOneInvalidOperation.data.rejected[0].code,
+    'a rejected sync operation did not return its stable result on retry',
+  );
+  const futureSyncOperation = {
+    id: randomUUID(), operationType: 'UPSERT', entityType: 'ALARM', entityId: randomUUID(),
+    clientVersion: 1, payload: { hour: 8, minute: 0 },
+    occurredAt: new Date(Date.now() + 6 * 60 * 1000).toISOString(),
+  };
+  const futureSync = await request('/sync', {
+    method: 'POST', token, body: { operations: [futureSyncOperation] },
+  });
+  assert(
+    futureSync.status === 201 && futureSync.data.rejected[0].code === 'SYNC_OCCURRED_AT_OUT_OF_RANGE',
+    'sync accepted an operation timestamp more than 5 minutes in the future',
+  );
+
+  const foreignAlarmSync = await request('/sync', {
+    method: 'POST', token: unrelatedToken, body: { operations: [{
+      id: randomUUID(), operationType: 'CREATE_ALARM', entityType: 'ALARM', entityId: alarmId,
+      clientVersion: 1, payload: { hour: 8, minute: 0 }, occurredAt: Date.now(),
+    }] },
+  });
+  assert(
+    foreignAlarmSync.status === 201 && foreignAlarmSync.data.rejected[0].code === 'ALARM_ID_OWNERSHIP_CONFLICT',
+    'foreign alarm UUID caused a server error instead of a safe ownership rejection',
+  );
 
   const syncedAlarmId = randomUUID();
   const syncCreate = {
@@ -267,7 +402,10 @@ async function main() {
     method: 'POST', token,
     body: { operations: [{ id: randomUUID(), operationType: 'UPDATE', entityType: 'PROFILE', entityId: randomUUID(), payload: {} }] },
   });
-  assert(unsupportedSync.status === 422, 'unsupported sync entity was silently accepted');
+  assert(
+    unsupportedSync.status === 201 && unsupportedSync.data.rejected[0].code === 'UNSUPPORTED_SYNC_ENTITY',
+    'one unsupported sync entity blocked the batch instead of becoming a per-operation rejection',
+  );
 
   const analyticsEvent = {
     id: randomUUID(),
@@ -275,6 +413,14 @@ async function main() {
     eventVersion: 1,
     properties: { source: 'smoke-test', alarmId },
   };
+  const futureAnalytics = await request('/analytics/events', {
+    method: 'POST', token,
+    body: { events: [{ ...analyticsEvent, id: randomUUID(), occurredAt: new Date(Date.now() + 6 * 60 * 1000).toISOString() }] },
+  });
+  assert(
+    futureAnalytics.status === 201 && futureAnalytics.data.rejected[0].code === 'ANALYTICS_OCCURRED_AT_OUT_OF_RANGE',
+    'analytics accepted an event timestamp more than 5 minutes in the future',
+  );
   const analytics = await request('/analytics/events', {
     method: 'POST', token, body: { events: [analyticsEvent] },
   });
@@ -289,7 +435,21 @@ async function main() {
   const conflictingAnalytics = await request('/analytics/events', {
     method: 'POST', token, body: { events: [{ ...analyticsEvent, properties: { source: 'changed' } }] },
   });
-  assert(conflictingAnalytics.status === 409, 'analytics event ID accepted changed properties');
+  assert(
+    conflictingAnalytics.status === 201 && conflictingAnalytics.data.rejected[0].code === 'ANALYTICS_EVENT_ID_CONFLICT',
+    'analytics event ID accepted changed properties or blocked the batch',
+  );
+  const isolatedAnalytics = await request('/analytics/events', {
+    method: 'POST', token, body: { events: [
+      { ...analyticsEvent, id: randomUUID(), properties: { source: 'valid-before' } },
+      { ...analyticsEvent, id: randomUUID(), properties: { source: 'x'.repeat(20_000) } },
+      { ...analyticsEvent, id: randomUUID(), properties: { source: 'valid-after' } },
+    ] },
+  });
+  assert(
+    isolatedAnalytics.status === 201 && isolatedAnalytics.data.accepted === 2 && isolatedAnalytics.data.rejected.length === 1,
+    'one invalid analytics event blocked valid events in the same batch',
+  );
 
   const supportTicket = {
     id: randomUUID(),
@@ -321,6 +481,7 @@ async function main() {
     method: 'POST',
     body: {
       deviceId: 'awero-ci-device-two-0002',
+      installationSecret: randomBytes(32).toString('base64url'),
       platform: 'ANDROID',
       appVersion: '0.1.0',
       timezone: 'UTC',
@@ -342,15 +503,41 @@ async function main() {
   const crossOwnerSync = await request('/sync', {
     method: 'POST', token: secondRegistration.data.accessToken, body: { operations: [syncOperation] },
   });
-  assert(crossOwnerSync.status === 409, 'sync operation ID was reused across anonymous owners');
+  assert(
+    crossOwnerSync.status === 201 && crossOwnerSync.data.rejected[0].code === 'SYNC_OPERATION_ID_CONFLICT',
+    'sync operation ID ownership conflict was not isolated safely',
+  );
   const crossOwnerAnalytics = await request('/analytics/events', {
     method: 'POST', token: secondRegistration.data.accessToken, body: { events: [analyticsEvent] },
   });
-  assert(crossOwnerAnalytics.status === 409, 'analytics event ID was reused across anonymous owners');
+  assert(
+    crossOwnerAnalytics.status === 201 && crossOwnerAnalytics.data.rejected[0].code === 'ANALYTICS_EVENT_ID_CONFLICT',
+    'analytics event ID ownership conflict was not isolated safely',
+  );
   const crossOwnerSupport = await request('/support/diagnostics', {
     method: 'POST', token: secondRegistration.data.accessToken, body: supportTicket,
   });
   assert(crossOwnerSupport.status === 409, 'support ticket ID was reused across anonymous owners');
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const repeatRegistration = await request('/auth/anonymous', {
+      method: 'POST', body: {
+        deviceId: 'awero-ci-device-one-0001', installationSecret, platform: 'IOS',
+        appVersion: '0.1.0', timezone: 'Europe/Moscow',
+      },
+    });
+    assert(
+      repeatRegistration.status === 201 && repeatRegistration.data.anonymousUserId === registration.data.anonymousUserId,
+      'repeat registration created another account or failed before the rate limit',
+    );
+  }
+  const limitedRegistration = await request('/auth/anonymous', {
+    method: 'POST', body: {
+      deviceId: 'awero-ci-device-one-0001', installationSecret, platform: 'IOS',
+      appVersion: '0.1.0', timezone: 'Europe/Moscow',
+    },
+  });
+  assert(limitedRegistration.status === 429, 'anonymous registration rate limit was not enforced');
 
   const removed = await request(`/alarms/${alarmId}`, { method: 'DELETE', token });
   assert(removed.status === 200 && removed.data.version === 4, 'alarm delete/tombstone failed');

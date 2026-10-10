@@ -16,6 +16,8 @@ struct AnonymousAuthSessionStore {
     private let service = "app.awero.anonymous-auth"
     private let sessionAccount = "session"
     private let installationAccount = "installation-id"
+    private let installationSecretAccount = "installation-secret"
+    private let installationBoundAccount = "installation-secret-bound"
 
     func installationID() throws -> String {
         if let data = try read(account: installationAccount),
@@ -25,6 +27,32 @@ struct AnonymousAuthSessionStore {
         let value = UUID().uuidString
         try write(Data(value.utf8), account: installationAccount)
         return value
+    }
+
+    func installationSecret() throws -> String {
+        if let data = try read(account: installationSecretAccount),
+           let value = String(data: data, encoding: .utf8), value.count == 43 {
+            return value
+        }
+        var bytes = [UInt8](repeating: 0, count: 32)
+        guard SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes) == errSecSuccess else {
+            throw AnonymousAuthSessionStoreError.keychain(errSecParam)
+        }
+        let value = Data(bytes).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+        try write(Data(value.utf8), account: installationSecretAccount)
+        return value
+    }
+
+    func installationSecretIsBound() throws -> Bool {
+        guard let data = try read(account: installationBoundAccount) else { return false }
+        return String(data: data, encoding: .utf8) == "true"
+    }
+
+    func markInstallationSecretBound() throws {
+        try write(Data("true".utf8), account: installationBoundAccount)
     }
 
     func loadSession() throws -> AnonymousAuthSession? {
@@ -107,11 +135,18 @@ struct AnonymousAuthCoordinator {
     func refreshIfNeeded(now: Date = .now) async {
         guard configuration.isEnabled else { return }
         do {
-            if let session = try store.loadSession(), session.expiresAt.timeIntervalSince(now) > 5 * 24 * 60 * 60 {
-                return
+            let installationSecret = try store.installationSecret()
+            if let session = try store.loadSession() {
+                if try store.installationSecretIsBound() == false {
+                    try await AnonymousAuthAPIClient(configuration: configuration)
+                        .bindInstallation(installationSecret, bearerToken: session.accessToken)
+                    try store.markInstallationSecretBound()
+                }
+                if session.expiresAt.timeIntervalSince(now) > 5 * 24 * 60 * 60 { return }
             }
             let registration = try AnonymousRegistrationRequest(
                 deviceId: store.installationID(),
+                installationSecret: installationSecret,
                 platform: "IOS",
                 appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0",
                 osVersion: ProcessInfo.processInfo.operatingSystemVersionString,
@@ -125,6 +160,7 @@ struct AnonymousAuthCoordinator {
                 accessToken: response.accessToken,
                 expiresAt: expiresAt
             ))
+            try store.markInstallationSecretBound()
         } catch {
             // Auth and sync are optional and must not affect local alarm behavior.
         }
