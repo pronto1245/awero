@@ -68,7 +68,7 @@ class WakeMissionRestoreEndToEndTest {
         instrumentation.runOnMainSync {
             val children = views(activity!!.window.decorView)
             assertFalse(children.any { it is TextView && it.text.toString() == context.getString(R.string.wake_start) })
-            val pattern = Regex("(\\d+) ([+-]) (\\d+) = \\?")
+            val pattern = Regex("(\\d+) ([+-]) (\\d+) =(?: \\?)?")
             val problem = children.filterIsInstance<TextView>()
                 .mapNotNull { pattern.matchEntire(it.text.toString()) }.single()
             val left = problem.groupValues[1].toInt()

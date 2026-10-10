@@ -188,5 +188,13 @@
   "create.done": "OK",
   "create.save_and_test": "Tester l’alarme",
   "create.save_and_test_hint": "Enregistre l’alarme et lance un test dans 30 secondes.",
-  "create.advanced": "Plus d’options"
+  "create.advanced": "Plus d’options",
+  "mission.steps_heading": "Levez-vous et marchez",
+  "mission.steps_subtitle": "Faites 30 pas pour arrêter l’alarme",
+  "mission.steps_of_target": "sur 30 pas",
+  "mission.steps_tip": "Allez à la cuisine et buvez un verre d’eau.",
+  "mission.qr_heading": "Trouvez votre code",
+  "mission.qr_subtitle": "Scannez votre code enregistré pour arrêter l’alarme",
+  "mission.qr_cant_scan": "Le code ne passe pas ?",
+  "mission.flashlight": "Lampe torche"
 }

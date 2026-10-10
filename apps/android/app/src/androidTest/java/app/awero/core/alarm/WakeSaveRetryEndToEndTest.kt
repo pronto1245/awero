@@ -170,7 +170,7 @@ class WakeSaveRetryEndToEndTest {
 
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView
-            val pattern = Regex("(\\d+) ([+-]) (\\d+) = \\?")
+            val pattern = Regex("(\\d+) ([+-]) (\\d+) =(?: \\?)?")
             val problem = views(root).filterIsInstance<TextView>()
                 .mapNotNull { pattern.matchEntire(it.text.toString()) }.single()
             val left = problem.groupValues[1].toInt()

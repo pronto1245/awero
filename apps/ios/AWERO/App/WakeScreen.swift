@@ -6,14 +6,24 @@ struct WakeScreen: View {
 
     private static let missionBottomID = "wake.missionBottom"
 
+    @Environment(\.colorScheme) private var systemColorScheme
+
     private var isActive: Bool { flow.state == .ringing || flow.state == .mission }
+    /// Steps and QR missions bring their own heading; Math and ringing use the shared one.
+    private var showsSharedHeading: Bool { !(flow.state == .mission && flow.currentMission != .math) }
+    /// The QR mission is a dark camera screen in both themes, as in the reference screen.
+    private var isQRMission: Bool { flow.state == .mission && flow.currentMission == .qr }
 
     var body: some View {
         ZStack(alignment: .top) {
             AweroDesign.ivory.ignoresSafeArea()
-            AweroSceneBackground(scene: .dawn)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
+            if isQRMission {
+                Color(hex: 0x2A2725).ignoresSafeArea()
+            } else {
+                AweroSceneBackground(scene: .dawn)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
 
             ScrollViewReader { proxy in
                 ScrollView {
@@ -37,11 +47,17 @@ struct WakeScreen: View {
                         }
                         .padding(.top, 8)
 
-                        Text(isActive ? LocalizedStringKey("wake.heading") : LocalizedStringKey("wake.title"))
-                            .font(.system(size: wakeTitleSize, weight: .bold))
-                            .foregroundStyle(AweroDesign.navy)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
+                        if showsSharedHeading {
+                            if isActive {
+                                AlarmBadge()
+                                    .padding(.top, 4)
+                            }
+                            Text(isActive ? LocalizedStringKey("wake.heading") : LocalizedStringKey("wake.title"))
+                                .font(.system(size: wakeTitleSize, weight: .bold))
+                                .foregroundStyle(AweroDesign.navy)
+                                .multilineTextAlignment(.center)
+                                .frame(maxWidth: .infinity)
+                        }
 
                         if flow.state == .ringing {
                             VStack(spacing: 14) {
@@ -126,6 +142,7 @@ struct WakeScreen: View {
                 .background(AweroDesign.ivory.opacity(0.94))
             }
         }
+        .environment(\.colorScheme, isQRMission ? .dark : systemColorScheme)
         .alert("wake.snooze_error_title", isPresented: Binding(
             get: { flow.snoozeError != nil },
             set: { if !$0 { flow.clearSnoozeError() } }
@@ -176,5 +193,22 @@ private struct PrimaryWakeButton: ButtonStyle {
         configuration.label.font(.headline.bold()).frame(maxWidth: .infinity).padding(.vertical, 16)
             .background(AweroDesign.coralStrong.opacity(configuration.isPressed ? 0.78 : 1))
             .foregroundStyle(.white).clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
+    }
+}
+
+/// Coral alarm glyph with soft rings, shown above the wake heading as in the reference screen.
+private struct AlarmBadge: View {
+    @ScaledMetric(relativeTo: .largeTitle) private var size: CGFloat = 64
+
+    var body: some View {
+        ZStack {
+            Circle().fill(AweroDesign.coral.opacity(0.14)).frame(width: size * 1.7, height: size * 1.7)
+            Circle().fill(AweroDesign.coral.opacity(0.28)).frame(width: size * 1.3, height: size * 1.3)
+            Circle().fill(AweroDesign.coralStrong).frame(width: size, height: size)
+            Image(systemName: "alarm.fill")
+                .font(.system(size: size * 0.42, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .accessibilityHidden(true)
     }
 }

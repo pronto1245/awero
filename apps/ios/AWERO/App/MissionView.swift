@@ -43,30 +43,28 @@ private struct MathMissionView: View {
     var body: some View {
         VStack(spacing: 12) {
             if let p = mission.problem {
-                Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
+                // The typed answer replaces "?" inside the problem card, as in the reference screen.
+                (Text("\(p.left) \(String(p.operation)) \(p.right) = ")
+                    .foregroundColor(AweroDesign.navy)
+                 + Text(answer.isEmpty ? "?" : answer)
+                    .foregroundColor(answer.isEmpty ? AweroDesign.navy : AweroDesign.coral))
                     .font(.system(size: problemSize, weight: .black))
-                    .foregroundStyle(AweroDesign.navy)
-                    .padding(.vertical, 14)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.vertical, 16)
+                    .padding(.horizontal, 12)
                     .frame(maxWidth: .infinity)
                     .background(AweroDesign.surface.opacity(0.96))
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .clipShape(RoundedRectangle(cornerRadius: 22))
                     .accessibilityIdentifier("mission.math.problem")
             }
-            VStack(spacing: 4) {
-                Text(answer.isEmpty ? NSLocalizedString("mission.answer", comment: "Answer field placeholder") : answer)
-                    .font(.title2.weight(.medium))
-                    .foregroundStyle(answer.isEmpty ? AweroDesign.navy.opacity(0.35) : AweroDesign.navy)
-                    .frame(maxWidth: .infinity, minHeight: 52, alignment: .center)
-                    .background(AweroDesign.surface.opacity(0.98), in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AweroDesign.navy.opacity(0.12), lineWidth: 1))
-                    .accessibilityIdentifier("mission.math.answer")
-                if invalid {
-                    Text("mission.try_again")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(AweroDesign.warning)
-                        .frame(maxWidth: .infinity, minHeight: 28)
-                        .accessibilityIdentifier("mission.math.invalid")
-                }
+            if invalid {
+                Text("mission.try_again")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(AweroDesign.warning)
+                    .frame(maxWidth: .infinity, minHeight: 24)
+                    .accessibilityIdentifier("mission.math.invalid")
             }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                 ForEach(1...9, id: \.self) { digit in
@@ -110,35 +108,79 @@ private struct StepsMissionView: View {
     let onSuccess: () -> Void
     let onFailure: () -> Void
     let timeout: Duration
-    @ScaledMetric(relativeTo: .title) private var titleSize: CGFloat = 24
-    @ScaledMetric(relativeTo: .largeTitle) private var stepCountSize: CGFloat = 40
+    private let target = 30
+    @ScaledMetric(relativeTo: .largeTitle) private var titleSize: CGFloat = 32
+    @ScaledMetric(relativeTo: .largeTitle) private var stepCountSize: CGFloat = 56
+    @ScaledMetric(relativeTo: .largeTitle) private var ringSize: CGFloat = 220
+
+    private var progress: Double { min(1, Double(runtime.steps) / Double(target)) }
 
     var body: some View {
-        VStack(spacing: 22) {
-            Text("mission.steps_title")
-                .font(.system(size: titleSize, weight: .bold))
-                .foregroundStyle(AweroDesign.navy)
-                .accessibilityIdentifier("mission.steps.title")
-            Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
-                .font(.system(size: stepCountSize, weight: .bold))
-                .foregroundStyle(AweroDesign.navy)
+        VStack(spacing: 18) {
+            VStack(spacing: 8) {
+                Text("mission.steps_heading")
+                    .font(.system(size: titleSize, weight: .bold))
+                    .foregroundStyle(AweroDesign.navy)
+                    .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("mission.steps.title")
+                Text("mission.steps_subtitle")
+                    .font(.body)
+                    .foregroundStyle(AweroDesign.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            ZStack {
+                Circle().stroke(AweroDesign.chip, lineWidth: 22)
+                Circle()
+                    .trim(from: 0, to: progress)
+                    .stroke(AweroDesign.coral, style: StrokeStyle(lineWidth: 22, lineCap: .butt))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeOut(duration: 0.3), value: progress)
+                VStack(spacing: 4) {
+                    Image(systemName: "figure.walk")
+                        .font(.title.weight(.semibold))
+                        .foregroundStyle(AweroDesign.coral)
+                    Text("\(runtime.steps)")
+                        .font(.system(size: stepCountSize, weight: .heavy))
+                        .monospacedDigit()
+                        .foregroundStyle(AweroDesign.navy)
+                    Text("mission.steps_of_target")
+                        .font(.subheadline)
+                        .foregroundStyle(AweroDesign.textSecondary)
+                }
+            }
+            .frame(width: ringSize, height: ringSize)
+            .padding(.vertical, 6)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps)))
+
             if runtime.unavailable {
                 Text("mission.motion_unavailable")
-                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.textSecondary)
             } else if runtime.completed {
                 Button("mission.continue", action: onSuccess)
                     .buttonStyle(WakeMissionButton())
             } else {
-                Text("mission.keep_walking")
-                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(AweroDesign.sage)
+                    Text("mission.steps_tip")
+                        .foregroundStyle(AweroDesign.navy)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(16)
+                .background(AweroDesign.surface.opacity(0.94), in: RoundedRectangle(cornerRadius: 20))
             }
             Button("mission.use_math", action: onFailure)
-                .buttonStyle(WakeMissionButton())
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AweroDesign.coralStrong)
+                .frame(minHeight: 44)
             Text("mission.timeout")
-                .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
+                .font(.caption).foregroundStyle(AweroDesign.textSecondary)
+                .multilineTextAlignment(.center)
         }
-        .padding(28)
-        .onAppear { runtime.start(target: 30) }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .onAppear { runtime.start(target: target) }
         .onDisappear { runtime.stop() }
         .task {
             do { try await Task.sleep(for: timeout) } catch { return }
@@ -161,51 +203,74 @@ private struct QRMissionView: View {
         return QRMission(expectedPayload: expected)
     }
 
+    @State private var torchOn = false
+
     var body: some View {
         VStack(spacing: 18) {
-            Text("mission.qr_title")
-                .font(.system(size: qrTitleSize, weight: .black))
-                .foregroundStyle(AweroDesign.navy)
+            VStack(spacing: 8) {
+                Text("mission.qr_heading")
+                    .font(.system(size: qrTitleSize, weight: .bold))
+                    .foregroundStyle(AweroDesign.navy)
+                    .multilineTextAlignment(.center)
+                Text("mission.qr_subtitle")
+                    .font(.body)
+                    .foregroundStyle(AweroDesign.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
 
             if expected == nil || expected?.isEmpty == true {
                 Text("mission.qr_unconfigured")
-                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.textSecondary)
                     .accessibilityIdentifier("mission.qr.unconfigured")
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if runtime.cameraUnavailable {
                 Text("mission.camera_unavailable")
-                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.textSecondary)
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if let scannedCode = runtime.scannedCode, mission?.validate(payload: scannedCode) == false {
                 Text("mission.qr_mismatch")
-                    .foregroundStyle(AweroDesign.navy.opacity(0.7))
+                    .foregroundStyle(AweroDesign.textSecondary)
             } else {
-                QRPreview(session: runtime.session)
-                    .frame(height: 300)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(Text("mission.qr_instructions"))
-                    .accessibilityAddTraits(.isImage)
-                Group {
-                    if runtime.scannedCode == nil {
-                        Text("mission.qr_instructions")
-                    } else {
-                        Text("mission.qr_detected")
+                ZStack(alignment: .topTrailing) {
+                    QRPreview(session: runtime.session)
+                        .frame(height: 280)
+                        .clipShape(RoundedRectangle(cornerRadius: 22))
+                        .overlay(ScannerFrame().padding(18))
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(Text("mission.qr_instructions"))
+                        .accessibilityAddTraits(.isImage)
+                    Button { toggleTorch() } label: {
+                        Image(systemName: torchOn ? "flashlight.on.fill" : "flashlight.off.fill")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Color.white.opacity(0.18), in: RoundedRectangle(cornerRadius: 12))
                     }
+                    .accessibilityLabel(Text("mission.flashlight"))
+                    .accessibilityValue(torchOn ? Text("home.enabled") : Text("home.disabled"))
+                    .padding(10)
                 }
-                .foregroundStyle(AweroDesign.navy.opacity(0.7))
+                Text(runtime.scannedCode == nil ? "mission.qr_instructions" : "mission.qr_detected")
+                    .foregroundStyle(AweroDesign.textSecondary)
+                    .multilineTextAlignment(.center)
                 Text("mission.timeout")
-                    .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .font(.caption).foregroundStyle(AweroDesign.textSecondary)
+                    .multilineTextAlignment(.center)
             }
+            Button(action: onFailure) {
+                Text("mission.qr_cant_scan")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .foregroundStyle(Color(hex: 0x1D2433))
+                    .background(Color.white, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
+            }
+            .accessibilityHint(Text("mission.use_math"))
         }
-        .safeAreaInset(edge: .bottom) {
-            Button("mission.use_math", action: onFailure)
-                .buttonStyle(WakeMissionButton())
-                .padding(.horizontal, 28)
-        }
-        .padding(28)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 12)
         .task {
             guard let expected, !expected.isEmpty else { return }
             if AVCaptureDevice.authorizationStatus(for: .video) == .notDetermined {
@@ -232,7 +297,24 @@ private struct QRMissionView: View {
                 try? await Task.sleep(for: .milliseconds(200))
             }
         }
-        .onDisappear { runtime.stop() }
+        .onDisappear {
+            setTorch(false)
+            runtime.stop()
+        }
+    }
+
+    private func toggleTorch() { setTorch(!torchOn) }
+
+    private func setTorch(_ on: Bool) {
+        guard let device = AVCaptureDevice.default(for: .video), device.hasTorch else { return }
+        do {
+            try device.lockForConfiguration()
+            device.torchMode = on ? .on : .off
+            device.unlockForConfiguration()
+            torchOn = on
+        } catch {
+            torchOn = false
+        }
     }
 }
 
@@ -243,6 +325,30 @@ private struct FallbackMissionView: View {
             Text("mission.unavailable").foregroundStyle(AweroDesign.navy)
             Button("mission.use_fallback", action: onFailure).buttonStyle(WakeMissionButton())
         }
+    }
+}
+
+/// Coral corner brackets and a scan line over the camera preview.
+private struct ScannerFrame: View {
+    var body: some View {
+        GeometryReader { geometry in
+            let size = geometry.size
+            let arm: CGFloat = 34
+            Path { path in
+                for (x, y, dx, dy) in [(0.0, 0.0, 1.0, 1.0), (size.width, 0.0, -1.0, 1.0), (0.0, size.height, 1.0, -1.0), (size.width, size.height, -1.0, -1.0)] {
+                    path.move(to: CGPoint(x: x, y: y + dy * arm))
+                    path.addLine(to: CGPoint(x: x, y: y))
+                    path.addLine(to: CGPoint(x: x + dx * arm, y: y))
+                }
+            }
+            .stroke(AweroDesign.coral, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+            Rectangle()
+                .fill(AweroDesign.coral)
+                .frame(width: size.width - 28, height: 2)
+                .shadow(color: AweroDesign.coral, radius: 6)
+                .position(x: size.width / 2, y: size.height / 2)
+        }
+        .allowsHitTesting(false)
     }
 }
 
