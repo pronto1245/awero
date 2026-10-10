@@ -62,6 +62,7 @@ class FirstRunOnboardingUiTest {
         continueButton.performScrollTo().assertIsDisplayed().assert(hasClickAction())
         continueButton.performClick()
         compose.onNodeWithText(context.getString(R.string.create_title)).assertIsDisplayed()
+        captureVisual("Create")
         compose.onNodeWithText(context.getString(R.string.create_save))
             .performScrollTo()
             .performClick()
@@ -73,6 +74,22 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.home_next_alarm), substring = true)
             .performScrollTo()
             .assertIsDisplayed()
+        captureVisual("HomeLargeText")
+        compose.onNodeWithText(context.getString(R.string.nav_progress)).performClick()
+        compose.onNodeWithText(context.getString(R.string.progress_empty_title)).assertIsDisplayed()
+        captureVisual("Progress")
+        compose.onNodeWithText(context.getString(R.string.nav_profile)).performClick()
+        compose.onNodeWithText(context.getString(R.string.settings_title)).assertIsDisplayed()
+        captureVisual("Profile")
+    }
+
+    private fun captureVisual(name: String) {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.waitForIdleSync()
+        val directory = java.io.File(instrumentation.targetContext.cacheDir, "awero-visual").apply { mkdirs() }
+        java.io.File(directory, "$name.png").outputStream().use { output ->
+            checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
+        }
     }
 
     companion object {

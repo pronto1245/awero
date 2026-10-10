@@ -47,12 +47,14 @@ private struct MathMissionView: View {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
                     .font(.system(size: problemSize, weight: .black, design: .rounded))
                     .foregroundStyle(AweroDesign.navy)
+                    .accessibilityIdentifier("mission.math.problem")
             }
             TextField("mission.answer", text: $answer)
                 .keyboardType(.numbersAndPunctuation)
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.center)
-            if invalid { Text("mission.try_again").foregroundStyle(.red) }
+                .accessibilityIdentifier("mission.math.answer")
+            if invalid { Text("mission.try_again").foregroundStyle(.red).accessibilityIdentifier("mission.math.invalid") }
             Button("±") {
                 answer = answer.hasPrefix("-") ? String(answer.dropFirst()) : "-" + answer
                 invalid = false
@@ -74,6 +76,7 @@ private struct MathMissionView: View {
                 } label: { Image(systemName: "delete.left") }
                     .buttonStyle(MathKeyButton())
                     .accessibilityLabel(Text("mission.delete_digit"))
+                    .accessibilityIdentifier("mission.math.delete")
                 Button("0") {
                     if answer.count < 12 { answer += "0" }
                     invalid = false
@@ -89,6 +92,7 @@ private struct MathMissionView: View {
                 } label: { Image(systemName: "checkmark") }
                     .buttonStyle(MathKeyButton(primary: true))
                     .accessibilityLabel(Text("mission.check"))
+                    .accessibilityIdentifier("mission.math.check")
             }
         }
         .padding(28)

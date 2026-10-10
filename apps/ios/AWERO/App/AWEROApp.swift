@@ -24,6 +24,13 @@ struct AWEROApp: App {
                     await alarmStore.load()
                     recoveryTrigger.appDidBecomeActive()
                     await wakeFlow.restore()
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("-awero.uiTestWake") {
+                        let alarm = alarmStore.alarms.first ?? Alarm(hour: 7, minute: 0, weekdays: Set(1...7), missionType: .math)
+                        await wakeFlow.start(alarm: alarm, isTestAlarm: true)
+                        await wakeFlow.beginMission()
+                    }
+                    #endif
                 }
                 .onChange(of: scenePhase) { phase in
                     guard phase == .active else { return }

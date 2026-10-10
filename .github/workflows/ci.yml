@@ -100,6 +100,9 @@ jobs:
             for attempt in $(seq 1 10); do if [ "$(adb get-state 2>/dev/null || true)" = "device" ]; then break; fi; adb reconnect offline >/dev/null 2>&1 || true; sleep 1; done
             test "$(adb get-state)" = "device"
             gradle -p apps/android :app:connectedDebugAndroidTest
+            for shot in Create HomeLargeText Progress Profile Math; do
+              adb exec-out run-as app.awero cat "cache/awero-visual/$shot.png" | base64 -w0 | fold -w3000 | awk -v name="$shot" '{print "AWERO_VISUAL|android|" name "|" NR-1 "|" $0}'
+            done
             bash apps/android/scripts/persistence-crash-test.sh
 
       - name: Collect Android emulator diagnostics

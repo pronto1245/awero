@@ -22,11 +22,11 @@ struct WakeScreen: View {
                         MissionView(alarm: missionAlarm(from: alarm), onSuccess: { Task { await flow.completeMission() } }, onFailure: { Task { await flow.fallbackToMath() } })
                     }
                 case .completed:
-                    Text("wake.completed_title").font(.title.bold()).foregroundStyle(AweroDesign.navy)
+                    Text("wake.completed_title").accessibilityIdentifier("wake.completed").font(.title.bold()).foregroundStyle(AweroDesign.navy)
                     Text("wake.completed_body").foregroundStyle(AweroDesign.navy.opacity(0.55))
                 case .emergencyStopped:
                     Text("wake.emergency_stop").font(.title2.bold()).foregroundStyle(AweroDesign.navy)
-                    Text("wake.stopped_body").foregroundStyle(AweroDesign.navy.opacity(0.55))
+                    Text("wake.stopped_body").accessibilityIdentifier("wake.stopped").foregroundStyle(AweroDesign.navy.opacity(0.55))
                 case .storageError:
                     Text("persistence.read_error_title").font(.title2.bold()).foregroundStyle(AweroDesign.navy)
                     Text(flow.storageError ?? String(localized: "persistence.read_error"))

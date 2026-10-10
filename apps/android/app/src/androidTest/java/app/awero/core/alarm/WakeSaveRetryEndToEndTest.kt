@@ -91,6 +91,12 @@ class WakeSaveRetryEndToEndTest {
             activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
         }
 
+        instrumentation.waitForIdleSync()
+        val visualDirectory = java.io.File(context.cacheDir, "awero-visual").apply { mkdirs() }
+        java.io.File(visualDirectory, "Math.png").outputStream().use { output ->
+            checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
+        }
+
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView
             val pattern = Regex("(\\d+) ([+-]) (\\d+) = \\?")
