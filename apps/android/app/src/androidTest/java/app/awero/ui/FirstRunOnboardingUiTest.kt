@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import app.awero.MainActivity
 import app.awero.R
+import java.io.FileInputStream
 import org.junit.BeforeClass
 import org.junit.AfterClass
 import org.junit.Rule
@@ -53,17 +54,26 @@ class FirstRunOnboardingUiTest {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences("awero.onboarding", 0).edit().clear().commit()
             val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
-            uiAutomation.executeShellCommand("pm grant app.awero android.permission.POST_NOTIFICATIONS").close()
-            uiAutomation.executeShellCommand("appops set app.awero SCHEDULE_EXACT_ALARM allow").close()
-            uiAutomation.executeShellCommand("appops set app.awero USE_FULL_SCREEN_INTENT allow").close()
-            uiAutomation.executeShellCommand("settings put system font_scale 1.8").close()
+            listOf(
+                "pm grant app.awero android.permission.POST_NOTIFICATIONS",
+                "appops set app.awero SCHEDULE_EXACT_ALARM allow",
+                "appops set app.awero USE_FULL_SCREEN_INTENT allow",
+                "settings put system font_scale 1.8"
+            ).forEach { command ->
+                val descriptor = uiAutomation.executeShellCommand(command)
+                val output = FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
+                descriptor.close()
+                check(output.isBlank()) { "Emulator setup failed for '$command': $output" }
+            }
         }
 
         @AfterClass
         @JvmStatic
         fun restoreSystemFontScale() {
-            InstrumentationRegistry.getInstrumentation().uiAutomation
-                .executeShellCommand("settings put system font_scale 1.0").close()
+            val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation
+                .executeShellCommand("settings put system font_scale 1.0")
+            FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
+            descriptor.close()
         }
     }
 }
