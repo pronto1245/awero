@@ -92,10 +92,13 @@ class WakeSaveRetryEndToEndTest {
         }
 
         instrumentation.waitForIdleSync()
+        instrumentation.uiAutomation.waitForIdle(500, 5_000)
         instrumentation.runOnMainSync {
             val buttons = views(activity!!.window.decorView).filterIsInstance<Button>()
             val visibleBounds = android.graphics.Rect()
-            for (button in buttons.filter { it.text.toString() in listOf("0", "✓", context.getString(R.string.wake_emergency_stop)) }) {
+            val critical = buttons.filter { it.text.toString() in listOf("0", "✓", context.getString(R.string.wake_emergency_stop)) }
+            assertEquals("Math control set was not rendered", 3, critical.size)
+            for (button in critical) {
                 assertTrue("Critical control was clipped: ${button.text}", button.getGlobalVisibleRect(visibleBounds))
                 assertEquals("Critical control was partly hidden: ${button.text}", button.height, visibleBounds.height())
             }
