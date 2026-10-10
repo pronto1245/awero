@@ -28,9 +28,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.awero.R
 
-private val OnboardingIvory = AweroDesign.ivory
-private val OnboardingNavy = AweroDesign.navy
-private val OnboardingCoral = AweroDesign.coral
+private val OnboardingIvory get() = AweroDesign.ivory
+private val OnboardingNavy get() = AweroDesign.navy
+private val OnboardingCoral get() = AweroDesign.coralStrong
 
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
