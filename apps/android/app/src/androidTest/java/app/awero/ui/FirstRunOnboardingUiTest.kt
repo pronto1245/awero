@@ -52,8 +52,11 @@ class FirstRunOnboardingUiTest {
         fun resetFirstRunState() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences("awero.onboarding", 0).edit().clear().commit()
-            InstrumentationRegistry.getInstrumentation().uiAutomation
-                .executeShellCommand("settings put system font_scale 1.8").close()
+            val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
+            uiAutomation.executeShellCommand("pm grant app.awero android.permission.POST_NOTIFICATIONS").close()
+            uiAutomation.executeShellCommand("appops set app.awero SCHEDULE_EXACT_ALARM allow").close()
+            uiAutomation.executeShellCommand("appops set app.awero USE_FULL_SCREEN_INTENT allow").close()
+            uiAutomation.executeShellCommand("settings put system font_scale 1.8").close()
         }
 
         @AfterClass
