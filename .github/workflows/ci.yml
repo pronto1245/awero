@@ -92,7 +92,9 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             gradle -p apps/android :app:installDebug
+            adb shell pm grant app.awero android.permission.POST_NOTIFICATIONS
             adb shell appops set app.awero SCHEDULE_EXACT_ALARM allow
+            adb shell appops set app.awero USE_FULL_SCREEN_INTENT allow
             adb shell cmd connectivity airplane-mode enable
             test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = "1"
             for attempt in $(seq 1 10); do if [ "$(adb get-state 2>/dev/null || true)" = "device" ]; then break; fi; adb reconnect offline >/dev/null 2>&1 || true; sleep 1; done

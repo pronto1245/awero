@@ -21,6 +21,7 @@ targets:
     scheme:
       testTargets:
         - AWEROTests
+        - AWEROFirstRunUITests
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.awero
@@ -48,6 +49,21 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.awero.tests
         PRODUCT_NAME: AWEROTests
+        SWIFT_VERSION: "5.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: "YES"
+  AWEROFirstRunUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/AWEROFirstRunUITests
+    dependencies:
+      - target: AWERO
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.awero.first-run-uitests
+        PRODUCT_NAME: AWEROFirstRunUITests
         SWIFT_VERSION: "5.0"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1"

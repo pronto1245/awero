@@ -21,6 +21,7 @@ struct OnboardingView: View {
                     .font(.system(size: titleSize, weight: .bold, design: .rounded))
                     .foregroundStyle(OnboardingStyle.navy)
                     .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("onboarding.title")
                 Text("onboarding.body")
                     .font(.body)
                     .foregroundStyle(OnboardingStyle.navy.opacity(0.75))
@@ -41,6 +42,7 @@ struct OnboardingView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 18))
                 }
                 .accessibilityHint(Text("onboarding.create_alarm_hint"))
+                .accessibilityIdentifier("onboarding.createAlarm")
             }
             .padding(24)
         }

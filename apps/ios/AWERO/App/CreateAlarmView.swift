@@ -91,6 +91,7 @@ struct CreateAlarmView: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
                     .background(CreateAweroStyle.ivory.opacity(0.96))
+                    .accessibilityIdentifier("alarm.save")
             }
         }
         .sheet(isPresented: $showCodeScanner) {
