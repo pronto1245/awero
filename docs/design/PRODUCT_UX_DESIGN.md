@@ -19,7 +19,7 @@ Where these differ from the concept board, these win:
 5. **Edit and delete.** Tapping an alarm card edits it; swipe deletes with confirmation.
 6. **Progress copy.** Average time reads as minutes to get up (e.g. «4,8 мин — среднее время подъёма»), not a star rating; the second tile shows the successful-wake percentage instead of repeating the streak; Russian uses a decimal comma.
 7. **Snooze.** None of the reference wake screens shows snooze; it is removed from the wake screen when that screen is rebuilt.
-8. **Imagery.** Photographic mountain-lake scenes replace the flat drawn sunrise (see Scene photos). Icons, cards and controls stay flat.
+8. **Imagery.** The owner's illustrated mountain-lake scenes, in the flat style of the reference screens, replace the code-drawn sunrise (see Scene illustrations).
 
 ## Reference screens (owner, 2026-10-10)
 
@@ -35,9 +35,9 @@ They are taken literally except for these owner-approved points:
 - **New alarm actions:** "Проверить будильник" saves the alarm and immediately starts a test ring; a "Готово" action in the header saves without a test.
 - Profile settings (melody, gradual volume, vibration, saved QR codes, sleep reminder) are product features, implemented in their own slices; they are not mocked in the UI before they work.
 
-## Scene photos
+## Scene illustrations
 
-Backgrounds use one mountain-lake scene photographed at four times of day (`apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). The Home header band follows device local time: dawn 05–11, day 11–18, sunset 18–23, night 23–05. The wake and mission screens use the portrait dawn scene, with a light top scrim behind the navy title and a fade into the ivory surface. The night portrait is reserved for the dim wake variant (correction 3), which also has to switch mission text colors and ships separately.
+Backgrounds use one illustrated mountain-lake scene at four times of day, supplied by the owner (853×1844 portraits; `apps/ios/AWERO/App/Scenes`, `apps/android/app/src/main/res/drawable-nodpi/scene_*`). The Home header band is a crop around the sun or moon and follows device local time: dawn 05–11, day 11–18, sunset 18–23, night 23–05. The wake and mission screens show the full portrait dawn scene; its bottom already fades into the ivory surface behind the mission controls. The night portrait is reserved for the dim wake variant (correction 3), which also has to switch mission text colors and ships separately.
 
 ## Screens and implementation status
 

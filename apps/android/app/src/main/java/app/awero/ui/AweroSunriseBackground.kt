@@ -15,7 +15,7 @@ import android.graphics.Shader
 import android.graphics.drawable.Drawable
 
 /**
- * Background of the OS-facing wake activity: the approved dawn photo across the top of the
+ * Background of the OS-facing wake activity: the illustrated dawn scene across the whole
  * screen, fading into the ivory mission surface. Without [resources] (or if the photo cannot be
  * decoded) it draws the offline layered sunrise instead.
  */
@@ -32,7 +32,7 @@ class AweroSunriseBackground(resources: Resources? = null) : Drawable() {
         val height = screenHeight * .52f
         if (width <= 0f || height <= 0f) return
         photo?.let { image ->
-            drawPhoto(canvas, image, width, screenHeight, height)
+            drawPhoto(canvas, image, width, screenHeight)
             return
         }
         paint.shader = null
@@ -125,30 +125,20 @@ class AweroSunriseBackground(resources: Resources? = null) : Drawable() {
         paint.shader = null
     }
 
-    private fun drawPhoto(canvas: Canvas, image: Bitmap, width: Float, screenHeight: Float, height: Float) {
+    private fun drawPhoto(canvas: Canvas, image: Bitmap, width: Float, screenHeight: Float) {
         paint.shader = null
         paint.color = AweroDesign.ivoryArgb
         paint.alpha = opacity
         canvas.drawRect(bounds, paint)
 
-        // Centre-crop the portrait photo into the top band of the screen.
-        val scale = maxOf(width / image.width, height / image.height)
+        // Centre-crop the portrait scene over the whole screen; it fades to ivory at the bottom.
+        val scale = maxOf(width / image.width, screenHeight / image.height)
         val sourceWidth = width / scale
-        val sourceHeight = height / scale
+        val sourceHeight = screenHeight / scale
         val left = (image.width - sourceWidth) / 2f
         val top = (image.height - sourceHeight) / 2f
         val source = Rect(left.toInt(), top.toInt(), (left + sourceWidth).toInt(), (top + sourceHeight).toInt())
-        paint.alpha = opacity
-        canvas.drawBitmap(image, source, RectF(0f, 0f, width, height), paint)
-
-        // Lighten the sky behind the navy title, then fade into the ivory mission surface.
-        paint.shader = LinearGradient(0f, 0f, 0f, height * .55f,
-            intArrayOf(0xB3FFF8EF.toInt(), 0x00FFF8EF), null, Shader.TileMode.CLAMP)
-        canvas.drawRect(0f, 0f, width, height * .55f, paint)
-        paint.shader = LinearGradient(0f, height * .75f, 0f, height + screenHeight * .03f,
-            intArrayOf(0x00FFF8EF, AweroDesign.ivoryArgb), null, Shader.TileMode.CLAMP)
-        canvas.drawRect(0f, height * .75f, width, height + screenHeight * .03f, paint)
-        paint.shader = null
+        canvas.drawBitmap(image, source, RectF(bounds), paint)
     }
 
     override fun setAlpha(alpha: Int) { opacity = alpha; invalidateSelf() }

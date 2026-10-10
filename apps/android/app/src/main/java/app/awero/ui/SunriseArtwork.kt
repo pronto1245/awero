@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -45,27 +46,17 @@ fun ApprovedHomeSunriseArtwork(
 }
 
 /**
- * Dawn photo header for the in-app wake screen: lightens the top so the navy title stays readable
- * over the sky; the caller fades the bottom into the ivory mission surface.
+ * Full-screen illustrated dawn scene behind the in-app wake screen. The artwork already fades
+ * into the ivory surface at the bottom, so it sits directly under the mission controls.
  */
 @Composable
-fun WakeSceneArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.unit.Dp = 390.dp) {
-    Box(modifier.fillMaxWidth().height(height)) {
-        Image(
-            painter = painterResource(AweroScene.wakePortrait),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().height(height)
-        )
-        Box(
-            Modifier.align(Alignment.TopCenter).fillMaxWidth().height(height * 0.55f)
-                .background(Brush.verticalGradient(listOf(AweroDesign.ivory.copy(alpha = .70f), AweroDesign.ivory.copy(alpha = 0f))))
-        )
-        Box(
-            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(height * 0.25f)
-                .background(Brush.verticalGradient(listOf(AweroDesign.ivory.copy(alpha = 0f), AweroDesign.ivory)))
-        )
-    }
+fun WakeSceneArtwork(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(AweroScene.wakePortrait),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier.fillMaxSize()
+    )
 }
 
 @Composable

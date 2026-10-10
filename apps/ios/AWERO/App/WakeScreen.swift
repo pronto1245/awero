@@ -11,12 +11,8 @@ struct WakeScreen: View {
     var body: some View {
         ZStack(alignment: .top) {
             AweroDesign.ivory.ignoresSafeArea()
-            WakeSceneBackground(height: 365)
-                .ignoresSafeArea(edges: .top)
-                .overlay(alignment: .bottom) {
-                    LinearGradient(colors: [.clear, AweroDesign.ivory.opacity(0.92)], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 96)
-                }
+            WakeSceneBackground()
+                .ignoresSafeArea()
                 .allowsHitTesting(false)
 
             ScrollViewReader { proxy in

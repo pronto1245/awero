@@ -52,10 +52,7 @@ fun WakeScreen(flow: WakeFlowController) {
     val active = state == WakeFlowController.State.RINGING || state == WakeFlowController.State.MISSION
 
     Box(Modifier.fillMaxSize().background(AweroDesign.ivory)) {
-        WakeSceneArtwork(
-            modifier = Modifier.align(Alignment.TopCenter),
-            height = 390.dp
-        )
+        WakeSceneArtwork(modifier = Modifier.fillMaxSize())
 
         Column(Modifier.fillMaxSize()) {
             Column(
