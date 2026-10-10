@@ -176,5 +176,13 @@
   "wake.error_completion_save": "Не удалось сохранить завершение. Сессия пробуждения всё ещё активна.",
   "wake.error_snooze_save": "Не удалось сохранить откладывание. Будильник продолжает звонить.",
   "wake.error_snooze_schedule": "Не удалось отложить будильник. Он продолжает звонить.",
-  "wake.error_stop_save": "Не удалось записать выключение. Будильник всё ещё активен."
+  "wake.error_stop_save": "Не удалось записать выключение. Будильник всё ещё активен.",
+  "home.days.weekdays": "Будни",
+  "home.days.weekends": "Выходные",
+  "home.days.everyday": "Каждый день",
+  "home.today": "Сегодня",
+  "home.tomorrow": "Завтра",
+  "home.status.not_scheduled": "Не запланирован",
+  "home.status.permission": "Нужно разрешение",
+  "home.fix": "Исправить"
 }

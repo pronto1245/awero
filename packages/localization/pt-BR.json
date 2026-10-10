@@ -176,5 +176,13 @@
   "wake.error_completion_save": "Não foi possível salvar a conclusão. Sua sessão de despertar continua ativa.",
   "wake.error_snooze_save": "Não foi possível salvar a soneca. O alarme continua tocando.",
   "wake.error_snooze_schedule": "Não foi possível agendar a soneca. O alarme continua tocando.",
-  "wake.error_stop_save": "Não foi possível registrar a parada. O alarme continua ativo."
+  "wake.error_stop_save": "Não foi possível registrar a parada. O alarme continua ativo.",
+  "home.days.weekdays": "Dias úteis",
+  "home.days.weekends": "Fins de semana",
+  "home.days.everyday": "Todos os dias",
+  "home.today": "Hoje",
+  "home.tomorrow": "Amanhã",
+  "home.status.not_scheduled": "Não agendado",
+  "home.status.permission": "Permissão necessária",
+  "home.fix": "Corrigir"
 }

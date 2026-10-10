@@ -176,5 +176,13 @@
   "wake.error_completion_save": "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.",
   "wake.error_snooze_save": "Das Schlummern konnte nicht gespeichert werden. Der Wecker klingelt weiter.",
   "wake.error_snooze_schedule": "Schlummern konnte nicht geplant werden. Der Wecker klingelt weiter.",
-  "wake.error_stop_save": "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv."
+  "wake.error_stop_save": "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.",
+  "home.days.weekdays": "Werktags",
+  "home.days.weekends": "Wochenende",
+  "home.days.everyday": "Täglich",
+  "home.today": "Heute",
+  "home.tomorrow": "Morgen",
+  "home.status.not_scheduled": "Nicht geplant",
+  "home.status.permission": "Berechtigung nötig",
+  "home.fix": "Beheben"
 }

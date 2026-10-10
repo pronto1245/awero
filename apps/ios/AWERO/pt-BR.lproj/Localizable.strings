@@ -55,6 +55,9 @@
 "home.alarms" = "Meus alarmes";
 "home.alarms_load_error_body" = "O AWERO não conseguiu ler seus alarmes salvos. Eles não foram apagados. Tente novamente.";
 "home.alarms_load_error_title" = "Não foi possível carregar os alarmes";
+"home.days.everyday" = "Todos os dias";
+"home.days.weekdays" = "Dias úteis";
+"home.days.weekends" = "Fins de semana";
 "home.delete" = "Excluir";
 "home.delete_confirm_body" = "Este alarme e seu horário serão removidos.";
 "home.delete_confirm_title" = "Excluir este alarme?";
@@ -65,6 +68,7 @@
 "home.enabled" = "Ativado";
 "home.error_body" = "Não foi possível concluir a ação. Verifique as permissões do alarme e tente novamente.";
 "home.error_title" = "Não foi possível executar a ação do alarme";
+"home.fix" = "Corrigir";
 "home.greeting" = "Bom dia";
 "home.loading_alarms" = "Carregando alarmes…";
 "home.mission.math" = "Matemática";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "Nenhum alarme ativo";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Tentar novamente";
+"home.status.not_scheduled" = "Não agendado";
+"home.status.permission" = "Permissão necessária";
 "home.subtitle" = "Um novo dia, novas possibilidades";
 "home.test" = "Testar";
+"home.today" = "Hoje";
 "home.toggle_alarm" = "Ativar ou desativar alarme às %1$@";
+"home.tomorrow" = "Amanhã";
 "mission.answer" = "Resposta";
 "mission.camera_denied" = "O acesso à câmera está indisponível. Use a alternativa de matemática.";
 "mission.camera_unavailable" = "Câmera indisponível.";

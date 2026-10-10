@@ -55,6 +55,9 @@
 "home.alarms" = "Мои будильники";
 "home.alarms_load_error_body" = "AWERO не удалось прочитать сохранённые будильники. Данные не удалены. Повторите попытку.";
 "home.alarms_load_error_title" = "Не удалось загрузить будильники";
+"home.days.everyday" = "Каждый день";
+"home.days.weekdays" = "Будни";
+"home.days.weekends" = "Выходные";
 "home.delete" = "Удалить";
 "home.delete_confirm_body" = "Будильник и его расписание будут удалены.";
 "home.delete_confirm_title" = "Удалить этот будильник?";
@@ -65,6 +68,7 @@
 "home.enabled" = "Включён";
 "home.error_body" = "Не удалось выполнить действие. Проверьте разрешения будильника и повторите попытку.";
 "home.error_title" = "Не удалось выполнить действие с будильником";
+"home.fix" = "Исправить";
 "home.greeting" = "Доброе утро";
 "home.loading_alarms" = "Загрузка будильников…";
 "home.mission.math" = "Математика";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "Нет включённых будильников";
 "home.ok" = "ОК";
 "home.retry_loading_alarms" = "Повторить";
+"home.status.not_scheduled" = "Не запланирован";
+"home.status.permission" = "Нужно разрешение";
 "home.subtitle" = "Новый день — новые возможности";
 "home.test" = "Проверить";
+"home.today" = "Сегодня";
 "home.toggle_alarm" = "Включить или выключить будильник на %1$@";
+"home.tomorrow" = "Завтра";
 "mission.answer" = "Ответ";
 "mission.camera_denied" = "Нет доступа к камере. Перейдите к математическому заданию.";
 "mission.camera_unavailable" = "Камера недоступна.";

@@ -176,5 +176,13 @@
   "wake.error_completion_save": "Could not save completion. Your wake session is still active.",
   "wake.error_snooze_save": "Could not save the snooze. The alarm is still ringing.",
   "wake.error_snooze_schedule": "Could not schedule snooze. The alarm is still ringing.",
-  "wake.error_stop_save": "Could not record the stop. The alarm is still active."
+  "wake.error_stop_save": "Could not record the stop. The alarm is still active.",
+  "home.days.weekdays": "Weekdays",
+  "home.days.weekends": "Weekends",
+  "home.days.everyday": "Every day",
+  "home.today": "Today",
+  "home.tomorrow": "Tomorrow",
+  "home.status.not_scheduled": "Not scheduled",
+  "home.status.permission": "Permission needed",
+  "home.fix": "Fix"
 }

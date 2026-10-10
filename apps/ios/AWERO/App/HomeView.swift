@@ -75,15 +75,17 @@ struct HomeView: View {
                         if let next = upcomingAlarms.first {
                             Button { editingAlarm = next.alarm } label: {
                                 VStack(alignment: .leading, spacing: 7) {
-                                    Label("home.next_alarm", systemImage: "sun.max.fill")
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(AweroDesign.coral)
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "sunrise.fill").foregroundStyle(AweroDesign.sun)
+                                        Text("home.next_alarm").foregroundStyle(AweroDesign.navy)
+                                    }
+                                    .font(.subheadline.weight(.semibold))
                                     HStack(alignment: .center) {
                                         VStack(alignment: .leading, spacing: 3) {
                                             Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
                                                 .font(.system(size: nextAlarmSize, weight: .bold))
                                                 .foregroundStyle(AweroDesign.navy)
-                                            Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .none) + " · " + missionName(next.alarm.missionType))
+                                            Text(nextAlarmDay(next.date, for: next.alarm) + " · " + missionName(next.alarm.missionType))
                                                 .font(.subheadline)
                                                 .foregroundStyle(AweroDesign.navy.opacity(0.68))
                                                 .lineLimit(1)
@@ -335,6 +337,25 @@ struct HomeView: View {
         }
     }
 
+    /// "Завтра, Пн" / "Сегодня, Пт" for the next two days, otherwise "Ср, 15 окт.".
+    private func nextAlarmDay(_ date: Date, for alarm: Alarm) -> String {
+        var calendar = Calendar.current
+        if alarm.timezoneMode == .fixed, let identifier = alarm.fixedTimezone,
+           let zone = TimeZone(identifier: identifier) {
+            calendar.timeZone = zone
+        }
+        let formatter = DateFormatter()
+        formatter.locale = .current
+        formatter.timeZone = calendar.timeZone
+        if calendar.isDateInToday(date) || calendar.isDateInTomorrow(date) {
+            formatter.setLocalizedDateFormatFromTemplate("EEE")
+            let relative = NSLocalizedString(calendar.isDateInToday(date) ? "home.today" : "home.tomorrow", comment: "Relative day of the next alarm")
+            return relative + ", " + formatter.string(from: date)
+        }
+        formatter.setLocalizedDateFormatFromTemplate("EEEdMMM")
+        return formatter.string(from: date)
+    }
+
     private func missionName(_ type: MissionType) -> String {
         let key: String
         switch type {
@@ -367,7 +388,7 @@ private struct AlarmCard: View {
     let onRetry: () -> Void
     let onOpenSettings: () -> Void
     let onDelete: () -> Void
-    @ScaledMetric(relativeTo: .largeTitle) private var alarmTimeSize: CGFloat = 38
+    @ScaledMetric(relativeTo: .title) private var alarmTimeSize: CGFloat = 30
 
     private var alarmTimeZone: TimeZone {
         if alarm.timezoneMode == .fixed,
@@ -386,31 +407,49 @@ private struct AlarmCard: View {
         )
     }
 
-    private var weekdays: String {
-        var calendar = Calendar(identifier: .gregorian)
-        if alarm.timezoneMode == .fixed, let identifier = alarm.fixedTimezone,
-           let timezone = TimeZone(identifier: identifier) {
-            calendar.timeZone = timezone
-        }
-        return alarm.weekdays.sorted().compactMap { weekday in
-            let index = weekday - 1
-            guard calendar.shortWeekdaySymbols.indices.contains(index) else { return nil }
-            return calendar.shortWeekdaySymbols[index]
-        }.joined(separator: " · ")
+    /// "Будни", "Выходные", "Каждый день", or short weekday names in calendar order.
+    private var days: String {
+        let weekdays: Set<Int> = [2, 3, 4, 5, 6]
+        let weekends: Set<Int> = [1, 7]
+        if alarm.weekdays.count == 7 { return NSLocalizedString("home.days.everyday", comment: "Alarm repeats daily") }
+        if alarm.weekdays == weekdays { return NSLocalizedString("home.days.weekdays", comment: "Alarm repeats Monday to Friday") }
+        if alarm.weekdays == weekends { return NSLocalizedString("home.days.weekends", comment: "Alarm repeats Saturday and Sunday") }
+        var calendar = Calendar.current
+        calendar.timeZone = alarmTimeZone
+        let symbols = calendar.shortWeekdaySymbols
+        let order = (0..<7).map { (calendar.firstWeekday - 1 + $0) % 7 + 1 }
+        return order.filter(alarm.weekdays.contains).compactMap { day in
+            symbols.indices.contains(day - 1) ? symbols[day - 1] : nil
+        }.joined(separator: ", ")
+    }
+
+    private var problem: AlarmReadiness? {
+        guard alarm.enabled, let readiness, readiness == .notScheduled || readiness == .actionRequired else { return nil }
+        return readiness
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .center, spacing: 14) {
+                missionIcon
+                    .font(.title3.weight(.semibold))
+                    .frame(width: 28)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
                     Text(alarmTimeText)
-                                    .font(.system(size: alarmTimeSize, weight: .bold))
+                        .font(.system(size: alarmTimeSize, weight: .bold))
+                        .monospacedDigit()
                         .foregroundStyle(AweroDesign.navy)
                         .accessibilityIdentifier("home.alarm.time")
-                    Text(weekdays)
-                        .foregroundStyle(AweroDesign.navy.opacity(0.55))
+                    Text(days + " · " + NSLocalizedString(missionKey(alarm.missionType), comment: "Alarm mission name"))
+                        .font(.subheadline)
+                        .foregroundStyle(AweroDesign.textSecondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .onTapGesture(perform: onEdit)
                 Toggle(isOn: Binding(get: { alarm.enabled }, set: onToggle)) {
                     Text(alarm.enabled ? "home.enabled" : "home.disabled")
                 }
@@ -426,54 +465,65 @@ private struct AlarmCard: View {
                 )
                 .accessibilityValue(alarm.enabled ? Text("home.enabled") : Text("home.disabled"))
             }
-            HStack(spacing: 6) {
-                Image(systemName: missionIcon(alarm.missionType))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(AweroDesign.coral)
-                Text(missionKey(alarm.missionType))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(AweroDesign.navy.opacity(0.72))
-            }
-            if alarm.enabled, let readiness, readiness != .disabled {
-                Text(LocalizedStringKey(readiness.localizationKey))
-                    .font(.caption)
-                    .foregroundStyle(readiness == .scheduled ? AweroDesign.sage : AweroDesign.coral)
-                if readiness == .notScheduled {
-                    Button("alarm.retry", action: onRetry)
-                } else if readiness == .actionRequired {
-                    Button("alarm.openSettings", action: onOpenSettings)
-                    Button("alarm.retry", action: onRetry)
+            .opacity(alarm.enabled ? 1 : 0.6)
+
+            if let problem {
+                HStack(spacing: 8) {
+                    Text(problem == .actionRequired ? "home.status.permission" : "home.status.not_scheduled")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AweroDesign.warning)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(AweroDesign.warningSoft, in: Capsule())
+                    Spacer(minLength: 4)
+                    Button("home.fix", action: problem == .actionRequired ? onOpenSettings : onRetry)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AweroDesign.coralStrong)
                 }
+                .padding(.top, 8)
+                .overlay(alignment: .top) { Rectangle().fill(AweroDesign.border).frame(height: 1) }
             }
-            HStack {
-                Button("home.test", action: onTest)
-                Button("home.edit", action: onEdit)
-                Button("home.delete", action: onDelete).foregroundStyle(AweroDesign.coral)
+            if alarm.enabled, readiness == .notificationFallback {
+                // Truthful note: ordinary notifications can be silenced by Silent Mode or Focus.
+                Text(LocalizedStringKey(AlarmReadiness.notificationFallback.localizationKey))
+                    .font(.caption)
+                    .foregroundStyle(AweroDesign.textSecondary)
             }
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
         .background(AweroDesign.surface)
         .clipShape(RoundedRectangle(cornerRadius: 20))
+        .contextMenu {
+            Button(action: onEdit) { Label("home.edit", systemImage: "pencil") }
+            Button(action: onTest) { Label("home.test", systemImage: "bell") }
+            Button(role: .destructive, action: onDelete) { Label("home.delete", systemImage: "trash") }
+        }
+        .accessibilityAction(named: Text("home.edit"), onEdit)
+        .accessibilityAction(named: Text("home.test"), onTest)
+        .accessibilityAction(named: Text("home.delete"), onDelete)
     }
 
-    private func missionKey(_ type: MissionType) -> LocalizedStringKey {
+    @ViewBuilder
+    private var missionIcon: some View {
+        switch alarm.missionType {
+        case .steps:
+            Image(systemName: "figure.walk").foregroundStyle(AweroDesign.textSecondary)
+        case .qr:
+            Image(systemName: "qrcode").foregroundStyle(AweroDesign.textSecondary)
+        default:
+            Image(systemName: "sun.max.fill").foregroundStyle(AweroDesign.sun)
+        }
+    }
+
+    private func missionKey(_ type: MissionType) -> String {
         switch type {
         case .math: "home.mission.math"
         case .steps: "home.mission.steps"
         case .qr: "home.mission.qr"
         case .photo: "home.mission.photo"
         case .mixed: "home.mission.mixed"
-        }
-    }
-
-    private func missionIcon(_ type: MissionType) -> String {
-        switch type {
-        case .math: "calculator"
-        case .steps: "figure.walk"
-        case .qr: "qrcode"
-        case .photo: "camera"
-        case .mixed: "square.grid.2x2"
         }
     }
 }

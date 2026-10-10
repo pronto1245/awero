@@ -55,6 +55,9 @@
 "home.alarms" = "My alarms";
 "home.alarms_load_error_body" = "AWERO could not read your saved alarms. Your data has not been deleted. Try again.";
 "home.alarms_load_error_title" = "Could not load alarms";
+"home.days.everyday" = "Every day";
+"home.days.weekdays" = "Weekdays";
+"home.days.weekends" = "Weekends";
 "home.delete" = "Delete";
 "home.delete_confirm_body" = "This alarm and its scheduled wake-up will be removed.";
 "home.delete_confirm_title" = "Delete this alarm?";
@@ -65,6 +68,7 @@
 "home.enabled" = "On";
 "home.error_body" = "Your requested change could not be completed. Check the alarm permissions and try again.";
 "home.error_title" = "Alarm action failed";
+"home.fix" = "Fix";
 "home.greeting" = "Good morning";
 "home.loading_alarms" = "Loading alarms…";
 "home.mission.math" = "Math";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "No active alarms";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Try again";
+"home.status.not_scheduled" = "Not scheduled";
+"home.status.permission" = "Permission needed";
 "home.subtitle" = "A new day, new possibilities";
 "home.test" = "Test";
+"home.today" = "Today";
 "home.toggle_alarm" = "Enable or disable alarm at %1$@";
+"home.tomorrow" = "Tomorrow";
 "mission.answer" = "Answer";
 "mission.camera_denied" = "Camera access is unavailable. Use the Math fallback.";
 "mission.camera_unavailable" = "Camera is unavailable.";
