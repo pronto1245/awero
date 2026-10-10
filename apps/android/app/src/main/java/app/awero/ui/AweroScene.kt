@@ -18,7 +18,7 @@ enum class AweroScene(@DrawableRes val portrait: Int) {
         /** The scene for a page: [light] in the light theme, night in the dark theme. */
         fun page(light: AweroScene): AweroScene = if (AweroDesign.isDark) NIGHT else light
 
-        @DrawableRes
+        @get:DrawableRes
         val wakePortrait: Int
             get() = page(DAWN).portrait
 
