@@ -73,7 +73,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
     Column(
         modifier = Modifier.fillMaxSize().background(FormIvory).imePadding()
-            .verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         TextButton(onClick = onCancel, modifier = Modifier.heightIn(min = 48.dp)) {
@@ -84,6 +84,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             color = FormNavy,
             style = MaterialTheme.typography.headlineMedium
         )
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(20.dp)) {
             Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.create_time), color = FormNavy)
@@ -183,7 +184,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             Text(stringResource(R.string.permission_alarm_body), color = FormNavy, modifier = Modifier.padding(16.dp))
         }
 
-        Spacer(Modifier.height(8.dp))
+        }
         Button(
             onClick = {
                 scope.launch {

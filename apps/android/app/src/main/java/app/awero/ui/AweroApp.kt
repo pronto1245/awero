@@ -4,6 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.padding
@@ -101,23 +103,33 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 Scaffold(
                     bottomBar = {
                         NavigationBar(containerColor = AweroDesign.ivory) {
+                            val itemColors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = AweroDesign.coral,
+                                selectedTextColor = AweroDesign.navy,
+                                indicatorColor = AweroDesign.coral.copy(alpha = .15f),
+                                unselectedIconColor = AweroDesign.navy.copy(alpha = .65f),
+                                unselectedTextColor = AweroDesign.navy.copy(alpha = .65f)
+                            )
                             NavigationBarItem(
                                 selected = screen == "home",
                                 onClick = { screen = "home" },
+                                colors = itemColors,
                                 icon = { AweroNavigationIcon("home") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home)) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                             )
                             NavigationBarItem(
                                 selected = screen == "progress",
                                 onClick = { screen = "progress" },
+                                colors = itemColors,
                                 icon = { AweroNavigationIcon("progress") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress)) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                             )
                             NavigationBarItem(
                                 selected = screen == "settings",
                                 onClick = { screen = "settings" },
+                                colors = itemColors,
                                 icon = { AweroNavigationIcon("profile") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile)) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                             )
                         }
                     }

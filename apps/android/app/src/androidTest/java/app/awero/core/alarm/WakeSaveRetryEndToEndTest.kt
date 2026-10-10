@@ -92,6 +92,14 @@ class WakeSaveRetryEndToEndTest {
         }
 
         instrumentation.waitForIdleSync()
+        instrumentation.runOnMainSync {
+            val buttons = views(activity!!.window.decorView).filterIsInstance<Button>()
+            val visibleBounds = android.graphics.Rect()
+            for (button in buttons.filter { it.text.toString() in listOf("0", "✓", context.getString(R.string.wake_emergency_stop)) }) {
+                assertTrue("Critical control was clipped: ${button.text}", button.getGlobalVisibleRect(visibleBounds))
+                assertEquals("Critical control was partly hidden: ${button.text}", button.height, visibleBounds.height())
+            }
+        }
         val visualDirectory = java.io.File(context.cacheDir, "awero-visual").apply { mkdirs() }
         java.io.File(visualDirectory, "Math.png").outputStream().use { output ->
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
@@ -132,7 +140,7 @@ class WakeSaveRetryEndToEndTest {
                 keys.single { it.text.toString() == digit.toString() }.performClick()
             }
             assertEquals(answer.toString(), input.text.toString())
-            views(root).filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
+            views(root).filterIsInstance<TextView>().single { (it.text.toString() == context.getString(R.string.mission_check) || it.contentDescription == context.getString(R.string.mission_check)) }.performClick()
         }
 
         awaitCondition("Failed save did not offer a retry") {

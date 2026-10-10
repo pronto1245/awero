@@ -13,7 +13,9 @@ object AweroDesign {
     val sage = Color(0xFF4F8B66)
     val colors = lightColorScheme(
         primary = coral, onPrimary = navy,
+        primaryContainer = coral.copy(alpha = .18f), onPrimaryContainer = navy,
         secondary = sage, onSecondary = Color.White,
+        secondaryContainer = coral.copy(alpha = .15f), onSecondaryContainer = navy,
         background = ivory, onBackground = navy,
         surface = ivory, onSurface = navy,
         surfaceVariant = Color(0xFFFFEFDB), onSurfaceVariant = navy,

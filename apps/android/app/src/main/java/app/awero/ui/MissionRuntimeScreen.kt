@@ -23,7 +23,8 @@ object MissionRuntimeScreen {
         val root = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(40, 40, 40, 40)
+            val padding = (8 * resources.displayMetrics.density).toInt()
+            setPadding(0, padding, 0, padding)
             setBackgroundColor(AweroDesign.ivoryArgb)
         }
         fun label(value: String, size: Float = 22f) = TextView(activity).apply {
@@ -31,9 +32,9 @@ object MissionRuntimeScreen {
             textSize = size
             setTextColor(AweroDesign.navyArgb)
             gravity = Gravity.CENTER
-            setPadding(0, 16, 0, 16)
+            setPadding(0, 8, 0, 8)
         }
-        root.addView(label(activity.getString(R.string.mission_title), 28f))
+        root.addView(label(activity.getString(R.string.wake_title), 26f), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         var finished = false
         var cleanup: () -> Unit = {}
         var deadline: Runnable? = null
@@ -76,19 +77,28 @@ object MissionRuntimeScreen {
                     hint = activity.getString(R.string.mission_answer)
                     showSoftInputOnFocus = false
                 }
-                root.addView(answer, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 fun keypadKey(value: String, description: String? = null, action: () -> Unit) = Button(activity).apply {
                     text = value
                     description?.let { contentDescription = it }
                     minHeight = (48 * resources.displayMetrics.density).toInt()
                     setTextColor(AweroDesign.navyArgb)
-                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+                    textSize = 24f
+                    minWidth = 0
+                    val padding = (8 * resources.displayMetrics.density).toInt()
+                    setPadding(padding, padding, padding, padding)
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        setColor(Color.WHITE)
+                        cornerRadius = 14 * resources.displayMetrics.density
+                    }
                     setOnClickListener { action() }
                 }
-                root.addView(keypadKey("±", activity.getString(R.string.mission_change_sign)) {
+                val answerRow = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+                answerRow.addView(answer, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                answerRow.addView(keypadKey("±", activity.getString(R.string.mission_change_sign)) {
                     val current = answer.text.toString()
                     answer.setText(if (current.startsWith("-")) current.drop(1) else "-$current")
-                })
+                }, LinearLayout.LayoutParams((48 * activity.resources.displayMetrics.density).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT))
+                root.addView(answerRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 val rows = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("⌫", "0"))
                 var checkRow: LinearLayout? = null
                 rows.forEach { values ->
@@ -98,20 +108,34 @@ object MissionRuntimeScreen {
                         row.addView(keypadKey(value, if (value == "⌫") activity.getString(R.string.mission_delete_digit) else null) {
                             val current = answer.text.toString()
                             answer.setText(if (value == "⌫") current.dropLast(1) else if (current.length < 12) current + value else current)
-                        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    val gap = (4 * activity.resources.displayMetrics.density).toInt()
+                    setMargins(gap, gap, gap, gap)
+                })
                     }
                     root.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 }
                 checkRow!!.addView(Button(activity).apply {
                     setTextColor(AweroDesign.navyArgb)
                     backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
-                    text = activity.getString(R.string.mission_check)
+                    text = "✓"
+                    contentDescription = activity.getString(R.string.mission_check)
+                    textSize = 24f
+                    minWidth = 0
+                    minHeight = (48 * resources.displayMetrics.density).toInt()
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        setColor(AweroDesign.coralArgb)
+                        cornerRadius = 14 * resources.displayMetrics.density
+                    }
                     setOnClickListener {
                         val value = answer.text.toString().toIntOrNull()
                         if (value != null && mission.validate(value)) finish(true)
                         else { answer.text.clear(); answer.hint = activity.getString(R.string.mission_try_again) }
                     }
-                }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                    val gap = (4 * activity.resources.displayMetrics.density).toInt()
+                    setMargins(gap, gap, gap, gap)
+                })
             }
             MissionType.STEPS -> {
                 val mission = StepsMission(activity)

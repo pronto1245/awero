@@ -119,7 +119,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
         val right = problem.groupValues[3].toInt()
         val answer = if (problem.groupValues[2] == "+") left + right else left - right
         views(root).filterIsInstance<EditText>().single().setText(answer.toString())
-        views(root).filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
+        views(root).filterIsInstance<TextView>().single { (it.text.toString() == context.getString(R.string.mission_check) || it.contentDescription == context.getString(R.string.mission_check)) }.performClick()
     }
 
     private fun hasMathProblem(): Boolean {

@@ -1,6 +1,6 @@
 # Stage 7 implementation evidence
 
-Status: in progress; visual acceptance is not complete.
+Delivered scope: native visual implementation for currently implemented features. Final acceptance evidence is recorded in PR #1 as CI and screenshot review complete. This file records implementation boundaries; it is not a claim of 100% product completion.
 
 ## Repository recovery
 
@@ -59,3 +59,17 @@ The iOS header places Settings next to the wordmark; create uses a compact wheel
 Six-locale UI capture is added to test real native language selection and navigation/create cancellation without changing production alarm or storage architecture. Settings display the app resource language rather than assuming it always equals the system language.
 
 This report does not claim 100% completion or physical alarm-delivery acceptance.
+
+## Captured evidence and corrective review
+
+Run 688 passed all four jobs, including 32 Android instrumentation tests and 3 iOS UI / 35 iOS application tests.
+Run 689 passed the iOS six-locale navigation/create UI test; Android behavior tests passed but PNG export failed, correctly blocking visual acceptance.
+Run 691 generated and signature-checked 29 Android PNGs (four screens in each of six locales, four large-text first-run screens and Math). Native tests compare exported bytes with the source screenshot; the archive is downloadable through GitHub Actions artifacts.
+
+Review of the real Android Math capture found cumulative outer/inner pixel padding, a narrow keypad and an incomplete final row. The corrective implementation uses density-aware outer padding, full-width mission content, the sign control beside the answer, a compact readable card and a separate full-width emergency stop. A focused small-emulator regression checks that zero, check and emergency controls are completely inside the visible bounds.
+
+Six-locale Android screenshots also exposed broken navigation words and default purple container colors. The corrective theme defines the missing primary/secondary container roles; navigation uses compact single-line labels with full localized accessibility text. The shared light native window theme uses dark system icons on ivory.
+
+Original PNGs are uploaded for both platforms. iOS prints small JPEG previews only, keeping log retrieval usable. Final review and current-head CI URLs belong in PR #1; a historical green run is not substituted for current-head checks.
+
+Android create/edit keeps Cancel/title and Save outside the scrolling form. Save remains visible at font scale 1.8; the first-run regression asserts visibility before clicking it.

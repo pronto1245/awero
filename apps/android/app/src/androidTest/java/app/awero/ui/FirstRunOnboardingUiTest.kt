@@ -64,7 +64,7 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.create_title)).assertIsDisplayed()
         captureVisual("Create")
         compose.onNodeWithText(context.getString(R.string.create_save))
-            .performScrollTo()
+            .assertIsDisplayed()
             .performClick()
         compose.waitUntil(timeoutMillis = 5_000) {
             compose.onAllNodesWithText(context.getString(R.string.home_alarms))

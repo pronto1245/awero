@@ -58,7 +58,7 @@ class WakeMissionRestoreEndToEndTest {
         awaitCondition("Restored mission was not rendered") {
             var ready = false
             instrumentation.runOnMainSync {
-                ready = views(activity!!.window.decorView).any { it is TextView && it.text.toString() == context.getString(R.string.mission_check) }
+                ready = views(activity!!.window.decorView).any { it is TextView && (it.text.toString() == context.getString(R.string.mission_check) || it.contentDescription == context.getString(R.string.mission_check)) }
             }
             ready
         }
@@ -75,7 +75,7 @@ class WakeMissionRestoreEndToEndTest {
             val right = problem.groupValues[3].toInt()
             val answer = if (problem.groupValues[2] == "+") left + right else left - right
             children.filterIsInstance<EditText>().single().setText(answer.toString())
-            children.filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
+            children.filterIsInstance<TextView>().single { (it.text.toString() == context.getString(R.string.mission_check) || it.contentDescription == context.getString(R.string.mission_check)) }.performClick()
         }
         awaitCondition("Restored mission could not complete") { runBlocking { sessions.loadActive() == null } }
         awaitCondition("Completion result was not rendered") {
