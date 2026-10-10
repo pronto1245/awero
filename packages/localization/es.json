@@ -159,5 +159,7 @@
   "progress.title": "Tu progreso",
   "progress.empty_title": "Tu primera semana empieza aquí",
   "progress.empty_body": "Aquí aparecerán tus despertares completados. Las pruebas de alarma no cuentan.",
-  "progress.empty_action": "Crear alarma"
+  "progress.empty_action": "Crear alarma",
+  "mission.delete_digit": "Borrar el último dígito",
+  "mission.change_sign": "Cambiar signo"
 }

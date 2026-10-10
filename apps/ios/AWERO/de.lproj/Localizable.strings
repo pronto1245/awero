@@ -78,8 +78,10 @@
 "mission.answer" = "Antwort";
 "mission.camera_denied" = "Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.";
 "mission.camera_unavailable" = "Kamera nicht verfügbar.";
+"mission.change_sign" = "Vorzeichen ändern";
 "mission.check" = "PRÜFEN";
 "mission.continue" = "Weiter";
+"mission.delete_digit" = "Letzte Ziffer löschen";
 "mission.keep_walking" = "Gehe weiter, bis du das Ziel erreichst.";
 "mission.motion_unavailable" = "Bewegungsdaten sind nicht verfügbar.";
 "mission.qr_detected" = "Code erkannt.";

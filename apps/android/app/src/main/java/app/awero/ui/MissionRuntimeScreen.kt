@@ -71,8 +71,32 @@ object MissionRuntimeScreen {
                     setTextSize(28f)
                     gravity = Gravity.CENTER
                     hint = activity.getString(R.string.mission_answer)
+                    showSoftInputOnFocus = false
                 }
                 root.addView(answer)
+                fun keypadKey(value: String, description: String? = null, action: () -> Unit) = Button(activity).apply {
+                    text = value
+                    description?.let { contentDescription = it }
+                    minHeight = (48 * resources.displayMetrics.density).toInt()
+                    setTextColor(AweroDesign.navyArgb)
+                    backgroundTintList = android.content.res.ColorStateList.valueOf(Color.WHITE)
+                    setOnClickListener { action() }
+                }
+                root.addView(keypadKey("±", activity.getString(R.string.mission_change_sign)) {
+                    val current = answer.text.toString()
+                    answer.setText(if (current.startsWith("-")) current.drop(1) else "-$current")
+                })
+                val rows = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("⌫", "0"))
+                rows.forEach { values ->
+                    val row = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+                    values.forEach { value ->
+                        row.addView(keypadKey(value, if (value == "⌫") activity.getString(R.string.mission_delete_digit) else null) {
+                            val current = answer.text.toString()
+                            answer.setText(if (value == "⌫") current.dropLast(1) else if (current.length < 12) current + value else current)
+                        }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                    }
+                    root.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+                }
                 root.addView(Button(activity).apply {
                     setTextColor(AweroDesign.navyArgb)
                     backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
@@ -124,7 +148,7 @@ object MissionRuntimeScreen {
                         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
                         isFocusable = true
                     }
-                    root.addView(preview, LinearLayout.LayoutParams(-1, 0, 1f))
+                    root.addView(preview, LinearLayout.LayoutParams(-1, (300 * activity.resources.displayMetrics.density).toInt()))
                     val runtime = QRMissionRuntime(activity)
                     val lifecycleObserver = object : DefaultLifecycleObserver {
                         override fun onDestroy(owner: LifecycleOwner) {

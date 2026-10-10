@@ -159,5 +159,7 @@
   "progress.title": "Ваш прогресс",
   "progress.empty_title": "Ваша первая неделя начинается здесь",
   "progress.empty_body": "Здесь появятся завершённые пробуждения. Проверки будильника не учитываются.",
-  "progress.empty_action": "Создать будильник"
+  "progress.empty_action": "Создать будильник",
+  "mission.delete_digit": "Удалить последнюю цифру",
+  "mission.change_sign": "Изменить знак"
 }

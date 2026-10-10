@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
@@ -64,6 +65,20 @@ object WakeAlarmScreen {
             }
         }
 
+        fun addMission(view: View) {
+            val scroll = ScrollView(activity).apply {
+                isFillViewport = true
+                addView(view, android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
+                ))
+            }
+            root.addView(scroll, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+            ))
+            root.addView(emergency)
+        }
+
         fun showFallback() {
             activity.lifecycleScope.launch {
                 if (!flow.fallbackToMath()) {
@@ -73,13 +88,12 @@ object WakeAlarmScreen {
                 root.removeAllViews()
                 status.text = activity.getString(R.string.mission_use_math)
                 root.addView(status)
-                root.addView(MissionRuntimeScreen.create(
+                addMission(MissionRuntimeScreen.create(
                     activity,
                     flow.currentAlarm.value!!.copy(missionType = app.awero.core.alarm.MissionType.MATH),
                     onSuccess = ::completeMission,
                     onFailure = {}
                 ))
-                root.addView(emergency)
             }
         }
 
@@ -93,8 +107,7 @@ object WakeAlarmScreen {
                 onSuccess = ::completeMission,
                 onFailure = ::showFallback
             )
-            root.addView(missionView)
-            root.addView(emergency)
+            addMission(missionView)
         }
 
         primary.setOnClickListener {

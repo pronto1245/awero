@@ -142,6 +142,8 @@
     "progress_title": "progress.title",
     "progress_empty_title": "progress.empty_title",
     "progress_empty_body": "progress.empty_body",
-    "progress_empty_action": "progress.empty_action"
+    "progress_empty_action": "progress.empty_action",
+    "mission_delete_digit": "mission.delete_digit",
+    "mission_change_sign": "mission.change_sign"
   }
 }

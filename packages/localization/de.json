@@ -159,5 +159,7 @@
   "progress.title": "Dein Fortschritt",
   "progress.empty_title": "Deine erste Woche beginnt hier",
   "progress.empty_body": "Hier erscheinen abgeschlossene Aufwach-Sitzungen. Alarmtests werden nicht gezählt.",
-  "progress.empty_action": "Wecker erstellen"
+  "progress.empty_action": "Wecker erstellen",
+  "mission.delete_digit": "Letzte Ziffer löschen",
+  "mission.change_sign": "Vorzeichen ändern"
 }

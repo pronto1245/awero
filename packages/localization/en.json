@@ -159,5 +159,7 @@
   "progress.title": "Your progress",
   "progress.empty_title": "Your first week starts here",
   "progress.empty_body": "Completed wake sessions will appear here. Alarm tests are not counted.",
-  "progress.empty_action": "Set an alarm"
+  "progress.empty_action": "Set an alarm",
+  "mission.delete_digit": "Delete last digit",
+  "mission.change_sign": "Change sign"
 }

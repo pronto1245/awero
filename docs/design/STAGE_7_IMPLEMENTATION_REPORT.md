@@ -6,9 +6,9 @@ Status: in progress; visual acceptance is not complete.
 
 Commit 291e416 restores the complete tree after an erroneous Git tree creation.
 The comparison with main contains 33 files and no deletions.
-The localization validator now requires the seven new navigation/progress keys.
+The localization validator now requires the seven navigation/progress keys and two keypad accessibility keys.
 Independent key-parity comparison passed for all 12 native resources:
-149 iOS keys and 143 Android keys across en, ru, pt-BR, fr, de, es.
+151 iOS keys and 145 Android keys across en, ru, pt-BR, fr, de, es.
 
 ## Implemented UI slices
 
@@ -22,6 +22,8 @@ Independent key-parity comparison passed for all 12 native resources:
 - Android repeat/difficulty chips wrap on narrow screens; native time picker respects device 12/24-hour preference.
 - Android active system-alarm path remains WakeAlarmActivity → WakeAlarmScreen → MissionRuntimeScreen.
 - WakeAlarmScreen uses existing localized resources and the light palette; scheduling and wake handlers are unchanged.
+- Math keypad: digits, delete, sign and real runtime validation on both platforms; Android completion/retry E2E now enters through keypad controls.
+- Android mission content scrolls independently of the emergency stop; camera preview has a bounded viewport.
 - Primary coral buttons use navy text: calculated contrast 5.06:1 (white was 2.86:1).
 
 ## Architectural verification
@@ -35,7 +37,7 @@ Do not merge until the final head CI passes.
 - Screenshot comparison of each screen/state on iOS and Android.
 - Full-size layout review of the active Android View runtime, including QR and large text.
 - Final small-screen/large-text and six-locale visual review.
-- Further alignment of wake composition and Math input with the approved board.
+- Screenshot review of the new Math keypad and wake composition against the approved board.
 - Progress charts/streaks require dated real wake history (Phase 9); no fabricated values.
 - Profile currently exposes implemented Settings only; account/billing features remain separate.
 - Final-head CI and targeted navigation/selection regressions.

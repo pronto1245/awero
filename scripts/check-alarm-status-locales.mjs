@@ -161,6 +161,8 @@ const expectedAndroid = new Set([
   "progress_empty_title",
   "progress_empty_body",
   "progress_empty_action",
+  "mission_delete_digit",
+  "mission_change_sign",
 ]);
 const expectedIOS = new Set([
   "alarm.status.scheduled",
@@ -312,6 +314,8 @@ const expectedIOS = new Set([
   "progress.empty_title",
   "progress.empty_body",
   "progress.empty_action",
+  "mission.delete_digit",
+  "mission.change_sign",
 ]);
 
 function assertKeys(platform, locale, path, expected, pattern) {

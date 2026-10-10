@@ -6,6 +6,7 @@ import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Button
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -98,7 +99,21 @@ class WakeSaveRetryEndToEndTest {
             val left = problem.groupValues[1].toInt()
             val right = problem.groupValues[3].toInt()
             val answer = if (problem.groupValues[2] == "+") left + right else left - right
-            views(root).filterIsInstance<EditText>().single().setText(answer.toString())
+            val input = views(root).filterIsInstance<EditText>().single()
+            val keys = views(root).filterIsInstance<Button>()
+            input.setText("9")
+            keys.single { it.contentDescription == context.getString(R.string.mission_delete_digit) }.performClick()
+            assertEquals("", input.text.toString())
+            val sign = keys.single { it.contentDescription == context.getString(R.string.mission_change_sign) }
+            sign.performClick()
+            assertEquals("-", input.text.toString())
+            sign.performClick()
+            assertEquals("", input.text.toString())
+            if (answer < 0) sign.performClick()
+            kotlin.math.abs(answer).toString().forEach { digit ->
+                keys.single { it.text.toString() == digit.toString() }.performClick()
+            }
+            assertEquals(answer.toString(), input.text.toString())
             views(root).filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
         }
 

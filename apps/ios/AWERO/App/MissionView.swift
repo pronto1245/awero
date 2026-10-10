@@ -53,15 +53,43 @@ private struct MathMissionView: View {
                 .textFieldStyle(.roundedBorder)
                 .multilineTextAlignment(.center)
             if invalid { Text("mission.try_again").foregroundStyle(.red) }
-            Button("mission.check") {
-                if let value = Int(answer), mission.validate(answer: value) {
-                    onSuccess()
-                } else {
-                    invalid = true
-                    answer = ""
-                }
+            Button("±") {
+                answer = answer.hasPrefix("-") ? String(answer.dropFirst()) : "-" + answer
+                invalid = false
             }
-            .buttonStyle(WakeMissionButton())
+            .foregroundStyle(AweroDesign.navy)
+            .frame(minHeight: 44)
+            .accessibilityLabel(Text("mission.change_sign"))
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(1...9, id: \.self) { digit in
+                    Button(String(digit)) {
+                        if answer.count < 12 { answer += String(digit) }
+                        invalid = false
+                    }
+                    .buttonStyle(MathKeyButton())
+                }
+                Button {
+                    if !answer.isEmpty { answer.removeLast() }
+                    invalid = false
+                } label: { Image(systemName: "delete.left") }
+                    .buttonStyle(MathKeyButton())
+                    .accessibilityLabel(Text("mission.delete_digit"))
+                Button("0") {
+                    if answer.count < 12 { answer += "0" }
+                    invalid = false
+                }
+                .buttonStyle(MathKeyButton())
+                Button {
+                    if let value = Int(answer), mission.validate(answer: value) {
+                        onSuccess()
+                    } else {
+                        invalid = true
+                        answer = ""
+                    }
+                } label: { Image(systemName: "checkmark") }
+                    .buttonStyle(MathKeyButton(primary: true))
+                    .accessibilityLabel(Text("mission.check"))
+            }
         }
         .padding(28)
     }
@@ -230,5 +258,20 @@ private struct WakeMissionButton: ButtonStyle {
             .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
             .foregroundStyle(AweroDesign.navy)
             .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+private struct MathKeyButton: ButtonStyle {
+    var primary = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(AweroDesign.navy)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .padding(.vertical, 4)
+            .background(primary ? AweroDesign.coral : Color.white)
+            .opacity(configuration.isPressed ? 0.75 : 1)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }

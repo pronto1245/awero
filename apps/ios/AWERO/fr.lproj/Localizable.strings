@@ -78,8 +78,10 @@
 "mission.answer" = "Réponse";
 "mission.camera_denied" = "L’accès à la caméra est indisponible. Utilisez le calcul de secours.";
 "mission.camera_unavailable" = "Caméra indisponible.";
+"mission.change_sign" = "Changer le signe";
 "mission.check" = "VÉRIFIER";
 "mission.continue" = "Continuer";
+"mission.delete_digit" = "Effacer le dernier chiffre";
 "mission.keep_walking" = "Continuez à marcher jusqu’à atteindre l’objectif.";
 "mission.motion_unavailable" = "Les données de mouvement sont indisponibles.";
 "mission.qr_detected" = "Code détecté.";

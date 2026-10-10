@@ -78,8 +78,10 @@
 "mission.answer" = "Ответ";
 "mission.camera_denied" = "Нет доступа к камере. Перейдите к математическому заданию.";
 "mission.camera_unavailable" = "Камера недоступна.";
+"mission.change_sign" = "Изменить знак";
 "mission.check" = "ПРОВЕРИТЬ";
 "mission.continue" = "Продолжить";
+"mission.delete_digit" = "Удалить последнюю цифру";
 "mission.keep_walking" = "Продолжайте идти, пока не достигнете цели.";
 "mission.motion_unavailable" = "Данные о движении недоступны.";
 "mission.qr_detected" = "Код распознан.";
