@@ -1,0 +1,239 @@
+name: AWERO CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: awero
+          POSTGRES_PASSWORD: awero
+          POSTGRES_DB: awero
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U awero -d awero"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://awero:awero@localhost:5432/awero
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm typecheck
+      - name: Verify generated six-language mobile resources
+        run: python3 scripts/localization/generate-native-locales.py --check
+      - name: Validate alarm status translations
+        run: node scripts/check-alarm-status-locales.mjs
+      - run: pnpm build
+      - name: Apply database migrations
+        run: pnpm --filter @awero/api db:migrate
+      - name: Run API smoke tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node apps/api/dist/main.js &
+          API_PID=$!
+          trap 'kill "$API_PID" 2>/dev/null || true' EXIT
+          READY=0
+          for ATTEMPT in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/api/v1/health >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          test "$READY" -eq 1
+          node apps/api/scripts/smoke-test.mjs
+
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - run: gradle -p apps/android :app:assembleDebug
+      - run: gradle -p apps/android :app:testDebugUnitTest
+      - name: Enable Android emulator hardware acceleration
+        run: |
+          sudo chmod 666 /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+      - name: Run Android persistence instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-linux-hw-accel: false
+          emulator-boot-timeout: 180
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            gradle -p apps/android :app:installDebug
+            adb shell pm grant app.awero android.permission.POST_NOTIFICATIONS
+            adb shell appops set app.awero SCHEDULE_EXACT_ALARM allow
+            adb shell appops set app.awero USE_FULL_SCREEN_INTENT allow
+            adb shell cmd connectivity airplane-mode enable
+            test "$(adb shell settings get global airplane_mode_on | tr -d '\r')" = "1"
+            for attempt in $(seq 1 10); do if [ "$(adb get-state 2>/dev/null || true)" = "device" ]; then break; fi; adb reconnect offline >/dev/null 2>&1 || true; sleep 1; done
+            test "$(adb get-state)" = "device"
+            gradle -p apps/android :app:connectedDebugAndroidTest
+            bash apps/android/scripts/persistence-crash-test.sh
+
+      - name: Collect Android emulator diagnostics
+        if: always()
+        run: timeout 20s adb logcat -d > android-logcat.txt 2>&1 || true
+      - name: Upload Android test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-persistence-reports
+          path: |
+            apps/android/app/build/reports/tests/
+            apps/android/app/build/reports/androidTests/
+            apps/android/app/build/outputs/androidTest-results/
+            apps/android/app/build/outputs/process-crash/
+            android-logcat.txt
+          if-no-files-found: warn
+
+  ios-syntax:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show selected Xcode version
+        run: xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate iOS app project
+        working-directory: apps/ios
+        run: xcodegen generate --spec project.yml
+      - name: Build iOS app for simulator
+        working-directory: apps/ios
+        run: >-
+          xcodebuild
+          -project AWERO.xcodeproj
+          -scheme AWERO
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/AWERO-Build"
+          CODE_SIGNING_ALLOWED=NO
+          build
+      - name: Verify AlarmKit and Live Activities app configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          INFO_PLIST="$RUNNER_TEMP/AWERO-Build/Build/Products/Debug-iphonesimulator/AWERO.app/Info.plist"
+          test -f "$INFO_PLIST"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :NSSupportsLiveActivities' "$INFO_PLIST")" = "true"
+          test -n "$(/usr/libexec/PlistBuddy -c 'Print :NSAlarmKitUsageDescription' "$INFO_PLIST")"
+      - name: Typecheck Swift sources
+        shell: bash
+        run: |
+          SDK_PATH=$(xcrun --sdk iphonesimulator --show-sdk-path)
+          find apps/ios/AWERO -name '*.swift' -print0 | xargs -0 swiftc -typecheck -sdk "$SDK_PATH" -target arm64-apple-ios18.0-simulator
+      - name: Run iOS alarm scheduler smoke test
+        run: |
+          swiftc -framework UserNotifications \
+            apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmScheduler.swift \
+            apps/ios/Tests/AlarmSchedulerSmokeMain.swift \
+            -o /tmp/awero-alarm-scheduler-smoke
+          /tmp/awero-alarm-scheduler-smoke
+      - name: Run iOS wake-flow XCTest suite
+        working-directory: apps/ios
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEVICE_ID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next(device["udid"] for group in data["devices"].values() for device in group if device.get("isAvailable") and device["name"].startswith("iPhone")))')
+          TEST_ARGS=(
+            -project AWERO.xcodeproj \
+            -scheme AWERO \
+            -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -parallel-testing-enabled NO \
+            -derivedDataPath "$RUNNER_TEMP/AWERO-Test-DerivedData" \
+            CODE_SIGNING_ALLOWED=NO
+          )
+          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROFirstRunUITests test
+          xcodebuild "${TEST_ARGS[@]}" -only-testing:AWEROTests test
+
+  ios-persistence-smoke:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run persistence smoke test
+        shell: bash
+        run: |
+          swiftc \
+            apps/ios/AWERO/Core/Alarm/AlarmModels.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmScheduler.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmStore.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmCoordinator.swift \
+            apps/ios/AWERO/Core/Alarm/AlarmRecovery.swift \
+            apps/ios/AWERO/Core/Sync/SyncOperation.swift \
+            apps/ios/AWERO/Core/Sync/SyncAPIConfiguration.swift \
+            apps/ios/AWERO/Core/Sync/SyncAPIClient.swift \
+            apps/ios/AWERO/Core/Sync/AnonymousAuthAPIClient.swift \
+            apps/ios/AWERO/Core/Sync/AnonymousAuthSessionStore.swift \
+            apps/ios/AWERO/Core/Sync/AlarmSnapshotSyncClient.swift \
+            apps/ios/AWERO/Core/Sync/WakeSessionSyncClient.swift \
+            apps/ios/AWERO/Core/Sync/SupportDiagnosticsAPIClient.swift \
+            apps/ios/AWERO/Core/Sync/SyncQueueStore.swift \
+            apps/ios/AWERO/Core/Sync/OfflineSyncCoordinator.swift \
+            apps/ios/AWERO/Core/WakeSession/WakeSession.swift \
+            apps/ios/AWERO/Core/WakeSession/WakeSessionManager.swift \
+            apps/ios/AWERO/Core/WakeSession/WakeFlowController.swift \
+            apps/ios/AWERO/Core/Statistics/StatisticsStore.swift \
+            apps/ios/AWERO/Core/Analytics/AnalyticsQueueStore.swift \
+            apps/ios/AWERO/Core/Storage/CoreDataStore.swift \
+            apps/ios/AWERO/Core/Missions/MissionFallbackPolicy.swift \
+            apps/ios/Tests/PersistenceSmokeMain.swift \
+            -o /tmp/awero-persistence-smoke
+          /tmp/awero-persistence-smoke
+      - name: Verify persistence across forced process termination
+        shell: bash
+        run: |
+          set -euo pipefail
+          CRASH_DIR=$(mktemp -d)
+          CRASH_PATH="$CRASH_DIR/AWERO.sqlite"
+          PID=""
+          trap 'if [ -n "$PID" ]; then kill -9 "$PID" 2>/dev/null || true; fi; rm -rf "$CRASH_DIR"' EXIT
+          AWERO_CRASH_PHASE=write AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke &
+          PID=$!
+          for ATTEMPT in $(seq 1 300); do
+            if [ -f "$CRASH_PATH.ready" ]; then break; fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "Crash fixture exited before committing data"
+              exit 1
+            fi
+            sleep 0.1
+          done
+          test -f "$CRASH_PATH.ready"
+          kill -9 "$PID"
+          EXIT_CODE=0
+          wait "$PID" || EXIT_CODE=$?
+          PID=""
+          test "$EXIT_CODE" -eq 137
+          AWERO_CRASH_PHASE=read AWERO_CRASH_PATH="$CRASH_PATH" /tmp/awero-persistence-smoke
