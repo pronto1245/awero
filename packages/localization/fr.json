@@ -184,5 +184,9 @@
   "home.tomorrow": "Demain",
   "home.status.not_scheduled": "Non programmé",
   "home.status.permission": "Autorisation requise",
-  "home.fix": "Corriger"
+  "home.fix": "Corriger",
+  "create.done": "OK",
+  "create.save_and_test": "Tester l’alarme",
+  "create.save_and_test_hint": "Enregistre l’alarme et lance un test dans 30 secondes.",
+  "create.advanced": "Plus d’options"
 }

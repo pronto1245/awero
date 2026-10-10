@@ -167,6 +167,10 @@
     "home_tomorrow": "home.tomorrow",
     "home_status_not_scheduled": "home.status.not_scheduled",
     "home_status_permission": "home.status.permission",
-    "home_fix": "home.fix"
+    "home_fix": "home.fix",
+    "create_done": "create.done",
+    "create_save_and_test": "create.save_and_test",
+    "create_save_and_test_hint": "create.save_and_test_hint",
+    "create_advanced": "create.advanced"
   }
 }

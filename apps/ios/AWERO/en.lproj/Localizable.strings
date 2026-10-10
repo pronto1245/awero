@@ -17,8 +17,10 @@
 "alarm.status.notScheduled" = "The alarm schedule is not confirmed. Retry to check it.";
 "alarm.status.notificationFallback" = "Notification alarm is scheduled. Silent Mode or Focus may limit how it alerts.";
 "alarm.status.scheduled" = "System alarm is scheduled.";
+"create.advanced" = "More options";
 "create.cancel" = "Cancel";
 "create.difficulty" = "Difficulty";
+"create.done" = "Done";
 "create.edit_title" = "Edit alarm";
 "create.error_body" = "The alarm was not saved. Check required permissions and available storage, then try again.";
 "create.error_title" = "Alarm was not scheduled";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Scan the code where you want to wake up, or enter its exact content.";
 "create.repeat" = "Repeat";
 "create.save" = "Save alarm";
+"create.save_and_test" = "Test alarm";
+"create.save_and_test_hint" = "Saves the alarm and plays a test alarm in 30 seconds.";
 "create.save_changes" = "Save changes";
 "create.scan" = "Scan QR/barcode";
 "create.time" = "Time";

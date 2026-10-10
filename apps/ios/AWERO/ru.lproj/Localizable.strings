@@ -17,12 +17,14 @@
 "alarm.status.notScheduled" = "Не удалось подтвердить расписание. Нажмите «Повторить» для проверки.";
 "alarm.status.notificationFallback" = "Запланировано уведомление. Беззвучный режим или Фокусирование могут ограничить звуковой сигнал.";
 "alarm.status.scheduled" = "Системный будильник запланирован.";
+"create.advanced" = "Дополнительно";
 "create.cancel" = "Отмена";
 "create.difficulty" = "Сложность";
+"create.done" = "Готово";
 "create.edit_title" = "Изменить будильник";
 "create.error_body" = "Будильник не сохранён. Проверьте необходимые разрешения и свободное место, затем повторите попытку.";
 "create.error_title" = "Не удалось запланировать будильник";
-"create.mission" = "Задание для пробуждения";
+"create.mission" = "Миссия пробуждения";
 "create.mission_math_body" = "Решите пример";
 "create.mission_qr_body" = "Отсканируйте код в другой комнате";
 "create.mission_steps_body" = "Пройдите несколько шагов";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Отсканируйте код в месте, куда нужно встать утром, или введите его содержимое.";
 "create.repeat" = "Повторять";
 "create.save" = "Сохранить будильник";
+"create.save_and_test" = "Проверить будильник";
+"create.save_and_test_hint" = "Будильник сохранится, а пробный сигнал прозвучит через 30 секунд.";
 "create.save_changes" = "Сохранить изменения";
 "create.scan" = "Сканировать QR-код или штрихкод";
 "create.time" = "Время";

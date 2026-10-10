@@ -19,6 +19,10 @@ struct CreateAlarmView: View {
     @State private var showCodeScanner = false
     @State private var showingPermissionIntro = false
     @State private var saveError: String?
+    @State private var pendingTest = false
+    /// Set once a new alarm is saved, so a retry after a failed test updates it instead of creating another.
+    @State private var savedAlarm: Alarm?
+    @State private var showAdvanced = false
 
     init(alarm: Alarm? = nil) {
         self.alarm = alarm
@@ -38,25 +42,32 @@ struct CreateAlarmView: View {
             ZStack {
                 AweroDesign.ivory.ignoresSafeArea()
                 VStack(spacing: 0) {
-                    HStack {
-                        Button { dismiss() } label: {
-                            Text("create.cancel")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundStyle(AweroDesign.navy)
-                                .padding(.horizontal, 18)
-                                .frame(height: 44)
-                                .background(AweroDesign.surface.opacity(0.88), in: Capsule())
-                        }
-                        .accessibilityLabel(Text("create.cancel"))
-                        .accessibilityIdentifier("alarm.cancel")
-                        Spacer(minLength: 4)
+                    ZStack {
                         Text(alarm == nil ? "create.title" : "create.edit_title")
                             .font(.headline.weight(.semibold))
                             .foregroundStyle(AweroDesign.navy)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
-                        Spacer(minLength: 4)
-                        Color.clear.frame(width: 74, height: 44)
+                            .padding(.horizontal, 88)
+                        HStack {
+                            Button { dismiss() } label: {
+                                Image(systemName: "chevron.left")
+                                    .font(.title3.weight(.semibold))
+                                    .foregroundStyle(AweroDesign.navy)
+                                    .frame(width: 44, height: 44)
+                            }
+                            .accessibilityLabel(Text("create.cancel"))
+                            .accessibilityIdentifier("alarm.cancel")
+                            Spacer()
+                            Button { saveAlarm(test: false) } label: {
+                                Text("create.done")
+                                    .font(.headline)
+                                    .foregroundStyle(canSave ? AweroDesign.coralStrong : AweroDesign.textSecondary)
+                                    .frame(minWidth: 44, minHeight: 44)
+                            }
+                            .disabled(!canSave)
+                            .accessibilityIdentifier("alarm.save")
+                        }
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 4)
@@ -66,8 +77,7 @@ struct CreateAlarmView: View {
                             wakeTimeSection
                             daysSection
                             missionSection
-                            timezoneSection
-                            permissionSection
+                            advancedSection
                         }
                         .padding(.horizontal, 18)
                         .padding(.top, 10)
@@ -83,7 +93,7 @@ struct CreateAlarmView: View {
                         do {
                             let timezoneMode: AlarmTimezoneMode = followsDeviceTimezone ? .deviceLocal : .fixed
                             try await AlarmScheduler().requestAuthorization(for: timezoneMode)
-                            saveAlarmNow()
+                            saveAlarmNow(test: pendingTest)
                         } catch {
                             saveError = error.localizedDescription
                         }
@@ -103,18 +113,29 @@ struct CreateAlarmView: View {
                 Text(saveError ?? "alarm.status.errorBody")
             }
             .safeAreaInset(edge: .bottom) {
-                Button(alarm == nil ? "create.save" : "create.save_changes", action: saveAlarm)
-                    .disabled((mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) || selectedDays.isEmpty)
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(AweroDesign.coralStrong.gradient)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
-                    .background(AweroDesign.ivory.opacity(0.96))
-                    .accessibilityIdentifier("alarm.save")
+                VStack(spacing: 6) {
+                    Button { saveAlarm(test: true) } label: {
+                        Text("create.save_and_test")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(canSave ? AweroDesign.coralStrong : AweroDesign.chip)
+                            .foregroundStyle(canSave ? Color.white : AweroDesign.textSecondary)
+                            .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
+                    }
+                    .disabled(!canSave)
+                    .accessibilityHint(Text("create.save_and_test_hint"))
+                    .accessibilityIdentifier("alarm.saveAndTest")
+                    Text("create.save_and_test_hint")
+                        .font(.caption)
+                        .foregroundStyle(AweroDesign.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .accessibilityHidden(true)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 8)
+                .background(AweroDesign.ivory.opacity(0.96))
             }
         }
         .sheet(isPresented: $showCodeScanner) {
@@ -136,17 +157,51 @@ struct CreateAlarmView: View {
                 .labelsHidden()
                 .accessibilityLabel(Text("create.time"))
                 .frame(maxWidth: .infinity)
-                .background(AweroDesign.surfaceWarm.opacity(0.48), in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
+                .background(AweroDesign.surfaceMuted, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
                 .clipped()
         }
         .padding(.top, 4)
         .padding(.bottom, 2)
     }
 
+    private var canSave: Bool {
+        !selectedDays.isEmpty && !(mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
+
+    /// Difficulty and time zone, collapsed by default as in the reference screen.
+    private var advancedSection: some View {
+        DisclosureGroup(isExpanded: $showAdvanced) {
+            VStack(alignment: .leading, spacing: 16) {
+                if mission == .math {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("create.difficulty")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(AweroDesign.navy)
+                        Picker("create.difficulty", selection: $difficulty) {
+                            Text("difficulty.easy").tag(Difficulty.easy)
+                            Text("difficulty.medium").tag(Difficulty.medium)
+                            Text("difficulty.hard").tag(Difficulty.hard)
+                        }
+                        .pickerStyle(.segmented)
+                    }
+                }
+                timezoneSection
+            }
+            .padding(.top, 12)
+        } label: {
+            Text("create.advanced")
+                .font(.headline)
+                .foregroundStyle(AweroDesign.navy)
+        }
+        .tint(AweroDesign.navy)
+        .padding(14)
+        .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
+    }
+
     private var timezoneSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("create.timezone")
-                .font(.headline)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(AweroDesign.navy)
             Picker("create.timezone", selection: $followsDeviceTimezone) {
                 Text("create.timezone_device").tag(true)
@@ -195,10 +250,7 @@ struct CreateAlarmView: View {
                     .accessibilityAddTraits(selectedDays.contains(day) ? .isSelected : [])
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
             if selectedDays.isEmpty {
                 Text("create.no_weekdays").font(.footnote).foregroundStyle(AweroDesign.coral)
             }
@@ -222,8 +274,6 @@ struct CreateAlarmView: View {
                     }
                 }
             }
-            .padding(8)
-            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
             if mission == .qr {
                 Text("permission.camera_body").font(.caption)
                 Button("create.scan") { showCodeScanner = true }
@@ -250,7 +300,7 @@ struct CreateAlarmView: View {
                     .minimumScaleFactor(0.8)
                 Text(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
                     .font(.caption)
-                    .foregroundStyle(AweroDesign.navy.opacity(0.64))
+                    .foregroundStyle(AweroDesign.textSecondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
                     .accessibilityIdentifier(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
@@ -258,7 +308,7 @@ struct CreateAlarmView: View {
             .foregroundStyle(AweroDesign.navy)
             .padding(8)
             .frame(maxWidth: .infinity, minHeight: 148)
-            .background(mission == type ? AweroDesign.coralSoft : AweroDesign.ivory.opacity(0.58))
+            .background(mission == type ? AweroDesign.coralSoft : AweroDesign.surface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).stroke(mission == type ? AweroDesign.coral : AweroDesign.navy.opacity(0.10), lineWidth: mission == type ? 1.5 : 1))
         }
@@ -266,29 +316,23 @@ struct CreateAlarmView: View {
         .accessibilityAddTraits(mission == type ? .isSelected : [])
     }
 
-    private var permissionSection: some View {
-        VStack(alignment: .leading) {
-            Text("permission.ios_alarm_body").font(.footnote)
-        }
-        .foregroundStyle(AweroDesign.navy.opacity(0.72))
-        .padding(14)
-        .background(AweroDesign.surfaceWarm)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-    }
-
-    private func saveAlarm() {
-        if alarm == nil && !didExplainAlarmPermission {
+    private func saveAlarm(test: Bool) {
+        guard canSave else { return }
+        pendingTest = test
+        if alarm == nil && savedAlarm == nil && !didExplainAlarmPermission {
             showingPermissionIntro = true
         } else {
-            saveAlarmNow()
+            saveAlarmNow(test: test)
         }
     }
 
-    private func saveAlarmNow() {
+    /// Saves the alarm; with `test`, also schedules a test ring (30 s) that does not count as a wake.
+    private func saveAlarmNow(test: Bool) {
         let components = Calendar.current.dateComponents([.hour, .minute], from: wakeDate)
         let hour = components.hour ?? 7
         let minute = components.minute ?? 30
-        var next = alarm ?? Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
+        let existing = savedAlarm ?? alarm
+        var next = existing ?? Alarm(hour: hour, minute: minute, weekdays: selectedDays, missionType: mission)
         next.hour = hour
         next.minute = minute
         next.weekdays = selectedDays
@@ -302,8 +346,10 @@ struct CreateAlarmView: View {
         Task {
             let coordinator = AlarmCoordinator(store: store)
             do {
-                if alarm == nil { try await coordinator.create(next) }
+                if existing == nil { try await coordinator.create(next) }
                 else { try await coordinator.update(next) }
+                savedAlarm = next
+                if test { try await coordinator.test(next) }
                 dismiss()
             } catch {
                 saveError = error.localizedDescription

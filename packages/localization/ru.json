@@ -32,7 +32,7 @@
   "create.edit_title": "Изменить будильник",
   "create.time": "Время",
   "create.repeat": "Повторять",
-  "create.mission": "Задание для пробуждения",
+  "create.mission": "Миссия пробуждения",
   "create.difficulty": "Сложность",
   "create.scan": "Сканировать QR-код или штрихкод",
   "create.qr_content": "Содержимое QR-кода или штрихкода",
@@ -184,5 +184,9 @@
   "home.tomorrow": "Завтра",
   "home.status.not_scheduled": "Не запланирован",
   "home.status.permission": "Нужно разрешение",
-  "home.fix": "Исправить"
+  "home.fix": "Исправить",
+  "create.done": "Готово",
+  "create.save_and_test": "Проверить будильник",
+  "create.save_and_test_hint": "Будильник сохранится, а пробный сигнал прозвучит через 30 секунд.",
+  "create.advanced": "Дополнительно"
 }

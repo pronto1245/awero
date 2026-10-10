@@ -184,5 +184,9 @@
   "home.tomorrow": "Tomorrow",
   "home.status.not_scheduled": "Not scheduled",
   "home.status.permission": "Permission needed",
-  "home.fix": "Fix"
+  "home.fix": "Fix",
+  "create.done": "Done",
+  "create.save_and_test": "Test alarm",
+  "create.save_and_test_hint": "Saves the alarm and plays a test alarm in 30 seconds.",
+  "create.advanced": "More options"
 }
