@@ -3,10 +3,17 @@ package app.awero.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -23,6 +30,9 @@ fun WakeScreen(flow: WakeFlowController) {
     val mission by flow.mission.collectAsState()
     val snoozeError by flow.snoozeError.collectAsState()
     val actionError by flow.actionError.collectAsState()
+    val currentAlarm by flow.currentAlarm.collectAsState()
+    val context = LocalContext.current
+    var pendingRetry by remember { mutableStateOf<MissionRetry?>(null) }
 
     Column(
         modifier = Modifier
@@ -58,12 +68,49 @@ fun WakeScreen(flow: WakeFlowController) {
 
             WakeFlowController.State.MISSION -> {
                 Text(stringResource(missionLabel(mission)), color = Color(0xFF14294B).copy(alpha = .7f))
-                Button(
-                    onClick = { scope.launch { flow.completeMission() } },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF684B))
-                ) {
-                    Text(stringResource(R.string.wake_complete))
+                // The session can only be completed by solving the real mission; there is no
+                // shortcut button. A failed save offers a retry of exactly the failed action.
+                val alarm = currentAlarm
+                val activity = context as? ComponentActivity
+                if (alarm != null && activity != null && pendingRetry == null) {
+                    key(alarm.id, mission) {
+                        AndroidView(
+                            factory = {
+                                MissionRuntimeScreen.create(
+                                    activity,
+                                    alarm.copy(missionType = mission),
+                                    onSuccess = {
+                                        scope.launch {
+                                            if (!flow.completeMission()) pendingRetry = MissionRetry.COMPLETE
+                                        }
+                                    },
+                                    onFailure = {
+                                        scope.launch {
+                                            if (!flow.fallbackToMath()) pendingRetry = MissionRetry.FALLBACK
+                                        }
+                                    }
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                        )
+                    }
+                }
+                pendingRetry?.let { retry ->
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                val saved = when (retry) {
+                                    MissionRetry.COMPLETE -> flow.completeMission()
+                                    MissionRetry.FALLBACK -> flow.fallbackToMath()
+                                }
+                                if (saved) pendingRetry = null
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE0502F))
+                    ) {
+                        Text(stringResource(R.string.wake_retry))
+                    }
                 }
                 TextButton(onClick = { scope.launch { flow.emergencyStop() } }) {
                     Text(stringResource(R.string.wake_emergency_stop))
@@ -84,6 +131,8 @@ fun WakeScreen(flow: WakeFlowController) {
         }
     }
 }
+
+private enum class MissionRetry { COMPLETE, FALLBACK }
 
 @Composable
 private fun missionLabel(mission: MissionType): Int = when (mission) {

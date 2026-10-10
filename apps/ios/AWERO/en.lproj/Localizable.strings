@@ -131,6 +131,13 @@
 "wake.completed_body" = "Wake session completed.";
 "wake.completed_title" = "YOU’RE UP";
 "wake.emergency_stop" = "Emergency stop";
+"wake.error_completion_save" = "Could not save completion. Your wake session is still active.";
+"wake.error_fallback_save" = "Could not save the fallback. Your wake session is still active.";
+"wake.error_mission_save" = "Could not save mission progress. The alarm is still active.";
+"wake.error_snooze_save" = "Could not save the snooze. The alarm is still ringing.";
+"wake.error_snooze_schedule" = "Could not schedule snooze. The alarm is still ringing.";
+"wake.error_stop_save" = "Could not record the stop. The alarm is still active.";
+"wake.fallback_label" = "Backup task: Math";
 "wake.retry" = "Retry saving";
 "wake.snooze" = "Snooze";
 "wake.snooze_error_body" = "The alarm is still ringing.";

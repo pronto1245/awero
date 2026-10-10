@@ -152,5 +152,12 @@
   "home.delete_confirm_body": "Ce réveil et son horaire seront supprimés.",
   "home.error_body": "L’action n’a pas pu aboutir. Vérifiez les autorisations du réveil et réessayez.",
   "create.error_body": "Le réveil n’a pas été enregistré. Vérifiez les autorisations requises et l’espace disponible, puis réessayez.",
-  "onboarding.permissions": "Avant de créer un réveil, AWERO explique et demande les autorisations système nécessaires pour vous prévenir à l’heure."
+  "onboarding.permissions": "Avant de créer un réveil, AWERO explique et demande les autorisations système nécessaires pour vous prévenir à l’heure.",
+  "wake.error_mission_save": "Impossible d’enregistrer la progression de la mission. L’alarme est toujours active.",
+  "wake.error_fallback_save": "Impossible d’enregistrer la solution de secours. Votre réveil est toujours actif.",
+  "wake.error_completion_save": "Impossible d’enregistrer la fin de la mission. Votre réveil est toujours actif.",
+  "wake.error_snooze_save": "Impossible d’enregistrer la répétition. L’alarme sonne toujours.",
+  "wake.error_snooze_schedule": "Impossible de programmer la répétition. L’alarme sonne toujours.",
+  "wake.error_stop_save": "Impossible d’enregistrer l’arrêt. L’alarme est toujours active.",
+  "wake.fallback_label": "Tâche de secours : calcul"
 }

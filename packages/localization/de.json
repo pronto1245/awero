@@ -152,5 +152,12 @@
   "home.delete_confirm_body": "Dieser Wecker und sein Zeitplan werden entfernt.",
   "home.error_body": "Die Aktion konnte nicht abgeschlossen werden. Prüfe die Weckerberechtigungen und versuche es erneut.",
   "create.error_body": "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.",
-  "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach."
+  "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach.",
+  "wake.error_mission_save": "Der Missionsfortschritt konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.",
+  "wake.error_fallback_save": "Die Ersatzaufgabe konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.",
+  "wake.error_completion_save": "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.",
+  "wake.error_snooze_save": "Das Schlummern konnte nicht gespeichert werden. Der Wecker klingelt weiter.",
+  "wake.error_snooze_schedule": "Schlummern konnte nicht geplant werden. Der Wecker klingelt weiter.",
+  "wake.error_stop_save": "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.",
+  "wake.fallback_label": "Ersatzaufgabe: Mathe"
 }

@@ -135,6 +135,13 @@
     "home_delete_confirm_body": "home.delete_confirm_body",
     "home_error_body": "home.error_body",
     "create_error_body": "create.error_body",
-    "onboarding_permissions": "onboarding.permissions"
+    "onboarding_permissions": "onboarding.permissions",
+    "wake_error_mission_save": "wake.error_mission_save",
+    "wake_error_fallback_save": "wake.error_fallback_save",
+    "wake_error_completion_save": "wake.error_completion_save",
+    "wake_error_snooze_save": "wake.error_snooze_save",
+    "wake_error_snooze_schedule": "wake.error_snooze_schedule",
+    "wake_error_stop_save": "wake.error_stop_save",
+    "wake_fallback_label": "wake.fallback_label"
   }
 }

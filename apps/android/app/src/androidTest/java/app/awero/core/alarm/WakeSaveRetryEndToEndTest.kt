@@ -1,5 +1,6 @@
 package app.awero.core.alarm
 
+import app.awero.R
 import android.content.Context
 import android.content.Intent
 import android.view.View
@@ -67,7 +68,7 @@ class WakeSaveRetryEndToEndTest {
         }
         activity = instrumentation.startActivitySync(intent) as WakeAlarmActivity
         awaitCondition("Wake host did not finish initialization") {
-            hasText("Start mission")
+            hasText(context.getString(R.string.wake_start))
         }
 
         var completionAttempts = 0
@@ -98,21 +99,21 @@ class WakeSaveRetryEndToEndTest {
             val right = problem.groupValues[3].toInt()
             val answer = if (problem.groupValues[2] == "+") left + right else left - right
             views(root).filterIsInstance<EditText>().single().setText(answer.toString())
-            views(root).filterIsInstance<TextView>().single { it.text.toString() == "CHECK" }.performClick()
+            views(root).filterIsInstance<TextView>().single { it.text.toString() == context.getString(R.string.mission_check) }.performClick()
         }
 
         awaitCondition("Failed save did not offer a retry") {
-            hasText("Retry saving")
+            hasText(context.getString(R.string.wake_retry))
         }
         assertEquals(WakeFlowController.State.MISSION, flow.state.value)
         assertNotNull(testSessions.loadActive())
 
         instrumentation.runOnMainSync {
             views(activity!!.window.decorView).filterIsInstance<TextView>()
-                .single { it.text.toString() == "Retry saving" }.performClick()
+                .single { it.text.toString() == context.getString(R.string.wake_retry) }.performClick()
         }
         awaitCondition("Retry did not complete the wake session") {
-            hasText("YOU'RE UP") && runBlocking { testSessions.loadActive() == null }
+            hasText(context.getString(R.string.wake_completed_title)) && runBlocking { testSessions.loadActive() == null }
         }
         assertEquals(2, completionAttempts)
         assertEquals("SUCCESS", testSessions.load(includeTestAlarms = true).single().result)
