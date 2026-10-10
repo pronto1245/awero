@@ -126,11 +126,14 @@ struct CreateAlarmView: View {
                     .disabled(!canSave)
                     .accessibilityHint(Text("create.save_and_test_hint"))
                     .accessibilityIdentifier("alarm.saveAndTest")
-                    Text("create.save_and_test_hint")
-                        .font(.caption)
-                        .foregroundStyle(AweroDesign.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .accessibilityHidden(true)
+                    // At accessibility sizes the hint would cover the form; VoiceOver reads it as the button hint.
+                    if !dynamicTypeSize.isAccessibilitySize {
+                        Text("create.save_and_test_hint")
+                            .font(.caption)
+                            .foregroundStyle(AweroDesign.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .accessibilityHidden(true)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 8)

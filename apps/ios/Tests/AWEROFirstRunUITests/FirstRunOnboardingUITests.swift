@@ -140,7 +140,10 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10))
         let missionDescription = app.staticTexts["create.mission_math_body"]
         XCTAssertTrue(missionDescription.waitForExistence(timeout: 10))
-        app.scrollViews.firstMatch.swipeUp()
+        // Scroll until the mission choices are reachable; the exact offset depends on the text size.
+        let form = app.scrollViews.firstMatch
+        for _ in 0..<3 where !missionDescription.isHittable { form.swipeUp() }
+        for _ in 0..<3 where !missionDescription.isHittable { form.swipeDown() }
         XCTAssertTrue(missionDescription.isHittable)
         capture("CreateLargeText")
         app.buttons["alarm.cancel"].tap()
