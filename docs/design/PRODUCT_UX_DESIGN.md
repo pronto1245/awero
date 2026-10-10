@@ -21,7 +21,7 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 - Warm ivory surfaces, deep navy text, sunrise coral for primary actions, and restrained sage for positive progress.
 - Clear type hierarchy, large time and mission content, rounded cards, comfortable touch targets, and strong contrast.
 - Keep wake screens focused and legible. The active wake screen currently uses the light palette; low-light behavior remains a separate design check.
-- Localization resources and automated key-parity checks cover English, Russian, Brazilian Portuguese, French, German, and Spanish. The user reports the iPhone walkthrough/manual checks are complete; do not request or repeat them. Source audit still identifies hard-coded active alarm-delivery strings and accessibility/localization implementation gaps that must be fixed before Phase 6 acceptance.
+- Localization resources and automated key-parity checks cover English, Russian, Brazilian Portuguese, French, German, and Spanish. Phase 6 now uses the complete locale JSON dictionaries as the source for generated Android/iOS resources; first-run onboarding, active alarm error copy, and native accessibility semantics are implemented. The user reports the iPhone walkthrough/manual checks are complete; do not request or repeat them. Physical VoiceOver/TalkBack use remains a release-device check.
 
 ## Acceptance criteria
 
