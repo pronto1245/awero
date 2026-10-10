@@ -106,6 +106,10 @@ final class FirstRunOnboardingUITests: XCTestCase {
             capture("Create-\(language)")
             app.buttons["alarm.cancel"].tap()
             XCTAssertTrue(create.waitForExistence(timeout: 5), language)
+            app.buttons["home.settings"].tap()
+            XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 5), language)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            XCTAssertTrue(create.waitForExistence(timeout: 5), language)
             app.terminate()
         }
     }

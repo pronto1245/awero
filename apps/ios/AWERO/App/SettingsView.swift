@@ -58,6 +58,7 @@ struct SettingsView: View {
         }
         .navigationTitle("settings.title")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
         .toolbarBackground(AweroDesign.ivory, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
     }

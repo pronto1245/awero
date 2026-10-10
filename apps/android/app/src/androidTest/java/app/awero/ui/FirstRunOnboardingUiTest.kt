@@ -119,12 +119,17 @@ class FirstRunOnboardingUiTest {
         java.io.File(directory, "$name.png").outputStream().use { output ->
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
-        val descriptor = instrumentation.uiAutomation.executeShellCommand(
-            "sh -c 'run-as app.awero cat cache/awero-visual/$name.png > /data/local/tmp/awero-visual-$name.png'"
-        )
-        val result = FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
-        descriptor.close()
-        check(result.isBlank()) { "Screenshot export failed: $result" }
+        if (Build.VERSION.SDK_INT >= 31) {
+            val bytes = java.io.File(directory, "$name.png").readBytes()
+            val descriptors = instrumentation.uiAutomation.executeShellCommandRw(
+                "dd of=/data/local/tmp/awero-visual-$name.png"
+            )
+            android.os.ParcelFileDescriptor.AutoCloseOutputStream(descriptors[1]).use { it.write(bytes) }
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptors[0]).use { it.readBytes() }
+            val saved = instrumentation.uiAutomation.executeShellCommand("cat /data/local/tmp/awero-visual-$name.png")
+            val actual = android.os.ParcelFileDescriptor.AutoCloseInputStream(saved).use { it.readBytes() }
+            check(bytes.contentEquals(actual)) { "Screenshot export did not preserve PNG bytes: $name" }
+        }
     }
 
     companion object {

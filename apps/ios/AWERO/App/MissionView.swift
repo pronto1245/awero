@@ -42,11 +42,15 @@ private struct MathMissionView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("mission.title").font(.caption.bold()).foregroundStyle(AweroDesign.navy.opacity(0.5))
+            Text("wake.title").font(.title.bold()).foregroundStyle(AweroDesign.navy)
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
                     .font(.system(size: problemSize, weight: .black, design: .rounded))
                     .foregroundStyle(AweroDesign.navy)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.white.opacity(0.96))
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
                     .accessibilityIdentifier("mission.math.problem")
             }
             TextField("mission.answer", text: $answer)

@@ -97,12 +97,17 @@ class WakeSaveRetryEndToEndTest {
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
 
-        val visualDescriptor = instrumentation.uiAutomation.executeShellCommand(
-            "sh -c 'run-as app.awero cat cache/awero-visual/Math.png > /data/local/tmp/awero-visual-Math.png'"
-        )
-        val visualResult = java.io.FileInputStream(visualDescriptor.fileDescriptor).bufferedReader().use { it.readText() }
-        visualDescriptor.close()
-        check(visualResult.isBlank()) { "Screenshot export failed: $visualResult" }
+        if (android.os.Build.VERSION.SDK_INT >= 31) {
+            val bytes = java.io.File(visualDirectory, "Math.png").readBytes()
+            val descriptors = instrumentation.uiAutomation.executeShellCommandRw(
+                "dd of=/data/local/tmp/awero-visual-Math.png"
+            )
+            android.os.ParcelFileDescriptor.AutoCloseOutputStream(descriptors[1]).use { it.write(bytes) }
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptors[0]).use { it.readBytes() }
+            val saved = instrumentation.uiAutomation.executeShellCommand("cat /data/local/tmp/awero-visual-Math.png")
+            val actual = android.os.ParcelFileDescriptor.AutoCloseInputStream(saved).use { it.readBytes() }
+            check(bytes.contentEquals(actual)) { "Screenshot export did not preserve Math PNG bytes" }
+        }
 
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView

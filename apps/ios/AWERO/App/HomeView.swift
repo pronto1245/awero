@@ -43,6 +43,7 @@ struct HomeView: View {
                                     .frame(minWidth: 44, minHeight: 44)
                             }
                             .accessibilityLabel(Text("settings.title"))
+                            .accessibilityIdentifier("home.settings")
                         }
                         Text("home.greeting")
                             .font(.system(size: greetingSize, weight: .bold, design: .rounded))
