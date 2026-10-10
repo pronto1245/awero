@@ -102,6 +102,9 @@ final class FirstRunOnboardingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["mission.math.check"].isHittable)
         XCTAssertTrue(app.buttons["wake.emergencyStop"].isHittable)
         capture("MathLargeText")
+        // Close the session so the next wake test starts a new one instead of restoring this one.
+        app.buttons["wake.emergencyStop"].tap()
+        XCTAssertTrue(app.staticTexts["wake.stopped"].waitForExistence(timeout: 5))
     }
 
     func testStepsAndQRWakeStatesUseTheSameVisualSystem() {

@@ -15,6 +15,7 @@ struct ProfileView: View {
                         .font(.largeTitle.bold())
                         .foregroundStyle(AweroDesign.navy)
                         .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("nav.profile")
                     Button(action: onOpenSettings) {
                         HStack(spacing: 14) {
                             Image(systemName: "gearshape")

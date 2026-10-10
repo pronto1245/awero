@@ -4,6 +4,8 @@ struct WakeScreen: View {
     @ObservedObject var flow: WakeFlowController
     @ScaledMetric(relativeTo: .largeTitle) private var wakeTitleSize: CGFloat = 34
 
+    private static let missionBottomID = "wake.missionBottom"
+
     private var isActive: Bool { flow.state == .ringing || flow.state == .mission }
 
     var body: some View {
@@ -17,82 +19,92 @@ struct WakeScreen: View {
                 }
                 .allowsHitTesting(false)
 
-            ScrollView {
-                VStack(spacing: 14) {
-                    HStack {
-                        Text("AWERO")
-                            .font(.system(size: 24, weight: .black))
-                            .foregroundStyle(AweroDesign.navy)
-                        Spacer()
-                        if isActive {
-                            Button { Task { await flow.emergencyStop() } } label: {
-                                Image(systemName: "xmark")
-                                    .font(.headline.weight(.semibold))
-                                    .foregroundStyle(AweroDesign.navy)
-                                    .frame(width: 42, height: 42)
-                                    .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 14) {
+                        HStack {
+                            Text("AWERO")
+                                .font(.system(size: 24, weight: .black))
+                                .foregroundStyle(AweroDesign.navy)
+                            Spacer()
+                            if isActive {
+                                Button { Task { await flow.emergencyStop() } } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.headline.weight(.semibold))
+                                        .foregroundStyle(AweroDesign.navy)
+                                        .frame(width: 42, height: 42)
+                                        .background(.white.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
+                                }
+                                .accessibilityLabel(Text("wake.emergency_stop"))
+                                .accessibilityIdentifier("wake.close")
                             }
-                            .accessibilityLabel(Text("wake.emergency_stop"))
-                            .accessibilityIdentifier("wake.close")
+                        }
+                        .padding(.top, 8)
+
+                        Text(isActive ? LocalizedStringKey("wake.heading") : LocalizedStringKey("wake.title"))
+                            .font(.system(size: wakeTitleSize, weight: .bold))
+                            .foregroundStyle(AweroDesign.navy)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+
+                        if flow.state == .ringing {
+                            VStack(spacing: 14) {
+                                Text("wake.active")
+                                    .font(.body)
+                                    .foregroundStyle(AweroDesign.navy)
+                                    .multilineTextAlignment(.center)
+                                Button("wake.start") { Task { await flow.beginMission() } }
+                                    .buttonStyle(PrimaryWakeButton())
+                                Button("wake.snooze") { Task { await flow.snooze() } }
+                                    .foregroundStyle(AweroDesign.navy.opacity(0.74))
+                                    .frame(minHeight: 44)
+                            }
+                            .padding(18)
+                            .background(.white.opacity(0.94))
+                            .clipShape(RoundedRectangle(cornerRadius: 22))
+                        } else if flow.state == .mission, let alarm = flow.currentAlarm {
+                            if flow.currentMission == .math {
+                                Text("wake.instruction")
+                                    .font(.body)
+                                    .foregroundStyle(AweroDesign.navy)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 18)
+                            }
+                            MissionView(
+                                alarm: missionAlarm(from: alarm),
+                                onSuccess: { Task { await flow.completeMission() } },
+                                onFailure: { Task { await flow.fallbackToMath() } }
+                            )
+                            .padding(.horizontal, 8)
+                            // With very large text the mission is taller than the screen. Bring the
+                            // answer controls into view first; the heading stays reachable by scrolling.
+                            Color.clear.frame(height: 1).id(Self.missionBottomID)
+                        } else {
+                            terminalState
+                        }
+
+                        if let error = flow.actionError, isActive {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(error).foregroundStyle(AweroDesign.navy)
+                                Button("wake.retry") { Task { await flow.retryPendingAction() } }
+                                    .buttonStyle(PrimaryWakeButton())
+                            }
+                            .padding(16)
+                            .background(.white.opacity(0.94))
+                            .clipShape(RoundedRectangle(cornerRadius: 18))
                         }
                     }
-                    .padding(.top, 8)
-
-                    Text(isActive ? LocalizedStringKey("wake.heading") : LocalizedStringKey("wake.title"))
-                        .font(.system(size: wakeTitleSize, weight: .bold))
-                        .foregroundStyle(AweroDesign.navy)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
-
-                    if flow.state == .ringing {
-                        VStack(spacing: 14) {
-                            Text("wake.active")
-                                .font(.body)
-                                .foregroundStyle(AweroDesign.navy)
-                                .multilineTextAlignment(.center)
-                            Button("wake.start") { Task { await flow.beginMission() } }
-                                .buttonStyle(PrimaryWakeButton())
-                            Button("wake.snooze") { Task { await flow.snooze() } }
-                                .foregroundStyle(AweroDesign.navy.opacity(0.74))
-                                .frame(minHeight: 44)
-                        }
-                        .padding(18)
-                        .background(.white.opacity(0.94))
-                        .clipShape(RoundedRectangle(cornerRadius: 22))
-                    } else if flow.state == .mission, let alarm = flow.currentAlarm {
-                        if flow.currentMission == .math {
-                            Text("wake.instruction")
-                                .font(.body)
-                                .foregroundStyle(AweroDesign.navy)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 18)
-                        }
-                        MissionView(
-                            alarm: missionAlarm(from: alarm),
-                            onSuccess: { Task { await flow.completeMission() } },
-                            onFailure: { Task { await flow.fallbackToMath() } }
-                        )
-                        .padding(.horizontal, 8)
-                    } else {
-                        terminalState
-                    }
-
-                    if let error = flow.actionError, isActive {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(error).foregroundStyle(AweroDesign.navy)
-                            Button("wake.retry") { Task { await flow.retryPendingAction() } }
-                                .buttonStyle(PrimaryWakeButton())
-                        }
-                        .padding(16)
-                        .background(.white.opacity(0.94))
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 12)
-                .frame(maxWidth: .infinity)
+                .scrollIndicators(.hidden)
+                .task(id: flow.state == .mission ? flow.currentMission.rawValue : "") {
+                    guard flow.state == .mission else { return }
+                    try? await Task.sleep(for: .milliseconds(150))
+                    withAnimation(nil) { proxy.scrollTo(Self.missionBottomID, anchor: .bottom) }
+                }
             }
-            .scrollIndicators(.hidden)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if isActive {

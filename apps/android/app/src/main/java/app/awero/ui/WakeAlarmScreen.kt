@@ -145,6 +145,21 @@ object WakeAlarmScreen {
                     android.widget.FrameLayout.LayoutParams.WRAP_CONTENT
                 ))
             }
+            // On short screens or with large text the mission is taller than the space above the
+            // emergency card. The answer keypad and ✓ sit at the bottom of the mission, so after
+            // the first layout bring the bottom into view; only the heading scrolls off the top
+            // and the person can still scroll back to it.
+            scroll.addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View, left: Int, top: Int, right: Int, bottom: Int,
+                    oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
+                ) {
+                    val overflow = view.height - scroll.height
+                    if (scroll.height <= 0 || view.height <= 0) return
+                    scroll.removeOnLayoutChangeListener(this)
+                    if (overflow > 0) scroll.post { scroll.scrollTo(0, overflow) }
+                }
+            })
             root.addView(scroll, LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
             ))
