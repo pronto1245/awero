@@ -147,6 +147,12 @@
 "wake.completed_title" = "VOUS ÊTES DEBOUT";
 "wake.emergency_stop" = "Arrêt d’urgence";
 "wake.emergency_stop_hint" = "Uniquement en cas d’urgence";
+"wake.error_completion_save" = "Impossible d’enregistrer la fin de la mission. Votre réveil est toujours actif.";
+"wake.error_fallback_save" = "Impossible d’enregistrer la solution de secours. Votre réveil est toujours actif.";
+"wake.error_mission_save" = "Impossible d’enregistrer la progression de la mission. L’alarme est toujours active.";
+"wake.error_snooze_save" = "Impossible d’enregistrer la répétition. L’alarme sonne toujours.";
+"wake.error_snooze_schedule" = "Impossible de programmer la répétition. L’alarme sonne toujours.";
+"wake.error_stop_save" = "Impossible d’enregistrer l’arrêt. L’alarme est toujours active.";
 "wake.heading" = "C’est l’heure de se réveiller";
 "wake.instruction" = "Résolvez le calcul pour arrêter le réveil.";
 "wake.retry" = "Réessayer l’enregistrement";

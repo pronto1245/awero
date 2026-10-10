@@ -170,5 +170,11 @@
   "wake.instruction": "Löse die Aufgabe, um den Wecker auszuschalten.",
   "wake.emergency_stop_hint": "Nur im Notfall",
   "home.no_enabled_title": "Keine aktiven Wecker",
-  "home.no_enabled_body": "Aktiviere unten einen Wecker, um den nächsten Weckzeitpunkt zu sehen."
+  "home.no_enabled_body": "Aktiviere unten einen Wecker, um den nächsten Weckzeitpunkt zu sehen.",
+  "wake.error_mission_save": "Der Missionsfortschritt konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.",
+  "wake.error_fallback_save": "Die Ersatzaufgabe konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.",
+  "wake.error_completion_save": "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.",
+  "wake.error_snooze_save": "Das Schlummern konnte nicht gespeichert werden. Der Wecker klingelt weiter.",
+  "wake.error_snooze_schedule": "Schlummern konnte nicht geplant werden. Der Wecker klingelt weiter.",
+  "wake.error_stop_save": "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv."
 }

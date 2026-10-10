@@ -170,5 +170,11 @@
   "wake.instruction": "Solve the problem to turn off the alarm.",
   "wake.emergency_stop_hint": "Only in an emergency",
   "home.no_enabled_title": "No active alarms",
-  "home.no_enabled_body": "Turn on an alarm below to see the next wake-up."
+  "home.no_enabled_body": "Turn on an alarm below to see the next wake-up.",
+  "wake.error_mission_save": "Could not save mission progress. The alarm is still active.",
+  "wake.error_fallback_save": "Could not save the fallback. Your wake session is still active.",
+  "wake.error_completion_save": "Could not save completion. Your wake session is still active.",
+  "wake.error_snooze_save": "Could not save the snooze. The alarm is still ringing.",
+  "wake.error_snooze_schedule": "Could not schedule snooze. The alarm is still ringing.",
+  "wake.error_stop_save": "Could not record the stop. The alarm is still active."
 }

@@ -170,5 +170,11 @@
   "wake.instruction": "Resolva a conta para desligar o alarme.",
   "wake.emergency_stop_hint": "Somente em caso de emergência",
   "home.no_enabled_title": "Nenhum alarme ativo",
-  "home.no_enabled_body": "Ative um alarme abaixo para ver o próximo horário de despertar."
+  "home.no_enabled_body": "Ative um alarme abaixo para ver o próximo horário de despertar.",
+  "wake.error_mission_save": "Não foi possível salvar o progresso da missão. O alarme continua ativo.",
+  "wake.error_fallback_save": "Não foi possível salvar a alternativa. Sua sessão de despertar continua ativa.",
+  "wake.error_completion_save": "Não foi possível salvar a conclusão. Sua sessão de despertar continua ativa.",
+  "wake.error_snooze_save": "Não foi possível salvar a soneca. O alarme continua tocando.",
+  "wake.error_snooze_schedule": "Não foi possível agendar a soneca. O alarme continua tocando.",
+  "wake.error_stop_save": "Não foi possível registrar a parada. O alarme continua ativo."
 }

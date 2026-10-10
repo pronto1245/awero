@@ -147,6 +147,12 @@
 "wake.completed_title" = "YA ESTÁS EN PIE";
 "wake.emergency_stop" = "Parada de emergencia";
 "wake.emergency_stop_hint" = "Solo en caso de emergencia";
+"wake.error_completion_save" = "No se pudo guardar la finalización. Tu sesión de despertar sigue activa.";
+"wake.error_fallback_save" = "No se pudo guardar la alternativa. Tu sesión de despertar sigue activa.";
+"wake.error_mission_save" = "No se pudo guardar el progreso de la misión. La alarma sigue activa.";
+"wake.error_snooze_save" = "No se pudo guardar la posposición. La alarma sigue sonando.";
+"wake.error_snooze_schedule" = "No se pudo programar la posposición. La alarma sigue sonando.";
+"wake.error_stop_save" = "No se pudo registrar la detención. La alarma sigue activa.";
 "wake.heading" = "Hora de despertar";
 "wake.instruction" = "Resuelve la operación para apagar la alarma.";
 "wake.retry" = "Reintentar guardado";

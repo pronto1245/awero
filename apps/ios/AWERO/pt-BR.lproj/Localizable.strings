@@ -147,6 +147,12 @@
 "wake.completed_title" = "VOCÊ JÁ LEVANTOU";
 "wake.emergency_stop" = "Parada de emergência";
 "wake.emergency_stop_hint" = "Somente em caso de emergência";
+"wake.error_completion_save" = "Não foi possível salvar a conclusão. Sua sessão de despertar continua ativa.";
+"wake.error_fallback_save" = "Não foi possível salvar a alternativa. Sua sessão de despertar continua ativa.";
+"wake.error_mission_save" = "Não foi possível salvar o progresso da missão. O alarme continua ativo.";
+"wake.error_snooze_save" = "Não foi possível salvar a soneca. O alarme continua tocando.";
+"wake.error_snooze_schedule" = "Não foi possível agendar a soneca. O alarme continua tocando.";
+"wake.error_stop_save" = "Não foi possível registrar a parada. O alarme continua ativo.";
 "wake.heading" = "Hora de acordar";
 "wake.instruction" = "Resolva a conta para desligar o alarme.";
 "wake.retry" = "Tentar salvar novamente";
