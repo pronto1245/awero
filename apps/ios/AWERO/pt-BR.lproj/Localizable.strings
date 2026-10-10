@@ -36,7 +36,7 @@
 "create.timezone_device" = "Seguir dispositivo";
 "create.timezone_device_hint" = "Em viagens, o alarme acompanha o fuso do dispositivo.";
 "create.timezone_fixed" = "Manter este fuso";
-"create.timezone_fixed_hint" = "Em viagens, o alarme permanece no fuso horário %1$s.";
+"create.timezone_fixed_hint" = "Em viagens, o alarme permanece no fuso horário %1$@.";
 "create.title" = "Novo alarme";
 "day.friday" = "Sexta-feira";
 "day.monday" = "Segunda-feira";
@@ -74,7 +74,7 @@
 "home.retry_loading_alarms" = "Tentar novamente";
 "home.subtitle" = "Um novo dia, novas possibilidades";
 "home.test" = "Testar";
-"home.toggle_alarm" = "Ativar ou desativar alarme às %1$s";
+"home.toggle_alarm" = "Ativar ou desativar alarme às %1$@";
 "mission.answer" = "Resposta";
 "mission.camera_denied" = "O acesso à câmera está indisponível. Use a alternativa de matemática.";
 "mission.camera_unavailable" = "Câmera indisponível.";

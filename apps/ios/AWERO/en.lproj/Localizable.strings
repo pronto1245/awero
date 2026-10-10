@@ -36,7 +36,7 @@
 "create.timezone_device" = "Follow device";
 "create.timezone_device_hint" = "The alarm follows your device time zone when you travel.";
 "create.timezone_fixed" = "Keep current zone";
-"create.timezone_fixed_hint" = "The alarm stays in time zone %1$s while you travel.";
+"create.timezone_fixed_hint" = "The alarm stays in time zone %1$@ while you travel.";
 "create.title" = "New alarm";
 "day.friday" = "Friday";
 "day.monday" = "Monday";
@@ -74,7 +74,7 @@
 "home.retry_loading_alarms" = "Try again";
 "home.subtitle" = "A new day, new possibilities";
 "home.test" = "Test";
-"home.toggle_alarm" = "Enable or disable alarm at %1$s";
+"home.toggle_alarm" = "Enable or disable alarm at %1$@";
 "mission.answer" = "Answer";
 "mission.camera_denied" = "Camera access is unavailable. Use the Math fallback.";
 "mission.camera_unavailable" = "Camera is unavailable.";

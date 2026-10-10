@@ -36,7 +36,7 @@
 "create.timezone_device" = "Suivre l’appareil";
 "create.timezone_device_hint" = "En voyage, l’alarme suit le fuseau de votre appareil.";
 "create.timezone_fixed" = "Conserver ce fuseau";
-"create.timezone_fixed_hint" = "En voyage, l’alarme reste sur le fuseau horaire %1$s.";
+"create.timezone_fixed_hint" = "En voyage, l’alarme reste sur le fuseau horaire %1$@.";
 "create.title" = "Nouveau réveil";
 "day.friday" = "Vendredi";
 "day.monday" = "Lundi";
@@ -74,7 +74,7 @@
 "home.retry_loading_alarms" = "Réessayer";
 "home.subtitle" = "Un nouveau jour, de nouvelles possibilités";
 "home.test" = "Tester";
-"home.toggle_alarm" = "Activer ou désactiver le réveil à %1$s";
+"home.toggle_alarm" = "Activer ou désactiver le réveil à %1$@";
 "mission.answer" = "Réponse";
 "mission.camera_denied" = "L’accès à la caméra est indisponible. Utilisez le calcul de secours.";
 "mission.camera_unavailable" = "Caméra indisponible.";

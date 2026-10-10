@@ -36,7 +36,7 @@
 "create.timezone_device" = "Следовать за устройством";
 "create.timezone_device_hint" = "В поездках будильник следует часовому поясу устройства.";
 "create.timezone_fixed" = "Зафиксировать пояс";
-"create.timezone_fixed_hint" = "В поездках будильник остаётся в часовом поясе %1$s.";
+"create.timezone_fixed_hint" = "В поездках будильник остаётся в часовом поясе %1$@.";
 "create.title" = "Новый будильник";
 "day.friday" = "Пятница";
 "day.monday" = "Понедельник";
@@ -74,7 +74,7 @@
 "home.retry_loading_alarms" = "Повторить";
 "home.subtitle" = "Новый день — новые возможности";
 "home.test" = "Проверить";
-"home.toggle_alarm" = "Включить или выключить будильник на %1$s";
+"home.toggle_alarm" = "Включить или выключить будильник на %1$@";
 "mission.answer" = "Ответ";
 "mission.camera_denied" = "Нет доступа к камере. Перейдите к математическому заданию.";
 "mission.camera_unavailable" = "Камера недоступна.";

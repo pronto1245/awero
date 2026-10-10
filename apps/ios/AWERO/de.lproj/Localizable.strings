@@ -36,7 +36,7 @@
 "create.timezone_device" = "Gerätezeitzone folgen";
 "create.timezone_device_hint" = "Auf Reisen folgt der Alarm der Zeitzone deines Geräts.";
 "create.timezone_fixed" = "Zeitzone beibehalten";
-"create.timezone_fixed_hint" = "Auf Reisen bleibt der Alarm in der Zeitzone %1$s.";
+"create.timezone_fixed_hint" = "Auf Reisen bleibt der Alarm in der Zeitzone %1$@.";
 "create.title" = "Neuer Wecker";
 "day.friday" = "Freitag";
 "day.monday" = "Montag";
@@ -74,7 +74,7 @@
 "home.retry_loading_alarms" = "Erneut versuchen";
 "home.subtitle" = "Ein neuer Tag, neue Möglichkeiten";
 "home.test" = "Testen";
-"home.toggle_alarm" = "Wecker um %1$s ein- oder ausschalten";
+"home.toggle_alarm" = "Wecker um %1$@ ein- oder ausschalten";
 "mission.answer" = "Antwort";
 "mission.camera_denied" = "Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.";
 "mission.camera_unavailable" = "Kamera nicht verfügbar.";

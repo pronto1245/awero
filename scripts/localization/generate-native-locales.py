@@ -4,6 +4,7 @@
 import argparse
 import json
 import pathlib
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -33,6 +34,12 @@ def load_source(locale):
     data = json.loads(path.read_text(), object_pairs_hook=reject_duplicates)
     if not data or any(not isinstance(key, str) or not isinstance(value, str) for key, value in data.items()):
         raise ValueError(f"{path} must contain a non-empty flat string dictionary")
+    for key, value in data.items():
+        if re.search(r"%(?:\d+\$)?s", value):
+            raise ValueError(
+                f"{path}: {key!r} uses a C/Android %s placeholder; use %@ for strings "
+                "so the iOS generator and Android conversion stay compatible"
+            )
     return data
 
 
@@ -46,7 +53,11 @@ def render_android(data):
     for resource_id, key in sorted(MAP["android"].items()):
         if key not in data:
             raise ValueError(f"missing Android translation source key {key!r} (resource {resource_id})")
-        value = data[key].replace("%@", "%s")
+        value = re.sub(
+            r"%(?:(\d+)\$)?@",
+            lambda match: f"%{match.group(1) + '$' if match.group(1) else ''}s",
+            data[key],
+        )
         item = ET.SubElement(resources, "string", {"name": resource_id})
         item.text = value
     return ET.tostring(resources, encoding="unicode", xml_declaration=False) + "\n"
