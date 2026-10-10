@@ -27,7 +27,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
             let systemAlert = springboard.alerts.firstMatch
             guard systemAlert.waitForExistence(timeout: 3) else { break }
             let allowButton = systemAlert.buttons.matching(
-                NSPredicate(format: "label CONTAINS[c] %@", "Allow")
+                NSPredicate(format: "label ==[c] %@ OR label ==[c] %@", "Allow", "Always Allow")
             ).firstMatch
             guard allowButton.exists else { break }
             allowButton.tap()
