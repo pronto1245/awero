@@ -159,6 +159,14 @@
     "wake_error_completion_save": "wake.error_completion_save",
     "wake_error_snooze_save": "wake.error_snooze_save",
     "wake_error_snooze_schedule": "wake.error_snooze_schedule",
-    "wake_error_stop_save": "wake.error_stop_save"
+    "wake_error_stop_save": "wake.error_stop_save",
+    "home_days_weekdays": "home.days.weekdays",
+    "home_days_weekends": "home.days.weekends",
+    "home_days_everyday": "home.days.everyday",
+    "home_today": "home.today",
+    "home_tomorrow": "home.tomorrow",
+    "home_status_not_scheduled": "home.status.not_scheduled",
+    "home_status_permission": "home.status.permission",
+    "home_fix": "home.fix"
   }
 }

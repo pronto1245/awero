@@ -176,5 +176,13 @@
   "wake.error_completion_save": "Impossible d’enregistrer la fin de la mission. Votre réveil est toujours actif.",
   "wake.error_snooze_save": "Impossible d’enregistrer la répétition. L’alarme sonne toujours.",
   "wake.error_snooze_schedule": "Impossible de programmer la répétition. L’alarme sonne toujours.",
-  "wake.error_stop_save": "Impossible d’enregistrer l’arrêt. L’alarme est toujours active."
+  "wake.error_stop_save": "Impossible d’enregistrer l’arrêt. L’alarme est toujours active.",
+  "home.days.weekdays": "En semaine",
+  "home.days.weekends": "Le week-end",
+  "home.days.everyday": "Tous les jours",
+  "home.today": "Aujourd’hui",
+  "home.tomorrow": "Demain",
+  "home.status.not_scheduled": "Non programmé",
+  "home.status.permission": "Autorisation requise",
+  "home.fix": "Corriger"
 }

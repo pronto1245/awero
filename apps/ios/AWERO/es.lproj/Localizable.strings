@@ -55,6 +55,9 @@
 "home.alarms" = "Mis alarmas";
 "home.alarms_load_error_body" = "AWERO no pudo leer tus alarmas guardadas. No se han eliminado. Inténtalo de nuevo.";
 "home.alarms_load_error_title" = "No se pudieron cargar las alarmas";
+"home.days.everyday" = "Todos los días";
+"home.days.weekdays" = "Entre semana";
+"home.days.weekends" = "Fines de semana";
 "home.delete" = "Eliminar";
 "home.delete_confirm_body" = "Se eliminarán esta alarma y su programación.";
 "home.delete_confirm_title" = "¿Eliminar esta alarma?";
@@ -65,6 +68,7 @@
 "home.enabled" = "Activada";
 "home.error_body" = "No se pudo completar la acción. Comprueba los permisos de la alarma e inténtalo de nuevo.";
 "home.error_title" = "No se pudo realizar la acción de la alarma";
+"home.fix" = "Corregir";
 "home.greeting" = "Buenos días";
 "home.loading_alarms" = "Cargando alarmas…";
 "home.mission.math" = "Matemáticas";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "No hay alarmas activas";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Intentar de nuevo";
+"home.status.not_scheduled" = "No programada";
+"home.status.permission" = "Falta un permiso";
 "home.subtitle" = "Un nuevo día, nuevas posibilidades";
 "home.test" = "Probar";
+"home.today" = "Hoy";
 "home.toggle_alarm" = "Activar o desactivar la alarma de las %1$@";
+"home.tomorrow" = "Mañana";
 "mission.answer" = "Respuesta";
 "mission.camera_denied" = "El acceso a la cámara no está disponible. Usa la alternativa de matemáticas.";
 "mission.camera_unavailable" = "Cámara no disponible.";

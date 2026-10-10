@@ -55,6 +55,9 @@
 "home.alarms" = "Meine Wecker";
 "home.alarms_load_error_body" = "AWERO konnte deine gespeicherten Wecker nicht lesen. Sie wurden nicht gelöscht. Versuche es erneut.";
 "home.alarms_load_error_title" = "Wecker konnten nicht geladen werden";
+"home.days.everyday" = "Täglich";
+"home.days.weekdays" = "Werktags";
+"home.days.weekends" = "Wochenende";
 "home.delete" = "Löschen";
 "home.delete_confirm_body" = "Dieser Wecker und sein Zeitplan werden entfernt.";
 "home.delete_confirm_title" = "Diesen Wecker löschen?";
@@ -65,6 +68,7 @@
 "home.enabled" = "Ein";
 "home.error_body" = "Die Aktion konnte nicht abgeschlossen werden. Prüfe die Weckerberechtigungen und versuche es erneut.";
 "home.error_title" = "Weckeraktion fehlgeschlagen";
+"home.fix" = "Beheben";
 "home.greeting" = "Guten Morgen";
 "home.loading_alarms" = "Wecker werden geladen…";
 "home.mission.math" = "Mathematik";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "Keine aktiven Wecker";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Erneut versuchen";
+"home.status.not_scheduled" = "Nicht geplant";
+"home.status.permission" = "Berechtigung nötig";
 "home.subtitle" = "Ein neuer Tag, neue Möglichkeiten";
 "home.test" = "Testen";
+"home.today" = "Heute";
 "home.toggle_alarm" = "Wecker um %1$@ ein- oder ausschalten";
+"home.tomorrow" = "Morgen";
 "mission.answer" = "Antwort";
 "mission.camera_denied" = "Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.";
 "mission.camera_unavailable" = "Kamera nicht verfügbar.";

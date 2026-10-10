@@ -16,7 +16,7 @@ Where these differ from the concept board, these win:
 2. **Secondary text.** Grey captions on ivory (repeat days, mission descriptions, the emergency-stop hint) are darkened one to two steps to meet contrast.
 3. **Dim wake variant.** The ringing/mission screen gets a dimmed variant (navy background, same coral) for dark bedrooms; other screens stay light.
 4. **Alarm readiness.** Every alarm card shows whether it is scheduled or needs action/permissions.
-5. **Edit and delete.** Tapping an alarm card edits it; swipe deletes with confirmation.
+5. **Edit and delete.** Tapping an alarm card edits it; a long press opens edit, test and delete (delete asks for confirmation). Long press is used instead of swipe because it works the same on both platforms and inside scrolling content; screen readers get the same three actions.
 6. **Progress copy.** Average time reads as minutes to get up (e.g. «4,8 мин — среднее время подъёма»), not a star rating; the second tile shows the successful-wake percentage instead of repeating the streak; Russian uses a decimal comma.
 7. **Snooze.** None of the reference wake screens shows snooze; it is removed from the wake screen when that screen is rebuilt.
 8. **Imagery.** The owner's illustrated mountain-lake scenes, in the flat style of the reference screens, replace the code-drawn sunrise (see Scene illustrations).

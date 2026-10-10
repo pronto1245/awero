@@ -55,6 +55,9 @@
 "home.alarms" = "Mes réveils";
 "home.alarms_load_error_body" = "AWERO n’a pas pu lire vos réveils enregistrés. Ils n’ont pas été supprimés. Réessayez.";
 "home.alarms_load_error_title" = "Impossible de charger les réveils";
+"home.days.everyday" = "Tous les jours";
+"home.days.weekdays" = "En semaine";
+"home.days.weekends" = "Le week-end";
 "home.delete" = "Supprimer";
 "home.delete_confirm_body" = "Ce réveil et son horaire seront supprimés.";
 "home.delete_confirm_title" = "Supprimer ce réveil ?";
@@ -65,6 +68,7 @@
 "home.enabled" = "Activé";
 "home.error_body" = "L’action n’a pas pu aboutir. Vérifiez les autorisations du réveil et réessayez.";
 "home.error_title" = "Impossible d’effectuer cette action sur le réveil";
+"home.fix" = "Corriger";
 "home.greeting" = "Bonjour";
 "home.loading_alarms" = "Chargement des réveils…";
 "home.mission.math" = "Mathématiques";
@@ -77,9 +81,13 @@
 "home.no_enabled_title" = "Aucune alarme active";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Réessayer";
+"home.status.not_scheduled" = "Non programmé";
+"home.status.permission" = "Autorisation requise";
 "home.subtitle" = "Un nouveau jour, de nouvelles possibilités";
 "home.test" = "Tester";
+"home.today" = "Aujourd’hui";
 "home.toggle_alarm" = "Activer ou désactiver le réveil à %1$@";
+"home.tomorrow" = "Demain";
 "mission.answer" = "Réponse";
 "mission.camera_denied" = "L’accès à la caméra est indisponible. Utilisez le calcul de secours.";
 "mission.camera_unavailable" = "Caméra indisponible.";

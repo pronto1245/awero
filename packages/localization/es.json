@@ -176,5 +176,13 @@
   "wake.error_completion_save": "No se pudo guardar la finalización. Tu sesión de despertar sigue activa.",
   "wake.error_snooze_save": "No se pudo guardar la posposición. La alarma sigue sonando.",
   "wake.error_snooze_schedule": "No se pudo programar la posposición. La alarma sigue sonando.",
-  "wake.error_stop_save": "No se pudo registrar la detención. La alarma sigue activa."
+  "wake.error_stop_save": "No se pudo registrar la detención. La alarma sigue activa.",
+  "home.days.weekdays": "Entre semana",
+  "home.days.weekends": "Fines de semana",
+  "home.days.everyday": "Todos los días",
+  "home.today": "Hoy",
+  "home.tomorrow": "Mañana",
+  "home.status.not_scheduled": "No programada",
+  "home.status.permission": "Falta un permiso",
+  "home.fix": "Corregir"
 }
