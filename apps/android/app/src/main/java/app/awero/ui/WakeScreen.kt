@@ -63,7 +63,7 @@ fun WakeScreen(flow: WakeFlowController) {
             Column(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(if (state == WakeFlowController.State.MISSION) 8.dp else 14.dp)
             ) {
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -166,13 +166,13 @@ fun WakeScreen(flow: WakeFlowController) {
                         AweroDesign.navy
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(if (state == WakeFlowController.State.MISSION) 0.dp else 10.dp))
             }
 
             if (active) {
                 Button(
                     onClick = { scope.launch { flow.emergencyStop() } },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp).heightIn(min = 62.dp)
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = if (state == WakeFlowController.State.MISSION) 4.dp else 8.dp).heightIn(min = 62.dp)
                         .semantics { contentDescription = context.getString(R.string.wake_emergency_stop) },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFE8E2)),
                     shape = RoundedCornerShape(AweroDesign.cardCorner)

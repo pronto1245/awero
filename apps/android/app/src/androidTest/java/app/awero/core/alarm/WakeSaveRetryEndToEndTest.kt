@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Button
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -118,8 +117,15 @@ class WakeSaveRetryEndToEndTest {
         setFontScale(1.8f)
         instrumentation.runOnMainSync {
             activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
-            views(activity!!.window.decorView).filterIsInstance<ScrollView>().single().fullScroll(View.FOCUS_DOWN)
         }
+        instrumentation.waitForIdleSync()
+        instrumentation.uiAutomation.waitForIdle(500, 5_000)
+        val metrics = context.resources.displayMetrics
+        val swipe = instrumentation.uiAutomation.executeShellCommand(
+            "input swipe ${metrics.widthPixels / 2} ${metrics.heightPixels * 3 / 4} ${metrics.widthPixels / 2} ${metrics.heightPixels / 4} 300"
+        )
+        FileInputStream(swipe.fileDescriptor).bufferedReader().use { it.readText() }
+        swipe.close()
         instrumentation.waitForIdleSync()
         instrumentation.uiAutomation.waitForIdle(500, 5_000)
         instrumentation.runOnMainSync {
