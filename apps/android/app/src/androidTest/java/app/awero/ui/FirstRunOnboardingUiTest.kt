@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -64,6 +65,10 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.create_save))
             .performScrollTo()
             .performClick()
+        compose.waitUntil(timeoutMillis = 5_000) {
+            compose.onAllNodesWithText(context.getString(R.string.home_alarms))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText(context.getString(R.string.home_alarms)).assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.home_next_alarm), substring = true)
             .assertIsDisplayed()

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -198,6 +199,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                         ))
                         onSaved()
                     } catch (error: Exception) {
+                        Log.e("AWERO.Alarm", "Could not save alarm", error)
                         saveNeedsSettings = error is IllegalStateException
                         saveError = context.getString(R.string.create_error_body)
                     }
