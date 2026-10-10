@@ -58,6 +58,8 @@ def render_android(data):
             lambda match: f"%{match.group(1) + '$' if match.group(1) else ''}s",
             data[key],
         )
+        # aapt rejects bare apostrophes and quotes in string resources.
+        value = re.sub(r"(?<!\\)(['\"])", r"\\\1", value)
         item = ET.SubElement(resources, "string", {"name": resource_id})
         item.text = value
     return ET.tostring(resources, encoding="unicode", xml_declaration=False) + "\n"

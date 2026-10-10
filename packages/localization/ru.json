@@ -188,5 +188,13 @@
   "create.done": "Готово",
   "create.save_and_test": "Проверить будильник",
   "create.save_and_test_hint": "Будильник сохранится, а пробный сигнал прозвучит через 30 секунд.",
-  "create.advanced": "Дополнительно"
+  "create.advanced": "Дополнительно",
+  "mission.steps_heading": "Встаньте и пройдитесь",
+  "mission.steps_subtitle": "Сделайте 30 шагов, чтобы выключить будильник",
+  "mission.steps_of_target": "из 30 шагов",
+  "mission.steps_tip": "Дойдите до кухни и выпейте стакан воды.",
+  "mission.qr_heading": "Найдите код",
+  "mission.qr_subtitle": "Отсканируйте сохранённый код, чтобы выключить будильник",
+  "mission.qr_cant_scan": "Код не сканируется?",
+  "mission.flashlight": "Фонарик"
 }

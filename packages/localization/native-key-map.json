@@ -171,6 +171,14 @@
     "create_done": "create.done",
     "create_save_and_test": "create.save_and_test",
     "create_save_and_test_hint": "create.save_and_test_hint",
-    "create_advanced": "create.advanced"
+    "create_advanced": "create.advanced",
+    "mission_steps_heading": "mission.steps_heading",
+    "mission_steps_subtitle": "mission.steps_subtitle",
+    "mission_steps_of_target": "mission.steps_of_target",
+    "mission_steps_tip": "mission.steps_tip",
+    "mission_qr_heading": "mission.qr_heading",
+    "mission_qr_subtitle": "mission.qr_subtitle",
+    "mission_qr_cant_scan": "mission.qr_cant_scan",
+    "mission_flashlight": "mission.flashlight"
   }
 }

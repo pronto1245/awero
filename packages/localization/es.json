@@ -188,5 +188,13 @@
   "create.done": "Listo",
   "create.save_and_test": "Probar alarma",
   "create.save_and_test_hint": "Guarda la alarma y suena una prueba en 30 segundos.",
-  "create.advanced": "Más opciones"
+  "create.advanced": "Más opciones",
+  "mission.steps_heading": "Levántate y camina",
+  "mission.steps_subtitle": "Da 30 pasos para apagar la alarma",
+  "mission.steps_of_target": "de 30 pasos",
+  "mission.steps_tip": "Ve a la cocina y bebe un vaso de agua.",
+  "mission.qr_heading": "Encuentra tu código",
+  "mission.qr_subtitle": "Escanea tu código guardado para apagar la alarma",
+  "mission.qr_cant_scan": "¿El código no se escanea?",
+  "mission.flashlight": "Linterna"
 }

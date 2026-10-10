@@ -188,5 +188,13 @@
   "create.done": "Done",
   "create.save_and_test": "Test alarm",
   "create.save_and_test_hint": "Saves the alarm and plays a test alarm in 30 seconds.",
-  "create.advanced": "More options"
+  "create.advanced": "More options",
+  "mission.steps_heading": "Get up and walk",
+  "mission.steps_subtitle": "Take 30 steps to turn off the alarm",
+  "mission.steps_of_target": "of 30 steps",
+  "mission.steps_tip": "Walk to the kitchen and drink a glass of water.",
+  "mission.qr_heading": "Find your code",
+  "mission.qr_subtitle": "Scan your saved code to turn off the alarm",
+  "mission.qr_cant_scan": "Code won’t scan?",
+  "mission.flashlight": "Flashlight"
 }

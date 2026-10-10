@@ -188,5 +188,13 @@
   "create.done": "Concluir",
   "create.save_and_test": "Testar alarme",
   "create.save_and_test_hint": "Salva o alarme e toca um teste em 30 segundos.",
-  "create.advanced": "Mais opções"
+  "create.advanced": "Mais opções",
+  "mission.steps_heading": "Levante e caminhe",
+  "mission.steps_subtitle": "Dê 30 passos para desligar o alarme",
+  "mission.steps_of_target": "de 30 passos",
+  "mission.steps_tip": "Vá até a cozinha e beba um copo de água.",
+  "mission.qr_heading": "Encontre seu código",
+  "mission.qr_subtitle": "Escaneie o código salvo para desligar o alarme",
+  "mission.qr_cant_scan": "O código não lê?",
+  "mission.flashlight": "Lanterna"
 }

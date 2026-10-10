@@ -188,5 +188,13 @@
   "create.done": "Fertig",
   "create.save_and_test": "Wecker testen",
   "create.save_and_test_hint": "Speichert den Wecker und spielt in 30 Sekunden einen Test ab.",
-  "create.advanced": "Weitere Optionen"
+  "create.advanced": "Weitere Optionen",
+  "mission.steps_heading": "Steh auf und geh los",
+  "mission.steps_subtitle": "Geh 30 Schritte, um den Wecker auszuschalten",
+  "mission.steps_of_target": "von 30 Schritten",
+  "mission.steps_tip": "Geh in die Küche und trink ein Glas Wasser.",
+  "mission.qr_heading": "Finde deinen Code",
+  "mission.qr_subtitle": "Scanne deinen gespeicherten Code, um den Wecker auszuschalten",
+  "mission.qr_cant_scan": "Code wird nicht erkannt?",
+  "mission.flashlight": "Taschenlampe"
 }
