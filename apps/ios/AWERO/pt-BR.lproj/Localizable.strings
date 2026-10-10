@@ -130,6 +130,7 @@
 "persistence.read_error" = "O AWERO não conseguiu ler os dados salvos. Eles não serão tratados como vazios. Tente novamente para restaurar o estado do alarme.";
 "persistence.read_error_title" = "Dados do alarme indisponíveis";
 "persistence.retry_read" = "Tentar ler novamente";
+"profile.settings_hint" = "Gerencie as preferências do app e as permissões dos alarmes.";
 "progress.empty_action" = "Criar alarme";
 "progress.empty_body" = "Seus despertares concluídos aparecerão aqui. Testes do alarme não são contabilizados.";
 "progress.empty_title" = "Sua primeira semana começa aqui";
@@ -157,5 +158,3 @@
 "wake.start" = "Iniciar missão";
 "wake.stopped_body" = "A sessão foi registrada.";
 "wake.title" = "LEVANTE-SE";
-
-"profile.settings_hint" = "Gerencie as preferências do app e as permissões dos alarmes.";

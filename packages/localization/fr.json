@@ -153,6 +153,7 @@
   "home.error_body": "L’action n’a pas pu aboutir. Vérifiez les autorisations du réveil et réessayez.",
   "create.error_body": "Le réveil n’a pas été enregistré. Vérifiez les autorisations requises et l’espace disponible, puis réessayez.",
   "onboarding.permissions": "Avant de créer un réveil, AWERO explique et demande les autorisations système nécessaires pour vous prévenir à l’heure.",
+  "profile.settings_hint": "Gérez les préférences de l’application et les autorisations des alarmes.",
   "nav.home": "Accueil",
   "nav.progress": "Progrès",
   "nav.profile": "Profil",

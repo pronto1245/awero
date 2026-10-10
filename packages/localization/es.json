@@ -153,6 +153,7 @@
   "home.error_body": "No se pudo completar la acción. Comprueba los permisos de la alarma e inténtalo de nuevo.",
   "create.error_body": "No se guardó la alarma. Comprueba los permisos necesarios y el espacio disponible e inténtalo de nuevo.",
   "onboarding.permissions": "Antes de crear una alarma, AWERO explica y solicita los permisos del sistema necesarios para avisarte a tiempo.",
+  "profile.settings_hint": "Administra las preferencias de la app y los permisos de las alarmas.",
   "nav.home": "Inicio",
   "nav.progress": "Progreso",
   "nav.profile": "Perfil",

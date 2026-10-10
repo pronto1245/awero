@@ -130,6 +130,7 @@
 "persistence.read_error" = "AWERO konnte gespeicherte Daten nicht lesen. Sie werden nicht als leer behandelt. Versuche es erneut, um den Weckstatus wiederherzustellen.";
 "persistence.read_error_title" = "Gespeicherte Weckdaten sind nicht verfügbar";
 "persistence.retry_read" = "Lesen erneut versuchen";
+"profile.settings_hint" = "Verwalte App-Einstellungen und Weckerberechtigungen.";
 "progress.empty_action" = "Wecker erstellen";
 "progress.empty_body" = "Hier erscheinen abgeschlossene Aufwach-Sitzungen. Alarmtests werden nicht gezählt.";
 "progress.empty_title" = "Deine erste Woche beginnt hier";

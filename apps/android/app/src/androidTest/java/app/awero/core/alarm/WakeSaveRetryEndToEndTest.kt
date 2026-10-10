@@ -24,6 +24,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.UUID
+import java.io.FileInputStream
 
 @RunWith(AndroidJUnit4::class)
 class WakeSaveRetryEndToEndTest {

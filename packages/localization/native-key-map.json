@@ -136,6 +136,7 @@
     "home_error_body": "home.error_body",
     "create_error_body": "create.error_body",
     "onboarding_permissions": "onboarding.permissions",
+    "profile_settings_hint": "profile.settings_hint",
     "nav_home": "nav.home",
     "nav_progress": "nav.progress",
     "nav_profile": "nav.profile",

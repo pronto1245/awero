@@ -153,6 +153,7 @@
   "home.error_body": "Die Aktion konnte nicht abgeschlossen werden. Prüfe die Weckerberechtigungen und versuche es erneut.",
   "create.error_body": "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.",
   "onboarding.permissions": "Bevor du einen Wecker erstellst, erklärt AWERO die nötigen Systemberechtigungen und fragt danach.",
+  "profile.settings_hint": "Verwalte App-Einstellungen und Weckerberechtigungen.",
   "nav.home": "Start",
   "nav.progress": "Verlauf",
   "nav.profile": "Profil",

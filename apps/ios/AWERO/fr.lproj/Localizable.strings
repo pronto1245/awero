@@ -130,6 +130,7 @@
 "persistence.read_error" = "AWERO n’a pas pu lire les données enregistrées. Elles ne sont pas considérées comme vides. Réessayez pour restaurer l’état du réveil.";
 "persistence.read_error_title" = "Données de réveil indisponibles";
 "persistence.retry_read" = "Réessayer la lecture";
+"profile.settings_hint" = "Gérez les préférences de l’application et les autorisations des alarmes.";
 "progress.empty_action" = "Créer une alarme";
 "progress.empty_body" = "Vos réveils terminés apparaîtront ici. Les tests d’alarme ne sont pas comptabilisés.";
 "progress.empty_title" = "Votre première semaine commence ici";
@@ -157,5 +158,3 @@
 "wake.start" = "Commencer la mission";
 "wake.stopped_body" = "La session a été enregistrée.";
 "wake.title" = "LEVEZ-VOUS";
-
-"profile.settings_hint" = "Gérez les préférences de l’application et les autorisations des alarmes.";

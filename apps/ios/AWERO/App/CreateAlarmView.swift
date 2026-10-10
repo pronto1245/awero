@@ -211,13 +211,15 @@ struct CreateAlarmView: View {
             Text("create.mission")
                 .font(.headline)
                 .foregroundStyle(AweroDesign.navy)
-            if dynamicTypeSize.isAccessibilitySize {
-                VStack(spacing: 8) {
-                    ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
-                }
-            } else {
-                HStack(alignment: .top, spacing: 8) {
-                    ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(spacing: 8) {
+                        ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+                    }
+                } else {
+                    HStack(alignment: .top, spacing: 8) {
+                        ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+                    }
                 }
             }
             .padding(8)

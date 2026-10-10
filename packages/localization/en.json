@@ -153,6 +153,7 @@
   "home.error_body": "Your requested change could not be completed. Check the alarm permissions and try again.",
   "create.error_body": "The alarm was not saved. Check required permissions and available storage, then try again.",
   "onboarding.permissions": "Before creating an alarm, AWERO explains and asks for the system access needed to alert you on time.",
+  "profile.settings_hint": "Manage your app preferences and alarm permissions.",
   "nav.home": "Home",
   "nav.progress": "Progress",
   "nav.profile": "Profile",
