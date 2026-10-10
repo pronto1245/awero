@@ -70,11 +70,28 @@ class AweroDatabaseMigrationTest {
 }
 
 @Database(
-    entities = [AlarmEntity::class, LegacyWakeSessionEntity::class, StatisticsEntity::class, SyncOperationEntity::class, AnalyticsEventEntity::class],
+    entities = [LegacyAlarmEntity::class, LegacyWakeSessionEntity::class, StatisticsEntity::class, SyncOperationEntity::class, AnalyticsEventEntity::class],
     version = 1,
     exportSchema = false
 )
 abstract class LegacyAweroDatabase : RoomDatabase()
+
+@Entity(tableName = "alarms")
+data class LegacyAlarmEntity(
+    @PrimaryKey val id: String,
+    val version: Int,
+    val hour: Int,
+    val minute: Int,
+    val enabled: Boolean,
+    val weekdays: String,
+    val timezoneMode: String,
+    val fixedTimezone: String?,
+    val missionType: String,
+    val difficulty: String,
+    val maxSnoozes: Int,
+    val snoozeMinutes: Int,
+    val qrExpectedCode: String?
+)
 
 @Entity(tableName = "wake_sessions")
 data class LegacyWakeSessionEntity(
