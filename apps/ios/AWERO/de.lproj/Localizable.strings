@@ -17,8 +17,10 @@
 "alarm.status.notScheduled" = "Der Weckerzeitplan ist nicht bestätigt. Tippe auf Erneut versuchen.";
 "alarm.status.notificationFallback" = "Benachrichtigungswecker ist geplant. Lautlosmodus oder Fokus kann den Alarm einschränken.";
 "alarm.status.scheduled" = "Systemwecker ist geplant.";
+"create.advanced" = "Weitere Optionen";
 "create.cancel" = "Abbrechen";
 "create.difficulty" = "Schwierigkeit";
+"create.done" = "Fertig";
 "create.edit_title" = "Wecker bearbeiten";
 "create.error_body" = "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.";
 "create.error_title" = "Wecker konnte nicht geplant werden";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Scanne den Code am Ort, an dem du morgens aufstehen möchtest, oder gib seinen Inhalt ein.";
 "create.repeat" = "Wiederholen";
 "create.save" = "Wecker speichern";
+"create.save_and_test" = "Wecker testen";
+"create.save_and_test_hint" = "Speichert den Wecker und spielt in 30 Sekunden einen Test ab.";
 "create.save_changes" = "Änderungen speichern";
 "create.scan" = "QR-Code/Barcode scannen";
 "create.time" = "Uhrzeit";

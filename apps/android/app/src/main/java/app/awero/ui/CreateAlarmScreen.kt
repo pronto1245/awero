@@ -74,6 +74,37 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
     var scannerError by remember { mutableStateOf<String?>(null) }
     var saveError by remember { mutableStateOf<String?>(null) }
     var saveNeedsSettings by remember { mutableStateOf(false) }
+    var showAdvanced by rememberSaveable(alarm?.id) { mutableStateOf(false) }
+    // Set once a new alarm is saved, so a retry after a failed test updates it instead of creating another.
+    var savedAlarm by remember { mutableStateOf<Alarm?>(null) }
+    val canSave = weekdays.isNotEmpty() && (mission != MissionType.QR || qrExpectedCode.isNotBlank())
+
+    /** Saves the alarm; with [test], also schedules a test ring that does not count as a wake. */
+    fun save(test: Boolean) {
+        if (!canSave) return
+        scope.launch {
+            try {
+                val code = qrExpectedCode.ifEmpty { null }
+                val timezoneMode = if (followsDeviceTimezone) TimezoneMode.DEVICE_LOCAL else TimezoneMode.FIXED
+                val selectedFixedTimezone = if (followsDeviceTimezone) null else fixedTimezone
+                val existing = savedAlarm ?: alarm
+                val stored = if (existing == null) coordinator.create(
+                    hour, minute, mission, difficulty, code, weekdays, timezoneMode, selectedFixedTimezone
+                ) else coordinator.update(existing.copy(
+                    hour = hour, minute = minute, weekdays = weekdays,
+                    timezoneMode = timezoneMode, fixedTimezone = selectedFixedTimezone,
+                    missionType = mission, difficulty = difficulty, qrExpectedCode = code
+                ))
+                savedAlarm = stored
+                if (test) coordinator.test(stored)
+                onSaved()
+            } catch (error: Exception) {
+                Log.e("AWERO.Alarm", "Could not save alarm", error)
+                saveNeedsSettings = error is IllegalStateException
+                saveError = context.getString(R.string.create_error_body)
+            }
+        }
+    }
     val owner = context as? ComponentActivity
     val configuration = LocalConfiguration.current
     // Stack mission choices on narrow phones too: three columns leave ~70dp per card there.
@@ -110,34 +141,38 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 maxLines = 2,
-                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 52.dp)
+                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 76.dp)
             )
+            TextButton(
+                onClick = { save(test = false) },
+                enabled = canSave,
+                modifier = Modifier.align(Alignment.CenterEnd).defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+            ) {
+                Text(
+                    stringResource(R.string.create_done),
+                    color = if (canSave) FormCoral else AweroDesign.textSecondary,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.create_time), color = FormNavy, style = MaterialTheme.typography.titleMedium)
+                val timeLabel = stringResource(R.string.create_time)
                 Surface(
-                    onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, DateFormat.is24HourFormat(context)).show() },
-                    modifier = Modifier.fillMaxWidth().height(154.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(AweroDesign.cardCorner),
-                    color = AweroDesign.surfaceWarm.copy(alpha = .62f)
+                    color = AweroDesign.surfaceMuted
                 ) {
-                    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                        listOf(hour, minute).forEachIndexed { index, value ->
-                            if (index == 1) Text(":", color = FormNavy, style = MaterialTheme.typography.headlineMedium)
-                            Column(Modifier.width(76.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                                val previous = if (index == 0) (value + 23) % 24 else (value + 59) % 60
-                                val next = if (index == 0) (value + 1) % 24 else (value + 1) % 60
-                                Text(String.format(Locale.ROOT, "%02d", previous), color = FormNavy.copy(alpha = .36f), style = MaterialTheme.typography.titleMedium)
-                                Box(
-                                    Modifier.fillMaxWidth().height(48.dp).padding(horizontal = 3.dp)
-                                        .clip(RoundedCornerShape(AweroDesign.cardCorner)).background(AweroDesign.surface.copy(alpha = .60f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(String.format(Locale.ROOT, "%02d", value), color = FormNavy, style = MaterialTheme.typography.headlineMedium)
-                                }
-                                Text(String.format(Locale.ROOT, "%02d", next), color = FormNavy.copy(alpha = .36f), style = MaterialTheme.typography.titleMedium)
-                            }
+                    Box(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
+                        Box(
+                            Modifier.fillMaxWidth().height(WheelItemHeight)
+                                .clip(RoundedCornerShape(14.dp)).background(AweroDesign.surfaceStrong)
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TimeWheel(hour, 24, timeLabel, { hour = it }, Modifier.weight(1f))
+                            Text(":", color = FormNavy, style = MaterialTheme.typography.headlineMedium)
+                            TimeWheel(minute, 60, timeLabel, { minute = it }, Modifier.weight(1f))
                         }
                     }
                 }
@@ -145,14 +180,14 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_repeat), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = AweroDesign.surface) {
-                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp)) {
+                run {
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                         listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
                             val selected = day in weekdays
                             val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
                             Box(
                                 Modifier.size(40.dp).clip(CircleShape)
-                                    .background(if (selected) FormCoral else AweroDesign.surfaceWarm)
+                                    .background(if (selected) FormCoral else AweroDesign.chip)
                                     .toggleable(
                                         value = selected,
                                         role = androidx.compose.ui.semantics.Role.Checkbox,
@@ -171,15 +206,15 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_mission), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = AweroDesign.surface) {
+                run {
                     if (compactLayout) {
-                        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
                                 MissionOptionCard(type, mission == type, Modifier.fillMaxWidth(), onClick = { mission = type })
                             }
                         }
                     } else {
-                        Row(Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
                                 MissionOptionCard(type, mission == type, Modifier.weight(1f), onClick = { mission = type })
                             }
@@ -209,63 +244,67 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                 }
         }
 
-        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(R.string.create_timezone), color = FormNavy, style = MaterialTheme.typography.titleSmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = followsDeviceTimezone,
-                    onClick = { followsDeviceTimezone = true },
-                    label = { Text(stringResource(R.string.create_timezone_device)) }
-                )
-                FilterChip(
-                    selected = !followsDeviceTimezone,
-                    onClick = { followsDeviceTimezone = false },
-                    label = { Text(stringResource(R.string.create_timezone_fixed)) }
-                )
+        // Difficulty and time zone, collapsed by default as in the reference screen.
+        Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = AweroDesign.surface) {
+            Column(Modifier.fillMaxWidth()) {
+                Row(
+                    Modifier.fillMaxWidth().clickable { showAdvanced = !showAdvanced }.padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.create_advanced), color = FormNavy, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Text(if (showAdvanced) "⌃" else "⌄", color = AweroDesign.textSecondary, style = MaterialTheme.typography.titleMedium)
+                }
+                if (showAdvanced) {
+                    Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (mission == MissionType.MATH) {
+                            Text(stringResource(R.string.create_difficulty), color = FormNavy, style = MaterialTheme.typography.titleSmall)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                listOf(Difficulty.EASY to R.string.difficulty_easy, Difficulty.MEDIUM to R.string.difficulty_medium, Difficulty.HARD to R.string.difficulty_hard).forEach { (level, label) ->
+                                    FilterChip(selected = difficulty == level, onClick = { difficulty = level }, label = { Text(stringResource(label)) })
+                                }
+                            }
+                        }
+                        Text(stringResource(R.string.create_timezone), color = FormNavy, style = MaterialTheme.typography.titleSmall)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(
+                                selected = followsDeviceTimezone,
+                                onClick = { followsDeviceTimezone = true },
+                                label = { Text(stringResource(R.string.create_timezone_device)) }
+                            )
+                            FilterChip(
+                                selected = !followsDeviceTimezone,
+                                onClick = { followsDeviceTimezone = false },
+                                label = { Text(stringResource(R.string.create_timezone_fixed)) }
+                            )
+                        }
+                        Text(
+                            text = if (followsDeviceTimezone) stringResource(R.string.create_timezone_device_hint)
+                            else stringResource(R.string.create_timezone_fixed_hint, fixedTimezone),
+                            color = AweroDesign.textSecondary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
             }
-            Text(
-                text = if (followsDeviceTimezone) stringResource(R.string.create_timezone_device_hint)
-                else stringResource(R.string.create_timezone_fixed_hint, fixedTimezone),
-                color = FormNavy.copy(alpha = .7f),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Card(colors = CardDefaults.cardColors(containerColor = AweroDesign.surfaceWarm), shape = RoundedCornerShape(18.dp)) {
-            Text(stringResource(R.string.permission_alarm_body), color = FormNavy, modifier = Modifier.padding(16.dp))
         }
 
         }
         Button(
-            onClick = {
-                scope.launch {
-                    try {
-                        val code = qrExpectedCode.ifEmpty { null }
-                        val timezoneMode = if (followsDeviceTimezone) TimezoneMode.DEVICE_LOCAL else TimezoneMode.FIXED
-                        val selectedFixedTimezone = if (followsDeviceTimezone) null else fixedTimezone
-                        if (alarm == null) coordinator.create(
-                            hour, minute, mission, difficulty, code, weekdays, timezoneMode, selectedFixedTimezone
-                        )
-                        else coordinator.update(alarm.copy(
-                            hour = hour, minute = minute, weekdays = weekdays,
-                            timezoneMode = timezoneMode, fixedTimezone = selectedFixedTimezone,
-                            missionType = mission, difficulty = difficulty, qrExpectedCode = code
-                        ))
-                        onSaved()
-                    } catch (error: Exception) {
-                        Log.e("AWERO.Alarm", "Could not save alarm", error)
-                        saveNeedsSettings = error is IllegalStateException
-                        saveError = context.getString(R.string.create_error_body)
-                    }
-                }
-            },
-            enabled = weekdays.isNotEmpty() && (mission != MissionType.QR || qrExpectedCode.isNotBlank()),
+            onClick = { save(test = true) },
+            enabled = canSave,
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = FormCoral),
             shape = RoundedCornerShape(AweroDesign.controlCorner)
         ) {
-            Text(stringResource(if (alarm == null) R.string.create_save else R.string.create_save_changes), color = Color.White)
+            Text(stringResource(R.string.create_save_and_test), color = Color.White)
         }
+        Text(
+            stringResource(R.string.create_save_and_test_hint),
+            color = AweroDesign.textSecondary,
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 
     if (showCodeScanner && owner != null) {
@@ -392,4 +431,49 @@ private fun FitOneLineText(text: String, color: Color, style: androidx.compose.u
             if (layout.didOverflowWidth && scale > 0.7f) scale -= 0.05f else ready = true
         }
     )
+}
+
+private val WheelItemHeight = 46.dp
+
+/**
+ * A scrolling, snapping number wheel (00–[range]-1) showing the selected value in the middle row,
+ * as in the reference New alarm screen. TalkBack reads the label and value and can scroll it.
+ */
+@Composable
+private fun TimeWheel(value: Int, range: Int, label: String, onChange: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val loops = 100
+    val base = range * (loops / 2)
+    val state = androidx.compose.foundation.lazy.rememberLazyListState(initialFirstVisibleItemIndex = base + value - 1)
+    val fling = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(lazyListState = state)
+    LaunchedEffect(state.isScrollInProgress) {
+        if (!state.isScrollInProgress) {
+            val centered = (state.firstVisibleItemIndex + 1) % range
+            if (centered != value) onChange(centered)
+        }
+    }
+    LaunchedEffect(value) {
+        if (!state.isScrollInProgress && (state.firstVisibleItemIndex + 1) % range != value) {
+            state.scrollToItem(base + value - 1)
+        }
+    }
+    androidx.compose.foundation.lazy.LazyColumn(
+        state = state,
+        flingBehavior = fling,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.height(WheelItemHeight * 3).semantics {
+            contentDescription = label + " " + String.format(Locale.ROOT, "%02d", value)
+        }
+    ) {
+        items(range * loops) { index ->
+            val selected = index == state.firstVisibleItemIndex + 1
+            Box(Modifier.fillMaxWidth().height(WheelItemHeight), contentAlignment = Alignment.Center) {
+                Text(
+                    String.format(Locale.ROOT, "%02d", index % range),
+                    color = if (selected) FormNavy else FormNavy.copy(alpha = .36f),
+                    style = if (selected) MaterialTheme.typography.headlineMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    else MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
 }

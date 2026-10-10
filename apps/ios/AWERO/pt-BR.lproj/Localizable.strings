@@ -17,8 +17,10 @@
 "alarm.status.notScheduled" = "O agendamento não foi confirmado. Toque em Tentar novamente.";
 "alarm.status.notificationFallback" = "Alarme por notificação agendado. O modo silencioso ou Foco pode limitar o alerta.";
 "alarm.status.scheduled" = "Alarme do sistema agendado.";
+"create.advanced" = "Mais opções";
 "create.cancel" = "Cancelar";
 "create.difficulty" = "Dificuldade";
+"create.done" = "Concluir";
 "create.edit_title" = "Editar alarme";
 "create.error_body" = "O alarme não foi salvo. Verifique as permissões necessárias e o espaço disponível e tente novamente.";
 "create.error_title" = "Não foi possível agendar o alarme";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Escaneie o código no local onde você quer acordar ou digite o conteúdo exato.";
 "create.repeat" = "Repetir";
 "create.save" = "Salvar alarme";
+"create.save_and_test" = "Testar alarme";
+"create.save_and_test_hint" = "Salva o alarme e toca um teste em 30 segundos.";
 "create.save_changes" = "Salvar alterações";
 "create.scan" = "Escanear QR code/código de barras";
 "create.time" = "Horário";

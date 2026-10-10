@@ -184,5 +184,9 @@
   "home.tomorrow": "Morgen",
   "home.status.not_scheduled": "Nicht geplant",
   "home.status.permission": "Berechtigung nötig",
-  "home.fix": "Beheben"
+  "home.fix": "Beheben",
+  "create.done": "Fertig",
+  "create.save_and_test": "Wecker testen",
+  "create.save_and_test_hint": "Speichert den Wecker und spielt in 30 Sekunden einen Test ab.",
+  "create.advanced": "Weitere Optionen"
 }

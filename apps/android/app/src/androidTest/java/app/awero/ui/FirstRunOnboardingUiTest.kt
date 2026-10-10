@@ -73,7 +73,7 @@ class FirstRunOnboardingUiTest {
         captureVisual("CreateMissions")
         compose.onNodeWithText(context.getString(R.string.create_mission_qr_body)).performScrollTo().assertIsDisplayed()
         captureVisual("CreateQR")
-        compose.onNodeWithText(context.getString(R.string.create_save))
+        compose.onNodeWithText(context.getString(R.string.create_done))
             .assertIsDisplayed()
             .performClick()
         compose.waitUntil(timeoutMillis = 5_000) {

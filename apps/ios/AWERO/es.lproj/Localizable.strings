@@ -17,8 +17,10 @@
 "alarm.status.notScheduled" = "No se ha confirmado la programación. Toca Reintentar.";
 "alarm.status.notificationFallback" = "Alarma mediante notificación programada. El modo silencio o Concentración puede limitar el aviso.";
 "alarm.status.scheduled" = "Alarma del sistema programada.";
+"create.advanced" = "Más opciones";
 "create.cancel" = "Cancelar";
 "create.difficulty" = "Dificultad";
+"create.done" = "Listo";
 "create.edit_title" = "Editar alarma";
 "create.error_body" = "No se guardó la alarma. Comprueba los permisos necesarios y el espacio disponible e inténtalo de nuevo.";
 "create.error_title" = "No se pudo programar la alarma";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Escanea el código en el lugar donde quieras despertarte o introduce su contenido exacto.";
 "create.repeat" = "Repetir";
 "create.save" = "Guardar alarma";
+"create.save_and_test" = "Probar alarma";
+"create.save_and_test_hint" = "Guarda la alarma y suena una prueba en 30 segundos.";
 "create.save_changes" = "Guardar cambios";
 "create.scan" = "Escanear QR/código de barras";
 "create.time" = "Hora";

@@ -17,8 +17,10 @@
 "alarm.status.notScheduled" = "La programmation n’est pas confirmée. Appuyez sur Réessayer.";
 "alarm.status.notificationFallback" = "Alarme par notification programmé. Le mode silencieux ou Concentration peut limiter l’alerte.";
 "alarm.status.scheduled" = "Alarme système programmé.";
+"create.advanced" = "Plus d’options";
 "create.cancel" = "Annuler";
 "create.difficulty" = "Difficulté";
+"create.done" = "OK";
 "create.edit_title" = "Modifier le réveil";
 "create.error_body" = "Le réveil n’a pas été enregistré. Vérifiez les autorisations requises et l’espace disponible, puis réessayez.";
 "create.error_title" = "Impossible de programmer le réveil";
@@ -32,6 +34,8 @@
 "create.qr_instructions" = "Scannez le code à l’endroit où vous souhaitez vous réveiller ou saisissez son contenu exact.";
 "create.repeat" = "Répéter";
 "create.save" = "Enregistrer le réveil";
+"create.save_and_test" = "Tester l’alarme";
+"create.save_and_test_hint" = "Enregistre l’alarme et lance un test dans 30 secondes.";
 "create.save_changes" = "Enregistrer les modifications";
 "create.scan" = "Scanner un QR code/code-barres";
 "create.time" = "Heure";
