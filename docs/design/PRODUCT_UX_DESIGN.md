@@ -1,46 +1,35 @@
-# AWERO Product UX Design — binding target
+# AWERO Product UX Design — approved direction
 
-Status: **binding target set by the owner on 2026-10-10; partially implemented.**
+Status: **approved visual direction, partially implemented**.
 
-The four-screen board in [the design image](awero-product-ux-concept.jpg) is the **required layout**, not a loose direction. Screens are implemented to match its structure, components, copy and palette, with the owner-approved corrections listed below. Where the board and this document differ, this document wins. Any deviation from the board needs an explicit owner decision recorded here.
+The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). It is a visual baseline, not a literal screenshot of the current app. The implemented alarm screens now use warm ivory surfaces, deep navy text, sunrise coral actions, and restrained sage accents on iOS and Android.
 
-The owner prioritized UX parity with this board ahead of Phase 7 (billing). Reliability rules still apply: no screen may block ringing, mission completion, snooze or emergency stop, and no screen may show fabricated data.
+## User value
 
-## Owner-approved corrections to the board
+AWERO helps people prepare for the morning, choose a short wake-up mission, and understand how their wake sessions are going. Alarm setup should remain easy, and progress must use only outcomes the app actually measured.
 
-1. **Button contrast.** Primary buttons, selected day chips and the ✓ key use the darker coral `#E0502F` with white text. The bright coral `#FF684B` stays for backgrounds, illustrations and accents only (white on `#FF684B` is about 2.9:1 and fails contrast).
-2. **Secondary text.** Grey captions on ivory ("Будни · Математика", mission descriptions, "Только в крайнем случае") are darkened by one to two steps so they meet contrast on ivory.
-3. **Dark wake screen.** The ringing/mission screen gets a dimmed variant (navy background, same coral) for dark bedrooms. Other screens stay light.
-4. **Alarm readiness.** Each alarm card shows a small status line or icon: scheduled, or action/permission required. This is mandatory; it is the product's reliability promise.
-5. **Edit and delete.** Tapping an alarm card opens edit; swipe deletes with confirmation. Test/Edit/Delete buttons are removed from the cards.
-6. **Progress copy.** "4,8 мин — среднее время подъёма" (not a star rating); the second tile shows the successful-wake percentage instead of repeating the streak; Russian uses a decimal comma.
-7. **Snooze** and **Profile contents** — open owner decisions; until decided, keep the existing snooze control on the wake screen and do not ship a Profile tab with placeholder content.
+## Screens and implementation status
 
-## Required screens
+1. **Home / alarms — implemented.** Greeting, truthful next alarm, alarm list, enabled state, mission summary, add, edit, test, retry, and delete actions.
+2. **Create / edit alarm — implemented.** Time, repeat days, Math/Steps/QR mission selection, difficulty, QR setup, permission explanation, save, and scheduling behavior.
+3. **Wake / mission — implemented.** Ringing, selected mission, retry/fallback, snooze, completion, and emergency-stop states stay connected to the existing local wake flow.
+4. **Settings — implemented.** The approved gear control opens a localized screen with the device language and a direct link to phone app-permission settings.
+5. **Progress — deferred to Phase 8.** Persisted aggregate statistics exist, but dated daily history does not. Do not show a weekly chart, streak, or sample score until the supporting data is implemented.
 
-| Screen | Required elements (from the board) | Status |
-|---|---|---|
-| Home | AWERO wordmark + gear; greeting and subtitle; sunrise-over-mountains illustration; "Следующий будильник" card with large time, "Завтра, Пн · Математика" and › chevron; "Мои будильники" list with sun/shoe icons, time, "Будни · Математика", coral switch, readiness status; coral "Добавить будильник"; bottom tab bar | Partial: palette, copy, list and next alarm exist; illustration, chevron, icons, card layout and tab bar missing |
-| New alarm | Back chevron + centered title; wheel time picker in a card; round day chips Пн–Вс (selected = coral); three mission cards with icon, title and one-line description; "Проверить будильник" primary action; time zone moved under an "Advanced" disclosure | Partial: all functions exist; layout and components differ |
-| Wake / mission | Sunset-landscape background (dark variant per correction 3); ✕ control; "Пора просыпаться" + "Решите пример, чтобы выключить будильник"; problem in a white card; custom 3×4 keypad with ⌫ and ✓; "Экстренно выключить / Только в крайнем случае" card; the mission appears immediately | Partial: flow, missions and emergency stop work; visual layout differs |
-| Progress | Streak header; stability card; weekly bars Пн–Вс from real wake history; two stat tiles; tip card; tab bar | Not started; requires dated daily wake history first |
-| Settings | Reachable from the gear; device language; link to system permissions | Implemented |
+## Visual direction
 
-## Data rules
+- Warm ivory surfaces, deep navy text, sunrise coral for primary actions, and restrained sage for positive progress.
+- Clear type hierarchy, large time and mission content, rounded cards, comfortable touch targets, and strong contrast.
+- Keep wake screens focused and legible. The active wake screen currently uses the light palette; low-light behavior remains a separate design check.
+- Localization resources and automated key-parity checks cover English, Russian, Brazilian Portuguese, French, German, and Spanish. Phase 6 now uses the complete locale JSON dictionaries as the source for generated Android/iOS resources; first-run onboarding, active alarm error copy, and native accessibility semantics are implemented. The user reports the iPhone walkthrough/manual checks are complete; do not request or repeat them. Physical VoiceOver/TalkBack use remains a release-device check.
 
-- Alarm state and progress come only from stored app data. No sample streak, score or chart for real users.
-- The weekly chart and streak require a persisted per-day wake history (date, result, time to get up). Build that store before the Progress screen.
+## Acceptance criteria
+
+- Implemented screens keep create, edit, delete, test, mission, snooze, emergency-stop, and fallback actions connected to their current implementations.
+- Alarm state and progress come from stored app data; no sample streak or score appears for real users.
 - Empty states explain what the user can do next.
+- Accessibility, Dynamic Type, and empty/populated screen walkthroughs are verified before Phase 6 closes.
 
-## Localization and accessibility
+## Current implementation boundary
 
-All user-facing strings, including the native Android alarm host and wake error messages, come from `packages/localization/*.json` in English, Russian, Brazilian Portuguese, French, German and Spanish. Dynamic Type / large text and VoiceOver / TalkBack labels are required on every new component. Physical-device screen-reader checks remain in Phase 10.
-
-## Implementation order
-
-1. Shared components per platform: palette tokens, primary button, white card, round day chip, mission card, numeric keypad, tab bar, illustrations.
-2. Wake / mission screen.
-3. New / edit alarm screen.
-4. Home screen.
-5. Daily wake history store, then Progress screen and tab bar.
-6. Profile, after the owner defines its contents.
+Home, alarm setup, wake/mission, and Settings have implementations on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs. This design document does not set the current phase; the single status matrix in [Implementation Status](../IMPLEMENTATION_STATUS.md) does. UX localization and accessibility gaps remain assigned to Phase 6. The user reports the iPhone walkthrough/manual checks are already complete, so do not repeat them. Progress stays deferred to Phase 8; the broader physical alarm reliability matrix remains in Phase 10.

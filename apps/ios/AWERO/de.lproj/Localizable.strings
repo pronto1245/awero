@@ -131,13 +131,6 @@
 "wake.completed_body" = "Die Aufwach-Sitzung ist abgeschlossen.";
 "wake.completed_title" = "DU BIST AUF";
 "wake.emergency_stop" = "Not-Aus";
-"wake.error_completion_save" = "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.";
-"wake.error_fallback_save" = "Die Ersatzaufgabe konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.";
-"wake.error_mission_save" = "Der Missionsfortschritt konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.";
-"wake.error_snooze_save" = "Das Schlummern konnte nicht gespeichert werden. Der Wecker klingelt weiter.";
-"wake.error_snooze_schedule" = "Schlummern konnte nicht geplant werden. Der Wecker klingelt weiter.";
-"wake.error_stop_save" = "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.";
-"wake.fallback_label" = "Ersatzaufgabe: Mathe";
 "wake.retry" = "Speichern erneut versuchen";
 "wake.snooze" = "Schlummern";
 "wake.snooze_error_body" = "Der Wecker klingelt weiterhin.";

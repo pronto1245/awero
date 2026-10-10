@@ -152,12 +152,5 @@
   "home.delete_confirm_body": "Este alarme e seu horário serão removidos.",
   "home.error_body": "Não foi possível concluir a ação. Verifique as permissões do alarme e tente novamente.",
   "create.error_body": "O alarme não foi salvo. Verifique as permissões necessárias e o espaço disponível e tente novamente.",
-  "onboarding.permissions": "Antes de criar um alarme, o AWERO explica e solicita o acesso do sistema necessário para avisar você no horário.",
-  "wake.error_mission_save": "Não foi possível salvar o progresso da missão. O alarme continua ativo.",
-  "wake.error_fallback_save": "Não foi possível salvar a alternativa. Sua sessão de despertar continua ativa.",
-  "wake.error_completion_save": "Não foi possível salvar a conclusão. Sua sessão de despertar continua ativa.",
-  "wake.error_snooze_save": "Não foi possível salvar a soneca. O alarme continua tocando.",
-  "wake.error_snooze_schedule": "Não foi possível agendar a soneca. O alarme continua tocando.",
-  "wake.error_stop_save": "Não foi possível registrar a parada. O alarme continua ativo.",
-  "wake.fallback_label": "Tarefa alternativa: Matemática"
+  "onboarding.permissions": "Antes de criar um alarme, o AWERO explica e solicita o acesso do sistema necessário para avisar você no horário."
 }

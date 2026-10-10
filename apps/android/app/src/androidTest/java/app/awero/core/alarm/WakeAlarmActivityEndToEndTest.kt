@@ -1,6 +1,5 @@
 package app.awero.core.alarm
 
-import app.awero.R
 import android.content.Context
 import android.content.Intent
 import android.view.View
@@ -71,8 +70,8 @@ class WakeAlarmActivityEndToEndTest {
 
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView
-            assertNotNull(findText(root, context.getString(R.string.wake_start)))
-            val emergencyStop = findText(root, context.getString(R.string.wake_emergency_stop))
+            assertNotNull(findText(root, "Start mission"))
+            val emergencyStop = findText(root, "Emergency stop")
             assertNotNull(emergencyStop)
             emergencyStop!!.performClick()
         }
@@ -82,7 +81,7 @@ class WakeAlarmActivityEndToEndTest {
         }
 
         instrumentation.runOnMainSync {
-            assertNotNull(findText(activity!!.window.decorView, context.getString(R.string.wake_stopped_body)))
+            assertNotNull(findText(activity!!.window.decorView, "STOPPED"))
         }
     }
 

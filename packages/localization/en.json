@@ -152,12 +152,5 @@
   "home.delete_confirm_body": "This alarm and its scheduled wake-up will be removed.",
   "home.error_body": "Your requested change could not be completed. Check the alarm permissions and try again.",
   "create.error_body": "The alarm was not saved. Check required permissions and available storage, then try again.",
-  "onboarding.permissions": "Before creating an alarm, AWERO explains and asks for the system access needed to alert you on time.",
-  "wake.error_mission_save": "Could not save mission progress. The alarm is still active.",
-  "wake.error_fallback_save": "Could not save the fallback. Your wake session is still active.",
-  "wake.error_completion_save": "Could not save completion. Your wake session is still active.",
-  "wake.error_snooze_save": "Could not save the snooze. The alarm is still ringing.",
-  "wake.error_snooze_schedule": "Could not schedule snooze. The alarm is still ringing.",
-  "wake.error_stop_save": "Could not record the stop. The alarm is still active.",
-  "wake.fallback_label": "Backup task: Math"
+  "onboarding.permissions": "Before creating an alarm, AWERO explains and asks for the system access needed to alert you on time."
 }

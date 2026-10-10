@@ -1,6 +1,5 @@
 package app.awero.core.wake
 
-import app.awero.R
 import android.content.Context
 import app.awero.core.alarm.Alarm
 import app.awero.core.alarm.AlarmScheduler
@@ -74,7 +73,7 @@ class WakeFlowController(
         _actionError.value = null
         val started = runCatching { sessions.startMission() }.getOrDefault(false)
         if (!started) {
-            _actionError.value = context.getString(R.string.wake_error_mission_save)
+            _actionError.value = "Could not save mission progress. The alarm is still active."
             return false
         }
         _state.value = State.MISSION
@@ -87,7 +86,7 @@ class WakeFlowController(
         _actionError.value = null
         val saved = runCatching { sessions.markFallback() }.getOrDefault(false)
         if (!saved) {
-            _actionError.value = context.getString(R.string.wake_error_fallback_save)
+            _actionError.value = "Could not save the fallback. Your wake session is still active."
             return false
         }
         _mission.value = fallback
@@ -99,7 +98,7 @@ class WakeFlowController(
         _actionError.value = null
         val session = runCatching { completeSession() }.getOrNull()
         if (session == null) {
-            _actionError.value = context.getString(R.string.wake_error_completion_save)
+            _actionError.value = "Could not save completion. Your wake session is still active."
             return false
         }
         if (!session.isTest) runCatching { statistics.record(session) }
@@ -121,12 +120,12 @@ class WakeFlowController(
                 scheduleAlarmSnooze(alarm, alarm.snoozeMinutes, activeTestAlarm)
                 if (!sessions.setSnoozeCount(nextCount)) {
                     runCatching { cancelAlarmSnooze(alarm, activeTestAlarm) }
-                    _snoozeError.value = context.getString(R.string.wake_error_snooze_save)
+                    _snoozeError.value = "Could not save snooze. The alarm is still ringing."
                     return false
                 }
             } catch (error: Exception) {
                 runCatching { cancelAlarmSnooze(alarm, activeTestAlarm) }
-                _snoozeError.value = error.message ?: context.getString(R.string.wake_error_snooze_schedule)
+                _snoozeError.value = error.message ?: "Could not schedule snooze. The alarm is still ringing."
                 return false
             }
             _snoozeCount.value = nextCount
@@ -142,7 +141,7 @@ class WakeFlowController(
         _actionError.value = null
         val session = runCatching { sessions.emergencyStop() }.getOrNull()
         if (session == null) {
-            _actionError.value = context.getString(R.string.wake_error_stop_save)
+            _actionError.value = "Could not record the stop. The alarm is still active."
             return false
         }
         if (!session.isTest) runCatching { statistics.record(session) }

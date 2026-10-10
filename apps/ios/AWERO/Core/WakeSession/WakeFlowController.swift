@@ -87,7 +87,7 @@ final class WakeFlowController: ObservableObject {
         guard await sessionManager.startMission() else {
             if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .beginMission
-            actionError = NSLocalizedString("wake.error_mission_save", comment: "Wake mission start save failure")
+            actionError = "Could not save mission progress. The alarm is still active."
             return
         }
         pendingAction = nil
@@ -103,7 +103,7 @@ final class WakeFlowController: ObservableObject {
         guard await sessionManager.markFallback() else {
             if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .fallback
-            actionError = NSLocalizedString("wake.error_fallback_save", comment: "Wake fallback save failure")
+            actionError = "Could not save the fallback. Your wake session is still active."
             return
         }
         pendingAction = nil
@@ -118,7 +118,7 @@ final class WakeFlowController: ObservableObject {
         guard let session = await sessionManager.complete() else {
             if sessionManager.persistenceReadFailed { presentStorageError(); return }
             pendingAction = .complete
-            actionError = NSLocalizedString("wake.error_completion_save", comment: "Wake completion save failure")
+            actionError = "Could not save completion. Your wake session is still active."
             return
         }
         pendingAction = nil
@@ -178,7 +178,7 @@ final class WakeFlowController: ObservableObject {
             guard await sessionManager.setSnoozeCount(nextSnoozeCount) else {
                 await cancelScheduledSnooze(for: alarm, using: cancel)
                 if sessionManager.persistenceReadFailed { presentStorageError(); return false }
-                snoozeError = NSLocalizedString("wake.error_snooze_save", comment: "Snooze save failure")
+                snoozeError = "Could not save the snooze. The alarm is still ringing."
                 return false
             }
         } catch {
