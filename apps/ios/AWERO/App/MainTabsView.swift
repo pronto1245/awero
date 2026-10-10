@@ -47,7 +47,7 @@ struct AweroMainTabsView: View {
                     .font(.system(size: 20, weight: .semibold))
                     .frame(height: 23)
                 Text(title)
-                    .font(.system(size: 11, weight: .medium, relativeTo: .caption))
+                    .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
