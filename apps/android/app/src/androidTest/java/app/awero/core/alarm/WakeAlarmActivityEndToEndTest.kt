@@ -72,7 +72,10 @@ class WakeAlarmActivityEndToEndTest {
         instrumentation.runOnMainSync {
             val root = activity!!.window.decorView
             assertNotNull(findText(root, context.getString(R.string.wake_start)))
-            val emergencyStop = findText(root, context.getString(R.string.wake_emergency_stop))
+            val emergencyStop = findDescription(
+                root,
+                context.getString(R.string.wake_emergency_stop) + ". " + context.getString(R.string.wake_emergency_stop_hint)
+            )
             assertNotNull(emergencyStop)
             emergencyStop!!.performClick()
         }
@@ -100,6 +103,16 @@ class WakeAlarmActivityEndToEndTest {
         if (view is ViewGroup) {
             for (index in 0 until view.childCount) {
                 findText(view.getChildAt(index), expected)?.let { return it }
+            }
+        }
+        return null
+    }
+
+    private fun findDescription(view: View, expected: String): View? {
+        if (view.contentDescription == expected) return view
+        if (view is ViewGroup) {
+            for (index in 0 until view.childCount) {
+                findDescription(view.getChildAt(index), expected)?.let { return it }
             }
         }
         return null

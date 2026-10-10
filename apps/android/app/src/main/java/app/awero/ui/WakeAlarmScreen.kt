@@ -126,6 +126,7 @@ object WakeAlarmScreen {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
             }
+            (status.parent as? android.view.ViewGroup)?.removeView(status)
             header.addView(status, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
             val close = Button(activity).apply {
                 text = "×"
