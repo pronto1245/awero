@@ -163,7 +163,6 @@ struct HomeView: View {
                     .padding(.vertical, 18)
                 }
             }
-            .sheet(isPresented: $showingCreate) { CreateAlarmView() }
             .sheet(item: $editingAlarm) { alarm in CreateAlarmView(alarm: alarm) }
             .confirmationDialog(
                 "home.delete_confirm_title",

@@ -28,5 +28,8 @@ struct ContentView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingFirstAlarm) {
+            CreateAlarmView()
+        }
     }
 }

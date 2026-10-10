@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,6 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import app.awero.MainActivity
 import app.awero.R
 import org.junit.BeforeClass
+import org.junit.AfterClass
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,8 +33,9 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(onboardingTitle)
             .assertIsDisplayed()
             .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
-        compose.onNodeWithText(continueLabel).assertIsDisplayed().assert(hasClickAction())
-        compose.onNodeWithText(continueLabel).performClick()
+        val continueButton = compose.onNodeWithText(continueLabel)
+        continueButton.performScrollTo().assertIsDisplayed().assert(hasClickAction())
+        continueButton.performClick()
         compose.onNodeWithText(context.getString(R.string.create_title)).assertIsDisplayed()
     }
 
@@ -42,6 +45,15 @@ class FirstRunOnboardingUiTest {
         fun resetFirstRunState() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             context.getSharedPreferences("awero.onboarding", 0).edit().clear().commit()
+            InstrumentationRegistry.getInstrumentation().uiAutomation
+                .executeShellCommand("settings put system font_scale 1.8").close()
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun restoreSystemFontScale() {
+            InstrumentationRegistry.getInstrumentation().uiAutomation
+                .executeShellCommand("settings put system font_scale 1.0").close()
         }
     }
 }

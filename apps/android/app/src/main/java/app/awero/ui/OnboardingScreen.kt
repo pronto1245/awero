@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -29,8 +32,8 @@ private val OnboardingCoral = Color(0xFFFF684B)
 @Composable
 fun OnboardingScreen(onContinue: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().background(OnboardingIvory).padding(24.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxSize().background(OnboardingIvory).verticalScroll(rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             Text("AWERO", style = MaterialTheme.typography.headlineMedium, color = OnboardingNavy)
@@ -44,7 +47,7 @@ fun OnboardingScreen(onContinue: () -> Unit) {
             Text(stringResource(R.string.onboarding_privacy), color = OnboardingNavy.copy(alpha = .72f))
             Text(stringResource(R.string.onboarding_permissions), color = OnboardingNavy.copy(alpha = .72f))
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(6.dp))
         Button(
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
