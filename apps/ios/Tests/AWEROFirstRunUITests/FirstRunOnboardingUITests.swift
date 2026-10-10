@@ -46,6 +46,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
         app.buttons["tab.1"].tap()
         capture("Progress")
         app.buttons["tab.2"].tap()
+        XCTAssertTrue(app.staticTexts["nav.profile"].waitForExistence(timeout: 5))
         capture("Profile")
     }
 
@@ -61,8 +62,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
             return
         }
         let answer = parts[1] == "+" ? left + right : left - right
-        if answer < 0 { app.buttons["mission.math.sign"].tap() }
-        for digit in String(abs(answer)) { app.buttons[String(digit)].tap() }
+        for digit in String(answer) { app.buttons[String(digit)].tap() }
         app.buttons["mission.math.check"].tap()
         XCTAssertTrue(app.staticTexts["wake.completed"].waitForExistence(timeout: 5))
         capture("MathCompleted")
@@ -82,14 +82,26 @@ final class FirstRunOnboardingUITests: XCTestCase {
         }
         let answer = parts[1] == "+" ? left + right : left - right
         let value = answer + 1
-        if value < 0 { app.buttons["mission.math.sign"].tap() }
-        for digit in String(abs(value)) { app.buttons[String(digit)].tap() }
+        for digit in String(value) { app.buttons[String(digit)].tap() }
         app.buttons["mission.math.check"].tap()
         XCTAssertTrue(app.staticTexts["mission.math.invalid"].waitForExistence(timeout: 5))
         capture("MathInvalid")
         XCTAssertTrue(app.buttons["wake.emergencyStop"].exists)
         app.buttons["wake.emergencyStop"].tap()
         XCTAssertTrue(app.staticTexts["wake.stopped"].waitForExistence(timeout: 5))
+    }
+
+    func testMathWakeKeepsActionsAvailableAtLargestTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-awero.uiTestWake", "YES",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"
+        ]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["mission.math.problem"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.buttons["mission.math.check"].isHittable)
+        XCTAssertTrue(app.buttons["wake.emergencyStop"].isHittable)
+        capture("MathLargeText")
     }
 
     func testStepsAndQRWakeStatesUseTheSameVisualSystem() {
@@ -142,7 +154,12 @@ final class FirstRunOnboardingUITests: XCTestCase {
             app.buttons["tab.1"].tap()
             capture("Progress-\(language)")
             app.buttons["tab.2"].tap()
+            XCTAssertTrue(app.staticTexts["nav.profile"].waitForExistence(timeout: 5), language)
             capture("Profile-\(language)")
+            app.buttons["profile.settings"].tap()
+            XCTAssertTrue(app.staticTexts["settings.title"].waitForExistence(timeout: 5), language)
+            capture("Settings-\(language)")
+            app.buttons["settings.back"].tap()
             app.buttons["tab.0"].tap()
             create.tap()
             XCTAssertTrue(app.buttons["alarm.save"].waitForExistence(timeout: 10), language)

@@ -104,7 +104,7 @@
 "mission.use_math" = "Mathe-Ersatzaufgabe verwenden";
 "nav.home" = "Start";
 "nav.profile" = "Profil";
-"nav.progress" = "Fortschritt";
+"nav.progress" = "Verlauf";
 "notification.alarm_body" = "Zeit zum Aufwachen.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Mitteilungen für geplante Wecker.";
@@ -157,3 +157,5 @@
 "wake.start" = "Aufgabe starten";
 "wake.stopped_body" = "Die Sitzung wurde gespeichert.";
 "wake.title" = "STEH AUF";
+
+"profile.settings_hint" = "Verwalte App-Einstellungen und Weckerberechtigungen.";

@@ -40,21 +40,23 @@ struct CreateAlarmView: View {
                 VStack(spacing: 0) {
                     HStack {
                         Button { dismiss() } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.headline.weight(.semibold))
+                            Text("create.cancel")
+                                .font(.system(size: 15, weight: .medium))
                                 .foregroundStyle(AweroDesign.navy)
-                                .frame(width: 44, height: 44, alignment: .leading)
+                                .padding(.horizontal, 18)
+                                .frame(height: 44)
+                                .background(Color.white.opacity(0.88), in: Capsule())
                         }
                         .accessibilityLabel(Text("create.cancel"))
                         .accessibilityIdentifier("alarm.cancel")
-                        Spacer(minLength: 8)
+                        Spacer(minLength: 4)
                         Text(alarm == nil ? "create.title" : "create.edit_title")
                             .font(.headline.weight(.semibold))
                             .foregroundStyle(AweroDesign.navy)
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
-                        Spacer(minLength: 8)
-                        Color.clear.frame(width: 44, height: 44)
+                        Spacer(minLength: 4)
+                        Color.clear.frame(width: 74, height: 44)
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 4)
@@ -193,6 +195,10 @@ struct CreateAlarmView: View {
                     .accessibilityAddTraits(selectedDays.contains(day) ? .isSelected : [])
                 }
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
             if selectedDays.isEmpty {
                 Text("create.no_weekdays").font(.footnote).foregroundStyle(AweroDesign.coral)
             }
@@ -214,6 +220,8 @@ struct CreateAlarmView: View {
                     ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
                 }
             }
+            .padding(8)
+            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
             if mission == .qr {
                 Text("permission.camera_body").font(.caption)
                 Button("create.scan") { showCodeScanner = true }
@@ -234,12 +242,12 @@ struct CreateAlarmView: View {
                     .foregroundStyle(mission == type ? AweroDesign.coral : AweroDesign.navy)
                     .accessibilityHidden(true)
                 Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .font(.subheadline.weight(.semibold))
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .minimumScaleFactor(0.8)
                 Text(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
-                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .font(.caption)
                     .foregroundStyle(AweroDesign.navy.opacity(0.64))
                     .multilineTextAlignment(.center)
                     .lineLimit(3)

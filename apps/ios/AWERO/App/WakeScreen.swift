@@ -9,7 +9,7 @@ struct WakeScreen: View {
     var body: some View {
         ZStack(alignment: .top) {
             AweroDesign.ivory.ignoresSafeArea()
-            SunriseArtwork(height: 365, showsForest: true)
+            SunriseArtwork(height: 365, showsForest: true, showsLake: true)
                 .ignoresSafeArea(edges: .top)
                 .overlay(alignment: .bottom) {
                     LinearGradient(colors: [.clear, AweroDesign.ivory.opacity(0.92)], startPoint: .top, endPoint: .bottom)
@@ -39,7 +39,7 @@ struct WakeScreen: View {
                     .padding(.top, 8)
 
                     Text(isActive ? LocalizedStringKey("wake.heading") : LocalizedStringKey("wake.title"))
-                        .font(.system(size: wakeTitleSize, weight: .bold, design: .rounded))
+                        .font(.system(size: wakeTitleSize, weight: .bold))
                         .foregroundStyle(AweroDesign.navy)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
@@ -167,6 +167,6 @@ private struct PrimaryWakeButton: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.headline.bold()).frame(maxWidth: .infinity).padding(.vertical, 16)
             .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
-            .foregroundStyle(AweroDesign.navy).clipShape(RoundedRectangle(cornerRadius: 16))
+            .foregroundStyle(.white).clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
     }
 }

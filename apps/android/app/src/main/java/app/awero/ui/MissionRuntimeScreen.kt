@@ -32,9 +32,12 @@ object MissionRuntimeScreen {
             textSize = size
             setTextColor(AweroDesign.navyArgb)
             gravity = Gravity.CENTER
-            setPadding(0, 8, 0, 8)
+            val verticalPadding = (8 * resources.displayMetrics.density).toInt()
+            setPadding(0, verticalPadding, 0, verticalPadding)
         }
-        root.addView(label(activity.getString(R.string.wake_heading), 28f), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        root.addView(label(activity.getString(R.string.wake_heading), 28f).apply {
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+        }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         var finished = false
         var cleanup: () -> Unit = {}
         var deadline: Runnable? = null
@@ -67,18 +70,33 @@ object MissionRuntimeScreen {
                 mission.start()
                 val problem = mission.problem ?: return root
                 root.addView(label(activity.getString(R.string.wake_instruction), 16f))
-                root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f).apply {
+                root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 40f).apply {
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    setPadding(0, (16 * resources.displayMetrics.density).toInt(), 0, (16 * resources.displayMetrics.density).toInt())
                     background = android.graphics.drawable.GradientDrawable().apply { setColor(0xF7FFFFFF.toInt()); cornerRadius = 20 * resources.displayMetrics.density }
-                }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+                }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    val gap = (6 * activity.resources.displayMetrics.density).toInt()
+                    setMargins(0, gap, 0, gap)
+                })
                 val answer = EditText(activity).apply {
-                    inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
+                    inputType = android.text.InputType.TYPE_CLASS_NUMBER
                     setTextColor(AweroDesign.navyArgb)
                     setTextSize(28f)
                     gravity = Gravity.CENTER
+                    minHeight = (52 * resources.displayMetrics.density).toInt()
                     hint = activity.getString(R.string.mission_answer)
                     showSoftInputOnFocus = false
-                    background = android.graphics.drawable.GradientDrawable().apply { setColor(Color.WHITE); cornerRadius = 14 * resources.displayMetrics.density }
+                    background = android.graphics.drawable.GradientDrawable().apply {
+                        setColor(Color.WHITE)
+                        setStroke((1 * resources.displayMetrics.density).toInt(), 0xFFDCD8D2.toInt())
+                        cornerRadius = 12 * resources.displayMetrics.density
+                    }
                     setPadding((8 * resources.displayMetrics.density).toInt(), 0, (8 * resources.displayMetrics.density).toInt(), 0)
+                }
+                val invalidMessage = label(activity.getString(R.string.mission_try_again), 16f).apply {
+                    setTextColor(0xFFED3B40.toInt())
+                    visibility = View.GONE
+                    minHeight = (32 * resources.displayMetrics.density).toInt()
                 }
                 fun keypadKey(value: String, description: String? = null, action: () -> Unit) = Button(activity).apply {
                     text = value
@@ -97,11 +115,11 @@ object MissionRuntimeScreen {
                 }
                 val answerRow = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
                 answerRow.addView(answer, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-                answerRow.addView(keypadKey("±", activity.getString(R.string.mission_change_sign)) {
-                    val current = answer.text.toString()
-                    answer.setText(if (current.startsWith("-")) current.drop(1) else "-$current")
-                }, LinearLayout.LayoutParams((48 * activity.resources.displayMetrics.density).toInt(), LinearLayout.LayoutParams.WRAP_CONTENT))
-                root.addView(answerRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+                root.addView(answerRow, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    val gap = (6 * activity.resources.displayMetrics.density).toInt()
+                    setMargins(0, gap, 0, gap)
+                })
+                root.addView(invalidMessage, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 val rows = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("⌫", "0"))
                 var checkRow: LinearLayout? = null
                 rows.forEach { values ->
@@ -111,6 +129,7 @@ object MissionRuntimeScreen {
                         row.addView(keypadKey(value, if (value == "⌫") activity.getString(R.string.mission_delete_digit) else null) {
                             val current = answer.text.toString()
                             answer.setText(if (value == "⌫") current.dropLast(1) else if (current.length < 12) current + value else current)
+                            invalidMessage.visibility = View.GONE
                         }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     val gap = (4 * activity.resources.displayMetrics.density).toInt()
                     setMargins(gap, gap, gap, gap)
@@ -133,7 +152,7 @@ object MissionRuntimeScreen {
                     setOnClickListener {
                         val value = answer.text.toString().toIntOrNull()
                         if (value != null && mission.validate(value)) finish(true)
-                        else { answer.text.clear(); answer.hint = activity.getString(R.string.mission_try_again) }
+                        else { answer.text.clear(); invalidMessage.visibility = View.VISIBLE }
                     }
                 }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                     val gap = (4 * activity.resources.displayMetrics.density).toInt()

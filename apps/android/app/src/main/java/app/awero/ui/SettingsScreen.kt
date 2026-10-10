@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,7 +25,7 @@ private val SettingsNavy = AweroDesign.navy
 private val SettingsCoral = AweroDesign.coral
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val appLocale = context.resources.configuration.locales[0]
     val deviceLanguage = appLocale.getDisplayName(appLocale)
@@ -37,11 +38,17 @@ fun SettingsScreen() {
             .padding(horizontal = AweroDesign.pagePadding, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(AweroDesign.sectionSpacing)
     ) {
-        Text("AWERO", color = SettingsNavy, style = MaterialTheme.typography.headlineSmall)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack, modifier = Modifier.defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)) {
+                Text("‹  ${stringResource(R.string.settings_back)}", color = SettingsNavy, maxLines = 1)
+            }
+            Text("AWERO", modifier = Modifier.weight(1f), color = SettingsNavy, style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Spacer(Modifier.width(64.dp))
+        }
         Text(
             stringResource(R.string.settings_title),
             color = SettingsNavy,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
             modifier = Modifier.semantics { heading() }
         )
 

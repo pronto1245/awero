@@ -55,18 +55,18 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit, o
         }
         Text(
             stringResource(R.string.progress_title), color = navy,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
             modifier = Modifier.semantics { heading() }
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFEEF3E5))
         ) {
             Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AweroNavigationIcon("progress")
-                Text(stringResource(R.string.progress_empty_title), color = navy, style = MaterialTheme.typography.headlineSmall)
-                Text(stringResource(R.string.progress_empty_body), color = navy.copy(alpha = .72f), style = MaterialTheme.typography.bodyLarge)
+                AweroNavigationIcon("plant", tint = AweroDesign.sage)
+                Text(stringResource(R.string.progress_empty_title), color = navy, style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.progress_empty_body), color = navy.copy(alpha = .72f), style = MaterialTheme.typography.bodyMedium)
             }
         }
         Button(

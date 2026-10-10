@@ -157,3 +157,5 @@
 "wake.start" = "Iniciar misión";
 "wake.stopped_body" = "La sesión quedó registrada.";
 "wake.title" = "LEVÁNTATE";
+
+"profile.settings_hint" = "Administra las preferencias de la app y los permisos de las alarmas.";

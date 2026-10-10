@@ -89,7 +89,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
         }
 
         awaitCondition("Camera denial did not persist the Math fallback") {
-            runBlocking { testSessions.loadActive()?.fallbackUsed == true } && hasText(context.getString(R.string.mission_use_math)) && hasMathProblem()
+            runBlocking { testSessions.loadActive()?.fallbackUsed == true } && hasMathProblem()
         }
         assertEquals(MissionType.MATH, flow.mission.value)
         assertEquals(WakeFlowController.State.MISSION, flow.state.value)

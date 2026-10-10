@@ -40,6 +40,7 @@ class WakeSaveRetryEndToEndTest {
 
     @After
     fun cleanup() = runBlocking {
+        setFontScale(1.0f)
         activity?.let { current -> instrumentation.runOnMainSync { current.finish() } }
         alarm?.let { current ->
             if (defaultSessions.loadActive()?.alarmId == current.id) defaultSessions.complete()
@@ -111,6 +112,36 @@ class WakeSaveRetryEndToEndTest {
             checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
         }
 
+        setFontScale(1.8f)
+        instrumentation.runOnMainSync {
+            activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
+        }
+        instrumentation.waitForIdleSync()
+        instrumentation.uiAutomation.waitForIdle(500, 5_000)
+        instrumentation.runOnMainSync {
+            val visibleBounds = android.graphics.Rect()
+            val keys = views(activity!!.window.decorView).filterIsInstance<Button>()
+            listOf("0", "✓").forEach { value ->
+                val key = keys.single { it.text.toString() == value }
+                assertTrue("Large-text keypad control is clipped: $value", key.getGlobalVisibleRect(visibleBounds))
+                assertEquals("Large-text keypad control is partly hidden: $value", key.height, visibleBounds.height())
+            }
+            val emergency = views(activity!!.window.decorView).single {
+                it.contentDescription == context.getString(R.string.wake_emergency_stop) + ". " + context.getString(R.string.wake_emergency_stop_hint)
+            }
+            assertTrue("Large-text emergency stop card is hidden", emergency.getGlobalVisibleRect(visibleBounds))
+            assertEquals("Large-text emergency stop card is partly hidden", emergency.height, visibleBounds.height())
+        }
+        java.io.File(visualDirectory, "MathLargeText.png").outputStream().use { output ->
+            checkNotNull(instrumentation.uiAutomation.takeScreenshot()).compress(android.graphics.Bitmap.CompressFormat.PNG, 100, output)
+        }
+        setFontScale(1.0f)
+        instrumentation.runOnMainSync {
+            activity!!.setContentView(WakeAlarmScreen.create(activity!!, flow))
+        }
+        instrumentation.waitForIdleSync()
+        instrumentation.uiAutomation.waitForIdle(500, 5_000)
+
         if (android.os.Build.VERSION.SDK_INT >= 31) {
             val bytes = java.io.File(visualDirectory, "Math.png").readBytes()
             val descriptors = instrumentation.uiAutomation.executeShellCommandRw(
@@ -136,13 +167,7 @@ class WakeSaveRetryEndToEndTest {
             input.setText("9")
             keys.single { it.contentDescription == context.getString(R.string.mission_delete_digit) }.performClick()
             assertEquals("", input.text.toString())
-            val sign = keys.single { it.contentDescription == context.getString(R.string.mission_change_sign) }
-            sign.performClick()
-            assertEquals("-", input.text.toString())
-            sign.performClick()
-            assertEquals("", input.text.toString())
-            if (answer < 0) sign.performClick()
-            kotlin.math.abs(answer).toString().forEach { digit ->
+            answer.toString().forEach { digit ->
                 keys.single { it.text.toString() == digit.toString() }.performClick()
             }
             assertEquals(answer.toString(), input.text.toString())
@@ -184,5 +209,11 @@ class WakeSaveRetryEndToEndTest {
             Thread.sleep(50)
         }
         assertTrue(message, condition())
+    }
+
+    private fun setFontScale(scale: Float) {
+        val descriptor = instrumentation.uiAutomation.executeShellCommand("settings put system font_scale $scale")
+        FileInputStream(descriptor.fileDescriptor).bufferedReader().use { it.readText() }
+        descriptor.close()
     }
 }

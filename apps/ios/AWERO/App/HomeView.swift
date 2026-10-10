@@ -47,7 +47,7 @@ struct HomeView: View {
                         }
                         VStack(alignment: .leading, spacing: 4) {
                             Text("home.greeting")
-                                .font(.system(size: greetingSize, weight: .bold, design: .rounded))
+                                .font(.system(size: greetingSize, weight: .bold))
                                 .foregroundStyle(AweroDesign.navy)
                             HStack(spacing: 5) {
                                 Text("home.subtitle")
@@ -61,7 +61,7 @@ struct HomeView: View {
                         }
                         .padding(.top, 4)
 
-                        SunriseArtwork(height: 166, cornerRadius: 0)
+                        ApprovedHomeSunriseArtwork(height: 100)
                             .padding(.horizontal, -20)
 
                         if let next = upcomingAlarms.first {
@@ -73,7 +73,7 @@ struct HomeView: View {
                                     HStack(alignment: .center) {
                                         VStack(alignment: .leading, spacing: 3) {
                                             Text(formatted(next.date, for: next.alarm, dateStyle: .none, timeStyle: .short))
-                                                .font(.system(size: nextAlarmSize, weight: .bold, design: .rounded))
+                                                .font(.system(size: nextAlarmSize, weight: .bold))
                                                 .foregroundStyle(AweroDesign.navy)
                                             Text(formatted(next.date, for: next.alarm, dateStyle: .full, timeStyle: .none) + " · " + missionName(next.alarm.missionType))
                                                 .font(.subheadline)
@@ -394,7 +394,7 @@ private struct AlarmCard: View {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(alarmTimeText)
-                        .font(.system(size: alarmTimeSize, weight: .bold, design: .rounded))
+                                    .font(.system(size: alarmTimeSize, weight: .bold))
                         .foregroundStyle(AweroDesign.navy)
                         .accessibilityIdentifier("home.alarm.time")
                     Text(weekdays)

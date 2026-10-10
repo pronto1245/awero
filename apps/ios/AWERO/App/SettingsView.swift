@@ -2,6 +2,8 @@ import SwiftUI
 
 
 struct SettingsView: View {
+    let onBack: () -> Void
+
     private var deviceLanguage: String {
         Locale.current.localizedString(forIdentifier: Bundle.main.preferredLocalizations.first ?? "en")
             ?? Bundle.main.preferredLocalizations.first ?? "en"
@@ -11,14 +13,28 @@ struct SettingsView: View {
         ZStack {
             AweroDesign.ivory.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("AWERO")
-                        .font(.system(size: 22, weight: .black))
-                        .foregroundStyle(AweroDesign.navy)
-                        .padding(.top, 10)
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(AweroDesign.navy)
+                                .frame(width: 44, height: 44)
+                                .background(AweroDesign.surface, in: Circle())
+                        }
+                        .accessibilityLabel(Text("settings.back"))
+                        .accessibilityIdentifier("settings.back")
+                        Spacer()
+                        Text("AWERO")
+                            .font(.system(size: 24, weight: .black))
+                            .foregroundStyle(AweroDesign.navy)
+                        Spacer()
+                        Color.clear.frame(width: 44, height: 44)
+                    }
+                    .padding(.top, 8)
 
                     Text("settings.title")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .font(.largeTitle.bold())
                         .foregroundStyle(AweroDesign.navy)
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("settings.title")

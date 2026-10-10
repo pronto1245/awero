@@ -5,7 +5,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.padding
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
@@ -32,10 +32,10 @@ fun AweroApp(statusRefreshKey: Int = 0) {
     var screen by rememberSaveable { mutableStateOf("loading") }
     var editingAlarm by remember { mutableStateOf<Alarm?>(null) }
     var editingAlarmId by rememberSaveable { mutableStateOf<String?>(null) }
-    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings" || screen == "progress") {
+    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings" || screen == "progress" || screen == "profile") {
         editingAlarm = null
         editingAlarmId = null
-        screen = "home"
+        screen = if (screen == "settings") "profile" else "home"
     }
 
     LaunchedEffect(Unit) {
@@ -116,21 +116,21 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                                 onClick = { screen = "home" },
                                 colors = itemColors,
                                 icon = { AweroNavigationIcon("home") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
                             )
                             NavigationBarItem(
                                 selected = screen == "progress",
                                 onClick = { screen = "progress" },
                                 colors = itemColors,
                                 icon = { AweroNavigationIcon("progress") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
                             )
                             NavigationBarItem(
-                                selected = screen == "settings",
-                                onClick = { screen = "settings" },
+                                selected = screen == "profile" || screen == "settings",
+                                onClick = { screen = "profile" },
                                 colors = itemColors,
                                 icon = { AweroNavigationIcon("profile") },
-                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
                             )
                         }
                     }
@@ -142,8 +142,12 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                             onOpenSettings = { screen = "settings" }
                         )
                         "settings" -> Box(Modifier.padding(innerPadding)) {
-                            SettingsScreen()
+                            SettingsScreen(onBack = { screen = "profile" })
                         }
+                        "profile" -> ProfileScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onOpenSettings = { screen = "settings" }
+                        )
                         else -> HomeScreen(
                             onCreateAlarm = {
                                 editingAlarm = null

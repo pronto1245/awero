@@ -11,10 +11,12 @@ class MathMission(private val difficulty: Difficulty) {
         private set
 
     fun start() {
-        val max = when(difficulty) { Difficulty.EASY -> 10; Difficulty.MEDIUM -> 25; Difficulty.HARD -> 50 }
-        val a = (1..max).random()
-        val b = (1..max).random()
-        problem = MathProblem(a,b,if ((0..1).random() == 0) '+' else '-')
+        val upperBound = when(difficulty) { Difficulty.EASY -> 10; Difficulty.MEDIUM -> 25; Difficulty.HARD -> 50 }
+        val a = (1..upperBound).random()
+        val b = (1..upperBound).random()
+        val operation = if ((0..1).random() == 0) '+' else '-'
+        problem = if (operation == '-') MathProblem(kotlin.math.max(a, b), kotlin.math.min(a, b), operation)
+        else MathProblem(a, b, operation)
     }
 
     fun validate(answer:Int): Boolean = problem?.answer == answer

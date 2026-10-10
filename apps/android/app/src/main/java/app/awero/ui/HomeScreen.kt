@@ -126,12 +126,16 @@ fun HomeScreen(
                 AweroNavigationIcon("settings")
             }
         }
-        Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
+        Text(
+            stringResource(R.string.home_greeting),
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+            color = AweroNavy
+        )
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .68f))
             AweroNavigationIcon("sun", tint = Color(0xFFFFA429))
         }
-        SunriseArtwork(Modifier.padding(top = 4.dp), height = 166.dp, rounded = false)
+        ApprovedHomeSunriseArtwork(Modifier.padding(top = 4.dp), height = 100.dp)
         Spacer(Modifier.height(18.dp))
 
         if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {

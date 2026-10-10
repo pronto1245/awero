@@ -5,6 +5,7 @@ import app.awero.R
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -28,16 +29,31 @@ object WakeAlarmScreen {
             textSize = size
             setTextColor(AweroDesign.navyArgb)
             gravity = Gravity.CENTER
-            setPadding(0, 20, 0, 20)
+            val verticalPadding = (10 * resources.displayMetrics.density).toInt()
+            setPadding(0, verticalPadding, 0, verticalPadding)
+        }
+
+        fun actionButton(value: String, primaryAction: Boolean = false) = Button(activity).apply {
+            text = value
+            textSize = 16f
+            isAllCaps = false
+            minHeight = (54 * resources.displayMetrics.density).toInt()
+            setTextColor(if (primaryAction) android.graphics.Color.WHITE else AweroDesign.navyArgb)
+            background = android.graphics.drawable.GradientDrawable().apply {
+                setColor(if (primaryAction) AweroDesign.coralArgb else android.graphics.Color.WHITE)
+                cornerRadius = 18 * resources.displayMetrics.density
+            }
         }
 
         val title = text(activity.getString(R.string.wake_heading), 32f)
+        title.setTypeface(title.typeface, android.graphics.Typeface.BOLD)
         val status = text("AWERO", 20f).apply {
             gravity = Gravity.START
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
             setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
         }
-        val primary = Button(activity).apply { text = activity.getString(R.string.wake_start); minHeight = (48 * resources.displayMetrics.density).toInt(); backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb); setTextColor(android.graphics.Color.WHITE) }
-        val snooze = Button(activity).apply { text = activity.getString(R.string.wake_snooze) }
+        val primary = actionButton(activity.getString(R.string.wake_start), primaryAction = true)
+        val snooze = actionButton(activity.getString(R.string.wake_snooze))
         val emergency = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
@@ -55,11 +71,25 @@ object WakeAlarmScreen {
             val headline = LinearLayout(activity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER
-                addView(TextView(activity).apply {
-                    text = "⚠"
+                val warningIcon = FrameLayout(activity)
+                warningIcon.addView(TextView(activity).apply {
+                    text = "▲"
                     setTextColor(0xFFD3313D.toInt())
-                    textSize = 15f
-                    setPadding(0, 0, (6 * resources.displayMetrics.density).toInt(), 0)
+                    textSize = 21f
+                    gravity = Gravity.CENTER
+                    includeFontPadding = false
+                }, FrameLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt(), Gravity.CENTER))
+                warningIcon.addView(TextView(activity).apply {
+                    text = "!"
+                    setTextColor(android.graphics.Color.WHITE)
+                    textSize = 11f
+                    setTypeface(typeface, android.graphics.Typeface.BOLD)
+                    gravity = Gravity.CENTER
+                    includeFontPadding = false
+                    translationY = (2 * resources.displayMetrics.density)
+                }, FrameLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt(), Gravity.CENTER))
+                addView(warningIcon, LinearLayout.LayoutParams((28 * resources.displayMetrics.density).toInt(), (28 * resources.displayMetrics.density).toInt()).apply {
+                    marginEnd = (6 * resources.displayMetrics.density).toInt()
                 })
                 addView(TextView(activity).apply {
                     text = activity.getString(R.string.wake_emergency_stop)
@@ -77,7 +107,7 @@ object WakeAlarmScreen {
                 gravity = Gravity.CENTER
             })
         }
-        val retry = Button(activity).apply { text = activity.getString(R.string.wake_retry) }
+        val retry = actionButton(activity.getString(R.string.wake_retry), primaryAction = true)
 
         fun showError(message: String, retryAction: (() -> Unit)? = null) {
             status.text = message
@@ -121,7 +151,7 @@ object WakeAlarmScreen {
             root.addView(emergency, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         }
 
-        fun addHeader() {
+        fun addHeader(target: LinearLayout = root) {
             val header = LinearLayout(activity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
@@ -142,7 +172,7 @@ object WakeAlarmScreen {
                 setOnClickListener { emergency.performClick() }
             }
             header.addView(close)
-            root.addView(header)
+            target.addView(header)
         }
 
         fun showFallback() {
@@ -208,10 +238,20 @@ object WakeAlarmScreen {
             }
         }
 
-        addHeader()
-        root.addView(title)
-        root.addView(primary)
-        root.addView(snooze)
+        val startContent = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+        addHeader(startContent)
+        startContent.addView(title)
+        startContent.addView(text(activity.getString(R.string.wake_instruction), 17f))
+        startContent.addView(primary, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            val gap = (8 * resources.displayMetrics.density).toInt()
+            setMargins(0, gap, 0, gap)
+        })
+        startContent.addView(snooze, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        val startScroll = ScrollView(activity).apply { isFillViewport = true; addView(startContent) }
+        root.addView(startScroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         root.addView(emergency, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         when (flow.state.value) {
             WakeFlowController.State.MISSION -> showMission()

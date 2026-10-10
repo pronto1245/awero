@@ -44,7 +44,7 @@ private struct MathMissionView: View {
         VStack(spacing: 12) {
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
-                    .font(.system(size: problemSize, weight: .black, design: .rounded))
+                    .font(.system(size: problemSize, weight: .black))
                     .foregroundStyle(AweroDesign.navy)
                     .padding(.vertical, 14)
                     .frame(maxWidth: .infinity)
@@ -52,33 +52,21 @@ private struct MathMissionView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .accessibilityIdentifier("mission.math.problem")
             }
-            HStack(spacing: 8) {
+            VStack(spacing: 4) {
                 Text(answer.isEmpty ? NSLocalizedString("mission.answer", comment: "Answer field placeholder") : answer)
                     .font(.title2.weight(.medium))
                     .foregroundStyle(answer.isEmpty ? AweroDesign.navy.opacity(0.35) : AweroDesign.navy)
-                    .frame(maxWidth: .infinity, minHeight: 48, alignment: .center)
+                    .frame(maxWidth: .infinity, minHeight: 52, alignment: .center)
+                    .background(Color.white.opacity(0.98), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AweroDesign.navy.opacity(0.12), lineWidth: 1))
                     .accessibilityIdentifier("mission.math.answer")
-                Button("±") {
-                    answer = answer.hasPrefix("-") ? String(answer.dropFirst()) : "-" + answer
-                    invalid = false
+                if invalid {
+                    Text("mission.try_again")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color(red: 0.93, green: 0.23, blue: 0.25))
+                        .frame(maxWidth: .infinity, minHeight: 28)
+                        .accessibilityIdentifier("mission.math.invalid")
                 }
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(AweroDesign.navy)
-                .frame(width: 48, height: 48)
-                .background(Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 14))
-                .accessibilityLabel(Text("mission.change_sign"))
-                .accessibilityIdentifier("mission.math.sign")
-            }
-            if invalid {
-                Text("mission.try_again")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(Color(red: 0.78, green: 0.18, blue: 0.22))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color(red: 1, green: 0.91, blue: 0.89), in: RoundedRectangle(cornerRadius: 12))
-                    .accessibilityIdentifier("mission.math.invalid")
-            }
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                 ForEach(1...9, id: \.self) { digit in
                     Button(String(digit)) {
@@ -127,11 +115,11 @@ private struct StepsMissionView: View {
     var body: some View {
         VStack(spacing: 22) {
             Text("mission.steps_title")
-                .font(.system(size: titleSize, weight: .black, design: .rounded))
+                .font(.system(size: titleSize, weight: .black))
                 .foregroundStyle(AweroDesign.navy)
                 .accessibilityIdentifier("mission.steps.title")
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
-                .font(.system(size: stepCountSize, weight: .bold, design: .rounded))
+                .font(.system(size: stepCountSize, weight: .bold))
                 .foregroundStyle(AweroDesign.navy)
             if runtime.unavailable {
                 Text("mission.motion_unavailable")
@@ -175,7 +163,7 @@ private struct QRMissionView: View {
     var body: some View {
         VStack(spacing: 18) {
             Text("mission.qr_title")
-                .font(.system(size: qrTitleSize, weight: .black, design: .rounded))
+                .font(.system(size: qrTitleSize, weight: .black))
                 .foregroundStyle(AweroDesign.navy)
 
             if expected == nil || expected?.isEmpty == true {

@@ -20,7 +20,7 @@ struct OnboardingView: View {
                     }
                     SunriseArtwork(height: 174, cornerRadius: 20)
                     Text("onboarding.title")
-                        .font(.system(size: titleSize, weight: .bold, design: .rounded))
+                        .font(.system(size: titleSize, weight: .bold))
                         .foregroundStyle(AweroDesign.navy)
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("onboarding.title")

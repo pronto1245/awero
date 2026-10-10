@@ -10,6 +10,8 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onAllNodesWithText
@@ -93,7 +95,10 @@ class FirstRunOnboardingUiTest {
         compose.onNodeWithText(context.getString(R.string.progress_empty_title)).assertIsDisplayed()
         captureVisual("Progress")
         compose.onNodeWithText(context.getString(R.string.nav_profile)).performClick()
+        compose.onNodeWithTag("profile.title").assertIsDisplayed()
+        compose.onNodeWithContentDescription(context.getString(R.string.profile_settings_hint)).performClick()
         compose.onNodeWithText(context.getString(R.string.settings_title)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.settings_back)).performClick()
         captureVisual("Profile")
         if (Build.VERSION.SDK_INT >= 33) {
             val manager = context.getSystemService(android.app.LocaleManager::class.java)
@@ -112,7 +117,11 @@ class FirstRunOnboardingUiTest {
                     compose.onNodeWithText(localized(R.string.progress_empty_title)).assertIsDisplayed()
                     captureVisual("Progress-$language")
                     compose.onNodeWithText(localized(R.string.nav_profile)).performClick()
+                    compose.onNodeWithTag("profile.title").assertIsDisplayed()
+                    compose.onNodeWithContentDescription(localized(R.string.profile_settings_hint)).performClick()
                     compose.onNodeWithText(localized(R.string.settings_title)).assertIsDisplayed()
+                    captureVisual("Settings-$language")
+                    compose.onNodeWithText(localized(R.string.settings_back)).performClick()
                     captureVisual("Profile-$language")
                     compose.onNodeWithText(localized(R.string.nav_home)).performClick()
                     compose.onNodeWithText(localized(R.string.home_add_alarm)).performClick()

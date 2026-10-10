@@ -74,7 +74,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
     var saveError by remember { mutableStateOf<String?>(null) }
     var saveNeedsSettings by remember { mutableStateOf(false) }
     val owner = context as? ComponentActivity
-    val compactLayout = LocalConfiguration.current.screenWidthDp < 380 || LocalConfiguration.current.fontScale >= 1.35f
+    val compactLayout = LocalConfiguration.current.fontScale >= 1.35f
     val requestCamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) showCodeScanner = true
         else scannerError = context.getString(R.string.permission_camera_denied)
@@ -87,19 +87,25 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
             .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            TextButton(onClick = onCancel, modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)) {
-                Text("‹", color = FormNavy, style = MaterialTheme.typography.headlineLarge)
+        Box(Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            TextButton(
+                onClick = onCancel,
+                modifier = Modifier.align(Alignment.CenterStart)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = .90f))
+                    .defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
+                    .padding(horizontal = 8.dp),
+                colors = ButtonDefaults.textButtonColors(contentColor = FormNavy)
+            ) {
+                Text(stringResource(R.string.create_cancel), maxLines = 1)
             }
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                Text(
-                    stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
-                    color = FormNavy,
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1
-                )
-            }
-            Spacer(Modifier.width(48.dp))
+            Text(
+                stringResource(if (alarm == null) R.string.create_title else R.string.create_edit_title),
+                color = FormNavy,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                maxLines = 1,
+                modifier = Modifier.align(Alignment.Center).fillMaxWidth().padding(horizontal = 100.dp)
+            )
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -133,22 +139,24 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_repeat), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
-                        val selected = day in weekdays
-                        val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
-                        Box(
-                            Modifier.size(40.dp).clip(CircleShape)
-                                .background(if (selected) FormCoral else AweroDesign.surfaceWarm)
-                                .toggleable(
-                                    value = selected,
-                                    role = androidx.compose.ui.semantics.Role.Checkbox,
-                                    onValueChange = { weekdays = if (selected) weekdays - day else weekdays + day }
-                                )
-                                .semantics { contentDescription = symbols.weekdays[day] },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(symbols.shortWeekdays[day].take(2), color = if (selected) Color.White else FormNavy.copy(alpha = .68f), style = MaterialTheme.typography.labelMedium)
+                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = Color.White) {
+                    Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp)) {
+                        listOf(2, 3, 4, 5, 6, 7, 1).forEach { day ->
+                            val selected = day in weekdays
+                            val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
+                            Box(
+                                Modifier.size(40.dp).clip(CircleShape)
+                                    .background(if (selected) FormCoral else AweroDesign.surfaceWarm)
+                                    .toggleable(
+                                        value = selected,
+                                        role = androidx.compose.ui.semantics.Role.Checkbox,
+                                        onValueChange = { weekdays = if (selected) weekdays - day else weekdays + day }
+                                    )
+                                    .semantics { contentDescription = symbols.weekdays[day] },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(symbols.shortWeekdays[day].take(2), color = if (selected) Color.White else FormNavy.copy(alpha = .68f), style = MaterialTheme.typography.labelMedium)
+                            }
                         }
                     }
                 }
@@ -157,16 +165,18 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
 
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(stringResource(R.string.create_mission), color = FormNavy, style = MaterialTheme.typography.titleMedium)
-                if (compactLayout) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
-                            MissionOptionCard(type, mission == type, Modifier.fillMaxWidth(), onClick = { mission = type })
+                Surface(shape = RoundedCornerShape(AweroDesign.cardCorner), color = Color.White) {
+                    if (compactLayout) {
+                        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
+                                MissionOptionCard(type, mission == type, Modifier.fillMaxWidth(), onClick = { mission = type })
+                            }
                         }
-                    }
-                } else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
-                            MissionOptionCard(type, mission == type, Modifier.weight(1f), onClick = { mission = type })
+                    } else {
+                        Row(Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf(MissionType.MATH, MissionType.STEPS, MissionType.QR).forEach { type ->
+                                MissionOptionCard(type, mission == type, Modifier.weight(1f), onClick = { mission = type })
+                            }
                         }
                     }
                 }

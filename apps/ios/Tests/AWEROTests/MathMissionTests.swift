@@ -22,4 +22,13 @@ final class MathMissionTests: XCTestCase {
             }
         }
     }
+
+    func testSubtractionAnswersFitTheDigitOnlyKeypad() throws {
+        let mission = MathMission(difficulty: .hard)
+        for _ in 0..<100 {
+            mission.start()
+            let problem = try XCTUnwrap(mission.problem)
+            if problem.operation == "-" { XCTAssertGreaterThanOrEqual(problem.answer, 0) }
+        }
+    }
 }

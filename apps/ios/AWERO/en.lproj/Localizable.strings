@@ -157,3 +157,5 @@
 "wake.start" = "Start mission";
 "wake.stopped_body" = "The session was recorded.";
 "wake.title" = "GET UP";
+
+"profile.settings_hint" = "Manage app preferences and alarm permissions.";
