@@ -124,6 +124,7 @@ fun HomeScreen(
         }
         Text(stringResource(R.string.home_greeting), style = MaterialTheme.typography.headlineLarge, color = AweroNavy)
         Text(stringResource(R.string.home_subtitle), color = AweroNavy.copy(alpha = .65f))
+        SunriseArtwork(Modifier.padding(top = 4.dp))
         Spacer(Modifier.height(18.dp))
 
         if (alarmLoadState == AlarmLoadState.Loaded && nextAlarm != null && nextAlarmDescription != null && nextAlarmTime != null) {

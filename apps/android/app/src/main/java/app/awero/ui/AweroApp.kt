@@ -92,10 +92,10 @@ fun AweroApp(statusRefreshKey: Int = 0) {
             "wake" -> WakeScreen(flow)
             "settings" -> SettingsScreen(onBack = { screen = "home" })
             else -> {
-                if (screen == "home" && (state == WakeFlowController.State.RINGING ||
+                if (state == WakeFlowController.State.RINGING ||
                     state == WakeFlowController.State.MISSION ||
                     state == WakeFlowController.State.COMPLETED ||
-                    state == WakeFlowController.State.EMERGENCY_STOPPED)
+                    state == WakeFlowController.State.EMERGENCY_STOPPED
                 ) {
                     LaunchedEffect(state) { screen = "wake" }
                 }

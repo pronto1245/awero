@@ -46,6 +46,7 @@ struct HomeView: View {
                         Text("home.subtitle")
                             .font(.subheadline)
                             .foregroundStyle(AweroStyle.navy.opacity(0.65))
+                        SunriseArtwork().padding(.top, 4)
 
                         if let next = upcomingAlarms.first {
                             VStack(alignment: .leading, spacing: 6) {
