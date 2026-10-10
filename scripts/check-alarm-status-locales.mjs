@@ -154,6 +154,13 @@ const expectedAndroid = new Set([
   "settings_alarm_permissions_body",
   "settings_open_system_settings",
   "settings_back",
+  "nav_home",
+  "nav_progress",
+  "nav_profile",
+  "progress_title",
+  "progress_empty_title",
+  "progress_empty_body",
+  "progress_empty_action",
 ]);
 const expectedIOS = new Set([
   "alarm.status.scheduled",
@@ -298,6 +305,13 @@ const expectedIOS = new Set([
   "onboarding.create_alarm",
   "onboarding.create_alarm_hint",
   "onboarding.permissions",
+  "nav.home",
+  "nav.progress",
+  "nav.profile",
+  "progress.title",
+  "progress.empty_title",
+  "progress.empty_body",
+  "progress.empty_action",
 ]);
 
 function assertKeys(platform, locale, path, expected, pattern) {
