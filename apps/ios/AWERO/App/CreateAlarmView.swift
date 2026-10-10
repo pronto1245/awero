@@ -36,9 +36,9 @@ struct CreateAlarmView: View {
         NavigationStack {
             Form {
                 wakeTimeSection
-                timezoneSection
                 daysSection
                 missionSection
+                timezoneSection
                 permissionSection
             }
             .scrollContentBackground(.hidden)

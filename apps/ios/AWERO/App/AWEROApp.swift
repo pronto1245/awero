@@ -18,6 +18,7 @@ struct AWEROApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.light)
                 .environmentObject(alarmStore)
                 .environmentObject(wakeFlow)
                 .task {

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SunriseArtwork: View {
+    var height: CGFloat = 148
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -45,7 +46,7 @@ struct SunriseArtwork: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 22))
         }
-        .frame(height: 148)
+        .frame(height: height)
         .accessibilityHidden(true)
     }
 }

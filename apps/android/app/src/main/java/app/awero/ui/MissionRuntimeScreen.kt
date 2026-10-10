@@ -61,10 +61,13 @@ object MissionRuntimeScreen {
 
         when (alarm.missionType) {
             MissionType.MATH -> {
+                root.setBackgroundColor(Color.TRANSPARENT)
                 val mission = MathMission(alarm.difficulty)
                 mission.start()
                 val problem = mission.problem ?: return root
-                root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f))
+                root.addView(label("${problem.left} ${problem.operation} ${problem.right} = ?", 34f).apply {
+                    background = android.graphics.drawable.GradientDrawable().apply { setColor(0xF2FFFFFF.toInt()); cornerRadius = 20 * resources.displayMetrics.density }
+                }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 val answer = EditText(activity).apply {
                     inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_SIGNED
                     setTextColor(AweroDesign.navyArgb)
@@ -73,7 +76,7 @@ object MissionRuntimeScreen {
                     hint = activity.getString(R.string.mission_answer)
                     showSoftInputOnFocus = false
                 }
-                root.addView(answer)
+                root.addView(answer, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 fun keypadKey(value: String, description: String? = null, action: () -> Unit) = Button(activity).apply {
                     text = value
                     description?.let { contentDescription = it }
@@ -87,8 +90,10 @@ object MissionRuntimeScreen {
                     answer.setText(if (current.startsWith("-")) current.drop(1) else "-$current")
                 })
                 val rows = listOf(listOf("1", "2", "3"), listOf("4", "5", "6"), listOf("7", "8", "9"), listOf("⌫", "0"))
+                var checkRow: LinearLayout? = null
                 rows.forEach { values ->
                     val row = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+                    checkRow = row
                     values.forEach { value ->
                         row.addView(keypadKey(value, if (value == "⌫") activity.getString(R.string.mission_delete_digit) else null) {
                             val current = answer.text.toString()
@@ -97,7 +102,7 @@ object MissionRuntimeScreen {
                     }
                     root.addView(row, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
                 }
-                root.addView(Button(activity).apply {
+                checkRow!!.addView(Button(activity).apply {
                     setTextColor(AweroDesign.navyArgb)
                     backgroundTintList = android.content.res.ColorStateList.valueOf(AweroDesign.coralArgb)
                     text = activity.getString(R.string.mission_check)
@@ -106,7 +111,7 @@ object MissionRuntimeScreen {
                         if (value != null && mission.validate(value)) finish(true)
                         else { answer.text.clear(); answer.hint = activity.getString(R.string.mission_try_again) }
                     }
-                })
+                }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
             }
             MissionType.STEPS -> {
                 val mission = StepsMission(activity)

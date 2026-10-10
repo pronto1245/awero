@@ -7,10 +7,16 @@ struct WakeScreen: View {
     var body: some View {
         ZStack {
             AweroDesign.ivory.ignoresSafeArea()
+            VStack(spacing: 0) {
+                SunriseArtwork(height: 260)
+                Spacer(minLength: 0)
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
             ScrollView {
             VStack(spacing: 24) {
-                Text("AWERO").font(.caption.weight(.bold)).foregroundStyle(AweroDesign.navy.opacity(0.45))
-                SunriseArtwork()
+                Text("AWERO").font(.title.bold()).foregroundStyle(AweroDesign.navy)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 switch flow.state {
                 case .ringing:

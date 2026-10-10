@@ -1,6 +1,10 @@
 package app.awero.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,11 +33,15 @@ fun AweroProgressScreen(modifier: Modifier = Modifier, onSetAlarm: () -> Unit) {
     val coral = AweroDesign.coral
 
     Column(
-        modifier = modifier.fillMaxSize().background(ivory).padding(24.dp),
+        modifier = modifier.fillMaxSize().background(ivory).verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("▥", color = coral, style = MaterialTheme.typography.displayMedium)
+        Text("AWERO", color = navy, style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(12.dp))
+        Text(stringResource(R.string.progress_title), color = navy, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
+        Spacer(Modifier.height(20.dp))
+        AweroNavigationIcon("progress")
         Spacer(Modifier.height(20.dp))
         Text(
             stringResource(R.string.progress_empty_title),

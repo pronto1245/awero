@@ -102,8 +102,9 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize().background(AweroIvory).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp)
+        modifier = modifier.fillMaxSize().background(AweroIvory).padding(horizontal = 20.dp)
     ) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
         Spacer(Modifier.height(12.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -294,6 +295,7 @@ fun HomeScreen(
             }
         }
 
+        }
         Spacer(Modifier.height(12.dp))
         Button(
             onClick = onCreateAlarm,

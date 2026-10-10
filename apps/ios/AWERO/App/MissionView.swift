@@ -41,7 +41,7 @@ private struct MathMissionView: View {
     }
 
     var body: some View {
-        VStack(spacing: 22) {
+        VStack(spacing: 12) {
             Text("mission.title").font(.caption.bold()).foregroundStyle(AweroDesign.navy.opacity(0.5))
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
@@ -62,6 +62,7 @@ private struct MathMissionView: View {
             .foregroundStyle(AweroDesign.navy)
             .frame(minHeight: 44)
             .accessibilityLabel(Text("mission.change_sign"))
+            .accessibilityIdentifier("mission.math.sign")
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
                 ForEach(1...9, id: \.self) { digit in
                     Button(String(digit)) {
@@ -95,7 +96,7 @@ private struct MathMissionView: View {
                     .accessibilityIdentifier("mission.math.check")
             }
         }
-        .padding(28)
+        .padding(.vertical, 12)
     }
 }
 

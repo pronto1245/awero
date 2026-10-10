@@ -19,7 +19,7 @@ object WakeAlarmScreen {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(48, 48, 48, 48)
-            setBackgroundColor(AweroDesign.ivoryArgb)
+            background = AweroSunriseBackground()
         }
 
         fun text(value: String, size: Float) = TextView(activity).apply {

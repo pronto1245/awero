@@ -142,21 +142,25 @@ struct HomeView: View {
                             }
                         }
 
-                        Button {
-                            showingCreate = true
-                        } label: {
-                            Label("home.add_alarm", systemImage: "plus.circle.fill")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(AweroDesign.coral)
-                                .foregroundStyle(AweroDesign.navy)
-                                .clipShape(RoundedRectangle(cornerRadius: 18))
-                        }
+
                     }
                     .padding(.horizontal, 20)
                     .padding(.vertical, 18)
                 }
+            }
+            .safeAreaInset(edge: .bottom) {
+                Button { showingCreate = true } label: {
+                    Label("home.add_alarm", systemImage: "plus.circle.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .foregroundStyle(AweroDesign.navy)
+                        .background(AweroDesign.coral)
+                        .clipShape(RoundedRectangle(cornerRadius: 18))
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(AweroDesign.ivory)
             }
             .sheet(item: $editingAlarm) { alarm in CreateAlarmView(alarm: alarm) }
             .confirmationDialog(

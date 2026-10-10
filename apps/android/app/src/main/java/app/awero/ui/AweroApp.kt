@@ -104,19 +104,19 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                             NavigationBarItem(
                                 selected = screen == "home",
                                 onClick = { screen = "home" },
-                                icon = { Text("⌂") },
+                                icon = { AweroNavigationIcon("home") },
                                 label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home)) }
                             )
                             NavigationBarItem(
                                 selected = screen == "progress",
                                 onClick = { screen = "progress" },
-                                icon = { Text("▥") },
+                                icon = { AweroNavigationIcon("progress") },
                                 label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress)) }
                             )
                             NavigationBarItem(
                                 selected = screen == "settings",
                                 onClick = { screen = "settings" },
-                                icon = { Text("●") },
+                                icon = { AweroNavigationIcon("profile") },
                                 label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile)) }
                             )
                         }

@@ -91,7 +91,7 @@ fun CreateAlarmScreen(alarm: Alarm? = null, onSaved: () -> Unit, onCancel: () ->
                     onClick = { TimePickerDialog(context, { _, h, m -> hour = h; minute = m }, hour, minute, DateFormat.is24HourFormat(context)).show() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(app.awero.core.alarm.AlarmTimeFormatter.format(hour, minute), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
+                    Text(DateFormat.getTimeFormat(context).format(Calendar.getInstance().apply { set(Calendar.HOUR_OF_DAY, hour); set(Calendar.MINUTE, minute) }.time), style = MaterialTheme.typography.headlineLarge, color = FormNavy)
                 }
                 Text(stringResource(R.string.create_timezone), color = FormNavy)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

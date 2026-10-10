@@ -57,7 +57,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
             return
         }
         let answer = parts[1] == "+" ? left + right : left - right
-        if answer < 0 { app.buttons["±"].tap() }
+        if answer < 0 { app.buttons["mission.math.sign"].tap() }
         for digit in String(abs(answer)) { app.buttons[String(digit)].tap() }
         app.buttons["mission.math.check"].tap()
         XCTAssertTrue(app.staticTexts["wake.completed"].waitForExistence(timeout: 5))
@@ -78,7 +78,7 @@ final class FirstRunOnboardingUITests: XCTestCase {
         }
         let answer = parts[1] == "+" ? left + right : left - right
         let value = answer + 1
-        if value < 0 { app.buttons["±"].tap() }
+        if value < 0 { app.buttons["mission.math.sign"].tap() }
         for digit in String(abs(value)) { app.buttons[String(digit)].tap() }
         app.buttons["mission.math.check"].tap()
         XCTAssertTrue(app.staticTexts["mission.math.invalid"].waitForExistence(timeout: 5))
