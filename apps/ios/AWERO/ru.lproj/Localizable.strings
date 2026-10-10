@@ -23,6 +23,9 @@
 "create.error_body" = "Будильник не сохранён. Проверьте необходимые разрешения и свободное место, затем повторите попытку.";
 "create.error_title" = "Не удалось запланировать будильник";
 "create.mission" = "Задание для пробуждения";
+"create.mission_math_body" = "Решите пример";
+"create.mission_qr_body" = "Отсканируйте код в другой комнате";
+"create.mission_steps_body" = "Пройдите несколько шагов";
 "create.no_weekdays" = "Выберите хотя бы один день повтора.";
 "create.point_camera" = "Наведите камеру на QR-код или штрихкод, который нужно сканировать утром.";
 "create.qr_content" = "Содержимое QR-кода или штрихкода";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR-код";
 "home.mission.steps" = "Шаги";
 "home.next_alarm" = "Следующий будильник";
+"home.no_enabled_body" = "Включите будильник ниже, чтобы увидеть время следующего пробуждения.";
+"home.no_enabled_title" = "Нет включённых будильников";
 "home.ok" = "ОК";
 "home.retry_loading_alarms" = "Повторить";
 "home.subtitle" = "Новый день — новые возможности";
@@ -78,8 +83,10 @@
 "mission.answer" = "Ответ";
 "mission.camera_denied" = "Нет доступа к камере. Перейдите к математическому заданию.";
 "mission.camera_unavailable" = "Камера недоступна.";
+"mission.change_sign" = "Изменить знак";
 "mission.check" = "ПРОВЕРИТЬ";
 "mission.continue" = "Продолжить";
+"mission.delete_digit" = "Удалить последнюю цифру";
 "mission.keep_walking" = "Продолжайте идти, пока не достигнете цели.";
 "mission.motion_unavailable" = "Данные о движении недоступны.";
 "mission.qr_detected" = "Код распознан.";
@@ -95,6 +102,9 @@
 "mission.unavailable" = "ЗАДАНИЕ НЕДОСТУПНО";
 "mission.use_fallback" = "Запасной вариант";
 "mission.use_math" = "Перейти к математике";
+"nav.home" = "Главная";
+"nav.profile" = "Профиль";
+"nav.progress" = "Прогресс";
 "notification.alarm_body" = "Пора просыпаться.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Оповещения для запланированных будильников.";
@@ -120,6 +130,11 @@
 "persistence.read_error" = "AWERO не удалось прочитать сохранённые данные. Они не считаются пустыми. Повторите попытку восстановления.";
 "persistence.read_error_title" = "Не удалось прочитать данные будильника";
 "persistence.retry_read" = "Повторить чтение";
+"profile.settings_hint" = "Управляйте настройками приложения и разрешениями будильника.";
+"progress.empty_action" = "Создать будильник";
+"progress.empty_body" = "Здесь появятся завершённые пробуждения. Проверки будильника не учитываются.";
+"progress.empty_title" = "Ваша первая неделя начинается здесь";
+"progress.title" = "Ваш прогресс";
 "settings.alarm_permissions_body" = "Разрешите уведомления и работу будильников AWERO, чтобы запланированные сигналы срабатывали.";
 "settings.alarm_permissions_title" = "Разрешения будильника";
 "settings.language_body" = "Используется язык телефона";
@@ -131,6 +146,15 @@
 "wake.completed_body" = "Пробуждение завершено.";
 "wake.completed_title" = "ВЫ УЖЕ ВСТАЛИ";
 "wake.emergency_stop" = "Экстренно выключить";
+"wake.emergency_stop_hint" = "Только в крайнем случае";
+"wake.error_completion_save" = "Не удалось сохранить завершение. Сессия пробуждения всё ещё активна.";
+"wake.error_fallback_save" = "Не удалось переключиться на запасное задание. Сессия пробуждения всё ещё активна.";
+"wake.error_mission_save" = "Не удалось сохранить начало задания. Будильник всё ещё активен.";
+"wake.error_snooze_save" = "Не удалось сохранить откладывание. Будильник продолжает звонить.";
+"wake.error_snooze_schedule" = "Не удалось отложить будильник. Он продолжает звонить.";
+"wake.error_stop_save" = "Не удалось записать выключение. Будильник всё ещё активен.";
+"wake.heading" = "Пора просыпаться";
+"wake.instruction" = "Решите пример, чтобы выключить будильник.";
 "wake.retry" = "Повторить сохранение";
 "wake.snooze" = "Отложить";
 "wake.snooze_error_body" = "Будильник продолжает звонить.";

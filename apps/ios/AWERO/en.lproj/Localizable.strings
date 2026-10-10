@@ -23,6 +23,9 @@
 "create.error_body" = "The alarm was not saved. Check required permissions and available storage, then try again.";
 "create.error_title" = "Alarm was not scheduled";
 "create.mission" = "Wake-up mission";
+"create.mission_math_body" = "Solve a problem";
+"create.mission_qr_body" = "Scan a code in another room";
+"create.mission_steps_body" = "Walk a few steps";
 "create.no_weekdays" = "Select at least one repeat day.";
 "create.point_camera" = "Point the camera at the QR code or barcode you will scan in the morning.";
 "create.qr_content" = "QR/barcode content";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR code";
 "home.mission.steps" = "Steps";
 "home.next_alarm" = "Next alarm";
+"home.no_enabled_body" = "Turn on an alarm below to see the next wake-up.";
+"home.no_enabled_title" = "No active alarms";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Try again";
 "home.subtitle" = "A new day, new possibilities";
@@ -78,8 +83,10 @@
 "mission.answer" = "Answer";
 "mission.camera_denied" = "Camera access is unavailable. Use the Math fallback.";
 "mission.camera_unavailable" = "Camera is unavailable.";
+"mission.change_sign" = "Change sign";
 "mission.check" = "CHECK";
 "mission.continue" = "Continue";
+"mission.delete_digit" = "Delete last digit";
 "mission.keep_walking" = "Keep walking until the target is reached.";
 "mission.motion_unavailable" = "Motion data is unavailable.";
 "mission.qr_detected" = "Code detected.";
@@ -95,6 +102,9 @@
 "mission.unavailable" = "MISSION UNAVAILABLE";
 "mission.use_fallback" = "Use fallback";
 "mission.use_math" = "Use Math fallback";
+"nav.home" = "Home";
+"nav.profile" = "Profile";
+"nav.progress" = "Progress";
 "notification.alarm_body" = "Wake up. Stay up.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Alerts for scheduled wake-up alarms.";
@@ -120,6 +130,11 @@
 "persistence.read_error" = "AWERO could not read saved data. It has not been treated as empty. Try again to restore your alarm state.";
 "persistence.read_error_title" = "Your saved wake state is unavailable";
 "persistence.retry_read" = "Try reading again";
+"profile.settings_hint" = "Manage your app preferences and alarm permissions.";
+"progress.empty_action" = "Set an alarm";
+"progress.empty_body" = "Completed wake sessions will appear here. Alarm tests are not counted.";
+"progress.empty_title" = "Your first week starts here";
+"progress.title" = "Your progress";
 "settings.alarm_permissions_body" = "Allow AWERO notifications and alarm access so scheduled alarms can alert you.";
 "settings.alarm_permissions_title" = "Alarm permissions";
 "settings.language_body" = "Uses your phone language";
@@ -131,6 +146,15 @@
 "wake.completed_body" = "Wake session completed.";
 "wake.completed_title" = "YOU’RE UP";
 "wake.emergency_stop" = "Emergency stop";
+"wake.emergency_stop_hint" = "Only in an emergency";
+"wake.error_completion_save" = "Could not save completion. Your wake session is still active.";
+"wake.error_fallback_save" = "Could not save the fallback. Your wake session is still active.";
+"wake.error_mission_save" = "Could not save mission progress. The alarm is still active.";
+"wake.error_snooze_save" = "Could not save the snooze. The alarm is still ringing.";
+"wake.error_snooze_schedule" = "Could not schedule snooze. The alarm is still ringing.";
+"wake.error_stop_save" = "Could not record the stop. The alarm is still active.";
+"wake.heading" = "Time to wake up";
+"wake.instruction" = "Solve the problem to turn off the alarm.";
 "wake.retry" = "Retry saving";
 "wake.snooze" = "Snooze";
 "wake.snooze_error_body" = "The alarm is still ringing.";

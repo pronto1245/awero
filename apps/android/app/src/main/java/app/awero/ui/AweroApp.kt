@@ -1,11 +1,20 @@
 package app.awero.ui
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
@@ -23,10 +32,10 @@ fun AweroApp(statusRefreshKey: Int = 0) {
     var screen by rememberSaveable { mutableStateOf("loading") }
     var editingAlarm by remember { mutableStateOf<Alarm?>(null) }
     var editingAlarmId by rememberSaveable { mutableStateOf<String?>(null) }
-    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings") {
+    BackHandler(enabled = screen == "create" || screen == "edit" || screen == "settings" || screen == "progress" || screen == "profile") {
         editingAlarm = null
         editingAlarmId = null
-        screen = "home"
+        screen = if (screen == "settings") "profile" else "home"
     }
 
     LaunchedEffect(Unit) {
@@ -60,7 +69,7 @@ fun AweroApp(statusRefreshKey: Int = 0) {
         }
     }
 
-    MaterialTheme {
+    MaterialTheme(colorScheme = AweroDesign.colors) {
         when (screen) {
             "loading" -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -84,7 +93,6 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 CircularProgressIndicator()
             }
             "wake" -> WakeScreen(flow)
-            "settings" -> SettingsScreen(onBack = { screen = "home" })
             else -> {
                 if (state == WakeFlowController.State.RINGING ||
                     state == WakeFlowController.State.MISSION ||
@@ -93,20 +101,70 @@ fun AweroApp(statusRefreshKey: Int = 0) {
                 ) {
                     LaunchedEffect(state) { screen = "wake" }
                 }
-                HomeScreen(
-                    onCreateAlarm = {
-                        editingAlarm = null
-                        editingAlarmId = null
-                        screen = "create"
-                    },
-                    onOpenSettings = { screen = "settings" },
-                    onEditAlarm = {
-                        editingAlarm = it
-                        editingAlarmId = it.id
-                        screen = "edit"
-                    },
-                    statusRefreshKey = statusRefreshKey
-                )
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar(containerColor = AweroDesign.ivory, tonalElevation = 0.dp) {
+                            val itemColors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = AweroDesign.coral,
+                                selectedTextColor = AweroDesign.navy,
+                                indicatorColor = Color.Transparent,
+                                unselectedIconColor = AweroDesign.navy.copy(alpha = .65f),
+                                unselectedTextColor = AweroDesign.navy.copy(alpha = .65f)
+                            )
+                            NavigationBarItem(
+                                selected = screen == "home",
+                                onClick = { screen = "home" },
+                                colors = itemColors,
+                                icon = { AweroNavigationIcon("home") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_home), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
+                            )
+                            NavigationBarItem(
+                                selected = screen == "progress",
+                                onClick = { screen = "progress" },
+                                colors = itemColors,
+                                icon = { AweroNavigationIcon("progress") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_progress), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
+                            )
+                            NavigationBarItem(
+                                selected = screen == "profile" || screen == "settings",
+                                onClick = { screen = "profile" },
+                                colors = itemColors,
+                                icon = { AweroNavigationIcon("profile") },
+                                label = { Text(androidx.compose.ui.res.stringResource(app.awero.R.string.nav_profile), fontSize = 10.sp, letterSpacing = (-0.1).sp, maxLines = 1, softWrap = false) }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    when (screen) {
+                        "progress" -> AweroProgressScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onSetAlarm = { screen = "create" },
+                            onOpenSettings = { screen = "settings" }
+                        )
+                        "settings" -> Box(Modifier.padding(innerPadding)) {
+                            SettingsScreen(onBack = { screen = "profile" })
+                        }
+                        "profile" -> ProfileScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            onOpenSettings = { screen = "settings" }
+                        )
+                        else -> HomeScreen(
+                            onCreateAlarm = {
+                                editingAlarm = null
+                                editingAlarmId = null
+                                screen = "create"
+                            },
+                            onOpenSettings = { screen = "settings" },
+                            onEditAlarm = {
+                                editingAlarm = it
+                                editingAlarmId = it.id
+                                screen = "edit"
+                            },
+                            statusRefreshKey = statusRefreshKey,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
+                }
             }
         }
     }

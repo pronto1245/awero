@@ -1,45 +1,66 @@
 import SwiftUI
 
-private enum SettingsStyle {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-}
 
 struct SettingsView: View {
+    let onBack: () -> Void
+
     private var deviceLanguage: String {
-        Locale.current.localizedString(forIdentifier: Locale.current.identifier)
-            ?? Locale.current.identifier
+        Locale.current.localizedString(forIdentifier: Bundle.main.preferredLocalizations.first ?? "en")
+            ?? Bundle.main.preferredLocalizations.first ?? "en"
     }
 
     var body: some View {
         ZStack {
-            SettingsStyle.ivory.ignoresSafeArea()
+            AweroDesign.ivory.ignoresSafeArea()
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        Button(action: onBack) {
+                            Image(systemName: "chevron.left")
+                                .font(.headline.weight(.semibold))
+                                .foregroundStyle(AweroDesign.navy)
+                                .frame(width: 44, height: 44)
+                                .background(AweroDesign.surface, in: Circle())
+                        }
+                        .accessibilityLabel(Text("settings.back"))
+                        .accessibilityIdentifier("settings.back")
+                        Spacer()
+                        Text("AWERO")
+                            .font(.system(size: 24, weight: .black))
+                            .foregroundStyle(AweroDesign.navy)
+                        Spacer()
+                        Color.clear.frame(width: 44, height: 44)
+                    }
+                    .padding(.top, 8)
+
+                    Text("settings.title")
+                        .font(.largeTitle.bold())
+                        .foregroundStyle(AweroDesign.navy)
+                        .accessibilityAddTraits(.isHeader)
+                        .accessibilityIdentifier("settings.title")
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text("settings.language_title")
                             .font(.headline)
-                            .foregroundStyle(SettingsStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                         Text(deviceLanguage)
                             .font(.title3.weight(.semibold))
-                            .foregroundStyle(SettingsStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                         Text("settings.language_body")
                             .font(.subheadline)
-                            .foregroundStyle(SettingsStyle.navy.opacity(0.68))
+                            .foregroundStyle(AweroDesign.navy.opacity(0.68))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(16)
+                    .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
 
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("settings.alarm_permissions_title")
                             .font(.headline)
-                            .foregroundStyle(SettingsStyle.navy)
+                            .foregroundStyle(AweroDesign.navy)
                         Text("settings.alarm_permissions_body")
                             .font(.subheadline)
-                            .foregroundStyle(SettingsStyle.navy.opacity(0.68))
+                            .foregroundStyle(AweroDesign.navy.opacity(0.68))
                         Button {
                             guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                             UIApplication.shared.open(url)
@@ -47,23 +68,19 @@ struct SettingsView: View {
                             Text("settings.open_system_settings")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 14)
-                                .background(SettingsStyle.coral)
+                                .padding(.vertical, 13)
+                                .background(AweroDesign.coral)
                                 .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .padding(16)
+                    .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
                 }
-                .padding(20)
+                .padding(.horizontal, AweroDesign.Space.page)
+                .padding(.bottom, 16)
             }
         }
-        .navigationTitle("settings.title")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(SettingsStyle.ivory, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
     }
 }

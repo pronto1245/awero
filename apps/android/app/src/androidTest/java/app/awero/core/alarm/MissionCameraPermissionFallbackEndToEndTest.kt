@@ -1,6 +1,7 @@
 package app.awero.core.alarm
 
 import android.content.Context
+import app.awero.R
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.view.View
@@ -70,7 +71,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
             putExtra(AlarmScheduler.EXTRA_TEST, true)
         }
         activity = instrumentation.startActivitySync(intent) as WakeAlarmActivity
-        awaitCondition("Wake host did not finish initialization") { hasText("Start mission") }
+        awaitCondition("Wake host did not finish initialization") { hasText(context.getString(R.string.wake_start)) }
         setCameraPermission(granted = false)
         assertEquals(PackageManager.PERMISSION_DENIED, context.checkSelfPermission(android.Manifest.permission.CAMERA))
 
@@ -88,14 +89,14 @@ class MissionCameraPermissionFallbackEndToEndTest {
         }
 
         awaitCondition("Camera denial did not persist the Math fallback") {
-            runBlocking { testSessions.loadActive()?.fallbackUsed == true } && hasText("FALLBACK") && hasMathProblem()
+            runBlocking { testSessions.loadActive()?.fallbackUsed == true } && hasMathProblem()
         }
         assertEquals(MissionType.MATH, flow.mission.value)
         assertEquals(WakeFlowController.State.MISSION, flow.state.value)
 
         solveCurrentMathProblem()
         awaitCondition("Fallback mission did not complete") {
-            hasText("YOU'RE UP") && runBlocking { testSessions.loadActive() == null }
+            hasText(context.getString(R.string.wake_completed_title)) && runBlocking { testSessions.loadActive() == null }
         }
         val completed = testSessions.load(includeTestAlarms = true).single()
         assertEquals("SUCCESS", completed.result)
@@ -118,7 +119,7 @@ class MissionCameraPermissionFallbackEndToEndTest {
         val right = problem.groupValues[3].toInt()
         val answer = if (problem.groupValues[2] == "+") left + right else left - right
         views(root).filterIsInstance<EditText>().single().setText(answer.toString())
-        views(root).filterIsInstance<TextView>().single { it.text.toString() == "CHECK" }.performClick()
+        views(root).filterIsInstance<TextView>().single { (it.text.toString() == context.getString(R.string.mission_check) || it.contentDescription == context.getString(R.string.mission_check)) }.performClick()
     }
 
     private fun hasMathProblem(): Boolean {

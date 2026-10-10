@@ -23,6 +23,9 @@
 "create.error_body" = "Der Wecker wurde nicht gespeichert. Prüfe die erforderlichen Berechtigungen und den verfügbaren Speicherplatz und versuche es erneut.";
 "create.error_title" = "Wecker konnte nicht geplant werden";
 "create.mission" = "Aufgabe zum Aufwachen";
+"create.mission_math_body" = "Löse eine Rechenaufgabe";
+"create.mission_qr_body" = "Scanne einen Code in einem anderen Raum";
+"create.mission_steps_body" = "Gehe ein paar Schritte";
 "create.no_weekdays" = "Wähle mindestens einen Wiederholungstag.";
 "create.point_camera" = "Richte die Kamera auf den QR-Code oder Barcode, den du morgens scannen wirst.";
 "create.qr_content" = "Inhalt des QR-Codes/Barcodes";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "QR-Code";
 "home.mission.steps" = "Schritte";
 "home.next_alarm" = "Nächster Wecker";
+"home.no_enabled_body" = "Aktiviere unten einen Wecker, um den nächsten Weckzeitpunkt zu sehen.";
+"home.no_enabled_title" = "Keine aktiven Wecker";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Erneut versuchen";
 "home.subtitle" = "Ein neuer Tag, neue Möglichkeiten";
@@ -78,8 +83,10 @@
 "mission.answer" = "Antwort";
 "mission.camera_denied" = "Kamerazugriff nicht verfügbar. Verwende die Mathe-Ersatzaufgabe.";
 "mission.camera_unavailable" = "Kamera nicht verfügbar.";
+"mission.change_sign" = "Vorzeichen ändern";
 "mission.check" = "PRÜFEN";
 "mission.continue" = "Weiter";
+"mission.delete_digit" = "Letzte Ziffer löschen";
 "mission.keep_walking" = "Gehe weiter, bis du das Ziel erreichst.";
 "mission.motion_unavailable" = "Bewegungsdaten sind nicht verfügbar.";
 "mission.qr_detected" = "Code erkannt.";
@@ -95,6 +102,9 @@
 "mission.unavailable" = "AUFGABE NICHT VERFÜGBAR";
 "mission.use_fallback" = "Ersatzaufgabe verwenden";
 "mission.use_math" = "Mathe-Ersatzaufgabe verwenden";
+"nav.home" = "Start";
+"nav.profile" = "Profil";
+"nav.progress" = "Verlauf";
 "notification.alarm_body" = "Zeit zum Aufwachen.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Mitteilungen für geplante Wecker.";
@@ -120,6 +130,11 @@
 "persistence.read_error" = "AWERO konnte gespeicherte Daten nicht lesen. Sie werden nicht als leer behandelt. Versuche es erneut, um den Weckstatus wiederherzustellen.";
 "persistence.read_error_title" = "Gespeicherte Weckdaten sind nicht verfügbar";
 "persistence.retry_read" = "Lesen erneut versuchen";
+"profile.settings_hint" = "Verwalte App-Einstellungen und Weckerberechtigungen.";
+"progress.empty_action" = "Wecker erstellen";
+"progress.empty_body" = "Hier erscheinen abgeschlossene Aufwach-Sitzungen. Alarmtests werden nicht gezählt.";
+"progress.empty_title" = "Deine erste Woche beginnt hier";
+"progress.title" = "Dein Fortschritt";
 "settings.alarm_permissions_body" = "Erlaube AWERO Benachrichtigungen und Wecker, damit geplante Alarme ausgelöst werden.";
 "settings.alarm_permissions_title" = "Weckerberechtigungen";
 "settings.language_body" = "Verwendet die Sprache deines Smartphones";
@@ -131,6 +146,15 @@
 "wake.completed_body" = "Die Aufwach-Sitzung ist abgeschlossen.";
 "wake.completed_title" = "DU BIST AUF";
 "wake.emergency_stop" = "Not-Aus";
+"wake.emergency_stop_hint" = "Nur im Notfall";
+"wake.error_completion_save" = "Der Abschluss konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.";
+"wake.error_fallback_save" = "Die Ersatzaufgabe konnte nicht gespeichert werden. Deine Wecksitzung ist weiterhin aktiv.";
+"wake.error_mission_save" = "Der Missionsfortschritt konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.";
+"wake.error_snooze_save" = "Das Schlummern konnte nicht gespeichert werden. Der Wecker klingelt weiter.";
+"wake.error_snooze_schedule" = "Schlummern konnte nicht geplant werden. Der Wecker klingelt weiter.";
+"wake.error_stop_save" = "Das Stoppen konnte nicht gespeichert werden. Der Wecker ist weiterhin aktiv.";
+"wake.heading" = "Zeit zum Aufwachen";
+"wake.instruction" = "Löse die Aufgabe, um den Wecker auszuschalten.";
 "wake.retry" = "Speichern erneut versuchen";
 "wake.snooze" = "Schlummern";
 "wake.snooze_error_body" = "Der Wecker klingelt weiterhin.";

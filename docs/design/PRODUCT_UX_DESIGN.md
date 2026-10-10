@@ -1,20 +1,32 @@
 # AWERO Product UX Design — approved direction
 
-Status: **approved visual direction, partially implemented**.
+Status: **approved visual direction; visual implementation is partial and is tracked in Phase 7**. See [Stage 7 Visual Implementation Plan](STAGE_7_VISUAL_IMPLEMENTATION_PLAN.md).
 
-The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). It is a visual baseline, not a literal screenshot of the current app. The implemented alarm screens now use warm ivory surfaces, deep navy text, sunrise coral actions, and restrained sage accents on iOS and Android.
+The approved visual direction is based on the four-screen concept board in [the design image](awero-product-ux-concept.jpg). Treat its composition, image treatment, type hierarchy, colors, card shapes, spacing, and button styling as the acceptance reference on both platforms. Native controls may differ only where platform behavior or accessibility requires it; those adaptations must preserve the approved visual hierarchy.
 
 ## User value
 
 AWERO helps people prepare for the morning, choose a short wake-up mission, and understand how their wake sessions are going. Alarm setup should remain easy, and progress must use only outcomes the app actually measured.
 
+## Owner-approved corrections to the board (2026-10-10)
+
+Where these differ from the concept board, these win:
+
+1. **Button contrast.** Primary buttons, selected day chips and the ✓ key use a darker coral (about `#E0502F`) with white text. The bright coral (`#FF684B`) stays for backgrounds, artwork and accents; white on it is about 2.9:1 and fails contrast.
+2. **Secondary text.** Grey captions on ivory (repeat days, mission descriptions, the emergency-stop hint) are darkened one to two steps to meet contrast.
+3. **Dim wake variant.** The ringing/mission screen gets a dimmed variant (navy background, same coral) for dark bedrooms; other screens stay light.
+4. **Alarm readiness.** Every alarm card shows whether it is scheduled or needs action/permissions.
+5. **Edit and delete.** Tapping an alarm card edits it; swipe deletes with confirmation.
+6. **Progress copy.** Average time reads as minutes to get up (e.g. «4,8 мин — среднее время подъёма»), not a star rating; the second tile shows the successful-wake percentage instead of repeating the streak; Russian uses a decimal comma.
+7. **Open owner decisions:** whether snooze stays on the wake screen, and what Profile contains beyond Settings.
+
 ## Screens and implementation status
 
-1. **Home / alarms — implemented.** Greeting, truthful next alarm, alarm list, enabled state, mission summary, add, edit, test, retry, and delete actions.
-2. **Create / edit alarm — implemented.** Time, repeat days, Math/Steps/QR mission selection, difficulty, QR setup, permission explanation, save, and scheduling behavior.
-3. **Wake / mission — implemented.** Ringing, selected mission, retry/fallback, snooze, completion, and emergency-stop states stay connected to the existing local wake flow.
-4. **Settings — implemented.** The approved gear control opens a localized screen with the device language and a direct link to phone app-permission settings.
-5. **Progress — deferred to Phase 8.** Persisted aggregate statistics exist, but dated daily history does not. Do not show a weekly chart, streak, or sample score until the supporting data is implemented.
+1. **Home / alarms — functional screen exists; visual parity is not yet accepted.** Greeting, truthful next alarm, alarm list, enabled state, mission summary, add, edit, test, retry, and delete actions.
+2. **Create / edit alarm — functional screen exists; visual parity is not yet accepted.** Time, repeat days, Math/Steps/QR mission selection, difficulty, QR setup, permission explanation, save, and scheduling behavior.
+3. **Wake / mission — functional paths exist; visual parity across runtime entry points is not yet accepted.** Ringing, selected mission, retry/fallback, snooze, completion, and emergency-stop states stay connected to the existing local wake flow.
+4. **Settings — functional screen exists; visual parity is not yet accepted.** The approved gear control opens a localized screen with the device language and a direct link to phone app-permission settings.
+5. **Progress — visual screen belongs to Phase 7; populated data belongs to Phase 9.** Implement an honest empty state now. Do not show a weekly chart, streak, or score until backed by persisted dated history.
 
 ## Visual direction
 
@@ -28,8 +40,8 @@ AWERO helps people prepare for the morning, choose a short wake-up mission, and 
 - Implemented screens keep create, edit, delete, test, mission, snooze, emergency-stop, and fallback actions connected to their current implementations.
 - Alarm state and progress come from stored app data; no sample streak or score appears for real users.
 - Empty states explain what the user can do next.
-- Accessibility, Dynamic Type, and empty/populated screen walkthroughs are verified before Phase 6 closes.
+- Accessibility, Dynamic Type, and empty/populated screen walkthroughs are verified as part of Phase 7 visual acceptance.
 
 ## Current implementation boundary
 
-Home, alarm setup, wake/mission, and Settings have implementations on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs. This design document does not set the current phase; the single status matrix in [Implementation Status](../IMPLEMENTATION_STATUS.md) does. UX localization and accessibility gaps remain assigned to Phase 6. The user reports the iPhone walkthrough/manual checks are already complete, so do not repeat them. Progress stays deferred to Phase 8; the broader physical alarm reliability matrix remains in Phase 10.
+Home, alarm setup, wake/mission, and Settings have functional implementations on both platforms; [CI run 37928994590](https://github.com/pronto1245/awero/actions/runs/37928994590) passed all four jobs, and Phase 6 localization/onboarding acceptance is separately recorded in the status matrix. This document defines visual direction; current work and acceptance are governed by [Implementation Status](../IMPLEMENTATION_STATUS.md). Phase 7 now covers full visual implementation and screenshot acceptance. Progress visuals begin with an honest empty state in Phase 7; populated history depends on Phase 9. The user reports the iPhone walkthrough/manual checks are complete; do not repeat them. The broader physical alarm reliability matrix remains in Phase 11.

@@ -23,6 +23,9 @@
 "create.error_body" = "Le réveil n’a pas été enregistré. Vérifiez les autorisations requises et l’espace disponible, puis réessayez.";
 "create.error_title" = "Impossible de programmer le réveil";
 "create.mission" = "Mission de réveil";
+"create.mission_math_body" = "Résolvez un calcul";
+"create.mission_qr_body" = "Scannez un code dans une autre pièce";
+"create.mission_steps_body" = "Faites quelques pas";
 "create.no_weekdays" = "Sélectionnez au moins un jour de répétition.";
 "create.point_camera" = "Pointez la caméra vers le QR code ou le code-barres à scanner le matin.";
 "create.qr_content" = "Contenu du QR code/code-barres";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "Code QR";
 "home.mission.steps" = "Pas";
 "home.next_alarm" = "Prochain réveil";
+"home.no_enabled_body" = "Activez une alarme ci-dessous pour voir le prochain réveil.";
+"home.no_enabled_title" = "Aucune alarme active";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Réessayer";
 "home.subtitle" = "Un nouveau jour, de nouvelles possibilités";
@@ -78,8 +83,10 @@
 "mission.answer" = "Réponse";
 "mission.camera_denied" = "L’accès à la caméra est indisponible. Utilisez le calcul de secours.";
 "mission.camera_unavailable" = "Caméra indisponible.";
+"mission.change_sign" = "Changer le signe";
 "mission.check" = "VÉRIFIER";
 "mission.continue" = "Continuer";
+"mission.delete_digit" = "Effacer le dernier chiffre";
 "mission.keep_walking" = "Continuez à marcher jusqu’à atteindre l’objectif.";
 "mission.motion_unavailable" = "Les données de mouvement sont indisponibles.";
 "mission.qr_detected" = "Code détecté.";
@@ -95,6 +102,9 @@
 "mission.unavailable" = "MISSION INDISPONIBLE";
 "mission.use_fallback" = "Utiliser la solution de secours";
 "mission.use_math" = "Utiliser le calcul de secours";
+"nav.home" = "Accueil";
+"nav.profile" = "Profil";
+"nav.progress" = "Progrès";
 "notification.alarm_body" = "C’est l’heure de se réveiller.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Alertes pour les réveils programmés.";
@@ -120,6 +130,11 @@
 "persistence.read_error" = "AWERO n’a pas pu lire les données enregistrées. Elles ne sont pas considérées comme vides. Réessayez pour restaurer l’état du réveil.";
 "persistence.read_error_title" = "Données de réveil indisponibles";
 "persistence.retry_read" = "Réessayer la lecture";
+"profile.settings_hint" = "Gérez les préférences de l’application et les autorisations des alarmes.";
+"progress.empty_action" = "Créer une alarme";
+"progress.empty_body" = "Vos réveils terminés apparaîtront ici. Les tests d’alarme ne sont pas comptabilisés.";
+"progress.empty_title" = "Votre première semaine commence ici";
+"progress.title" = "Votre progression";
 "settings.alarm_permissions_body" = "Autorisez les notifications et les alarmes AWERO pour recevoir les alertes programmées.";
 "settings.alarm_permissions_title" = "Autorisations de l’alarme";
 "settings.language_body" = "Utilise la langue de votre téléphone";
@@ -131,6 +146,15 @@
 "wake.completed_body" = "La session de réveil est terminée.";
 "wake.completed_title" = "VOUS ÊTES DEBOUT";
 "wake.emergency_stop" = "Arrêt d’urgence";
+"wake.emergency_stop_hint" = "Uniquement en cas d’urgence";
+"wake.error_completion_save" = "Impossible d’enregistrer la fin de la mission. Votre réveil est toujours actif.";
+"wake.error_fallback_save" = "Impossible d’enregistrer la solution de secours. Votre réveil est toujours actif.";
+"wake.error_mission_save" = "Impossible d’enregistrer la progression de la mission. L’alarme est toujours active.";
+"wake.error_snooze_save" = "Impossible d’enregistrer la répétition. L’alarme sonne toujours.";
+"wake.error_snooze_schedule" = "Impossible de programmer la répétition. L’alarme sonne toujours.";
+"wake.error_stop_save" = "Impossible d’enregistrer l’arrêt. L’alarme est toujours active.";
+"wake.heading" = "C’est l’heure de se réveiller";
+"wake.instruction" = "Résolvez le calcul pour arrêter le réveil.";
 "wake.retry" = "Réessayer l’enregistrement";
 "wake.snooze" = "Répéter";
 "wake.snooze_error_body" = "Le réveil sonne toujours.";

@@ -18,12 +18,24 @@ struct AWEROApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.light)
                 .environmentObject(alarmStore)
                 .environmentObject(wakeFlow)
                 .task {
                     await alarmStore.load()
                     recoveryTrigger.appDidBecomeActive()
                     await wakeFlow.restore()
+                    #if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("-awero.uiTestWake") {
+                        let requestedMission = ProcessInfo.processInfo.arguments.firstIndex(of: "-awero.uiTestMission")
+                            .flatMap { ProcessInfo.processInfo.arguments.indices.contains($0 + 1) ? ProcessInfo.processInfo.arguments[$0 + 1] : nil }
+                            .flatMap { MissionType(rawValue: $0.uppercased()) }
+                        var alarm = alarmStore.alarms.first ?? Alarm(hour: 7, minute: 0, weekdays: Set(1...7), missionType: requestedMission ?? .math)
+                        if let requestedMission { alarm.missionType = requestedMission }
+                        await wakeFlow.start(alarm: alarm, isTestAlarm: true)
+                        await wakeFlow.beginMission()
+                    }
+                    #endif
                 }
                 .onChange(of: scenePhase) { phase in
                     guard phase == .active else { return }

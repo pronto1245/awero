@@ -1,16 +1,12 @@
 import SwiftUI
 import AVFoundation
 
-private enum CreateAweroStyle {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-}
 
 struct CreateAlarmView: View {
     let alarm: Alarm?
     @EnvironmentObject private var store: AlarmStore
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @AppStorage("awero.didExplainAlarmPermission.v1") private var didExplainAlarmPermission = false
 
     @State private var wakeDate: Date
@@ -27,11 +23,11 @@ struct CreateAlarmView: View {
     init(alarm: Alarm? = nil) {
         self.alarm = alarm
         let calendar = Calendar.current
-        let base = calendar.date(from: DateComponents(hour: alarm?.hour ?? 7, minute: alarm?.minute ?? 30)) ?? Date()
+        let base = calendar.date(from: DateComponents(hour: alarm?.hour ?? 7, minute: alarm?.minute ?? 0)) ?? Date()
         _wakeDate = State(initialValue: base)
         _followsDeviceTimezone = State(initialValue: alarm?.timezoneMode != .fixed)
         _fixedTimezone = State(initialValue: alarm?.fixedTimezone ?? TimeZone.current.identifier)
-        _selectedDays = State(initialValue: alarm?.weekdays ?? Set(1...7))
+        _selectedDays = State(initialValue: alarm?.weekdays ?? Set(2...6))
         _mission = State(initialValue: alarm?.missionType ?? .math)
         _difficulty = State(initialValue: alarm?.difficulty ?? .medium)
         _qrExpectedCode = State(initialValue: alarm?.qrExpectedCode ?? "")
@@ -39,17 +35,47 @@ struct CreateAlarmView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                wakeTimeSection
-                timezoneSection
-                daysSection
-                missionSection
-                permissionSection
+            ZStack {
+                AweroDesign.ivory.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    HStack {
+                        Button { dismiss() } label: {
+                            Text("create.cancel")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundStyle(AweroDesign.navy)
+                                .padding(.horizontal, 18)
+                                .frame(height: 44)
+                                .background(Color.white.opacity(0.88), in: Capsule())
+                        }
+                        .accessibilityLabel(Text("create.cancel"))
+                        .accessibilityIdentifier("alarm.cancel")
+                        Spacer(minLength: 4)
+                        Text(alarm == nil ? "create.title" : "create.edit_title")
+                            .font(.headline.weight(.semibold))
+                            .foregroundStyle(AweroDesign.navy)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        Spacer(minLength: 4)
+                        Color.clear.frame(width: 74, height: 44)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
+
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 18) {
+                            wakeTimeSection
+                            daysSection
+                            missionSection
+                            timezoneSection
+                            permissionSection
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 10)
+                        .padding(.bottom, 18)
+                    }
+                    .scrollIndicators(.hidden)
+                }
             }
-            .scrollContentBackground(.hidden)
-            .background(CreateAweroStyle.ivory)
-            .tint(CreateAweroStyle.coral)
-            .navigationTitle(alarm == nil ? "create.title" : "create.edit_title")
             .alert("permission.ios_alarm_title", isPresented: $showingPermissionIntro) {
                 Button("permission.continue") {
                     didExplainAlarmPermission = true
@@ -76,23 +102,18 @@ struct CreateAlarmView: View {
             } message: {
                 Text(saveError ?? "alarm.status.errorBody")
             }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("create.cancel") { dismiss() }
-                }
-            }
             .safeAreaInset(edge: .bottom) {
                 Button(alarm == nil ? "create.save" : "create.save_changes", action: saveAlarm)
                     .disabled((mission == .qr && qrExpectedCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) || selectedDays.isEmpty)
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(CreateAweroStyle.coral)
+                    .background(AweroDesign.coral.gradient)
                     .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
-                    .background(CreateAweroStyle.ivory.opacity(0.96))
+                    .background(AweroDesign.ivory.opacity(0.96))
                     .accessibilityIdentifier("alarm.save")
             }
         }
@@ -105,14 +126,28 @@ struct CreateAlarmView: View {
     }
 
     private var wakeTimeSection: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("create.time")
+                .font(.headline)
+                .foregroundStyle(AweroDesign.navy)
             DatePicker("create.time", selection: $wakeDate, displayedComponents: .hourAndMinute)
+                .datePickerStyle(.wheel)
+                .frame(height: dynamicTypeSize.isAccessibilitySize ? 230 : 166)
+                .labelsHidden()
+                .accessibilityLabel(Text("create.time"))
+                .frame(maxWidth: .infinity)
+                .background(AweroDesign.surfaceWarm.opacity(0.48), in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
+                .clipped()
         }
-        .listRowBackground(Color.white)
+        .padding(.top, 4)
+        .padding(.bottom, 2)
     }
 
     private var timezoneSection: some View {
-        Section {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("create.timezone")
+                .font(.headline)
+                .foregroundStyle(AweroDesign.navy)
             Picker("create.timezone", selection: $followsDeviceTimezone) {
                 Text("create.timezone_device").tag(true)
                 Text("create.timezone_fixed").tag(false)
@@ -122,7 +157,7 @@ struct CreateAlarmView: View {
             if followsDeviceTimezone {
                 Text("create.timezone_device_hint")
                     .font(.footnote)
-                    .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.65))
             } else {
                 Text(
                     String.localizedStringWithFormat(
@@ -131,51 +166,64 @@ struct CreateAlarmView: View {
                     )
                 )
                 .font(.footnote)
-                .foregroundStyle(CreateAweroStyle.navy.opacity(0.65))
+                .foregroundStyle(AweroDesign.navy.opacity(0.65))
             }
-        } header: {
-            Text("create.timezone")
         }
-        .listRowBackground(Color.white)
+        .padding(.vertical, 2)
     }
 
     private var daysSection: some View {
-        Section {
-            ForEach(1...7, id: \.self) { day in
-                Toggle(
-                    weekdayKey(day),
-                    isOn: Binding(
-                        get: { selectedDays.contains(day) },
-                        set: { enabled in
-                            if enabled { selectedDays.insert(day) }
-                            else { selectedDays.remove(day) }
-                        }
-                    )
-                )
-            }
-            if selectedDays.isEmpty {
-                Text("create.no_weekdays").font(.footnote).foregroundStyle(CreateAweroStyle.coral)
-            }
-        } header: {
+        VStack(alignment: .leading, spacing: 10) {
             Text("create.repeat")
+                .font(.headline)
+                .foregroundStyle(AweroDesign.navy)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 80 : 36))], spacing: 6) {
+                ForEach([2, 3, 4, 5, 6, 7, 1], id: \.self) { day in
+                    Button {
+                        if selectedDays.contains(day) { selectedDays.remove(day) }
+                        else { selectedDays.insert(day) }
+                    } label: {
+                        Text(Calendar.current.shortWeekdaySymbols[day - 1])
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, minHeight: 44)
+                            .foregroundStyle(selectedDays.contains(day) ? Color.white : AweroDesign.navy.opacity(0.68))
+                            .background(selectedDays.contains(day) ? AweroDesign.coral : Color.white.opacity(0.72))
+                            .clipShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(Text(weekdayKey(day)))
+                    .accessibilityAddTraits(selectedDays.contains(day) ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
+            if selectedDays.isEmpty {
+                Text("create.no_weekdays").font(.footnote).foregroundStyle(AweroDesign.coral)
+            }
         }
-        .listRowBackground(Color.white)
+        .padding(.vertical, 2)
     }
 
     private var missionSection: some View {
-        Section {
-            Picker("create.mission", selection: $mission) {
-                Text("home.mission.math").tag(MissionType.math)
-                Text("home.mission.steps").tag(MissionType.steps)
-                Text("home.mission.qr").tag(MissionType.qr)
-            }
-            if mission == .math {
-                Picker("create.difficulty", selection: $difficulty) {
-                    Text("difficulty.easy").tag(Difficulty.easy)
-                    Text("difficulty.medium").tag(Difficulty.medium)
-                    Text("difficulty.hard").tag(Difficulty.hard)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("create.mission")
+                .font(.headline)
+                .foregroundStyle(AweroDesign.navy)
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    VStack(spacing: 8) {
+                        ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+                    }
+                } else {
+                    HStack(alignment: .top, spacing: 8) {
+                        ForEach([MissionType.math, .steps, .qr], id: \.self) { missionOption($0) }
+                    }
                 }
             }
+            .padding(8)
+            .background(AweroDesign.surface, in: RoundedRectangle(cornerRadius: AweroDesign.Corner.card))
             if mission == .qr {
                 Text("permission.camera_body").font(.caption)
                 Button("create.scan") { showCodeScanner = true }
@@ -184,17 +232,48 @@ struct CreateAlarmView: View {
                     .autocorrectionDisabled()
                 Text("create.qr_instructions").font(.caption)
             }
-        } header: {
-            Text("create.mission")
         }
-        .listRowBackground(Color.white)
+        .padding(.vertical, 2)
+    }
+
+    private func missionOption(_ type: MissionType) -> some View {
+        Button { mission = type } label: {
+            VStack(spacing: 8) {
+                Image(systemName: type == .math ? "calculator" : type == .steps ? "shoe.fill" : "qrcode")
+                    .font(.system(size: 27, weight: .semibold))
+                    .foregroundStyle(mission == type ? AweroDesign.coral : AweroDesign.navy)
+                    .accessibilityHidden(true)
+                Text(type == .math ? LocalizedStringKey("home.mission.math") : type == .steps ? LocalizedStringKey("home.mission.steps") : LocalizedStringKey("home.mission.qr"))
+                    .font(.subheadline.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Text(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
+                    .font(.caption)
+                    .foregroundStyle(AweroDesign.navy.opacity(0.64))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .accessibilityIdentifier(type == .math ? "create.mission_math_body" : type == .steps ? "create.mission_steps_body" : "create.mission_qr_body")
+            }
+            .foregroundStyle(AweroDesign.navy)
+            .padding(8)
+            .frame(maxWidth: .infinity, minHeight: 148)
+            .background(mission == type ? Color(red: 1, green: 0.93, blue: 0.87) : AweroDesign.ivory.opacity(0.58))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(mission == type ? AweroDesign.coral : AweroDesign.navy.opacity(0.10), lineWidth: mission == type ? 1.5 : 1))
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(mission == type ? .isSelected : [])
     }
 
     private var permissionSection: some View {
-        Section {
+        VStack(alignment: .leading) {
             Text("permission.ios_alarm_body").font(.footnote)
         }
-        .listRowBackground(Color(red: 1, green: 0.937, blue: 0.859))
+        .foregroundStyle(AweroDesign.navy.opacity(0.72))
+        .padding(14)
+        .background(Color(red: 1, green: 0.94, blue: 0.86))
+        .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
     private func saveAlarm() {

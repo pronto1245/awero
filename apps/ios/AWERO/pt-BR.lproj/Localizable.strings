@@ -23,6 +23,9 @@
 "create.error_body" = "O alarme não foi salvo. Verifique as permissões necessárias e o espaço disponível e tente novamente.";
 "create.error_title" = "Não foi possível agendar o alarme";
 "create.mission" = "Missão para despertar";
+"create.mission_math_body" = "Resolva uma conta";
+"create.mission_qr_body" = "Escaneie um código em outro cômodo";
+"create.mission_steps_body" = "Dê alguns passos";
 "create.no_weekdays" = "Selecione pelo menos um dia para repetir.";
 "create.point_camera" = "Aponte a câmera para o QR code ou código de barras que você usará pela manhã.";
 "create.qr_content" = "Conteúdo do QR code/código de barras";
@@ -70,6 +73,8 @@
 "home.mission.qr" = "Código QR";
 "home.mission.steps" = "Passos";
 "home.next_alarm" = "Próximo alarme";
+"home.no_enabled_body" = "Ative um alarme abaixo para ver o próximo horário de despertar.";
+"home.no_enabled_title" = "Nenhum alarme ativo";
 "home.ok" = "OK";
 "home.retry_loading_alarms" = "Tentar novamente";
 "home.subtitle" = "Um novo dia, novas possibilidades";
@@ -78,8 +83,10 @@
 "mission.answer" = "Resposta";
 "mission.camera_denied" = "O acesso à câmera está indisponível. Use a alternativa de matemática.";
 "mission.camera_unavailable" = "Câmera indisponível.";
+"mission.change_sign" = "Alterar sinal";
 "mission.check" = "VERIFICAR";
 "mission.continue" = "Continuar";
+"mission.delete_digit" = "Apagar último dígito";
 "mission.keep_walking" = "Continue caminhando até alcançar a meta.";
 "mission.motion_unavailable" = "Dados de movimento indisponíveis.";
 "mission.qr_detected" = "Código detectado.";
@@ -95,6 +102,9 @@
 "mission.unavailable" = "MISSÃO INDISPONÍVEL";
 "mission.use_fallback" = "Usar alternativa";
 "mission.use_math" = "Usar alternativa de matemática";
+"nav.home" = "Início";
+"nav.profile" = "Perfil";
+"nav.progress" = "Progresso";
 "notification.alarm_body" = "Hora de acordar.";
 "notification.alarm_title" = "AWERO";
 "notification.channel_description" = "Alertas de alarmes programados.";
@@ -120,6 +130,11 @@
 "persistence.read_error" = "O AWERO não conseguiu ler os dados salvos. Eles não serão tratados como vazios. Tente novamente para restaurar o estado do alarme.";
 "persistence.read_error_title" = "Dados do alarme indisponíveis";
 "persistence.retry_read" = "Tentar ler novamente";
+"profile.settings_hint" = "Gerencie as preferências do app e as permissões dos alarmes.";
+"progress.empty_action" = "Criar alarme";
+"progress.empty_body" = "Seus despertares concluídos aparecerão aqui. Testes do alarme não são contabilizados.";
+"progress.empty_title" = "Sua primeira semana começa aqui";
+"progress.title" = "Seu progresso";
 "settings.alarm_permissions_body" = "Permita notificações e alarmes do AWERO para receber os alertas programados.";
 "settings.alarm_permissions_title" = "Permissões do alarme";
 "settings.language_body" = "Usa o idioma do seu celular";
@@ -131,6 +146,15 @@
 "wake.completed_body" = "A sessão de despertar foi concluída.";
 "wake.completed_title" = "VOCÊ JÁ LEVANTOU";
 "wake.emergency_stop" = "Parada de emergência";
+"wake.emergency_stop_hint" = "Somente em caso de emergência";
+"wake.error_completion_save" = "Não foi possível salvar a conclusão. Sua sessão de despertar continua ativa.";
+"wake.error_fallback_save" = "Não foi possível salvar a alternativa. Sua sessão de despertar continua ativa.";
+"wake.error_mission_save" = "Não foi possível salvar o progresso da missão. O alarme continua ativo.";
+"wake.error_snooze_save" = "Não foi possível salvar a soneca. O alarme continua tocando.";
+"wake.error_snooze_schedule" = "Não foi possível agendar a soneca. O alarme continua tocando.";
+"wake.error_stop_save" = "Não foi possível registrar a parada. O alarme continua ativo.";
+"wake.heading" = "Hora de acordar";
+"wake.instruction" = "Resolva a conta para desligar o alarme.";
 "wake.retry" = "Tentar salvar novamente";
 "wake.snooze" = "Soneca";
 "wake.snooze_error_body" = "O alarme ainda está tocando.";

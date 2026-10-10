@@ -12,8 +12,13 @@ final class MathMission {
     private(set) var problem: MathProblem?
     init(difficulty: Difficulty) { self.difficulty = difficulty }
     func start() {
-        let max = difficulty == .easy ? 10 : difficulty == .medium ? 25 : 50
-        problem = MathProblem(left: Int.random(in: 1...max), right: Int.random(in: 1...max), operation: Bool.random() ? "+" : "-")
+        let upperBound = difficulty == .easy ? 10 : difficulty == .medium ? 25 : 50
+        let operation: Character = Bool.random() ? "+" : "-"
+        let left = Int.random(in: 1...upperBound)
+        let right = Int.random(in: 1...upperBound)
+        problem = operation == "-"
+            ? MathProblem(left: max(left, right), right: min(left, right), operation: operation)
+            : MathProblem(left: left, right: right, operation: operation)
     }
     func validate(answer: Int) -> Bool { problem?.answer == answer }
 }

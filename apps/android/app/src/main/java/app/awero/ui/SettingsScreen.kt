@@ -10,56 +10,54 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.unit.dp
 import app.awero.R
-import java.util.Locale
 
-private val SettingsIvory = Color(0xFFFFF8EF)
-private val SettingsNavy = Color(0xFF14294B)
-private val SettingsCoral = Color(0xFFFF684B)
+private val SettingsIvory = AweroDesign.ivory
+private val SettingsNavy = AweroDesign.navy
+private val SettingsCoral = AweroDesign.coral
 
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
     val context = LocalContext.current
-    val deviceLanguage = Locale.getDefault().getDisplayName(Locale.getDefault())
+    val appLocale = context.resources.configuration.locales[0]
+    val deviceLanguage = appLocale.getDisplayName(appLocale)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(SettingsIvory)
             .verticalScroll(rememberScrollState())
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = AweroDesign.pagePadding, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(AweroDesign.sectionSpacing)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                    .semantics { contentDescription = context.getString(R.string.settings_back) }
-            ) {
-                Text("‹", color = SettingsNavy, style = MaterialTheme.typography.headlineMedium)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack, modifier = Modifier.defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)) {
+                Text("‹  ${stringResource(R.string.settings_back)}", color = SettingsNavy, maxLines = 1)
             }
-            Text(
-                stringResource(R.string.settings_title),
-                color = SettingsNavy,
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Text("AWERO", modifier = Modifier.weight(1f), color = SettingsNavy, style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Spacer(Modifier.width(64.dp))
         }
+        Text(
+            stringResource(R.string.settings_title),
+            color = SettingsNavy,
+            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+            modifier = Modifier.semantics { heading() }
+        )
 
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
@@ -77,10 +75,10 @@ fun SettingsScreen(onBack: () -> Unit) {
 
         Card(
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            shape = RoundedCornerShape(20.dp)
+            shape = RoundedCornerShape(AweroDesign.cardCorner)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
@@ -102,7 +100,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                     },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SettingsCoral),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(AweroDesign.controlCorner)
                 ) {
                     Text(stringResource(R.string.settings_open_system_settings), color = Color.White)
                 }

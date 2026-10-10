@@ -30,4 +30,14 @@ class MathMissionTest {
             }
         }
     }
+
+    @Test
+    fun subtractionAnswersFitTheDigitOnlyKeypad() {
+        val mission = MathMission(Difficulty.HARD)
+        repeat(100) {
+            mission.start()
+            val problem = requireNotNull(mission.problem)
+            if (problem.operation == '-') assertTrue(problem.answer >= 0)
+        }
+    }
 }

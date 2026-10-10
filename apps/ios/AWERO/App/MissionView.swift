@@ -1,11 +1,6 @@
 import SwiftUI
 import AVFoundation
 
-enum WakePalette {
-    static let ivory = Color(red: 1.0, green: 0.973, blue: 0.937)
-    static let navy = Color(red: 0.078, green: 0.161, blue: 0.294)
-    static let coral = Color(red: 1.0, green: 0.408, blue: 0.294)
-}
 
 struct MissionView: View {
     let alarm: Alarm
@@ -46,29 +41,67 @@ private struct MathMissionView: View {
     }
 
     var body: some View {
-        VStack(spacing: 22) {
-            Text("mission.title").font(.caption.bold()).foregroundStyle(WakePalette.navy.opacity(0.5))
+        VStack(spacing: 12) {
             if let p = mission.problem {
                 Text("\(p.left) \(String(p.operation)) \(p.right) = ?")
-                    .font(.system(size: problemSize, weight: .black, design: .rounded))
-                    .foregroundStyle(WakePalette.navy)
+                    .font(.system(size: problemSize, weight: .black))
+                    .foregroundStyle(AweroDesign.navy)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.white.opacity(0.96))
+                    .clipShape(RoundedRectangle(cornerRadius: 18))
+                    .accessibilityIdentifier("mission.math.problem")
             }
-            TextField("mission.answer", text: $answer)
-                .keyboardType(.numbersAndPunctuation)
-                .textFieldStyle(.roundedBorder)
-                .multilineTextAlignment(.center)
-            if invalid { Text("mission.try_again").foregroundStyle(.red) }
-            Button("mission.check") {
-                if let value = Int(answer), mission.validate(answer: value) {
-                    onSuccess()
-                } else {
-                    invalid = true
-                    answer = ""
+            VStack(spacing: 4) {
+                Text(answer.isEmpty ? NSLocalizedString("mission.answer", comment: "Answer field placeholder") : answer)
+                    .font(.title2.weight(.medium))
+                    .foregroundStyle(answer.isEmpty ? AweroDesign.navy.opacity(0.35) : AweroDesign.navy)
+                    .frame(maxWidth: .infinity, minHeight: 52, alignment: .center)
+                    .background(Color.white.opacity(0.98), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(AweroDesign.navy.opacity(0.12), lineWidth: 1))
+                    .accessibilityIdentifier("mission.math.answer")
+                if invalid {
+                    Text("mission.try_again")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color(red: 0.93, green: 0.23, blue: 0.25))
+                        .frame(maxWidth: .infinity, minHeight: 28)
+                        .accessibilityIdentifier("mission.math.invalid")
                 }
             }
-            .buttonStyle(WakeMissionButton())
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                ForEach(1...9, id: \.self) { digit in
+                    Button(String(digit)) {
+                        if answer.count < 12 { answer += String(digit) }
+                        invalid = false
+                    }
+                    .buttonStyle(MathKeyButton())
+                }
+                Button {
+                    if !answer.isEmpty { answer.removeLast() }
+                    invalid = false
+                } label: { Image(systemName: "delete.left") }
+                    .buttonStyle(MathKeyButton())
+                    .accessibilityLabel(Text("mission.delete_digit"))
+                    .accessibilityIdentifier("mission.math.delete")
+                Button("0") {
+                    if answer.count < 12 { answer += "0" }
+                    invalid = false
+                }
+                .buttonStyle(MathKeyButton())
+                Button {
+                    if let value = Int(answer), mission.validate(answer: value) {
+                        onSuccess()
+                    } else {
+                        invalid = true
+                        answer = ""
+                    }
+                } label: { Image(systemName: "checkmark") }
+                    .buttonStyle(MathKeyButton(primary: true))
+                    .accessibilityLabel(Text("mission.check"))
+                    .accessibilityIdentifier("mission.math.check")
+            }
         }
-        .padding(28)
+        .padding(.vertical, 12)
     }
 }
 
@@ -83,25 +116,26 @@ private struct StepsMissionView: View {
     var body: some View {
         VStack(spacing: 22) {
             Text("mission.steps_title")
-                .font(.system(size: titleSize, weight: .black, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .font(.system(size: titleSize, weight: .black))
+                .foregroundStyle(AweroDesign.navy)
+                .accessibilityIdentifier("mission.steps.title")
             Text(String.localizedStringWithFormat(NSLocalizedString("mission.steps_progress", comment: ""), runtime.steps))
-                .font(.system(size: stepCountSize, weight: .bold, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .font(.system(size: stepCountSize, weight: .bold))
+                .foregroundStyle(AweroDesign.navy)
             if runtime.unavailable {
                 Text("mission.motion_unavailable")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
             } else if runtime.completed {
                 Button("mission.continue", action: onSuccess)
                     .buttonStyle(WakeMissionButton())
             } else {
                 Text("mission.keep_walking")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
             }
             Button("mission.use_math", action: onFailure)
                 .buttonStyle(WakeMissionButton())
             Text("mission.timeout")
-                .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
+                .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
         }
         .padding(28)
         .onAppear { runtime.start(target: 30) }
@@ -130,22 +164,23 @@ private struct QRMissionView: View {
     var body: some View {
         VStack(spacing: 18) {
             Text("mission.qr_title")
-                .font(.system(size: qrTitleSize, weight: .black, design: .rounded))
-                .foregroundStyle(WakePalette.navy)
+                .font(.system(size: qrTitleSize, weight: .black))
+                .foregroundStyle(AweroDesign.navy)
 
             if expected == nil || expected?.isEmpty == true {
                 Text("mission.qr_unconfigured")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
+                    .accessibilityIdentifier("mission.qr.unconfigured")
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if runtime.cameraUnavailable {
                 Text("mission.camera_unavailable")
-                    .foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.6))
                 Button("mission.use_fallback", action: onFailure)
                     .buttonStyle(WakeMissionButton())
             } else if let scannedCode = runtime.scannedCode, mission?.validate(payload: scannedCode) == false {
                 Text("mission.qr_mismatch")
-                    .foregroundStyle(WakePalette.navy.opacity(0.7))
+                    .foregroundStyle(AweroDesign.navy.opacity(0.7))
             } else {
                 QRPreview(session: runtime.session)
                     .frame(height: 300)
@@ -160,9 +195,9 @@ private struct QRMissionView: View {
                         Text("mission.qr_detected")
                     }
                 }
-                .foregroundStyle(WakePalette.navy.opacity(0.7))
+                .foregroundStyle(AweroDesign.navy.opacity(0.7))
                 Text("mission.timeout")
-                    .font(.caption).foregroundStyle(WakePalette.navy.opacity(0.6))
+                    .font(.caption).foregroundStyle(AweroDesign.navy.opacity(0.6))
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -205,7 +240,7 @@ private struct FallbackMissionView: View {
     let onFailure: () -> Void
     var body: some View {
         VStack(spacing: 20) {
-            Text("mission.unavailable").foregroundStyle(WakePalette.navy)
+            Text("mission.unavailable").foregroundStyle(AweroDesign.navy)
             Button("mission.use_fallback", action: onFailure).buttonStyle(WakeMissionButton())
         }
     }
@@ -232,8 +267,23 @@ private struct WakeMissionButton: ButtonStyle {
             .font(.headline.bold())
             .frame(maxWidth: .infinity)
             .padding(.vertical, 17)
-            .background(WakePalette.coral.opacity(configuration.isPressed ? 0.78 : 1))
+            .background(AweroDesign.coral.opacity(configuration.isPressed ? 0.78 : 1))
             .foregroundStyle(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipShape(RoundedRectangle(cornerRadius: AweroDesign.Corner.control))
+    }
+}
+
+private struct MathKeyButton: ButtonStyle {
+    var primary = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(primary ? Color.white : AweroDesign.navy)
+            .frame(maxWidth: .infinity, minHeight: 52)
+            .padding(.vertical, 4)
+            .background(primary ? AweroDesign.coral : Color.white)
+            .opacity(configuration.isPressed ? 0.75 : 1)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
