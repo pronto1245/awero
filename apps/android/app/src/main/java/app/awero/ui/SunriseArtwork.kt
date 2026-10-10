@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -19,7 +20,7 @@ fun SunriseArtwork(modifier: Modifier = Modifier, height: androidx.compose.ui.un
     val shape = if (rounded) RoundedCornerShape(22.dp) else RoundedCornerShape(0.dp)
     Canvas(modifier.fillMaxWidth().height(height).background(Color(0xFFFFE9B8), shape)) {
         val clip = Path().apply {
-            if (rounded) addRoundRect(androidx.compose.ui.geometry.RoundRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height), 22.dp.toPx()))
+            if (rounded) addRoundRect(androidx.compose.ui.geometry.RoundRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height), CornerRadius(22.dp.toPx())))
             else addRect(androidx.compose.ui.geometry.Rect(0f, 0f, size.width, size.height))
         }
         clipPath(clip) {
